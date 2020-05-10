@@ -1,0 +1,34 @@
+name: Deploy to Heroku
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master
+        uses: actions/checkout@master
+
+      - name: Log in Heroku
+        uses: sjdonado/heroku@master
+        with:
+          args: container:login
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Push to Heroku
+        uses: sjdonado/heroku@master
+        with:
+          args: container:push -a game3-js web
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Release in Heroku
+        uses: sjdonado/heroku@master
+        with:
+          args: container:release -a game3-js web
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
