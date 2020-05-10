@@ -1,0 +1,9 @@
+version: "0.1"
+
+services:
+  game3js:
+    image: alto-io/game3js
+    container_name: game3js
+    restart: always
+    ports:
+      - 3001:3001

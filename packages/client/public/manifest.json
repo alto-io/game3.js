@@ -1,0 +1,16 @@
+{
+  "short_name": "Game3.js",
+  "name": "Game3.js",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": ".",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#FFFFFF",
+  "background_color": "#25131A"
+}

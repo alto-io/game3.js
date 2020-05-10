@@ -1,0 +1,55 @@
+{
+  "name": "@game3js/client",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@reach/router": "^1.2.1",
+    "@game3js/common": "0.0.1",
+    "@walletconnect/browser": "1.0.0-beta.47",
+    "@walletconnect/qrcode-modal": "^1.0.0-beta.47",
+    "axios": "^0.19.1",
+    "colyseus.js": "^0.13.0",
+    "ethers": "^4.0.42",
+    "hiredis": "^0.5.0",
+    "pixi-particles": "^4.2.0",
+    "pixi-viewport": "^4.5.0",
+    "pixi.js": "^5.2.0",
+    "querystringify": "^2.1.1",
+    "react": "^16.12.0",
+    "react-device-detect": "^1.11.14",
+    "react-dom": "^16.12.0",
+    "react-helmet": "^5.2.1",
+    "react-nipple": "^1.0.1",
+    "react-scripts": "3.4.0",
+    "react-toastify": "^5.5.0",
+    "styled-components": "4.2.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.25",
+    "@types/node": "^13.1.2",
+    "@types/pixi.js": "^5.0.0",
+    "@types/querystringify": "^2.0.0",
+    "@types/reach__router": "^1.2.6",
+    "@types/react": "^16.9.17",
+    "@types/react-dom": "^16.9.4",
+    "@types/react-helmet": "^5.0.14",
+    "@types/styled-components": "4.1.8",
+    "tslint-react": "^4.1.0",
+    "typescript": "^3.7.4"
+  },
+  "scripts": {
+    "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
+    "lint:fix": "tslint --fix -c tslint.json 'src/**/*.{ts,tsx}'",
+    "start": "react-scripts start",
+    "build": "react-scripts --max_old_space_size=4096 build"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

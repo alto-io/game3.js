@@ -1,0 +1,44 @@
+{
+  "name": "game3.js",
+  "version": "0.0.1",
+  "private": true,  
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alto-io/game3.js"
+  },
+  "author": {
+    "name": "Paul Gadi",
+    "url": "https://outplay.games"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "clean:dependencies": "rimraf ./**/node_modules",
+    "clean:builds": "rimraf ./**/build",
+    "clean": "concurrently --kill-others-on-fail \"yarn clean:dependencies\" \"yarn clean:builds\"",
+    "lint": "yarn workspace @game3js/client lint; yarn workspace @game3js/server lint",
+    "lint:fix": "yarn workspace @game3js/client lint:fix; yarn workspace @game3js/server lint:fix",
+    "start:common": "yarn workspace @game3js/common start",
+    "start:client": "yarn workspace @game3js/client start",
+    "start:server": "yarn workspace @game3js/server start",
+    "start": "yarn build:common && concurrently --kill-others-on-fail \"yarn start:common\" \"yarn start:client\" \"yarn start:server\"",
+    "build:common": "yarn workspace @game3js/common build",
+    "build:client": "yarn workspace @game3js/client build",
+    "build:server": "yarn workspace @game3js/server build",
+    "build:move": "mv ./packages/client/build ./packages/server/build/public",
+    "build": "yarn build:common && yarn build:client && yarn build:server && yarn build:move",
+    "serve": "yarn workspace @game3js/server serve",
+    "postinstall": "rimraf node_modules/@types/react-native"
+  },
+  "dependencies": {
+    "concurrently": "^4.1.1",
+    "tslint": "^5.19.0"
+  },
+  "devDependencies": {
+    "typescript": "^3.5.3",
+    "rimraf": "^2.6.2"
+  }
+}
