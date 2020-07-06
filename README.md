@@ -1,6 +1,8 @@
 # Game3.js (The Web 3.0 Game Framework)
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/alto-io/game3.js/blob/master/LICENSE) [![](https://github.com/alto-io/game3.js/workflows/Docker%20Publish/badge.svg)](https://hub.docker.com/r/alto-io/game3.js)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](https://github.com/alto-io/game3.js/blob/master/LICENSE)
+
+[![Join the community on Gitter](https://img.shields.io/gitter/room/alto-io/game3-js?style=for-the-badge)](https://gitter.im/game3-js/community)
 
 ## 🚀 Running
 
