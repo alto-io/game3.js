@@ -22,6 +22,7 @@ export interface IRoomOptions {
   roomMap: string;
   roomMaxPlayers: number;
   mode: GameMode;
+  tournamentId?: string;
 }
 
 /**

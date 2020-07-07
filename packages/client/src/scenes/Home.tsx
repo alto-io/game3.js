@@ -1,20 +1,21 @@
 import { navigate, RouteComponentProps } from '@reach/router';
 import { Constants, Types, Database } from '@game3js/common';
-import { Client } from 'colyseus.js';
-import { RoomAvailable } from 'colyseus.js/lib/Room';
-import qs from 'querystringify';
 import React, { Component, Fragment } from 'react';
 import { Helmet } from 'react-helmet';
-import { Box, Button, GitHub, IListItem, Inline, Input, Room, Select, Separator, Space, View } from '../components';
-import playerImage from '../images/textures/player/player-idle-2.png';
+import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
 
-import { Slide, ToastContainer, toast } from 'react-toastify'
+import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import { updatePlayerProfile } from "../helpers/database";
+import { updatePlayerProfile, refreshLeaderboard, getFileFromHash } from "../helpers/database";
 
 import styled from "styled-components";
 import { colors } from "../styles";
+
+import { Client } from 'colyseus.js';
+import { RoomAvailable } from 'colyseus.js/lib/Room';
+import qs from 'querystringify';
+import playerImage from '../images/textures/player/player-idle-2.png';
 
 const SAccountName = styled.div`
   margin: 1em 0;
@@ -22,7 +23,6 @@ const SAccountName = styled.div`
   t-size: 20px;
   font-weight: 700;
 `;
-
 
 const MapsList: IListItem[] = Constants.MAPS_NAMES.map(value => ({
   value,
@@ -39,8 +39,8 @@ const GameModesList: IListItem[] = Constants.GAME_MODES.map(value => ({
   title: value,
 }));
 
+
 const ALLOW_NAME_CHANGE = true;
-const ENABLE_WEB3_LOGIN = false;
 
 interface IProps extends RouteComponentProps {
   playerProfile: Database.PlayerProfile;
@@ -51,14 +51,18 @@ interface IState {
   newPlayerName: string;
   playerName: string;
   hasNameChanged: boolean;
+  leaderboard: Array<Database.LeaderboardEntry>;
+  timer: any;
+  leaderboardTimer: any;
+
   isNewRoom: boolean;
   roomName: string;
   roomMap: any;
   roomMaxPlayers: any;
   mode: any;
   rooms: Array<RoomAvailable<any>>;
-  leaderboard: Array<Database.LeaderboardEntry>;
-  timer: any;
+
+  replayingVideo: boolean;
 }
 
 export default class Home extends Component<IProps, IState> {
@@ -67,19 +71,24 @@ export default class Home extends Component<IProps, IState> {
     newPlayerName: null,
     playerName: '',
     hasNameChanged: false,
+    leaderboard: null,
+
+    timer: null,
+    leaderboardTimer: null,
+
     isNewRoom: false,
     roomName: localStorage.getItem('roomName') || '',
     roomMap: MapsList[0].value,
     roomMaxPlayers: PlayersCountList[0].value,
     mode: GameModesList[0].value,
     rooms: [],
-    timer: null,
-    leaderboard: null,
+
+    replayingVideo: false
   };
 
   private client?: Client;
-
-
+  private video: any;
+  
   // BASE
   componentDidMount() {
     try {
@@ -91,6 +100,11 @@ export default class Home extends Component<IProps, IState> {
       this.setState({
         timer: setInterval(this.updateRooms, Constants.ROOM_REFRESH),
       }, this.updateRooms);
+
+      this.setState({
+        leaderboardTimer: setInterval(this.updateLeaderboard, Constants.ROOM_REFRESH),
+      }, this.updateLeaderboard);
+
     } catch (error) {
       console.error(error);
     }
@@ -99,19 +113,21 @@ export default class Home extends Component<IProps, IState> {
   componentWillUnmount() {
     const {
       timer,
+      leaderboardTimer
     } = this.state;
 
     if (timer) {
       clearInterval(timer);
     }
+
+    if (leaderboardTimer) {
+      clearInterval(leaderboardTimer);
+    }
+
   }
 
 
   // HANDLERS
-  handleWeb3Login = () => {
-    console.log("SDF")
-  }
-
   handlePlayerNameChange = (event: any) => {
     this.setState({
       playerName: event.target.value,
@@ -150,6 +166,24 @@ export default class Home extends Component<IProps, IState> {
     navigate(`/${roomId}`);
   }
 
+  handleReplayClick = async (hash: string) => {
+
+    // start reading the file from DB
+    const replayFile = await getFileFromHash(hash);
+
+    const url = window.URL.createObjectURL(replayFile);
+
+    this.video = document.querySelector('video');
+    this.video.src = url;
+    this.video.play();
+
+    this.setState(
+      {
+        replayingVideo: true
+      }
+    )
+  }
+
   handleCreateRoomClick = () => {
     const {
       roomName,
@@ -177,20 +211,28 @@ export default class Home extends Component<IProps, IState> {
     });
   }
 
-
-  // METHODS
-  updateRooms = async () => {
-    if (!this.client) {
-      return;
+    // METHODS
+    updateRooms = async () => {
+      if (!this.client) {
+        return;
+      }
+  
+      const rooms = await this.client.getAvailableRooms(Constants.ROOM_NAME);
+      this.setState({
+        rooms,
+      });
     }
 
-    const rooms = await this.client.getAvailableRooms(Constants.ROOM_NAME);
-    this.setState({
-      rooms,
-    });
-  }
+    updateLeaderboard = async () => { 
+      const leaderboard =  await refreshLeaderboard();
 
+      // format leaderboard for render
 
+      this.setState({
+        leaderboard,
+      });
+    }    
+  
   // RENDER
   render() {
     return (
@@ -202,11 +244,6 @@ export default class Home extends Component<IProps, IState> {
           flexDirection: 'column',
         }}
       >
-
-      <ToastContainer
-        position="bottom-right"
-        transition={ Slide }
-        pauseOnHover={ false } />
 
         <Helmet>
           <title>{Constants.APP_TITLE}</title>
@@ -221,6 +258,10 @@ export default class Home extends Component<IProps, IState> {
           // <GitHub />
         }
         </View>
+
+        {
+          this.renderReplayVideo()
+        }
 
         {
           this.props.connected &&
@@ -244,8 +285,26 @@ export default class Home extends Component<IProps, IState> {
 
         <Space size="m" />
         {this.renderRoom()}
+
       </View>
     );
+  }
+
+  renderReplayVideo = () => {
+    // const {
+    //   replayingVideo,
+    // } = this.state; 
+
+    // if (!replayingVideo)
+    // {
+    //   return null;
+    // }
+
+    return (
+      <Fragment>
+           <video id="recorded" loop></video>
+      </Fragment>
+    )
   }
 
   renderName = () => {
@@ -257,7 +316,6 @@ export default class Home extends Component<IProps, IState> {
         }}
       >
         <View flex={true}>
-          <img src={playerImage} alt="player" width={30} />
           <Inline size="thin" />
           <SAccountName>Pick your name:</SAccountName>
         </View>
@@ -272,17 +330,6 @@ export default class Home extends Component<IProps, IState> {
           />
         )}
 
-        {ENABLE_WEB3_LOGIN && (
-          <Fragment>
-            <Space size="xs" />
-            <Button
-              title="Login"
-              onClick={this.handleWeb3Login}
-              text={'Login'}
-            />
-          </Fragment>
-        )}
-
         {this.state.hasNameChanged && (
           <Fragment>
             <Space size="xs" />
@@ -295,6 +342,95 @@ export default class Home extends Component<IProps, IState> {
         )}
       </Box>
     );
+  }
+
+  renderLeaderboard = () => {
+    const {
+      leaderboard,
+    } = this.state;
+
+    if (!leaderboard) {
+      return (
+        <View
+          flex={true}
+          center={true}
+          style={{
+            borderRadius: 8,
+            backgroundColor: '#efefef',
+            color: 'darkgrey',
+            height: 128,
+          }}
+        >
+          {'Refreshing Leaderboard attempts...'}
+        </View>
+      );
+    }
+
+    if (leaderboard.length <= 0) {
+      return (
+        <View
+          flex={true}
+          center={true}
+          style={{
+            borderRadius: 8,
+            backgroundColor: '#efefef',
+            color: 'darkgrey',
+            height: 128,
+          }}
+        >
+          {'No entries yet, start a game to join'}
+        </View>
+      );
+    }
+
+    
+
+    return leaderboard.map(({time, id, hash}, index) => {
+      return (
+        <Fragment key={id}>
+          <Replay
+            id={id}
+            time={time}
+            hash={hash}
+            onClick={this.handleReplayClick}
+          />
+          {(index !== leaderboard.length - 1) && <Space size="xxs" />}
+        </Fragment>
+
+     )
+    });
+
+    
+
+
+    // for (const entry in leaderboard)
+    // {
+    //   return (
+    //     {entry}
+    //   )
+    // }
+
+    // return leaderboard.map(({ roomId, metadata, clients, maxClients }, index) => {
+    //   const map = MapsList.find(item => item.value === metadata.roomMap);
+    //   const mapName = map ? map.title : metadata.roomMap;
+    //
+    //   return (
+    //     <Fragment key={roomId}>
+    //       <Room
+    //         id={roomId}
+    //         roomName={metadata.roomName}
+    //         roomMap={mapName}
+    //         clients={clients}
+    //         maxClients={maxClients}
+    //         mode={metadata.mode}
+    //         onClick={this.handleRoomClick}
+    //       />
+    //       {(index !== rooms.length - 1) && <Space size="xxs" />}
+    //     </Fragment>
+    //   );
+    // });
+    //
+
   }
 
   renderRoom = () => {
@@ -401,52 +537,8 @@ export default class Home extends Component<IProps, IState> {
         )}
       </View>
     );
-  }
-
-  renderLeaderboard = () => {
-    const {
-      leaderboard,
-    } = this.state;
-
-    if (!leaderboard || !leaderboard.length) {
-      return (
-        <View
-          flex={true}
-          center={true}
-          style={{
-            borderRadius: 8,
-            backgroundColor: '#efefef',
-            color: 'darkgrey',
-            height: 128,
-          }}
-        >
-          {'No leaderboard entries yet...'}
-        </View>
-      );
-    }
-
-    // return leaderboard.map(({ roomId, metadata, clients, maxClients }, index) => {
-    //   const map = MapsList.find(item => item.value === metadata.roomMap);
-    //   const mapName = map ? map.title : metadata.roomMap;
-    //
-    //   return (
-    //     <Fragment key={roomId}>
-    //       <Room
-    //         id={roomId}
-    //         roomName={metadata.roomName}
-    //         roomMap={mapName}
-    //         clients={clients}
-    //         maxClients={maxClients}
-    //         mode={metadata.mode}
-    //         onClick={this.handleRoomClick}
-    //       />
-    //       {(index !== rooms.length - 1) && <Space size="xxs" />}
-    //     </Fragment>
-    //   );
-    // });
-    //
-  }
-
+  }    
+    
   renderRooms = () => {
     const {
       rooms,
@@ -488,5 +580,6 @@ export default class Home extends Component<IProps, IState> {
         </Fragment>
       );
     });
-  }
+  }    
+  
 }

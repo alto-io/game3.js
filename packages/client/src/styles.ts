@@ -15,6 +15,7 @@ export const baseColors = {
   pink: "255, 51, 102",
   red: "214, 75, 71",
   purple: "110, 107, 233",
+  darkBlue: "27, 37, 44"
 };
 
 export const colors = {

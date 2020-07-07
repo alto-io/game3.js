@@ -1,5 +1,9 @@
 import { monitor } from '@colyseus/monitor';
-import { Constants , Database, GameRoom } from '@game3js/common';
+import { 
+  Constants,
+  Database,
+  GameRoom
+} from '@game3js/common';
 import { Server } from 'colyseus';
 import * as cors from 'cors';
 import * as express from 'express';
@@ -35,7 +39,11 @@ let dbManager = null
 async function initializeDatabase() {
   dbManager = new Database.OrbitDBManager();
   await dbManager.start();
-  await dbManager.initializeServerData();
+
+  console.log(await dbManager.node.bootstrap.list());
+  console.log(await dbManager.node.id());
+  console.log(await dbManager.node.swarm.peers());
+
 }
 
 initializeDatabase();
@@ -43,11 +51,11 @@ initializeDatabase();
 // Game Rooms
 server.define(Constants.ROOM_NAME, GameRoom.ShooterGameRoom);
 
-// Serve static resources from the "public" folder
-app.use(express.static(join(__dirname, 'public')));
-
 // If you don't want people accessing your server stats, comment this line.
 app.use("/colyseus", basicAuthMiddleware, monitor());
+
+// Serve static resources from the "public" folder
+app.use(express.static(join(__dirname, 'public')));
 
 app.post('/profile', async (req: any, res: any) => {
   const result = await dbManager.savePlayerProfile(req.body);
@@ -55,12 +63,28 @@ app.post('/profile', async (req: any, res: any) => {
 });
 
 app.get('/profile', async (req: any, res: any) => {
-  const result = await dbManager.getDBPlayerProfile(req.query.walletid);
+  const result = await dbManager.getPlayerProfile(req.query.walletid);
   res.json(result);
 });
 
 app.get('/leaderboard', async (req: any, res: any) => {
   const result = await dbManager.getLeaderboard();
+  res.json(result);
+});
+
+// TODO: only organizer must be able to put info
+app.post('/tournament', async (req: any, res: any) => {
+  const result = await dbManager.putTournamentData(req.body);
+  res.json(result);
+});
+
+app.get('/tournament', async (req: any, res: any) => {
+  const result = await dbManager.getTournamentData(req.query.tournamentId);
+  res.json(result);
+});
+
+app.post('/tournamentResult', async (req: any, res: any) => {
+  const result = await dbManager.serverPutResult(req.body);
   res.json(result);
 });
 
@@ -74,4 +98,5 @@ server.onShutdown(() => {
 });
 
 server.listen(PORT);
+
 console.log(`Listening on ws://localhost:${PORT}`);

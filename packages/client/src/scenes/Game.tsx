@@ -9,12 +9,22 @@ import ReactNipple from 'react-nipple';
 import { View } from '../components';
 import GameManager from '../managers/GameManager';
 
+import { localSaveReplay, clientSaveTournamentReplay, putTournamentResult } from "../helpers/database";
+
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
+declare global {
+  interface Window { MediaRecorder: any; }
+}
+
 interface IProps extends RouteComponentProps {
   roomId?: string;
 }
 
 interface IState {
   playerId: string;
+  tournamentId: string;
   playersCount: number;
   maxPlayersCount: number;
 }
@@ -23,6 +33,7 @@ export default class Game extends Component<IProps, IState> {
 
   public state = {
     playerId: '',
+    tournamentId: 'demo',
     playersCount: 0,
     maxPlayersCount: 0,
   };
@@ -32,6 +43,15 @@ export default class Game extends Component<IProps, IState> {
   private client?: Client;
   private room?: Room;
 
+  private mediaRecorder: any;
+  private recordedBlobs: any;
+  private sourceBuffer: any;
+  private video: any;
+  private canvas: any;
+  private stream: any;
+  private mediaSource: any;
+  private gameOver: boolean;
+  private recordFileHash: any;
 
   // BASE
   constructor(props: IProps) {
@@ -43,10 +63,26 @@ export default class Game extends Component<IProps, IState> {
       window.innerHeight,
       this.handleActionSend,
     );
+
+    this.gameOver = false;
+    this.recordFileHash = null;
   }
 
-  componentDidMount() {
-    this.start();
+  
+  async componentDidMount() {
+    await this.start();
+
+    this.mediaSource = new window.MediaSource();
+    // this.mediaSource.addEventListener('sourceopen', this.handleSourceOpen, false);
+  
+    this.canvas = document.querySelector('canvas');
+    this.video = document.querySelector('video');
+
+    if (this.canvas) {
+      this.stream = this.canvas.captureStream(); // frames per second
+      console.log('Started stream capture from canvas element: ', this.stream);
+    }
+
   }
 
   componentWillUnmount() {
@@ -79,6 +115,8 @@ export default class Game extends Component<IProps, IState> {
       };
     }
 
+    const tournamentId = parsedSearch.tournamentId
+
     // Connect
     try {
       const host = window.document.location.host.replace(/:.*/, '');
@@ -101,6 +139,7 @@ export default class Game extends Component<IProps, IState> {
 
     this.setState({
       playerId: this.room.sessionId,
+      tournamentId,
     });
 
     // Listen for state changes
@@ -212,12 +251,33 @@ export default class Game extends Component<IProps, IState> {
         this.gameManager.hudLogAdd(`Waiting for other players...`);
         this.gameManager.hudAnnounceAdd(`Waiting for other players...`);
         break;
-      case 'start':
-        this.gameManager.hudLogAdd(`Game starts!`);
-        this.gameManager.hudAnnounceAdd(`Game starts!`);
+      case 'start': // TODO: add better state management for recording and leaving rooms
+        const { tournamentId } = this.state
+        const playingTournament = !!tournamentId
+        if (this.gameOver)
+        {
+          toast.info("Game finished!");
+          if (!playingTournament) {
+            navigate('/');
+          } else {
+            const options = {
+              recordFileHash: this.recordFileHash,
+              tournamentId 
+            }
+            navigate(`/tournaments${qs.stringify(options, true)}`);
+          }
+        }
+        else 
+        {
+          this.gameManager.hudLogAdd(`Game starts!`);
+          this.gameManager.hudAnnounceAdd(`Game starts!`);
+          this.startRecording();
+        }
         break;
       case 'stop':
         this.gameManager.hudLogAdd(`Game ends...`);
+        this.gameOver = true;
+        this.stopRecording();
         break;
       case 'joined':
         this.gameManager.hudLogAdd(`"${message.params.name}" joins.`);
@@ -238,6 +298,79 @@ export default class Game extends Component<IProps, IState> {
       default:
         break;
     }
+  }
+
+  // HANDLERS: Gameplay Recorder
+  startRecording() {
+    let options: any = { mimeType: 'video/webm' };
+    this.recordedBlobs = [];
+    try {
+        this.mediaRecorder = new window.MediaRecorder(this.stream, options);
+    } catch (e0) {
+        console.log('Unable to create MediaRecorder with options Object: ', e0);
+        try {
+            options = { mimeType: 'video/webm,codecs=vp9' };
+            this.mediaRecorder = new window.MediaRecorder(this.stream, options);
+        } catch (e1) {
+            console.log('Unable to create MediaRecorder with options Object: ', e1);
+            try {
+                options = 'video/vp8'; // Chrome 47
+                this.mediaRecorder = new window.MediaRecorder(this.stream, options);
+            } catch (e2) {
+                alert('MediaRecorder is not supported by this browser.\n\n' +
+                    'Try Firefox 29 or later, or Chrome 47 or later, ' +
+                    'with Enable experimental Web Platform features enabled from chrome://flags.');
+                console.error('Exception while creating MediaRecorder:', e2);
+                return;
+            }
+        }
+    }
+    console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
+
+    this.mediaRecorder.onstop = (event) => {
+        // console.log('Recorder stopped: ', event);
+        // const superBuffer = new Blob(this.recordedBlobs, { type: 'video/webm' });
+        // this.video.src = window.URL.createObjectURL(superBuffer);
+    }
+
+    this.mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+            this.recordedBlobs.push(event.data);
+        }
+    }
+
+    this.mediaRecorder.start(100); // collect 100ms of data
+    // console.log('MediaRecorder started', this.mediaRecorder);
+  }
+
+  stopRecording = async () => {
+      this.mediaRecorder.stop();
+
+      // TODO: playerId = roomId? change to something more meaningful
+      const playerId = this.state.playerId;
+      const tournamentId = this.state.tournamentId || 'demo';
+      const time = this.gameManager.gameEndsAt - Date.now();
+
+      console.log('Recorded Blobs: ', this.recordedBlobs);
+
+      const replayDate = new Date();
+      const filename = "replay_" + playerId + "_" + replayDate.valueOf() + ".webm";
+      const options = {type:'video/webm'};
+
+      const file = new File(this.recordedBlobs, filename, options);
+  
+      // this.video.controls = true;
+
+
+      // TODO: move to web worker so it doesn't pause main thread
+      if (tournamentId === 'demo') {
+        localSaveReplay(playerId, tournamentId, time, file);
+      } else {
+        this.recordFileHash = await clientSaveTournamentReplay(file);
+        //const resultId = 1
+        //const result = await putTournamentResult(tournamentId, resultId, fileHash);
+        //console.log(result)
+      }
   }
 
 
@@ -371,6 +504,10 @@ export default class Game extends Component<IProps, IState> {
         </Helmet>
         <div ref={this.gameCanvas} />
         {isMobile && this.renderJoySticks()}
+
+        { 
+          // <video id="recorded" loop></video>
+        }
       </View>
     );
   }

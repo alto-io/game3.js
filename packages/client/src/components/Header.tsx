@@ -2,9 +2,10 @@ import * as React from "react";
 import styled from "styled-components";
 import * as PropTypes from "prop-types";
 import Blockie from "./Blockie";
+import { View } from "./View";
 import { ellipseAddress, getChainData } from "../helpers/utilities";
 import { transitions } from "../styles";
-import { Database } from "@game3js/common";
+import { Database } from "'@game3js/common";
 
 const SHeader = styled.div`
   margin-top: -1px;
@@ -122,9 +123,11 @@ const Header = (props: IHeaderProps) => {
                 </SDisconnect>
             </SActiveAccount>
           ) : (
-            <SConnect connected={connected} onClick={connectSession}>
-              {"Login with WalletConnect"}
-            </SConnect>
+            <View>
+              <SConnect connected={connected} onClick={connectSession}>
+                {"Login"}
+              </SConnect>
+            </View>
           )}
 
     </SHeader>

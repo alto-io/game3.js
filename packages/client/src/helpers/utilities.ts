@@ -1,7 +1,10 @@
+import * as ethUtil from "ethereumjs-util";
 import { convertHexToUtf8 } from "@walletconnect/utils";
 import { utils } from "ethers";
 import { IChainData } from "./types";
 import supportedChains from "./chains";
+import { apiGetGasPrices, apiGetAccountNonce } from "./api";
+import { convertAmountToRawNumber, convertStringToHex } from "./bignumber";
 
 export function capitalize(string: string): string {
   return string
@@ -210,4 +213,77 @@ export function getCachedSession(): any {
     }
   }
   return session;
+}
+
+export async function formatTestTransaction(address: string, chainId: number) {
+  // from
+  const from = address;
+
+  // to
+  const to = address;
+
+  // nonce
+  const _nonce = await apiGetAccountNonce(address, chainId);
+  const nonce = sanitizeHex(convertStringToHex(_nonce));
+
+  // gasPrice
+  const gasPrices = await apiGetGasPrices();
+  const _gasPrice = gasPrices.slow.price;
+  const gasPrice = sanitizeHex(
+    convertStringToHex(convertAmountToRawNumber(_gasPrice, 9))
+  );
+
+  // gasLimit
+  const _gasLimit = 21000;
+  const gasLimit = sanitizeHex(convertStringToHex(_gasLimit));
+
+  // value
+  const _value = 0;
+  const value = sanitizeHex(convertStringToHex(_value));
+
+  // data
+  const data = "0x";
+
+  // test transaction
+  const tx = {
+    from,
+    to,
+    nonce,
+    gasPrice,
+    gasLimit,
+    value,
+    data
+  };
+
+  return tx;
+}
+
+export function hashPersonalMessage(msg: string): string {
+  const buffer = Buffer.from(msg);
+  const result = ethUtil.hashPersonalMessage(buffer);
+  const hash = ethUtil.bufferToHex(result);
+  return hash;
+}
+
+export function recoverPersonalSignature(sig: string, msg: string): string {
+  const hash = hashPersonalMessage(msg);
+  const signer = recoverPublicKey(sig, hash);
+  return signer;
+}
+
+export function recoverPublicKey(sig: string, hash: string): string {
+  const sigParams = ethUtil.fromRpcSig(sig);
+  const hashBuffer = Buffer.from(hash.replace("0x", ""), "hex");
+  const result = ethUtil.ecrecover(
+    hashBuffer,
+    sigParams.v,
+    sigParams.r,
+    sigParams.s
+  );
+  const signer = ethUtil.bufferToHex(ethUtil.publicToAddress(result));
+  return signer;
+}
+
+export function isObject(obj: any): boolean {
+  return typeof obj === "object" && !!Object.keys(obj).length;
 }

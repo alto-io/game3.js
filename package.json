@@ -15,6 +15,9 @@
       "packages/*"
     ]
   },
+  "engines" : { 
+    "node" : ">=0.12" 
+  },
   "scripts": {
     "clean:dependencies": "rimraf ./**/node_modules",
     "clean:builds": "rimraf ./**/build",
@@ -35,10 +38,17 @@
   },
   "dependencies": {
     "concurrently": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "truffle-hdwallet-provider": "^1.0.17",
     "tslint": "^5.19.0"
   },
+  "resolutions": {
+    "cids/multicodec": "1.0.1",
+    "ipfs-bitswap/multicodec": "0.5.5",
+    "**/redis": "3.0.2"
+  },
   "devDependencies": {
-    "typescript": "^3.5.3",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "typescript": "^3.5.3"
   }
 }

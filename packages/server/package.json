@@ -7,19 +7,24 @@
     "@colyseus/monitor": "^0.12.2",
     "@colyseus/schema": "^0.5.17",
     "@game3js/common": "0.0.1",
-    "colyseus": "^0.13.3",
+    "colyseus": "^0.13.7",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-basic-auth": "^1.2.0",
     "path": "^0.12.7"
   },
+  "resolutions": {
+    "cids/multicodec": "1.0.1",
+    "ipfs-bitswap/multicodec": "0.5.5",
+    "**/redis": "3.0.2"
+  },  
   "devDependencies": {
     "@types/cors": "^2.8.6",
     "@types/node": "^13.1.2",
     "nodemon": "^2.0.2",
     "ts-node": "^8.5.4",
     "tslint-react": "^4.1.0",
-    "typescript": "^3.7.4"
+    "typescript": "3.6.5"
   },
   "scripts": {
     "lint": "tslint -c tslint.json 'src/**/*.ts'",

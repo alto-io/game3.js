@@ -3,26 +3,42 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@reach/router": "^1.2.1",
     "@game3js/common": "0.0.1",
+    "@reach/router": "^1.2.1",
     "@walletconnect/browser": "1.0.0-beta.47",
     "@walletconnect/qrcode-modal": "^1.0.0-beta.47",
+    "@walletconnect/web3-provider": "^1.0.0-beta.47",
     "axios": "^0.19.1",
+    "bignumber.js": "^9.0.0",
+    "blockies-ts": "^1.0.0",
     "colyseus.js": "^0.13.0",
+    "date-fns": "^2.14.0",
+    "dotenv": "^8.2.0",
+    "ethereumjs-util": "^7.0.1",
     "ethers": "^4.0.42",
-    "hiredis": "^0.5.0",
     "pixi-particles": "^4.2.0",
     "pixi-viewport": "^4.5.0",
     "pixi.js": "^5.2.0",
+    "prop-types": "^15.7.2",
     "querystringify": "^2.1.1",
     "react": "^16.12.0",
+    "react-app-rewired": "^2.1.6",
     "react-device-detect": "^1.11.14",
     "react-dom": "^16.12.0",
     "react-helmet": "^5.2.1",
     "react-nipple": "^1.0.1",
     "react-scripts": "3.4.0",
     "react-toastify": "^5.5.0",
-    "styled-components": "4.2.0"
+    "styled-components": "4.2.0",
+    "threads": "^1.4.1",
+    "uuid": "^8.1.0",
+    "web3": "^1.2.7",
+    "web3modal": "^1.6.3"
+  },
+  "resolutions": {
+    "cids/multicodec": "1.0.1",
+    "ipfs-bitswap/multicodec": "0.5.5",
+    "**/redis": "3.0.2"
   },
   "devDependencies": {
     "@types/jest": "^24.0.25",
@@ -34,14 +50,15 @@
     "@types/react-dom": "^16.9.4",
     "@types/react-helmet": "^5.0.14",
     "@types/styled-components": "4.1.8",
+    "threads-plugin": "^1.3.1",
     "tslint-react": "^4.1.0",
-    "typescript": "^3.7.4"
+    "typescript": "3.6.5"
   },
   "scripts": {
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "lint:fix": "tslint --fix -c tslint.json 'src/**/*.{ts,tsx}'",
-    "start": "react-scripts start",
-    "build": "react-scripts --max_old_space_size=4096 build"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired --max_old_space_size=4096 build"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -168,3 +168,30 @@ export interface IAppConfig {
   rpcEngine: IRpcEngine;
   events: IAppEvents;
 }
+
+export interface IBoxImage {
+  "@type": string;
+  contentUrl: {
+    [label: string]: string;
+  };
+}
+
+export interface IBoxProfile {
+  memberSince: string;
+  coverPhoto: IBoxImage[];
+  location: string;
+  emoji: string;
+  job: string;
+  employer: string;
+  website: string;
+  description: string;
+  ethereum_proof: {
+    consent_msg: string;
+    consent_signature: string;
+    linked_did: string;
+  };
+  proof_did: string;
+  github: string;
+  image: IBoxImage[];
+  name: string;
+}

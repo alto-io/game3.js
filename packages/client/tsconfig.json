@@ -5,7 +5,8 @@
     "lib": [
       "dom",
       "dom.iterable",
-      "es5"
+      "es5",
+      "es2015"
     ],
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
@@ -19,6 +20,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "noImplicitAny": false,
+    "noImplicitThis": false,
     "strictNullChecks": false,
 
     "jsx": "preserve"

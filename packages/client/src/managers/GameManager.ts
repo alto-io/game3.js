@@ -71,7 +71,7 @@ export default class GameManager {
   private maxPlayers: number = 0;
   private state: string | null = null;
   private lobbyEndsAt: number = 0;
-  private gameEndsAt: number = 0;
+  public gameEndsAt: number = 0;
   private mode?: string;
 
   // Me (the one playing the game on his computer)

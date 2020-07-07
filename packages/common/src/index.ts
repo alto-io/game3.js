@@ -10,6 +10,7 @@ import * as Tiled from './tiled';
 import * as Types from './types';
 import * as Database from './database';
 import * as GameRoom from './gameroom';
+import * as Utils from './utils';
 
 export {
   Collisions,
@@ -23,5 +24,6 @@ export {
   Tiled,
   Types,
   Database,
-  GameRoom
+  GameRoom,
+  Utils
 };
