@@ -25,7 +25,7 @@ export function isAudio (filename) {
 
 export function isText (filename) {
   const ext = getFileExtension(filename)
-  return ext === 'txt' || hljs.getLanguage(ext)
+  return ext === 'txt' || String(hljs.getLanguage(ext))
 }
 
 export function isImage (filename) {
