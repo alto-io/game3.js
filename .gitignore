@@ -17,6 +17,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
+packages/client/src/contracts
 packages/server/ipfs
 packages/server/orbitdb
 packages/server/report.*.json
