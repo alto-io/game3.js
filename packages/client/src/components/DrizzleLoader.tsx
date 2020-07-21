@@ -6,7 +6,7 @@ import { Drizzle, generateStore } from "@drizzle/store"; // fka: drizzle
 import { DrizzleProvider } from "@drizzle/react-plugin"; // fka: drizzle-react
 
 // Import Rimble's ProgressAlert utility and its redux store to manage transaction alerts
-// import store from "./../core/middleware";
+import store from "./../core/middleware";
 
 // Let drizzle know what contracts we want and how to access our test blockchain
 import drizzleOptions from "./../drizzleOptions";
@@ -22,8 +22,8 @@ const DrizzleLoader = () => {
   };
 
   return hasWeb3Provider ? (
-    <DrizzleProvider store={null} options={drizzleOptions}>
-      <App drizzle={drizzle} store={null} />
+    <DrizzleProvider store={store} options={drizzleOptions}>
+      <App drizzle={drizzle} store={store} />
     </DrizzleProvider>
   ) : (
     <App drizzle={null} />
