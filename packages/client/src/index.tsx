@@ -2,9 +2,10 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { createGlobalStyle } from "styled-components";
 
-import App from "./App";
 import { globalStyle } from "./styles";
 // import './index.css';
+
+import DrizzleLoader from "./components/DrizzleLoader";
 import * as serviceWorker from './serviceWorker';
 
 const GlobalStyle = createGlobalStyle`
@@ -21,7 +22,7 @@ declare global {
 ReactDOM.render(
   <>
     <GlobalStyle />
-    <App />
+    <DrizzleLoader />
   </>,
   document.getElementById("root"),
 );

@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@drizzle/react-plugin": "^1.5.1",
+    "@drizzle/store": "^1.5.1",
     "@game3js/common": "0.0.1",
     "@reach/router": "^1.2.1",
     "@walletconnect/browser": "1.0.0-beta.47",
