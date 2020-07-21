@@ -19,6 +19,8 @@
     "node": ">=0.12"
   },
   "scripts": {
+    "sol:deploy": "truffle migrate --reset --compile-all",
+    "sol:test": "truffle test",    
     "clean:dependencies": "rimraf ./**/node_modules",
     "clean:builds": "rimraf ./**/build",
     "clean": "concurrently --kill-others-on-fail \"yarn clean:dependencies\" \"yarn clean:builds\"",

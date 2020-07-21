@@ -9,7 +9,7 @@ module.exports = {
       provider() {
         return new HDWalletProvider(
           process.env.GANACHE_MNEMONIC,
-          "http://localhost:9545/"
+          "http://localhost:7545/"
         );
       },
       host: "localhost",
@@ -18,30 +18,19 @@ module.exports = {
       gas: 6721975,
       gasPrice: 1000000000
     },    
-    developtruffle: {
-      provider() {
-        return new HDWalletProvider(
-          process.env.TRUFFLE_MNEMONIC,
-          "http://localhost:9545/"
-        );
-      },
-      host: "localhost",
-      port: 9545,
-      network_id: 4447
-    },
-    ganache: {
-      provider() {
-        return new HDWalletProvider(
-          process.env.GANACHE_MNEMONIC,
-          "http://localhost:7545"
-        );
-      },
-      host: "localhost",
-      port: 7545,
-      network_id: 5777,
-      gas: 6721975,
-      gasPrice: 1000000000
-    },
+    test: {
+        provider() {
+            return new HDWalletProvider(
+            process.env.GANACHE_MNEMONIC,
+            "http://localhost:7545/"
+            );
+        },
+        host: "localhost",
+        port: 7545,
+        network_id: 5777,
+        gas: 6721975,
+        gasPrice: 1000000000
+    },    
     mainnet: {
       provider() {
         // using wallet at index 1 ----------------------------------------------------------------------------------------v
