@@ -3,10 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@drizzle/react-components": "^1.5.1",
     "@drizzle/react-plugin": "^1.5.1",
     "@drizzle/store": "^1.5.1",
     "@game3js/common": "0.0.1",
     "@reach/router": "^1.2.1",
+    "@rimble/connection-banner": "^1.2.3",
     "@walletconnect/browser": "1.0.0-beta.47",
     "@walletconnect/qrcode-modal": "^1.0.0-beta.47",
     "@walletconnect/web3-provider": "^1.0.0-beta.47",

@@ -6,6 +6,14 @@ import { Database } from '@game3js/common';
 import { Router } from '@reach/router';
 import { v4 as uuidv4 } from 'uuid';
 
+// Drizzle for state and contract interactions
+import { DrizzleContext } from "@drizzle/react-plugin";
+
+// App-specific config and settings
+import drizzleConfig from "./drizzleConfig";
+
+import ConnectionBanner from "@rimble/connection-banner";
+
 import WalletConnect from "@walletconnect/browser";
 import Web3Modal from "web3modal";
 
@@ -301,7 +309,12 @@ class App extends React.Component<any, any> {
       theme: "dark"
     });
 
-    console.log(process.env)
+    // DEBUG INFO
+    console.log(props);
+    console.log(process.env);
+
+
+
   }
 
   public componentDidMount() {
@@ -701,47 +714,57 @@ class App extends React.Component<any, any> {
       result,
       web3
     } = this.state;
+
     return (
-      <>
+    <DrizzleContext.Provider drizzle={this.props.drizzle}>
         <ToastContainer
           position="bottom-right"
           transition={ Slide }
           pauseOnHover={ false } />
-        <View flex={true} center={true} column={true}>
-            <Header
-              playerProfile={playerProfile}
-              connected={connected}
-              address={address}
-              chainId={chainId}
-              killSession={this.resetApp}
-              connectSession={this.onConnect}/>
-        </View>
-        <Router>
-          <Home
-            default={true}
-            playerProfile={playerProfile}
-            connected={connected}
-            path="/"
-          />
-          <Game
-            path="/:roomId"
-          />
-          <Replay
-            path="/replay"
-            playerProfile={ playerProfile }
-          />
-          <Recorder
-            path="/recorder"
-            propVar={ connected }
-          />
-          <Tournaments
-            path="/tournaments"
-            web3={web3}
-            address={address}
-            playerProfile={playerProfile}
-          />
-        </Router>
-      </>
+        <DrizzleContext.Consumer>
+        {({ drizzleState }) => {
+            return (          
+              <>
+                <View flex={true} center={true} column={true}>
+                    <Header
+                      playerProfile={playerProfile}
+                      connected={connected}
+                      address={address}
+                      chainId={chainId}
+                      killSession={this.resetApp}
+                      connectSession={this.onConnect}/>
+                </View>
+ 
+                <Router>
+                  <Home
+                    default={true}
+                    playerProfile={playerProfile}
+                    connected={connected}
+                    path="/"
+                  />
+                  <Game
+                    path="/:roomId"
+                  />
+                  <Replay
+                    path="/replay"
+                    playerProfile={ playerProfile }
+                  />
+                  <Recorder
+                    path="/recorder"
+                    propVar={ connected }
+                  />
+                  <Tournaments
+                    path="/tournaments"
+                    web3={web3}
+                    address={address}
+                    playerProfile={playerProfile}
+                  />
+                </Router>
+              </>
+              );
+          }}
+          </DrizzleContext.Consumer>
+      </DrizzleContext.Provider>
     );
   };
 }
