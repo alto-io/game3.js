@@ -9,11 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 // Drizzle for state and contract interactions
 import { DrizzleContext } from "@drizzle/react-plugin";
 
-// App-specific config and settings
-import drizzleConfig from "./drizzleConfig";
-
-import ConnectionBanner from "@rimble/connection-banner";
-
 import WalletConnect from "@walletconnect/browser";
 import Web3Modal from "web3modal";
 
@@ -74,74 +69,6 @@ require('dotenv').config()
 
 // app settings
 const CREATE_WALLET_ON_GUEST_ACCOUNT = false;
-
-
-const SLayout = styled.div`
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  text-align: center;
-`;
-
-const SContent = styled(Wrapper)`
-  width: 100%;
-  height: 100%;
-  padding: 0 16px;
-`;
-
-const SContainer = styled.div`
-  height: 100%;
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  word-break: break-word;
-`;
-
-const SLanding = styled(Column)`
-  height: 600px;
-`;
-
-const SModalContainer = styled.div`
-  width: 100%;
-  position: relative;
-  word-wrap: break-word;
-`;
-
-const SModalTitle = styled.div`
-  margin: 1em 0;
-  font-size: 20px;
-  font-weight: 700;
-`;
-
-const SModalParagraph = styled.p`
-  margin-top: 30px;
-`;
-
-const SBalances = styled(SLanding)`
-  height: 100%;
-  & h3 {
-    padding-top: 30px;
-  }
-`;
-
-const STestButtonContainer = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-`;
-
-const STestButton = styled(Web3ModalButton)`
-  border-radius: 8px;
-  font-size: ${fonts.size.medium};
-  height: 44px;
-  width: 100%;
-  max-width: 175px;
-  margin: 12px;
-`;
 
 export interface IAppState {
   playerProfile: Database.PlayerProfile;
@@ -727,6 +654,8 @@ class App extends React.Component<any, any> {
               <>
                 <View flex={true} center={true} column={true}>
                     <Header
+                      drizzle={this.props.drizzle}
+                      drizzleState={drizzleState}
                       playerProfile={playerProfile}
                       connected={connected}
                       address={address}
@@ -734,7 +663,6 @@ class App extends React.Component<any, any> {
                       killSession={this.resetApp}
                       connectSession={this.onConnect}/>
                 </View>
- 
                 <Router>
                   <Home
                     default={true}

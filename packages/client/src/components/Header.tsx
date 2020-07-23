@@ -7,6 +7,11 @@ import { ellipseAddress, getChainData } from "../helpers/utilities";
 import { transitions } from "../styles";
 import { Database } from "'@game3js/common";
 
+// App-specific config and settings
+import drizzleConfig from "../drizzleConfig";
+
+import ConnectionBanner from "@rimble/connection-banner";
+
 const SHeader = styled.div`
   margin-top: -1px;
   margin-bottom: 1px;
@@ -90,6 +95,8 @@ const SConnect = styled(SSession)`
 `;
 
 interface IHeaderProps {
+  drizzle: any;
+  drizzleState: any;
   killSession: () => void;
   connectSession: () => void;
   connected: boolean;
@@ -99,10 +106,20 @@ interface IHeaderProps {
 }
 
 const Header = (props: IHeaderProps) => {
-  const { playerProfile, connected, address, chainId, killSession, connectSession } = props;
+  const { drizzle, drizzleState, playerProfile, connected, address, chainId, killSession, connectSession } = props;
   const activeChain = chainId ? getChainData(chainId).name : null;
+
   return (
     <SHeader {...props}>
+
+        <View>
+          <ConnectionBanner
+            currentNetwork={1337}
+            requiredNetwork={drizzleConfig.requiredNetwork}
+            onWeb3Fallback={null}
+          />
+        </View>
+
       {connected && activeChain ? (
         <SActiveChain>
           <p>{`Connected to`}</p>
