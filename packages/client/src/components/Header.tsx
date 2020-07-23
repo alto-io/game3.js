@@ -112,6 +112,7 @@ const Header = (props: IHeaderProps) => {
   return (
     <SHeader {...props}>
 
+          {/*
         <View>
           <ConnectionBanner
             currentNetwork={1337}
@@ -119,6 +120,7 @@ const Header = (props: IHeaderProps) => {
             onWeb3Fallback={null}
           />
         </View>
+          */}
 
       {connected && activeChain ? (
         <SActiveChain>
