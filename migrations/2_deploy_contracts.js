@@ -1,5 +1,6 @@
 var CryptoPizza = artifacts.require("./CryptoPizza.sol");
 var Token = artifacts.require("./Token.sol");
+var Tournament = artifacts.require("./Tournaments.sol");
 
 let _ = "        ";
 
@@ -21,6 +22,13 @@ module.exports = (deployer, helper, accounts) => {
         _ + "Token deployed at: " + token.address
       );
 
+      // Deploy Tournament.sol
+      await deployer.deploy(Tournament);
+      let tournament = await Tournament.deployed();
+      console.log(
+        _ + "Tournament deployed at: " + tournament.address
+      );
+      
 
     } catch (error) {
       console.log(error);
