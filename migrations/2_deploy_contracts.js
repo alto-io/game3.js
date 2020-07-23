@@ -1,4 +1,5 @@
 var CryptoPizza = artifacts.require("./CryptoPizza.sol");
+var Token = artifacts.require("./Token.sol");
 
 let _ = "        ";
 
@@ -12,6 +13,14 @@ module.exports = (deployer, helper, accounts) => {
       console.log(
         _ + "CryptoPizza deployed at: " + cryptoPizza.address
       );
+
+      // Deploy Token.sol
+      await deployer.deploy(Token);
+      let token = await Token.deployed();
+      console.log(
+        _ + "Token deployed at: " + token.address
+      );
+
 
     } catch (error) {
       console.log(error);
