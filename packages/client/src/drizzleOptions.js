@@ -1,8 +1,9 @@
 // Drizzle contracts
 import CryptoPizza from "./contracts/CryptoPizza.json";
+import Token from "./contracts/Token.json";
 
 const drizzleOptions = {
-  contracts: [CryptoPizza],
+  contracts: [CryptoPizza, Token],
   web3: {
     fallback: {
       type: "ws",
