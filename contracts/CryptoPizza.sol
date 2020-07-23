@@ -1,4 +1,4 @@
-pragma solidity ^0.5.10;
+pragma solidity ^0.6.0;
 
 // Imports symbols from other files into the current contract.
 // In this case, a series of helper contracts from OpenZeppelin.
@@ -56,7 +56,8 @@ contract CryptoPizza is IERC721, ERC165 {
         isUnique(_name, _dna)
     {
         // Adds Pizza to array of Pizzas and get id
-        uint256 id = SafeMath.sub(pizzas.push(Pizza(_name, _dna)), 1);
+        pizzas.push(Pizza(_name, _dna));
+        uint256 id = SafeMath.sub(pizzas.length, 1);
 
         // Checks that Pizza owner is the same as current user
         // Learn more: https://solidity.readthedocs.io/en/v0.5.10/control-structures.html#error-handling-assert-require-revert-and-exceptions
@@ -114,7 +115,7 @@ contract CryptoPizza is IERC721, ERC165 {
     }
 
     // Transfers Pizza and ownership to other address
-    function transferFrom(address _from, address _to, uint256 _pizzaId) public {
+    function transferFrom(address _from, address _to, uint256 _pizzaId) public override {
         require(_from != address(0) && _to != address(0), "Invalid address.");
         require(_exists(_pizzaId), "Pizza does not exist.");
         require(_from != _to, "Cannot transfer to the same address.");
@@ -137,7 +138,7 @@ contract CryptoPizza is IERC721, ERC165 {
      * otherwise, the transfer is reverted.
     */
     function safeTransferFrom(address from, address to, uint256 pizzaId)
-        public
+        public override
     {
         // solium-disable-next-line arg-overflow
         this.safeTransferFrom(from, to, pizzaId, "");
@@ -155,7 +156,7 @@ contract CryptoPizza is IERC721, ERC165 {
         address to,
         uint256 pizzaId,
         bytes memory _data
-    ) public {
+    ) public override {
         this.transferFrom(from, to, pizzaId);
         require(_checkOnERC721Received(from, to, pizzaId, _data), "Must implmement onERC721Received.");
     }
@@ -199,19 +200,19 @@ contract CryptoPizza is IERC721, ERC165 {
     }
 
     // Returns count of Pizzas by address
-    function balanceOf(address _owner) public view returns (uint256 _balance) {
+    function balanceOf(address _owner) public override view returns (uint256 _balance) {
         return ownerPizzaCount[_owner];
     }
 
     // Returns owner of the Pizza found by id
-    function ownerOf(uint256 _pizzaId) public view returns (address _owner) {
+    function ownerOf(uint256 _pizzaId) public override view returns (address _owner) {
         address owner = pizzaToOwner[_pizzaId];
         require(owner != address(0), "Invalid Pizza ID.");
         return owner;
     }
 
     // Approves other address to transfer ownership of Pizza
-    function approve(address _to, uint256 _pizzaId) public {
+    function approve(address _to, uint256 _pizzaId) public override {
         require(msg.sender == pizzaToOwner[_pizzaId], "Must be the Pizza owner.");
         pizzaApprovals[_pizzaId] = _to;
         emit Approval(msg.sender, _to, _pizzaId);
@@ -220,6 +221,7 @@ contract CryptoPizza is IERC721, ERC165 {
     // Returns approved address for specific Pizza
     function getApproved(uint256 _pizzaId)
         public
+        override
         view
         returns (address operator)
     {
@@ -243,7 +245,7 @@ contract CryptoPizza is IERC721, ERC165 {
      * Sets or unsets the approval of a given operator
      * An operator is allowed to transfer all tokens of the sender on their behalf
      */
-    function setApprovalForAll(address to, bool approved) public {
+    function setApprovalForAll(address to, bool approved) public override {
         require(to != msg.sender, "Cannot approve own address");
         operatorApprovals[msg.sender][to] = approved;
         emit ApprovalForAll(msg.sender, to, approved);
@@ -252,6 +254,7 @@ contract CryptoPizza is IERC721, ERC165 {
     // Tells whether an operator is approved by a given owner
     function isApprovedForAll(address owner, address operator)
         public
+        override
         view
         returns (bool)
     {

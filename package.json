@@ -20,7 +20,7 @@
   },
   "scripts": {
     "sol:deploy": "truffle migrate --reset --compile-all",
-    "sol:test": "truffle test",    
+    "sol:test": "truffle test",
     "clean:dependencies": "rimraf ./**/node_modules",
     "clean:builds": "rimraf ./**/build",
     "clean": "concurrently --kill-others-on-fail \"yarn clean:dependencies\" \"yarn clean:builds\"",
@@ -39,7 +39,7 @@
     "postinstall": "rimraf node_modules/@types/react-native"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "2.5.0",
+    "@openzeppelin/contracts": "^3.1.0",
     "concurrently": "^4.1.1",
     "dotenv": "^8.2.0",
     "truffle": "^5.0.2",

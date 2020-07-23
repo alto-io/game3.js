@@ -1,4 +1,4 @@
-pragma solidity ^0.5.10;
+pragma solidity ^0.6.0;
 
 contract Token {
     // An `address` is comparable to an email address - it's used to identify an account on Ethereum.
