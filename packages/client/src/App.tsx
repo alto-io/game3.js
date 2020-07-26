@@ -1,8 +1,8 @@
+
 import * as React from "react";
-import styled from "styled-components";
 import Web3 from "web3";
+
 import { convertUtf8ToHex } from "@walletconnect/utils";
-import { Database } from '@game3js/common';
 import { Router } from '@reach/router';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,42 +15,39 @@ import Web3Modal from "web3modal";
 // @ts-ignore
 import WalletConnectProvider from "@walletconnect/web3-provider";
 
+import { Database } from '@game3js/common';
+
+
 import { View } from './components';
 import Header from "./components/Header";
-import WCButton from "./components/WCButton";
-import Web3ModalButton from "./components/Web3ModalButton";
-import Column from "./components/Column";
-import Wrapper from "./components/Wrapper";
-import Modal from "./components/Modal";
-import Web3ModalHeader from "./components/Web3ModalHeader";
-import Loader from "./components/Loader";
-import ModalResult from "./components/ModalResult";
-import AccountAssets from "./components/AccountAssets";
-import ConnectButton from "./components/ConnectButton";
-import { apiGetAccountAssets } from "./helpers/api";
+import SmartContractControls from './components/SmartContractControls';
+
 import {
-  hashPersonalMessage,
-  recoverPublicKey,
-  recoverPersonalSignature,
   formatTestTransaction,
-  getChainData
+  getChainData,
+  hashPersonalMessage,
+  recoverPersonalSignature,
+  recoverPublicKey,
 } from "./helpers/utilities";
+
+import { apiGetAccountAssets } from "./helpers/api";
+import { getProfile, openBox } from "./helpers/box";
 import { IAssetData, IBoxProfile } from "./helpers/types";
-import { fonts } from "./styles";
-import { openBox, getProfile } from "./helpers/box";
+
+
 import {
-  ETH_SEND_TRANSACTION,
-  ETH_SIGN,
-  PERSONAL_SIGN,
   BOX_GET_PROFILE,
   DAI_BALANCE_OF,
-  DAI_TRANSFER
+  DAI_TRANSFER,
+  ETH_SEND_TRANSACTION,
+  ETH_SIGN,
+  PERSONAL_SIGN
 } from "./constants";
 
-import { DEFAULT_CHAIN_ID, DEFAULT_ACTIVE_INDEX } from "./helpers/constants";
+import { DEFAULT_ACTIVE_INDEX, DEFAULT_CHAIN_ID } from "./helpers/constants";
+import appConfig from "./config";
 
 import { callBalanceOf, callTransfer } from "./helpers/web3";
-import appConfig from "./config";
 import { getAccounts, initWallet, updateWallet } from "./helpers/wallet";
 import { getLocalDatabaseManager, getPlayerProfile } from "./helpers/database";
 
@@ -663,6 +660,13 @@ class App extends React.Component<any, any> {
                       killSession={this.resetApp}
                       connectSession={this.onConnect}/>
                 </View>
+
+                <View flex={true} center={true} column={true}>
+                  <SmartContractControls
+                    drizzle={this.props.drizzle}
+                    drizzleState={drizzleState}/>
+                </View>
+
                 <Router>
                   <Home
                     default={true}
