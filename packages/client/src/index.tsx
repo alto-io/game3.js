@@ -1,16 +1,22 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { createGlobalStyle } from "styled-components";
-
-import { globalStyle } from "./styles";
-// import './index.css';
 
 import DrizzleLoader from "./components/DrizzleLoader";
 import * as serviceWorker from './serviceWorker';
 
-const GlobalStyle = createGlobalStyle`
-  ${globalStyle}
-`;
+// Theming for look and feel
+
+import { ThemeProvider } from "styled-components";
+import CustomTheme from "./CustomTheme";
+
+// import './index.css';
+
+// import { createGlobalStyle } from "styled-components";
+// import { globalStyle } from "./styles";
+
+// const GlobalStyle = createGlobalStyle`
+//   ${globalStyle}
+// `;
 
 declare global {
   // tslint:disable-next-line
@@ -21,8 +27,10 @@ declare global {
 
 ReactDOM.render(
   <>
-    <GlobalStyle />
-    <DrizzleLoader />
+    {/*<GlobalStyle/>*/}
+    <ThemeProvider theme={CustomTheme}>
+      <DrizzleLoader />
+    </ThemeProvider>
   </>,
   document.getElementById("root"),
 );

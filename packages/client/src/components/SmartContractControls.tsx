@@ -47,11 +47,13 @@ function SmartContractControls({ drizzle, drizzleState, drizzleStatus, account, 
             currentNetwork={currentNetwork}
             requiredNetwork={currentNetwork /*in prod: drizzleConfig.requiredNetwork*/ }
             />
+            {/*
             <CounterCardContainer
                 token={token}
                 address={address}
                 key={token.id}
             />
+            */}
         </Card>
     )
 }
@@ -63,9 +65,8 @@ const mapStateToProps = state => {
     console.log(state);
   return {
     drizzleStatus: state.drizzleStatus,
-    account: state.accounts[0],
+    address: state.accounts[0],
     networkId: state.web3.networkId,
-    contracts: state.contracts,
   };
 };
 

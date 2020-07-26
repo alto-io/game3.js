@@ -17,10 +17,11 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 
 import { Database } from '@game3js/common';
 
-
 import { View } from './components';
+
 import Header from "./components/Header";
 import SmartContractControls from './components/SmartContractControls';
+import HeaderNav from "./components/HeaderNav";
 
 import {
   formatTestTransaction,
@@ -157,6 +158,13 @@ function initWeb3(provider: any) {
 
   return web3;
 }
+
+
+const preflightCheck = () => {
+  if (window.ethereum) {
+    window.ethereum.enable();
+  }
+};
 
 class App extends React.Component<any, any> {
   // @ts-ignore
@@ -649,6 +657,11 @@ class App extends React.Component<any, any> {
         {({ drizzleState }) => {
             return (          
               <>
+                <HeaderNav
+                  drizzle={this.props.drizzle}
+                  drizzleState={drizzleState}
+                  preflightCheck={preflightCheck}/>
+              
                 <View flex={true} center={true} column={true}>
                     <Header
                       drizzle={this.props.drizzle}
@@ -662,7 +675,7 @@ class App extends React.Component<any, any> {
                 </View>
 
                 <View flex={true} center={true} column={true}>
-                  <SmartContractControls
+                <SmartContractControls
                     drizzle={this.props.drizzle}
                     drizzleState={drizzleState}/>
                 </View>

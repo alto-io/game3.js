@@ -6,12 +6,14 @@ import Counter from './contracts/Counter.json';
 
 const drizzleOptions = {
   contracts: [Counter, CryptoPizza, Token, Tournaments],
+  /*
   web3: {
     fallback: {
       type: "ws",
       url: "ws://127.0.0.1:7545"
     }
   }
+  */
 };
 
 export default drizzleOptions;
