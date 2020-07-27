@@ -9,8 +9,13 @@ import { v4 as uuidv4 } from 'uuid';
 // Drizzle for state and contract interactions
 import { DrizzleContext } from "@drizzle/react-plugin";
 
+// WalletConnect
 import WalletConnect from "@walletconnect/browser";
 import Web3Modal from "web3modal";
+
+// Rimble
+import RimbleWeb3 from "./rimble/RimbleWeb3";
+
 
 // @ts-ignore
 import WalletConnectProvider from "@walletconnect/web3-provider";
@@ -20,6 +25,7 @@ import { Database } from '@game3js/common';
 import { View } from './components';
 
 import Header from "./components/Header";
+import RimbleExample from "./components/RimbleExample";
 import SmartContractControls from './components/SmartContractControls';
 import HeaderNav from "./components/HeaderNav";
 
@@ -105,6 +111,12 @@ const DEFAULT_ACCOUNTS = CREATE_WALLET_ON_GUEST_ACCOUNT
 const DEFAULT_ADDRESS = CREATE_WALLET_ON_GUEST_ACCOUNT
   ? DEFAULT_ACCOUNTS[DEFAULT_ACTIVE_INDEX] : "";
 
+
+// Optional parameters to pass into RimbleWeb3
+const RIMBLE_CONFIG = {
+  // accountBalanceMinimum: 0.001,
+  requiredNetwork: 5777 // ganache
+};
 
 const INITIAL_STATE: IAppState = {
   playerProfile: {
@@ -648,68 +660,99 @@ class App extends React.Component<any, any> {
     } = this.state;
 
     return (
-    <DrizzleContext.Provider drizzle={this.props.drizzle}>
-        <ToastContainer
-          position="bottom-right"
-          transition={ Slide }
-          pauseOnHover={ false } />
-        <DrizzleContext.Consumer>
-        {({ drizzleState }) => {
-            return (          
-              <>
-                <HeaderNav
-                  drizzle={this.props.drizzle}
-                  drizzleState={drizzleState}
-                  preflightCheck={preflightCheck}/>
-              
-                <View flex={true} center={true} column={true}>
-                    <Header
+    <RimbleWeb3 config={RIMBLE_CONFIG}>
+      <RimbleWeb3.Consumer>
+          {({
+            needsPreflight,
+            validBrowser,
+            userAgent,
+            web3,
+            account,
+            accountBalance,
+            accountBalanceLow,
+            initAccount,
+            rejectAccountConnect,
+            userRejectedConnect,
+            accountValidated,
+            accountValidationPending,
+            rejectValidation,
+            userRejectedValidation,
+            validateAccount,
+            connectAndValidateAccount,
+            modals,
+            network,
+            transaction,
+            web3Fallback
+          }) => ( 
+        <DrizzleContext.Provider drizzle={this.props.drizzle}>
+            <ToastContainer
+              position="bottom-right"
+              transition={ Slide }
+              pauseOnHover={ false } />
+            <DrizzleContext.Consumer>
+            {({ drizzleState }) => {
+                return (          
+                  <>
+                  {/*
+                    <HeaderNav
                       drizzle={this.props.drizzle}
                       drizzleState={drizzleState}
-                      playerProfile={playerProfile}
-                      connected={connected}
-                      address={address}
-                      chainId={chainId}
-                      killSession={this.resetApp}
-                      connectSession={this.onConnect}/>
-                </View>
+                      preflightCheck={preflightCheck}/>
+                  */}
+                  
+                    <View flex={true} center={true} column={true}>
+                        <Header
+                          drizzle={this.props.drizzle}
+                          drizzleState={drizzleState}
+                          playerProfile={playerProfile}
+                          connected={connected}
+                          address={address}
+                          chainId={chainId}
+                          killSession={this.resetApp}
+                          connectSession={this.onConnect}/>
+                    </View>
 
-                <View flex={true} center={true} column={true}>
-                <SmartContractControls
-                    drizzle={this.props.drizzle}
-                    drizzleState={drizzleState}/>
-                </View>
+                  {
+                    <View flex={true} center={true} column={true}>
+                    <SmartContractControls
+                        drizzle={this.props.drizzle}
+                        drizzleState={drizzleState}/>
+                    </View>
+                  }
 
-                <Router>
-                  <Home
-                    default={true}
-                    playerProfile={playerProfile}
-                    connected={connected}
-                    path="/"
-                  />
-                  <Game
-                    path="/:roomId"
-                  />
-                  <Replay
-                    path="/replay"
-                    playerProfile={ playerProfile }
-                  />
-                  <Recorder
-                    path="/recorder"
-                    propVar={ connected }
-                  />
-                  <Tournaments
-                    path="/tournaments"
-                    web3={web3}
-                    address={address}
-                    playerProfile={playerProfile}
-                  />
-                </Router>
-              </>
-              );
-          }}
-          </DrizzleContext.Consumer>
-      </DrizzleContext.Provider>
+                    <Router>
+                      <Home
+                        default={true}
+                        playerProfile={playerProfile}
+                        connected={connected}
+                        path="/"
+                      />
+                      <Game
+                        path="/:roomId"
+                      />
+                      <Replay
+                        path="/replay"
+                        playerProfile={ playerProfile }
+                      />
+                      <Recorder
+                        path="/recorder"
+                        propVar={ connected }
+                      />
+                      <Tournaments
+                        path="/tournaments"
+                        web3={web3}
+                        address={address}
+                        playerProfile={playerProfile}
+                      />
+                    </Router>
+                  </>
+                  );
+              }}
+              </DrizzleContext.Consumer>
+          </DrizzleContext.Provider>
+            )}
+        </RimbleWeb3.Consumer>       
+    </RimbleWeb3>
     );
   };
 }

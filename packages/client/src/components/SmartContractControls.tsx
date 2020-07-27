@@ -7,9 +7,11 @@ import NetworkIndicator from "@rimble/network-indicator";
 
 import CounterCardContainer from './CounterCard.container';
 
-function SmartContractControls({ drizzle, drizzleState, drizzleStatus, account, networkId, contracts }) {
+function SmartContractControls({ drizzle, drizzleState, drizzleStatus, account, networkId, contract }) {
     const [currentNetwork, setCurrentNetwork] = useState(null);
     const [address, setAddress] = useState(null);
+    const [contractAddress, setContractAddress] = useState(null);
+    const [contractAbi, setContractAbi] = useState(null);
 
     const token = {
         id: "Counter",
@@ -41,6 +43,17 @@ function SmartContractControls({ drizzle, drizzleState, drizzleStatus, account, 
         }
     }, [networkId, drizzleStatus, drizzle]);
 
+    // retrieve contract details
+    useEffect(() => {
+        const contract = drizzle.contracts.Counter;
+
+        if (contract) {
+            setContractAbi(contract.abi);
+            setContractAddress(contract.address);
+        }
+
+    }, [drizzle, drizzleState]);
+
     return (
         <Card maxWidth={'640px'} mx={'auto'} p={3} px={4}>
             <NetworkIndicator
@@ -62,11 +75,10 @@ function SmartContractControls({ drizzle, drizzleState, drizzleStatus, account, 
  * Export connected component.
  */
 const mapStateToProps = state => {
-    console.log(state);
   return {
     drizzleStatus: state.drizzleStatus,
     address: state.accounts[0],
-    networkId: state.web3.networkId,
+    networkId: state.web3.networkId
   };
 };
 
