@@ -25,8 +25,9 @@ import { Database } from '@game3js/common';
 import { View } from './components';
 
 import Header from "./components/Header";
-import RimbleExample from "./components/RimbleExample";
-import SmartContractControls from './components/SmartContractControls';
+
+import PrimaryCard from "./components/PrimaryCard";
+import WalletBlock from './components/WalletBlock';
 import HeaderNav from "./components/HeaderNav";
 
 import {
@@ -714,11 +715,21 @@ class App extends React.Component<any, any> {
 
                   {
                     <View flex={true} center={true} column={true}>
-                    <SmartContractControls
-                        drizzle={this.props.drizzle}
-                        drizzleState={drizzleState}/>
+
+                    <WalletBlock
+                        account={account}
+                        accountBalance={accountBalance}
+                        accountBalanceLow={accountBalanceLow}
+                        accountValidated={accountValidated}
+                        connectAndValidateAccount={connectAndValidateAccount}
+                      />
+
                     </View>
                   }
+
+
+                  <PrimaryCard />
+
 
                     <Router>
                       <Home
