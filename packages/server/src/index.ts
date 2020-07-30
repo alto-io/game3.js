@@ -2,8 +2,10 @@ import { monitor } from '@colyseus/monitor';
 import { 
   Constants,
   Database,
-  GameRoom
+  GameRoom,
+  GlobalState
 } from '@game3js/common';
+
 import { Server } from 'colyseus';
 import * as cors from 'cors';
 import * as express from 'express';
@@ -29,27 +31,25 @@ app.use(cors());
 app.use(express.json());
 
 // Game server
-const server = new Server({
+const colyseusServer = new Server({
   server: createServer(app),
   express: app,
 });
 
-let dbManager = null
-
 async function initializeDatabase() {
-  dbManager = new Database.OrbitDBManager();
-  await dbManager.start();
-
-  console.log(await dbManager.node.bootstrap.list());
-  console.log(await dbManager.node.id());
-  console.log(await dbManager.node.swarm.peers());
-
+  GlobalState.ServerState.dbManager = new Database.OrbitDBManager();
+  await GlobalState.ServerState.dbManager.start();
+/*
+  console.log(await GlobalState.ServerState.dbManager.node.bootstrap.list());
+  console.log(await GlobalState.ServerState.dbManager.node.id());
+  console.log(await GlobalState.ServerState.dbManager.node.swarm.peers());
+*/
 }
 
 initializeDatabase();
 
 // Game Rooms
-server.define(Constants.ROOM_NAME, GameRoom.ShooterGameRoom);
+colyseusServer.define(Constants.ROOM_NAME, GameRoom.ShooterGameRoom);
 
 // If you don't want people accessing your server stats, comment this line.
 app.use("/colyseus", basicAuthMiddleware, monitor());
@@ -58,33 +58,33 @@ app.use("/colyseus", basicAuthMiddleware, monitor());
 app.use(express.static(join(__dirname, 'public')));
 
 app.post('/profile', async (req: any, res: any) => {
-  const result = await dbManager.savePlayerProfile(req.body);
+  const result = await GlobalState.ServerState.dbManager.savePlayerProfile(req.body);
   res.json(result);
 });
 
 app.get('/profile', async (req: any, res: any) => {
-  const result = await dbManager.getPlayerProfile(req.query.walletid);
+  const result = await GlobalState.ServerState.dbManager.getPlayerProfile(req.query.walletid);
   res.json(result);
 });
 
 app.get('/leaderboard', async (req: any, res: any) => {
-  const result = await dbManager.getLeaderboard();
+  const result = await GlobalState.ServerState.dbManager.getLeaderboard();
   res.json(result);
 });
 
 // TODO: only organizer must be able to put info
 app.post('/tournament', async (req: any, res: any) => {
-  const result = await dbManager.putTournamentData(req.body);
+  const result = await GlobalState.ServerState.dbManager.putTournamentData(req.body);
   res.json(result);
 });
 
 app.get('/tournament', async (req: any, res: any) => {
-  const result = await dbManager.getTournamentData(req.query.tournamentId);
+  const result = await GlobalState.ServerState.dbManager.getTournamentData(req.query.tournamentId);
   res.json(result);
 });
 
 app.post('/tournamentResult', async (req: any, res: any) => {
-  const result = await dbManager.serverPutResult(req.body);
+  const result = await GlobalState.ServerState.dbManager.serverPutResult(req.body);
   res.json(result);
 });
 
@@ -93,10 +93,10 @@ app.get('*', (req: any, res: any) => {
   res.sendFile(join(__dirname, 'public', 'index.html'));
 });
 
-server.onShutdown(() => {
+colyseusServer.onShutdown(() => {
   console.log(`Shutting down...`);
 });
 
-server.listen(PORT);
+colyseusServer.listen(PORT);
 
 console.log(`Listening on ws://localhost:${PORT}`);

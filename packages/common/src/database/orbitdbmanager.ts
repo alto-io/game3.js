@@ -23,6 +23,7 @@ export class OrbitDBManager implements DBManager {
   user:any = null
   tournaments:any = null
   tournamentResults:any = null
+  gameSessions:any = null
 
   defaultServerOptions = {
       relay: { enabled: true, hop: { enabled: true, active: true } },
@@ -87,6 +88,8 @@ export class OrbitDBManager implements DBManager {
     this.tournaments = await this.orbitdb.kvstore('tournaments', this.defaultOptions);
     await this.tournaments.load()
 
+    this.gameSessions = await this.orbitdb.docstore('gameSessions', docStoreOptions);
+    await this.gameSessions.load()
   }
 
   async refreshClientData() {
@@ -109,6 +112,7 @@ export class OrbitDBManager implements DBManager {
     this.user = await this.orbitdb.kvstore('user', this.defaultOptions)
     this.tournaments = await this.orbitdb.docstore('tournaments', docStoreOptions)
     this.tournamentResults = await this.orbitdb.docstore('tournamentResults', docStoreOptions)
+    this.gameSessions = await this.orbitdb.docstore('gameSessions', docStoreOptions)
     await this.user.load()
   }
 
@@ -177,7 +181,7 @@ export class OrbitDBManager implements DBManager {
         }
         await this.leaderboardEntries.put(entry);
       }
-    }
+  }
   
   async getFileFromHash(hash: string) {
 
@@ -225,4 +229,16 @@ export class OrbitDBManager implements DBManager {
     return { result }
   }
 
+  async serverPutGameSession(sessionId, sessionData) {
+    const entry = {
+      id: sessionId,
+      sessionData,
+    }
+    console.log('Game session info:')
+    console.log(entry)
+    const result = await this.gameSessions.put(entry)
+    console.log('result:')
+    console.log(result)
+    return { result }
+  }
 }

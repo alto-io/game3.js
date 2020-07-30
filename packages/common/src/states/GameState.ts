@@ -2,6 +2,10 @@ import { ArraySchema, MapSchema, Schema, type } from '@colyseus/schema';
 import { Collisions, Constants, Entities, Geometry, Maps, Maths, Tiled, Types } from '..';
 import { Bullet, Game, Message, Monster, Player, Prop } from '../entities';
 
+import { ServerState } from '../globalstate'
+
+import { v4 as uuidv4 } from 'uuid'
+
 export class GameState extends Schema {
 
   @type(Game)
@@ -24,7 +28,7 @@ export class GameState extends Schema {
   private spawners: Geometry.RectangleBody[] = [];
   private actions: Types.IAction[] = [];
   private onMessage: (message: Message) => void;
-
+  private sessionId: string;
 
   // INIT
   constructor(
@@ -46,11 +50,14 @@ export class GameState extends Schema {
       onGameEnd: this.handleGameEnd,
     });
 
+    this.sessionId = uuidv4();
+
     // Map
     this.initializeMap(mapName);
 
     // Callback
     this.onMessage = onMessage;
+    
   }
 
   initializeMap = (mapName: string) => {
@@ -166,8 +173,19 @@ export class GameState extends Schema {
     this.propsClear();
     this.monstersClear();
     this.onMessage(new Message('stop'));
+
+    this.saveGameSession();
   }
 
+  saveGameSession = () => {
+    const id = this.sessionId
+    const data = {}
+    for (const playerId in this.players) {
+      const player: Player = this.players[playerId]
+      data[playerId] = player.kills
+    }
+    ServerState.dbManager.serverPutGameSession(id, data)
+  }
 
   // PLAYERS: single
   playerAdd(id: string, name: string) {

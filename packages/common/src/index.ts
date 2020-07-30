@@ -11,6 +11,7 @@ import * as Types from './types';
 import * as Database from './database';
 import * as GameRoom from './gameroom';
 import * as Utils from './utils';
+import * as GlobalState from './globalstate'
 
 export {
   Collisions,
@@ -25,5 +26,6 @@ export {
   Types,
   Database,
   GameRoom,
-  Utils
+  Utils,
+  GlobalState
 };

@@ -41,7 +41,7 @@ export default class Game extends Component<IProps, IState> {
   private gameCanvas: RefObject<HTMLDivElement>;
   private gameManager: GameManager;
   private client?: Client;
-  private room?: Room;
+  public room?: Room;
 
   private mediaRecorder: any;
   private recordedBlobs: any;
