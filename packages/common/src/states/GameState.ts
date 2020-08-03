@@ -29,12 +29,14 @@ export class GameState extends Schema {
   private actions: Types.IAction[] = [];
   private onMessage: (message: Message) => void;
   private sessionId: string;
+  private tournamentId: string;
 
   // INIT
   constructor(
     mapName: string,
     maxPlayers: number,
     mode: Types.GameMode,
+    tournamentId: string,
     onMessage: (message: Message) => void,
   ) {
     super();
@@ -51,6 +53,7 @@ export class GameState extends Schema {
     });
 
     this.sessionId = uuidv4();
+    this.tournamentId = tournamentId;
 
     // Map
     this.initializeMap(mapName);
@@ -165,26 +168,30 @@ export class GameState extends Schema {
     this.onMessage(new Message('start'));
   }
 
-  private handleGameEnd = (message?: Message) => {
+  private handleGameEnd = async (message?: Message) => {
     if (message) {
       this.onMessage(message);
     }
 
     this.propsClear();
     this.monstersClear();
-    this.onMessage(new Message('stop'));
-
-    this.saveGameSession();
+    const gameSessionId = await this.saveGameSession();
+    this.onMessage(new Message('stop', { gameSessionId }));
   }
 
   saveGameSession = () => {
     const id = this.sessionId
-    const data = {}
+    const data = {
+      sessionId: id,
+      tournamentId: this.tournamentId,
+      playerData: {},
+    }
     for (const playerId in this.players) {
       const player: Player = this.players[playerId]
-      data[playerId] = player.kills
+      data.playerData[playerId] = player.kills
     }
     ServerState.dbManager.serverPutGameSession(id, data)
+    return id
   }
 
   // PLAYERS: single

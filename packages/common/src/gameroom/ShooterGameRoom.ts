@@ -21,6 +21,7 @@ export class ShooterGameRoom extends Room<GameState> {
       roomMap: options.roomMap,
       roomMaxPlayers: this.maxClients,
       mode: options.mode,
+      tournamentId: options.tournamentId,
     });
 
     // Init State
@@ -28,6 +29,7 @@ export class ShooterGameRoom extends Room<GameState> {
       options.roomMap,
       this.maxClients,
       options.mode,
+      options.tournamentId,
       this.handleMessage,
     ));
 

@@ -101,6 +101,7 @@ export default class Game extends Component<IProps, IState> {
 
     const isNewRoom = roomId === 'new';
     const parsedSearch = qs.parse(search) as Types.IRoomOptions;
+    const tournamentId = parsedSearch.tournamentId
 
     let options;
     if (isNewRoom) {
@@ -114,8 +115,7 @@ export default class Game extends Component<IProps, IState> {
         playerName: localStorage.getItem('playerName'),
       };
     }
-
-    const tournamentId = parsedSearch.tournamentId
+    options.tournamentId = tournamentId
 
     // Connect
     try {
