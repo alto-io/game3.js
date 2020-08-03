@@ -48,11 +48,15 @@ class Tournament extends Component<IProps, IState> {
   }
 
   componentDidMount() {
-    this.getBlockchainInfo()
+    this.getBlockchainInfo(this.props)
   }
 
-  getBlockchainInfo = async () => {
-    const { tournamentId, contract, userAddress } = this.props
+  componentWillReceiveProps(newProps) {
+    this.getBlockchainInfo(newProps)
+  }
+
+  getBlockchainInfo = async (props) => {
+    const { tournamentId, contract, userAddress } = props
 
     const raw = await contract.methods.getTournament(tournamentId).call()
     const tournament = {
@@ -68,7 +72,10 @@ class Tournament extends Component<IProps, IState> {
     }
     tournament.timeIsUp = isPast(new Date(tournament.endTime))
 
-    const ownTournament = tournament.organizer.toLowerCase() === userAddress.toLowerCase()
+    let ownTournament = false
+    if (userAddress) {
+      ownTournament = tournament.organizer.toLowerCase() === userAddress.toLowerCase()
+    }
 
     const resultsCount = await contract.methods.getResultsCount(tournament.id).call()
     const results = []
