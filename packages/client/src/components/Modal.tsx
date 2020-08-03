@@ -157,7 +157,7 @@ class Modal extends React.Component<IModalProps, IModalState> {
         body.style.position = 'fixed'
       }
     }
-    this.props.toggleModal()
+    this.props.toggleModal(this.props.show)
   }
 
   public render() {

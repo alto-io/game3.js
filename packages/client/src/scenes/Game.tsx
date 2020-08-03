@@ -11,6 +11,8 @@ import GameManager from '../managers/GameManager';
 
 import { localSaveReplay, clientSaveTournamentReplay, putTournamentResult } from "../helpers/database";
 
+import GameResult from '../components/GameResult'
+
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -27,6 +29,7 @@ interface IState {
   tournamentId: string;
   playersCount: number;
   maxPlayersCount: number;
+  showResult: boolean;
 }
 
 export default class Game extends Component<IProps, IState> {
@@ -36,6 +39,7 @@ export default class Game extends Component<IProps, IState> {
     tournamentId: 'demo',
     playersCount: 0,
     maxPlayersCount: 0,
+    showResult: false
   };
 
   private gameCanvas: RefObject<HTMLDivElement>;
@@ -264,7 +268,7 @@ export default class Game extends Component<IProps, IState> {
               recordFileHash: this.recordFileHash,
               tournamentId 
             }
-            navigate(`/tournaments${qs.stringify(options, true)}`);
+            //navigate(`/tournaments${qs.stringify(options, true)}`);
           }
         }
         else 
@@ -278,6 +282,9 @@ export default class Game extends Component<IProps, IState> {
         this.gameManager.hudLogAdd(`Game ends...`);
         this.gameOver = true;
         this.stopRecording();
+        this.setState({
+          showResult: true
+        })
         break;
       case 'joined':
         this.gameManager.hudLogAdd(`"${message.params.name}" joins.`);
@@ -489,9 +496,30 @@ export default class Game extends Component<IProps, IState> {
     });
   }
 
+  onResultToggle = (show) => {
+    const newShow = !show
+    this.setState({
+      showResult: newShow
+    })
+    if (!newShow && this.gameOver) {
+      const { tournamentId } = this.state
+      const playingTournament = !!tournamentId
+      if (!playingTournament) {
+        navigate('/');
+      } else {
+        const options = {
+          recordFileHash: this.recordFileHash,
+          tournamentId 
+        }
+        navigate(`/tournaments${qs.stringify(options, true)}`);
+      }
+    }
+  }
 
   // RENDER
   render() {
+    const { showResult } = this.state
+
     return (
       <View
         style={{
@@ -503,6 +531,7 @@ export default class Game extends Component<IProps, IState> {
           <title>{`Death Match (${this.state.playersCount})`}</title>
         </Helmet>
         <div ref={this.gameCanvas} />
+        <GameResult show={showResult} onToggle={this.onResultToggle}/>
         {isMobile && this.renderJoySticks()}
 
         { 
