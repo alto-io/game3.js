@@ -234,11 +234,14 @@ export class OrbitDBManager implements DBManager {
       id: sessionId,
       sessionData,
     }
-    console.log('Game session info:')
     console.log(entry)
     const result = await this.gameSessions.put(entry)
-    console.log('result:')
-    console.log(result)
     return { result }
+  }
+
+  async serverGetGameSession(sessionId, playerId) {
+    const data = await this.gameSessions.get(sessionId)
+    const playerData = data.sessionData.playerData[playerId];
+    return playerData
   }
 }

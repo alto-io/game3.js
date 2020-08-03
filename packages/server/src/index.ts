@@ -88,6 +88,14 @@ app.post('/tournamentResult', async (req: any, res: any) => {
   res.json(result);
 });
 
+app.get('/gameSession', async (req: any, res: any) => {
+  const sessionId = req.query.sessionid
+  const walletId = req.query.walletId
+  const result = await GlobalState.ServerState.dbManager
+    .serverGetGameSession(sessionId, walletId);
+  res.json(result);
+});
+
 // Serve the frontend client
 app.get('*', (req: any, res: any) => {
   res.sendFile(join(__dirname, 'public', 'index.html'));
