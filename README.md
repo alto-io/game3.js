@@ -40,7 +40,7 @@ Game3.js currently does not support more than one game yet, and requires you to 
   * Play around with the TOSIOS Example to understand how Colyseus and Pixi.js work. Most of the game-related code is in `packages/client` and `packages/common`. The vanilla [TOSIOS](https://github.com/halftheopposite/tosios) repo is also a great reference.
   * Future versions of Game3.js will integrate the Web 3 Login for player identity and the IPFS replays for smart contract leaderboards. For games to be more easily integrated, the following integration points should be done:
 	  1. Once logged in, the game should use the saved player name
-	  2. Once a game finishes, the game should successfully save a reply
+	  2. Once a game finishes, the game should successfully save a replay
 
 
 ## Special thanks
