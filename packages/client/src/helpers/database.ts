@@ -93,10 +93,10 @@ export async function putTournamentResult(tournamentId, resultId, fileHash): Pro
   return result;
 }
 
-export async function getGameSession(gameSessionId, playerId): Promise<any> {
+export async function getGameSession(gameSessionId, playerAddress): Promise<any> {
   const params = {
     sessionId: gameSessionId,
-    playerId,
+    playerAddress,
   }
   const response = await api.get('/gameSession', { params });
   console.log(response)

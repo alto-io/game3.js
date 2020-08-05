@@ -33,6 +33,7 @@ export class Player extends Circle {
 
   // This property is needed to limit shooting rate
   public lastShootAt: number;
+  public address: string;
 
   // Init
   constructor(
@@ -43,6 +44,7 @@ export class Player extends Circle {
     lives: number,
     maxLives: number,
     name: string,
+    address: string,
     team?: Types.Teams,
   ) {
     super(x, y, radius);
@@ -50,6 +52,7 @@ export class Player extends Circle {
     this.lives = lives;
     this.maxLives = maxLives;
     this.name = validateName(name);
+    this.address = address;
     this.team = team;
     this.color = team ? getTeamColor(team) : '#FFFFFF';
     this.kills = 0;

@@ -22,6 +22,7 @@ declare global {
 
 interface IProps extends RouteComponentProps {
   roomId?: string;
+  address?: string;
 }
 
 interface IState {
@@ -32,6 +33,7 @@ interface IState {
   showResult: boolean;
   gameSessionId: string;
   recordFileHash: string;
+  gameOver: boolean;
 }
 
 export default class Game extends Component<IProps, IState> {
@@ -44,6 +46,7 @@ export default class Game extends Component<IProps, IState> {
     showResult: false,
     gameSessionId: null,
     recordFileHash: null,
+    gameOver: false,
   };
 
   private gameCanvas: RefObject<HTMLDivElement>;
@@ -70,8 +73,6 @@ export default class Game extends Component<IProps, IState> {
       window.innerHeight,
       this.handleActionSend,
     );
-
-    this.gameOver = false;
   }
 
   
@@ -122,6 +123,7 @@ export default class Game extends Component<IProps, IState> {
       };
     }
     options.tournamentId = tournamentId
+    options.playerAddress = this.props.address
 
     // Connect
     try {
@@ -261,7 +263,7 @@ export default class Game extends Component<IProps, IState> {
         const { tournamentId } = this.state
         const playingTournament = !!tournamentId
         this.setState({ gameSessionId: message.params.sessionId })
-        if (this.gameOver)
+        if (this.state.gameOver)
         {
           toast.info("Game finished!");
           if (!playingTournament) {
@@ -277,7 +279,7 @@ export default class Game extends Component<IProps, IState> {
         break;
       case 'stop':
         this.gameManager.hudLogAdd(`Game ends...`);
-        this.gameOver = true;
+        this.setState({ gameOver: true });
         this.stopRecording();
         this.setState({
           showResult: true
@@ -501,7 +503,7 @@ export default class Game extends Component<IProps, IState> {
     this.setState({
       showResult: newShow
     })
-    if (!newShow && this.gameOver) {
+    if (!newShow && this.state.gameOver) {
       const { tournamentId } = this.state
       const playingTournament = !!tournamentId
       if (!playingTournament) {
@@ -514,8 +516,9 @@ export default class Game extends Component<IProps, IState> {
 
   // RENDER
   render() {
-    const { showResult, playerId, 
-      gameSessionId, recordFileHash, tournamentId } = this.state
+    const { showResult, gameSessionId, recordFileHash, 
+      tournamentId, gameOver } = this.state
+    const { address } = this.props
 
     return (
       <View
@@ -528,14 +531,14 @@ export default class Game extends Component<IProps, IState> {
           <title>{`Death Match (${this.state.playersCount})`}</title>
         </Helmet>
         <div ref={this.gameCanvas} />
-        <GameResult
+        { gameOver && (<GameResult
           show={showResult}
           onToggle={this.onResultToggle}
-          playerId={playerId}
+          playerAddress={address}
           gameSessionId={gameSessionId}
           recordFileHash={recordFileHash}
           tournamentId={tournamentId}
-        />
+        />)}
         {isMobile && this.renderJoySticks()}
 
         { 

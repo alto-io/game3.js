@@ -11,6 +11,7 @@ export type WallCollisionType = 'full' | 'none';
  */
 export interface IPlayerOptions {
   playerName?: string;
+  playerAddress?: string;
 }
 
 /**

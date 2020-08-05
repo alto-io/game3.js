@@ -60,7 +60,7 @@ export class ShooterGameRoom extends Room<GameState> {
   }
 
   onJoin(client: Client, options: Types.IPlayerOptions) {
-    this.state.playerAdd(client.sessionId, options.playerName);
+    this.state.playerAdd(client.sessionId, options.playerName, options.playerAddress);
     console.log(`Player joined: id=${client.sessionId} name=${options.playerName}`);
   }
 

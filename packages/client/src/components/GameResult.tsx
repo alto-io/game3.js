@@ -8,7 +8,7 @@ import { getGameSession } from "../helpers/database"
 interface IProps extends RouteComponentProps {
   show: boolean;
   onToggle?: any;
-  playerId: string;
+  playerAddress: string;
   gameSessionId: string;
   recordFileHash: string;
   tournamentId: string;
@@ -17,27 +17,27 @@ interface IProps extends RouteComponentProps {
 export default class GameResult extends React.Component<IProps> {
 
   componentDidMount = () => {
-    const { gameSessionId, playerId } = this.props
-    this.updateScore(gameSessionId, playerId)
+    const { gameSessionId, playerAddress } = this.props
+    this.updateScore(gameSessionId, playerAddress)
   }
 
   componentWillReceiveProps = (newProps) => {
-    const { gameSessionId, playerId } = this.props
+    const { gameSessionId, playerAddress } = this.props
     const newGameSessionId = newProps.gameSessionId
-    const newPlayerId = newProps.newPlayerId
+    const newPlayerAddress = newProps.playerAddress
 
     if (gameSessionId !== newGameSessionId ||
-      playerId !== newPlayerId) {
-      this.updateScore(newGameSessionId, newPlayerId)
+      playerAddress !== newPlayerAddress) {
+      this.updateScore(newGameSessionId, newPlayerAddress)
     }
   }
 
-  updateScore = async (gameSessionId, playerId) => {
-    if (!gameSessionId || !playerId) {
-      console.log(`gameSessionId: ${gameSessionId}, playerId: ${playerId}`)
+  updateScore = async (gameSessionId, playerAddress) => {
+    if (!gameSessionId || !playerAddress) {
+      console.log(`gameSessionId: ${gameSessionId}, playerAddress: ${playerAddress}`)
       return
     }
-    const sessionData = await getGameSession(gameSessionId, playerId)
+    const sessionData = await getGameSession(gameSessionId, playerAddress)
     console.log(sessionData)
   }
 

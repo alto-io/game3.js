@@ -179,7 +179,7 @@ export class GameState extends Schema {
     this.onMessage(new Message('stop', { sessionId: this.sessionId }));
   }
 
-  saveGameSession = () => {
+  saveGameSession = async () => {
     const id = this.sessionId
     const data = {
       sessionId: id,
@@ -188,13 +188,13 @@ export class GameState extends Schema {
     }
     for (const playerId in this.players) {
       const player: Player = this.players[playerId]
-      data.playerData[playerId] = player.kills
+      data.playerData[player.address] = player.kills
     }
-    ServerState.dbManager.serverPutGameSession(id, data)
+    await ServerState.dbManager.serverPutGameSession(id, data)
   }
 
   // PLAYERS: single
-  playerAdd(id: string, name: string) {
+  playerAdd(id: string, name: string, address: string) {
     const spawner = this.getSpawnerRandomly();
     const player = new Player(
       id,
@@ -204,6 +204,7 @@ export class GameState extends Schema {
       0,
       Constants.PLAYER_MAX_LIVES,
       name || id,
+      address
     );
 
     this.players[id] = player;
