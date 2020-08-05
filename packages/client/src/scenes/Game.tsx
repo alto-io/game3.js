@@ -30,6 +30,8 @@ interface IState {
   playersCount: number;
   maxPlayersCount: number;
   showResult: boolean;
+  gameSessionId: string;
+  recordFileHash: string;
 }
 
 export default class Game extends Component<IProps, IState> {
@@ -39,7 +41,9 @@ export default class Game extends Component<IProps, IState> {
     tournamentId: 'demo',
     playersCount: 0,
     maxPlayersCount: 0,
-    showResult: false
+    showResult: false,
+    gameSessionId: null,
+    recordFileHash: null,
   };
 
   private gameCanvas: RefObject<HTMLDivElement>;
@@ -55,7 +59,6 @@ export default class Game extends Component<IProps, IState> {
   private stream: any;
   private mediaSource: any;
   private gameOver: boolean;
-  private recordFileHash: any;
 
   // BASE
   constructor(props: IProps) {
@@ -69,7 +72,6 @@ export default class Game extends Component<IProps, IState> {
     );
 
     this.gameOver = false;
-    this.recordFileHash = null;
   }
 
   
@@ -258,17 +260,12 @@ export default class Game extends Component<IProps, IState> {
       case 'start': // TODO: add better state management for recording and leaving rooms
         const { tournamentId } = this.state
         const playingTournament = !!tournamentId
+        this.setState({ gameSessionId: message.params.sessionId })
         if (this.gameOver)
         {
           toast.info("Game finished!");
           if (!playingTournament) {
             navigate('/');
-          } else {
-            const options = {
-              recordFileHash: this.recordFileHash,
-              tournamentId 
-            }
-            //navigate(`/tournaments${qs.stringify(options, true)}`);
           }
         }
         else 
@@ -373,7 +370,10 @@ export default class Game extends Component<IProps, IState> {
       if (tournamentId === 'demo') {
         localSaveReplay(playerId, tournamentId, time, file);
       } else {
-        this.recordFileHash = await clientSaveTournamentReplay(file);
+        const recordFileHash = await clientSaveTournamentReplay(file);
+        this.setState({
+          recordFileHash
+        })
         //const resultId = 1
         //const result = await putTournamentResult(tournamentId, resultId, fileHash);
         //console.log(result)
@@ -507,18 +507,15 @@ export default class Game extends Component<IProps, IState> {
       if (!playingTournament) {
         navigate('/');
       } else {
-        const options = {
-          recordFileHash: this.recordFileHash,
-          tournamentId 
-        }
-        navigate(`/tournaments${qs.stringify(options, true)}`);
+        navigate(`/tournaments`)
       }
     }
   }
 
   // RENDER
   render() {
-    const { showResult } = this.state
+    const { showResult, playerId, 
+      gameSessionId, recordFileHash, tournamentId } = this.state
 
     return (
       <View
@@ -531,7 +528,14 @@ export default class Game extends Component<IProps, IState> {
           <title>{`Death Match (${this.state.playersCount})`}</title>
         </Helmet>
         <div ref={this.gameCanvas} />
-        <GameResult show={showResult} onToggle={this.onResultToggle}/>
+        <GameResult
+          show={showResult}
+          onToggle={this.onResultToggle}
+          playerId={playerId}
+          gameSessionId={gameSessionId}
+          recordFileHash={recordFileHash}
+          tournamentId={tournamentId}
+        />
         {isMobile && this.renderJoySticks()}
 
         { 

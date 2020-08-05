@@ -93,6 +93,17 @@ export async function putTournamentResult(tournamentId, resultId, fileHash): Pro
   return result;
 }
 
+export async function getGameSession(gameSessionId, playerId): Promise<any> {
+  const params = {
+    sessionId: gameSessionId,
+    playerId,
+  }
+  const response = await api.get('/gameSession', { params });
+  console.log(response)
+  const { result } = response.data
+  return result;
+}
+
 // Local Database Calls
 export async function localSaveReplay(playerId: string, tournamentId: string, time: number, file: File) {
   const result = await dbManager.localSaveReplay(playerId, tournamentId, time, file);

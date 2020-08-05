@@ -240,6 +240,12 @@ export class OrbitDBManager implements DBManager {
   }
 
   async serverGetGameSession(sessionId, playerId) {
+    console.log('serverGetGameSession')
+    console.log(sessionId)
+    console.log(playerId)
+    if (!sessionId || playerId) {
+      return null
+    }
     const data = await this.gameSessions.get(sessionId)
     const playerData = data.sessionData.playerData[playerId];
     return playerData

@@ -165,7 +165,7 @@ export class GameState extends Schema {
     this.setPlayersActive(true);
     this.propsAdd(Constants.FLASKS_COUNT);
     this.monstersAdd(Constants.MONSTERS_COUNT);
-    this.onMessage(new Message('start'));
+    this.onMessage(new Message('start', { sessionId: this.sessionId }));
   }
 
   private handleGameEnd = async (message?: Message) => {
@@ -175,8 +175,8 @@ export class GameState extends Schema {
 
     this.propsClear();
     this.monstersClear();
-    const gameSessionId = await this.saveGameSession();
-    this.onMessage(new Message('stop', { gameSessionId }));
+    await this.saveGameSession();
+    this.onMessage(new Message('stop', { sessionId: this.sessionId }));
   }
 
   saveGameSession = () => {
@@ -191,7 +191,6 @@ export class GameState extends Schema {
       data.playerData[playerId] = player.kills
     }
     ServerState.dbManager.serverPutGameSession(id, data)
-    return id
   }
 
   // PLAYERS: single

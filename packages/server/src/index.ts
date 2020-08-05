@@ -90,9 +90,9 @@ app.post('/tournamentResult', async (req: any, res: any) => {
 
 app.get('/gameSession', async (req: any, res: any) => {
   const sessionId = req.query.sessionid
-  const walletId = req.query.walletId
+  const playerId = req.query.playerId
   const result = await GlobalState.ServerState.dbManager
-    .serverGetGameSession(sessionId, walletId);
+    .serverGetGameSession(sessionId, playerId);
   res.json(result);
 });
 
