@@ -42,6 +42,16 @@ Game3.js currently does not support more than one game yet, and requires you to 
 	  1. Once logged in, the game should use the saved player name
 	  2. Once a game finishes, the game should successfully save a replay
 
+## Using the Saved Player Name
+* In [Home.tsx](packages/client/src/scenes/Home.tsx#L195), the player name is passed to the game via the [playerProfile prop](packages/client/src/scenes/Home.tsx#L46). The playerName is sent as a [query string to the /new endpoint](packages/client/src/scenes/Home.tsx#L205).
+* For games that don't use Colyseus client-side, the same method can be used: a url endpoint leads to a new game, and query strings are passed to initialize variables.
+
+## Saving A Replay
+* Game3.js uses the [MediaRecorder Web API](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder) to save a replay of a game session on client-side IPFS.
+* A [canvas object](packages/client/src/scenes/Game.tsx#L81-L84) which shows the game client is saved by the API
+* Once a game starts [startRecording()](packages/client/src/scenes/Game.tsx#L304-L344) is called in Game.tsx
+* Once the game is finished [stopRecording()](packages/client/src/scenes/Game.tsx#L346-L374) is called, which saves the stream onto a webm file stored in IPFS (see localSaveReplay()).
+* For games that don't use Colyseus, the MediaRecorder API can be used directly to store a stream of the gameplay which can be the parameter for localSaveReplay().
 
 ## Special thanks
 
