@@ -98,10 +98,8 @@ export async function getGameSession(gameSessionId, playerAddress): Promise<any>
     sessionId: gameSessionId,
     playerAddress,
   }
-  const response = await api.get('/gameSession', { params });
-  console.log(response)
-  const { result } = response.data
-  return result;
+  const response = await api.get('/gameSession', { params })
+  return response.data
 }
 
 // Local Database Calls

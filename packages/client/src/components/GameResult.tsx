@@ -4,6 +4,7 @@ import { RouteComponentProps } from '@reach/router'
 
 import Modal from './Modal'
 import { getGameSession } from "../helpers/database"
+import { View, Button } from '../components'
 
 interface IProps extends RouteComponentProps {
   show: boolean;
@@ -14,7 +15,18 @@ interface IProps extends RouteComponentProps {
   tournamentId: string;
 }
 
-export default class GameResult extends React.Component<IProps> {
+interface IState {
+  sessionData: any;
+}
+
+export default class GameResult extends React.Component<IProps, IState> {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      sessionData: null
+    }
+  }
 
   componentDidMount = () => {
     const { gameSessionId, playerAddress } = this.props
@@ -34,18 +46,26 @@ export default class GameResult extends React.Component<IProps> {
 
   updateScore = async (gameSessionId, playerAddress) => {
     if (!gameSessionId || !playerAddress) {
-      console.log(`gameSessionId: ${gameSessionId}, playerAddress: ${playerAddress}`)
       return
     }
     const sessionData = await getGameSession(gameSessionId, playerAddress)
-    console.log(sessionData)
+    this.setState({
+      sessionData
+    })
   }
 
   render () {
     const { show, onToggle } = this.props
+    const { sessionData } = this.state
+
+    const score = (sessionData && sessionData.timeLeft) || ''
+
     return (
       <Modal show={show} toggleModal={onToggle}>
-        <div>Game result</div>
+        <View style={{ margin: '20px' }}>Game result: {score}</View>
+        <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
+          <Button>Submit score</Button>
+        </View>
       </Modal>
     )
   }
