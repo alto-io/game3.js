@@ -52,7 +52,12 @@ class Tournament extends Component<IProps, IState> {
   }
 
   componentWillReceiveProps(newProps) {
-    this.getBlockchainInfo(newProps)
+    const { tournamentId, userAddress } = this.props
+    const { tournamentId: newId, userAddress: newAddress } = newProps
+
+    if (tournamentId !== newId || userAddress !== newAddress) {
+      this.getBlockchainInfo(newProps)
+    }
   }
 
   getBlockchainInfo = async (props) => {
