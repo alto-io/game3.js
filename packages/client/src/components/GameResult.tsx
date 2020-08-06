@@ -3,8 +3,10 @@ import * as React from 'react'
 import { RouteComponentProps } from '@reach/router'
 
 import Modal from './Modal'
-import { getGameSession } from "../helpers/database"
 import { View, Button } from '../components'
+
+import { getGameSession } from "../helpers/database"
+import { getTournamentContract } from '../helpers/web3'
 
 interface IProps extends RouteComponentProps {
   show: boolean;
@@ -13,10 +15,12 @@ interface IProps extends RouteComponentProps {
   gameSessionId: string;
   recordFileHash: string;
   tournamentId: string;
+  web3: any;
 }
 
 interface IState {
   sessionData: any;
+  contract: any;
 }
 
 export default class GameResult extends React.Component<IProps, IState> {
@@ -24,24 +28,37 @@ export default class GameResult extends React.Component<IProps, IState> {
     super(props)
 
     this.state = {
-      sessionData: null
+      sessionData: null,
+      contract: null,
     }
   }
 
   componentDidMount = () => {
-    const { gameSessionId, playerAddress } = this.props
+    const { gameSessionId, playerAddress, web3 } = this.props
     this.updateScore(gameSessionId, playerAddress)
+    this.initContract(web3)
   }
 
   componentWillReceiveProps = (newProps) => {
-    const { gameSessionId, playerAddress } = this.props
-    const newGameSessionId = newProps.gameSessionId
-    const newPlayerAddress = newProps.playerAddress
+    const { gameSessionId, playerAddress, web3 } = this.props
+    const { gameSessionId: newGameSessionId, 
+      playerAddress: newPlayerAddress, web3: newWeb3 } = newProps
 
     if (gameSessionId !== newGameSessionId ||
       playerAddress !== newPlayerAddress) {
       this.updateScore(newGameSessionId, newPlayerAddress)
     }
+    if (newWeb3 !== web3) {
+      this.initContract(newWeb3)
+    }
+  }
+
+  initContract = async (web3) => {
+    if (!web3) {
+      return
+    }
+    const contract = await getTournamentContract(web3)
+    this.setState({ contract })
   }
 
   updateScore = async (gameSessionId, playerAddress) => {
@@ -54,6 +71,18 @@ export default class GameResult extends React.Component<IProps, IState> {
     })
   }
 
+  submitResult = async () => {
+    const { tournamentId, recordFileHash, playerAddress,
+      onToggle } = this.props
+    const { contract } = this.state
+
+    contract.methods.submitResult(tournamentId, recordFileHash)
+      .send({
+        from: playerAddress
+      })
+    onToggle(true)
+  }
+
   render () {
     const { show, onToggle } = this.props
     const { sessionData } = this.state
@@ -64,7 +93,7 @@ export default class GameResult extends React.Component<IProps, IState> {
       <Modal show={show} toggleModal={onToggle}>
         <View style={{ margin: '20px' }}>Game result: {score}</View>
         <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
-          <Button>Submit score</Button>
+          <Button onClick={this.submitResult}>Submit score</Button>
         </View>
       </Modal>
     )

@@ -23,6 +23,7 @@ declare global {
 interface IProps extends RouteComponentProps {
   roomId?: string;
   address?: string;
+  web3?: any;
 }
 
 interface IState {
@@ -253,7 +254,7 @@ export default class Game extends Component<IProps, IState> {
     this.gameManager.bulletRemove(bulletId);
   }
 
-  handleMessage = (type: any, message: any) => {
+  handleMessage = async (type: any, message: any) => {
     switch (message.type) {
       case 'waiting':
         this.gameManager.hudLogAdd(`Waiting for other players...`);
@@ -280,7 +281,7 @@ export default class Game extends Component<IProps, IState> {
       case 'stop':
         this.gameManager.hudLogAdd(`Game ends...`);
         this.setState({ gameOver: true });
-        this.stopRecording();
+        await this.stopRecording();
         this.setState({
           showResult: true
         })
@@ -518,7 +519,7 @@ export default class Game extends Component<IProps, IState> {
   render() {
     const { showResult, gameSessionId, recordFileHash, 
       tournamentId, gameOver } = this.state
-    const { address } = this.props
+    const { address, web3 } = this.props
 
     return (
       <View
@@ -538,6 +539,7 @@ export default class Game extends Component<IProps, IState> {
           gameSessionId={gameSessionId}
           recordFileHash={recordFileHash}
           tournamentId={tournamentId}
+          web3={web3}
         />)}
         {isMobile && this.renderJoySticks()}
 
