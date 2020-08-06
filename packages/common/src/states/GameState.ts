@@ -188,7 +188,11 @@ export class GameState extends Schema {
     }
     for (const playerId in this.players) {
       const player: Player = this.players[playerId]
-      data.playerData[player.address] = player.kills
+      const scoreData = {
+        kills: player.kills,
+        timeLeft: this.game.gameEndsAt - Date.now()
+      }
+      data.playerData[player.address] = scoreData
     }
     await ServerState.dbManager.serverPutGameSession(id, data)
   }
@@ -326,9 +330,11 @@ export class GameState extends Schema {
   private playerUpdateKills(playerId: string) {
     const player: Player = this.players[playerId];
     if (!player) {
+      console.log('-')
       return;
     }
 
+    console.log('kill')
     player.setKills(player.kills + 1);
   }
 
