@@ -39,7 +39,6 @@ const INITIAL_STATE: IState = {
 
 export default class Tournaments extends Component<IProps, IState> {
 
-  public pendingResult = null
   public video: any = null
 
   constructor(props: any) {
@@ -52,24 +51,6 @@ export default class Tournaments extends Component<IProps, IState> {
 
   componentDidMount() {
     this.initContract(this.props.web3)
-
-    const {
-      location: {
-        search = '',
-      } = {},
-    } = this.props
-    const options = qs.parse(search)
-
-    const { tournamentId, recordFileHash } = options as any
-    if (tournamentId && recordFileHash) {
-      console.log(`tournamentId: ${tournamentId}, recordFileHash: ${recordFileHash}`)
-      this.pendingResult = {
-        tournamentId,
-        recordFileHash,
-      }
-    } else {
-      this.pendingResult = null
-    }
   }
 
   componentWillReceiveProps(newProps) {
@@ -87,7 +68,6 @@ export default class Tournaments extends Component<IProps, IState> {
     const contract = await getTournamentContract(web3)
     this.setState({ contract }, () => {
       this.updateTournaments()
-      this.submitPendingResult()
     })
   }
 
@@ -156,34 +136,6 @@ export default class Tournaments extends Component<IProps, IState> {
     };
 
     navigate(`/new${qs.stringify(options, true)}`)
-  }
-
-  submitPendingResult = async () => {
-    const { address } = this.props
-    const { contract } = this.state
-
-    if (!contract) {
-      console.log('Missing contract')
-      return
-    }
-
-    if (!this.pendingResult) {
-      console.log('No pending result')
-      return
-    }
-
-    const { tournamentId, recordFileHash } = this.pendingResult
-
-    console.log('Submitting result:')
-    console.log(`tournamentId: ${tournamentId}, recordFileHash: ${recordFileHash}`)
-
-    await contract.methods.submitResult(tournamentId, recordFileHash)
-      .send({
-        from: address
-      })
-    console.log('Result submitted')
-    this.pendingResult = null
-    navigate('/tournaments')
   }
 
   showReplay = async (fileHash) => {
