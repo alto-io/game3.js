@@ -81,13 +81,11 @@ export async function clientSaveTournamentReplay(file: File) {
   return result
 }
 
-export async function putTournamentResult(tournamentId, resultId, fileHash): Promise<any> {
+export async function putGameReplay(sessionId, playerAddress, fileHash): Promise<any> {
   const body = {
-    tournamentId,
-    resultId,
-    fileHash,
+    sessionId, playerAddress, fileHash
   }
-  const response = await api.post('/tournamentResult', body);
+  const response = await api.post('/gameReplay', body);
   console.log(response)
   const { result } = response.data;
   return result;

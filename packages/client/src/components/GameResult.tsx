@@ -5,7 +5,7 @@ import { RouteComponentProps } from '@reach/router'
 import Modal from './Modal'
 import { View, Button } from '../components'
 
-import { getGameSession } from "../helpers/database"
+import { getGameSession, putGameReplay } from "../helpers/database"
 import { getTournamentContract } from '../helpers/web3'
 
 interface IProps extends RouteComponentProps {
@@ -73,8 +73,11 @@ export default class GameResult extends React.Component<IProps, IState> {
 
   submitResult = async () => {
     const { tournamentId, recordFileHash, playerAddress,
-      onToggle } = this.props
+      onToggle, gameSessionId } = this.props
     const { contract } = this.state
+
+    const result = await putGameReplay(gameSessionId, playerAddress, recordFileHash)
+    console.log(result)
 
     contract.methods.submitResult(tournamentId, recordFileHash)
       .send({

@@ -215,20 +215,26 @@ export class OrbitDBManager implements DBManager {
       }
   }
 
-  async serverPutResult(requestBody) {
-    console.log('serverPutResult')
-    const { tournamentId, resultId, fileHash } = requestBody
-    const id = `${tournamentId}-${resultId}`
-    const entry = {
-      id,
-      tournamentId,
-      fileHash,
+  async serverPutGameReplay(requestBody) {
+    console.log('serverPutGameReplay')
+    const { sessionId, playerAddress, fileHash } = requestBody
+
+    const entries = await this.gameSessions.get(sessionId)
+    if (entries.length === 0) {
+      return
     }
+    const entry = entries[0]
+    const playerData = entries[0].sessionData.playerData[playerAddress]
+    if (!playerData) {
+      return
+    }
+    playerData.replayHash = fileHash
     console.log(entry)
-    const result = await this.tournamentResults.put(entry);
+    const result = await this.gameSessions.put(entry)
     return { result }
   }
 
+  // called from colyseus game state
   async serverPutGameSession(sessionId, sessionData) {
     const entry = {
       id: sessionId,

@@ -181,6 +181,6 @@ export class MinimongoDBManager implements DBManager {
     return result;
   }
 
-  serverPutResult(reqBody: any) {}
+  serverPutGameReplay(reqBody: any) {}
 
 }

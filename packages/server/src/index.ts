@@ -83,8 +83,8 @@ app.get('/tournament', async (req: any, res: any) => {
   res.json(result);
 });
 
-app.post('/tournamentResult', async (req: any, res: any) => {
-  const result = await GlobalState.ServerState.dbManager.serverPutResult(req.body);
+app.post('/gameReplay', async (req: any, res: any) => {
+  const result = await GlobalState.ServerState.dbManager.serverPutGameReplay(req.body);
   res.json(result);
 });
 

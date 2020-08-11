@@ -13,5 +13,5 @@ export interface DBManager {
     getLeaderboard();
     putTournamentData(reqBody: any);
     getTournamentData(tournamentId: string);
-    serverPutResult(reqBody: any);
+    serverPutGameReplay(reqBody: any);
 }

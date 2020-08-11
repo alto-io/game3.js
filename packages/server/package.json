@@ -29,7 +29,7 @@
   "scripts": {
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "lint:fix": "tslint --fix -c tslint.json 'src/**/*.ts'",
-    "start": "nodemon --watch './src/**/*.ts' --exec ts-node ./src/index.ts",
+    "start": "nodemon --watch './src/**/*.ts' --watch '../common/build/**/*.js' --exec ts-node ./src/index.ts",
     "build": "tsc -p tsconfig.json",
     "serve": "node build/index.js"
   }
