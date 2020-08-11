@@ -61,6 +61,7 @@ import { getLocalDatabaseManager, getPlayerProfile } from "./helpers/database";
 
 import Home from './scenes/Home';
 import Game from './scenes/Game';
+import GameUnity from './scenes/GameUnity';
 import Recorder from './scenes/Recorder';
 import Tournaments from './scenes/Tournaments'
 import Replay from './scenes/Replay';
@@ -737,6 +738,9 @@ class App extends React.Component<any, any> {
                         playerProfile={playerProfile}
                         connected={connected}
                         path="/"
+                      />
+                      <GameUnity
+                        path="/wom"
                       />
                       <Game
                         path="/:roomId"

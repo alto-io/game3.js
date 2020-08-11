@@ -166,6 +166,10 @@ export default class Home extends Component<IProps, IState> {
     navigate(`/${roomId}`);
   }
 
+  handlePlayWomClick = (roomId: string) => {
+    navigate(`/wom`);
+  }
+
   handleReplayClick = async (hash: string) => {
 
     // start reading the file from DB
@@ -210,6 +214,8 @@ export default class Home extends Component<IProps, IState> {
       isNewRoom: false,
     });
   }
+
+
 
     // METHODS
     updateRooms = async () => {
@@ -468,6 +474,15 @@ export default class Home extends Component<IProps, IState> {
           flexDirection: 'column',
         }}
       >
+
+          <Button
+            title="Play WoM"
+            onClick={this.handlePlayWomClick}
+            text={'Play WoM'}
+          />
+
+          <Space size="xxs" />
+
         {!isNewRoom && (
           <Button
             title="Create new room"
