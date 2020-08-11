@@ -91,7 +91,7 @@ class Tournament extends Component<IProps, IState> {
         resultId: resultIdx,
         isWinner: rawResult['0'],
         playerAddress: rawResult['1'],
-        fileHash: rawResult['2'],
+        sessionId: rawResult['2'],
       })
     }
     tournament.results = results

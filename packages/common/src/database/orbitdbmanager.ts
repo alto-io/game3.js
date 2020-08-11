@@ -230,8 +230,8 @@ export class OrbitDBManager implements DBManager {
     }
     playerData.replayHash = fileHash
     console.log(entry)
-    const result = await this.gameSessions.put(entry)
-    return { result }
+    await this.gameSessions.put(entry)
+    return { result: sessionId }
   }
 
   // called from colyseus game state
@@ -241,22 +241,24 @@ export class OrbitDBManager implements DBManager {
       sessionData,
     }
     console.log(entry)
-    const result = await this.gameSessions.put(entry)
-    return { result }
+    await this.gameSessions.put(entry)
+    return { result: sessionId }
   }
 
   async serverGetGameSession(sessionId, playerAddress) {
     console.log('serverGetGameSession')
-    console.log(sessionId)
-    console.log(playerAddress)
+    console.log(`sessionId: ${sessionId}`)
+    console.log(`playerAddress: ${playerAddress}`)
     if (!sessionId || !playerAddress) {
       return null
     }
     const data = await this.gameSessions.get(sessionId)
     let playerData = null
     if (data.length > 0) {
-      playerData = data[0].sessionData.playerData[playerAddress]
+      playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
     }
+    console.log('playerData:')
+    console.log(playerData)
     return playerData
   }
 }
