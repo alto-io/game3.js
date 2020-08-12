@@ -3,8 +3,7 @@ import { Constants, Types, Database } from '@game3js/common';
 import React, { Component, Fragment } from 'react';
 import { Helmet } from 'react-helmet';
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
-import { GAME_DETAILS } from '../constants';
-import GameCard from '../components/GameCard';
+
 import { Flex, Text } from "rimble-ui";
 
 import { toast } from 'react-toastify'
@@ -19,6 +18,8 @@ import { Client } from 'colyseus.js';
 import { RoomAvailable } from 'colyseus.js/lib/Room';
 import qs from 'querystringify';
 import playerImage from '../images/textures/player/player-idle-2.png';
+
+import Body from '../components/Body'
 
 const SAccountName = styled.div`
   margin: 1em 0;
@@ -248,9 +249,8 @@ export default class Home extends Component<IProps, IState> {
     return (
       <>
 
-          {
-            this.renderGames()
-          }      
+          <Body/>
+    
         <View
           flex={true}
           center={true}
@@ -303,23 +303,6 @@ export default class Home extends Component<IProps, IState> {
 
         </View>
       </>);
-  }
-
-  renderGames = () => {
-    return (
-      <Box maxWidth={"1180px"} p={3} mx={"auto"}>
-      <Text my={4} />
-      <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-        {GAME_DETAILS.map(game => {
-          return (
-            <GameCard
-              game={game}
-            />
-          );
-        })}
-      </Flex>
-    </Box>    
-    )
   }
 
 
