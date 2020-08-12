@@ -27,7 +27,7 @@ const RainbowImage = ({ src }) => {
     <RainbowBorder borderRadius={3}>
       <ShadowImage
         height={"200px"}
-        width={"200px"}
+        width={"300px"}
         border={"none"}
         borderWidth={0}
         borderColor={"white"}
