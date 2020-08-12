@@ -1,6 +1,7 @@
 import React from "react";
 import Unity, { UnityContent } from "react-unity-webgl";
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
+import { Card } from "rimble-ui";
 
 export class GameUnity extends React.Component<any,any> {
 
@@ -124,6 +125,7 @@ export class GameUnity extends React.Component<any,any> {
   render() {
     return (
         <View>
+             <Card maxWidth={'1024px'} px={4} mx={'auto'}>  
               <Button
                 block
                 disabled={!this.state.gameReady}
@@ -148,6 +150,7 @@ export class GameUnity extends React.Component<any,any> {
                   )
                 }
             </div>
+            </Card>       
 
         </View>
     );

@@ -3,6 +3,9 @@ import { Constants, Types, Database } from '@game3js/common';
 import React, { Component, Fragment } from 'react';
 import { Helmet } from 'react-helmet';
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
+import { GAME_DETAILS } from '../constants';
+import GameCard from '../components/GameCard';
+import { Flex, Text } from "rimble-ui";
 
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -23,6 +26,7 @@ const SAccountName = styled.div`
   t-size: 20px;
   font-weight: 700;
 `;
+
 
 const MapsList: IListItem[] = Constants.MAPS_NAMES.map(value => ({
   value,
@@ -242,59 +246,82 @@ export default class Home extends Component<IProps, IState> {
   // RENDER
   render() {
     return (
-      <View
-        flex={true}
-        center={true}
-        style={{
-          padding: 32,
-          flexDirection: 'column',
-        }}
-      >
+      <>
 
-        <Helmet>
-          <title>{Constants.APP_TITLE}</title>
-        </Helmet>
-
-        <View flex={true} center={true} column={true}>
-        {
-          // <h1 style={{ color: 'white' }}>
-          //   {Constants.APP_TITLE}
-          // </h1>
-          // <Space size="xxs" />
-          // <GitHub />
-        }
-        </View>
-
-        {
-          this.renderReplayVideo()
-        }
-
-        {
-          this.props.connected &&
-          <>
-            {
-              this.renderName()
-            }
-          </>
-        }
-
-        <Space size="m" />
-
-        <Box
+          {
+            this.renderGames()
+          }      
+        <View
+          flex={true}
+          center={true}
           style={{
-            width: 500,
-            maxWidth: '100%',
+            padding: 32,
+            flexDirection: 'column',
           }}
         >
-        {this.renderLeaderboard()}
-        </Box>
 
-        <Space size="m" />
-        {this.renderRoom()}
+          <Helmet>
+            <title>{Constants.APP_TITLE}</title>
+          </Helmet>
 
-      </View>
-    );
+          <View flex={true} center={true} column={true}>
+          {
+            // <h1 style={{ color: 'white' }}>
+            //   {Constants.APP_TITLE}
+            // </h1>
+            // <Space size="xxs" />
+            // <GitHub />
+          }
+          </View>
+
+          {
+            this.renderReplayVideo()
+          }
+
+          {
+            this.props.connected &&
+            <>
+              {
+                this.renderName()
+              }
+            </>
+          }
+
+          <Space size="m" />
+
+          <Box
+            style={{
+              width: 500,
+              maxWidth: '100%',
+            }}
+          >
+          {this.renderLeaderboard()}
+          </Box>
+
+          <Space size="m" />
+          {this.renderRoom()}
+
+        </View>
+      </>);
   }
+
+  renderGames = () => {
+    return (
+      <Box maxWidth={"1180px"} p={3} mx={"auto"}>
+      <Text my={4} />
+      <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
+        {GAME_DETAILS.map(game => {
+          return (
+            <GameCard
+              game={game}
+            />
+          );
+        })}
+      </Flex>
+    </Box>    
+    )
+  }
+
 
   renderReplayVideo = () => {
     // const {

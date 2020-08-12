@@ -695,12 +695,11 @@ class App extends React.Component<any, any> {
             {({ drizzleState }) => {
                 return (          
                   <>
-                  {/*
                     <HeaderNav
                       drizzle={this.props.drizzle}
                       drizzleState={drizzleState}
                       preflightCheck={preflightCheck}/>
-                  */}
+                  {/*
                   
                     <View flex={true} center={true} column={true}>
                         <Header
@@ -714,7 +713,6 @@ class App extends React.Component<any, any> {
                           connectSession={this.onConnect}/>
                     </View>
 
-                  {
                     <View flex={true} center={true} column={true}>
 
                     <WalletBlock
@@ -726,10 +724,9 @@ class App extends React.Component<any, any> {
                       />
 
                     </View>
-                  }
-
 
                   <PrimaryCard />
+                  */}
 
 
                     <Router>
