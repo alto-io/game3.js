@@ -3,6 +3,10 @@ import { Card, Text, Button } from 'rimble-ui';
 
 import AccountOverview from "../rimble/components/AccountOverview";
 
+import walletIcon from "./../images/icon-wallet.svg";
+import balanceIcon from "./../images/icon-balance.svg";
+import shortenAddress from "../core/utilities/shortenAddress";
+
 
 class WalletBlock extends Component {
 

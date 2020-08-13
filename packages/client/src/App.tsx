@@ -30,6 +30,8 @@ import PrimaryCard from "./components/PrimaryCard";
 import WalletBlock from './components/WalletBlock';
 import HeaderNav from "./components/HeaderNav";
 
+import OutplayLoginHeader from './components/OutplayLoginHeader';
+
 import {
   formatTestTransaction,
   getChainData,
@@ -695,11 +697,23 @@ class App extends React.Component<any, any> {
             {({ drizzleState }) => {
                 return (          
                   <>
+
+
+                  <OutplayLoginHeader 
+                        drizzle={this.props.drizzle}
+                        drizzleState={drizzleState}
+                        account={account}
+                        accountBalance={accountBalance}
+                        accountBalanceLow={accountBalanceLow}
+                        accountValidated={accountValidated}
+                        connectAndValidateAccount={connectAndValidateAccount}                  
+                  />
+
+                  {/*
                     <HeaderNav
                       drizzle={this.props.drizzle}
                       drizzleState={drizzleState}
                       preflightCheck={preflightCheck}/>
-                  {/*
                   
                     <View flex={true} center={true} column={true}>
                         <Header
