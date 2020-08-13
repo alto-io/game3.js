@@ -85,6 +85,25 @@ const OutplayNavigation = ({ route, setRoute }) => {
         </Link>
       </StyledLinkContainer>
      
+      <StyledLinkContainer
+        mx={3}
+        routeName={"CreateTourneyView"}
+        route={route}
+        borderRadius={2}
+      >
+        <Link
+          href={"createtourney"}
+          p={3}
+          onClick={e => {
+            e.preventDefault();
+            setRoute("CreateTourneyView");
+          }}
+        >
+          Create Tourney
+        </Link>
+      </StyledLinkContainer>
+
+
     </Flex>
   );
 };

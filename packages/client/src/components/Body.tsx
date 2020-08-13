@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Play from "./Play";
 import TournamentView from "./TournamentView";
+import CreateTourneyView from "./CreateTourneyView";
 
 // import DashboardView from './DashboardView';
 // import WalletView from './WalletView';
@@ -43,6 +44,11 @@ function Body({ drizzle, drizzleState, store }) {
                 store={store}
                 drizzle={drizzle}
                 setRoute={setRoute} />,
+            CreateTourneyView: 
+            <CreateTourneyView 
+              store={store}
+              drizzle={drizzle}
+              setRoute={setRoute} />,
           }[route]
         }
       </Flex>
