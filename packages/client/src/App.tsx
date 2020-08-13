@@ -30,7 +30,7 @@ import PrimaryCard from "./components/PrimaryCard";
 import WalletBlock from './components/WalletBlock';
 import HeaderNav from "./components/HeaderNav";
 
-import OutplayLoginHeader from './components/OutplayLoginHeader';
+import RimbleContainer from './components/RimbleContainer';
 
 import {
   formatTestTransaction,
@@ -699,7 +699,7 @@ class App extends React.Component<any, any> {
                   <>
 
 
-                  <OutplayLoginHeader 
+                  <RimbleContainer
                         drizzle={this.props.drizzle}
                         drizzleState={drizzleState}
                         account={account}
