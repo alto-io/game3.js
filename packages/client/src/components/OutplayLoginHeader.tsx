@@ -11,6 +11,10 @@ import TransactionsCard from "./TransactionsCard";
 
 import AccountOverview from "../rimble/components/AccountOverview";
 
+import walletIcon from "./../images/icon-wallet.svg";
+import balanceIcon from "./../images/icon-balance.svg";
+import shortenAddress from "../core/utilities/shortenAddress";
+
 const StyledHeader = styled(Flex)`
 border-bottom: 1px solid #d6d6d6;
 box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.01);
@@ -81,11 +85,14 @@ class OutplayLoginHeader extends React.Component {
     const {
         contract,
         account,
+        accountBalance,
         transactions,
         initContract,
         initAccount,
+        drizzle
         } = this.props;        
     return (
+        <>
             <StyledHeader justifyContent={"space-between"} p={3} bg={"white"}>
             {/* <Image src={logo} /> */}
             <Text
@@ -97,7 +104,7 @@ class OutplayLoginHeader extends React.Component {
                      OP Arcade
                     </Text>
             
-            {account && balance ? (
+            {account && accountBalance ? (
               <Flex>
                 <Flex alignItems={"center"} mr={4}>
                   <Image src={walletIcon} mr={2} />
@@ -128,7 +135,7 @@ class OutplayLoginHeader extends React.Component {
                       Balance
                     </Text>
                     <Text fontSize={1} color={"primary"}>
-                      {drizzle.web3.utils.fromWei(balance, "ether")} ETH
+                      {accountBalance.toString()} ETH
                     </Text>
                   </Box>
                 </Flex>
@@ -139,6 +146,8 @@ class OutplayLoginHeader extends React.Component {
                 </>
             )}
           </StyledHeader>
+           <TransactionToastUtil transactions={transactions} />
+        </>
     );
   }
 }
@@ -159,7 +168,6 @@ export default OutplayLoginHeader;
             </Card>
 
             <TransactionsCard transactions={transactions} />
-            <TransactionToastUtil transactions={transactions} />
           </div>
 
           */
