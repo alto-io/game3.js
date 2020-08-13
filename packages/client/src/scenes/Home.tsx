@@ -50,6 +50,8 @@ const ALLOW_NAME_CHANGE = true;
 interface IProps extends RouteComponentProps {
   playerProfile: Database.PlayerProfile;
   connected: boolean;
+  drizzle: any;
+  drizzleState: any;
 }
 
 interface IState {
@@ -246,10 +248,11 @@ export default class Home extends Component<IProps, IState> {
   
   // RENDER
   render() {
+    const { drizzle, drizzleState } = this.props
     return (
       <>
 
-          <Body/>
+          <Body drizzle={drizzle} drizzleState={drizzleState} />
     
         <View
           flex={true}

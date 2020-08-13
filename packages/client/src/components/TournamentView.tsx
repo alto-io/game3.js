@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { drizzleConnect } from "@drizzle/react-plugin";
 import ConnectionBanner from "@rimble/connection-banner";
 import { Box, Flex, Text, Link } from "rimble-ui";
 
-import GameCard from '../components/GameCard';
+import TournamentCard from '../components/TournamentCard';
+import { getTournamentContract } from '../helpers/web3';
 
 const TEMP_TOURNEY = [{
   name: "Tourney 1",
@@ -25,24 +26,25 @@ class TournamentView extends React.Component<any, any> {
 
     this.state = {
       currentNetwork: null,
-      address: null
+      address: null,
+      tournamentsCount: 0
     }
   }
 
   componentDidMount() {
-    const { account, networkId, drizzleStatus, drizzle } = this.props
+    const { address, networkId, drizzleStatus, drizzle } = this.props
 
-    this.updateAddress(account)
+    this.updateAddress(address)
     this.updateDrizzle(networkId, drizzleStatus, drizzle)
   }
 
   componentWillReceiveProps(newProps) {
-    const { account, networkId, drizzleStatus, drizzle } = this.props
-    const { account: newAccount, networkId: newNetworkId, 
+    const { address, networkId, drizzleStatus, drizzle } = this.props
+    const { address: newAddress, networkId: newNetworkId, 
       drizzleStatus: newDrizzleStatus, drizzle: newDrizzle } = newProps
 
-    if (account !== newAccount) {
-      this.updateAddress(account)
+    if (address !== newAddress) {
+      this.updateAddress(newAddress)
     }
     if (networkId !== newNetworkId || drizzleStatus !== newDrizzleStatus
       || drizzle !== newDrizzle) {
@@ -63,11 +65,37 @@ class TournamentView extends React.Component<any, any> {
         this.setState({ currentNetwork: parseInt(networkId) } );
       });
     }
+    if (drizzleStatus.initialized && window.web3 && drizzle !== null) {
+      this.fetchTournaments();
+    }
+  }
+
+  fetchTournaments = async () => {
+    const { drizzle } = this.props
+
+    const contract = drizzle.contracts.Tournaments;
+    const tournamentsCount = await contract.methods.getTournamentsCount().call();
+    this.setState({
+      tournamentsCount,
+    })
   }
 
   render() {
-    const { drizzleState } = this.props
-    const { currentNetwork } = this.state
+    const { drizzleState, address, store, drizzle } = this.props;
+    const { currentNetwork, tournamentsCount } = this.state;
+
+    const tournaments = [];
+    for(let i = 0; i < tournamentsCount; i++) {
+      tournaments.push(
+        <TournamentCard
+          tournamentId={i}
+          address={address}
+          store={store}
+          drizzle={drizzle}
+        />
+      );
+    }
+
     return (
       <Box>
         {
@@ -82,16 +110,10 @@ class TournamentView extends React.Component<any, any> {
           )
         }
           <Box maxWidth={"1180px"} p={3} mx={"auto"}>
-              <Text my={4} />
-              <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-                  {TEMP_TOURNEY.map(game => {
-                  return (
-                      <GameCard
-                      game={game}
-                      />
-                  );
-                  })}
-              </Flex>
+            <Text my={4} />
+            <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
+              { tournaments }
+            </Flex>
           </Box>  
       </Box>
     );
