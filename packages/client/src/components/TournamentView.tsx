@@ -1,72 +1,123 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { drizzleConnect } from "@drizzle/react-plugin";
 import ConnectionBanner from "@rimble/connection-banner";
 import { Box, Flex, Text, Link } from "rimble-ui";
 
-import GameCard from '../components/GameCard';
+import TournamentCard from '../components/TournamentCard';
+import { getTournamentContract } from '../helpers/web3';
 
-function TournamentView({ drizzle, drizzleState, drizzleStatus, account, networkId }) {
-  const [currentNetwork, setCurrentNetwork] = useState(null);
-  const [address, setAddress] = useState(null);
+const TEMP_TOURNEY = [{
+  name: "Tourney 1",
+  image: "RER",
+  button: "TEST"
+}]
 
-  const TEMP_TOURNEY = [{
-      name: "Tourney 1",
-      image: "RER",
-      button: "TEST"
-  }]
+// Optional parameters to pass into RimbleWeb3
+const RIMBLE_CONFIG = {
+  // accountBalanceMinimum: 0.001,
+  // requiredNetwork: 5777, // ganache
+  requiredNetwork: 4 // rinkeby
+};
 
-    // Optional parameters to pass into RimbleWeb3
-    const RIMBLE_CONFIG = {
-    // accountBalanceMinimum: 0.001,
-    requiredNetwork: 5777 // ganache
-    };
+class TournamentView extends React.Component<any, any> {
 
-  // Set account
-  useEffect(() => {
-    if (account) {
-      setAddress(account);
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      currentNetwork: null,
+      address: null,
+      tournamentsCount: 0
     }
-  }, [account]);
+  }
 
-  // Set current network
-  useEffect(() => {
+  componentDidMount() {
+    const { address, networkId, drizzleStatus, drizzle } = this.props
+
+    this.updateAddress(address)
+    this.updateDrizzle(networkId, drizzleStatus, drizzle)
+  }
+
+  componentWillReceiveProps(newProps) {
+    const { address, networkId, drizzleStatus, drizzle } = this.props
+    const { address: newAddress, networkId: newNetworkId, 
+      drizzleStatus: newDrizzleStatus, drizzle: newDrizzle } = newProps
+
+    if (address !== newAddress) {
+      this.updateAddress(newAddress)
+    }
+    if (networkId !== newNetworkId || drizzleStatus !== newDrizzleStatus
+      || drizzle !== newDrizzle) {
+      this.updateDrizzle(newNetworkId, newDrizzleStatus, newDrizzle)
+    }
+  }
+
+  updateAddress = (address) => {
+    this.setState({ address })
+  }
+
+  updateDrizzle = (networkId, drizzleStatus, drizzle) => {
     if (networkId) {
-      setCurrentNetwork(networkId);
+      this.setState({ currentNetwork: networkId} );
     }
     if (!drizzleStatus.initialized && window.web3 && drizzle !== null) {
       window.web3.version.getNetwork((error, networkId) => {
-        setCurrentNetwork(parseInt(networkId));
+        this.setState({ currentNetwork: parseInt(networkId) } );
       });
     }
-  }, [networkId, drizzleStatus, drizzle]);
+    if (drizzleStatus.initialized && window.web3 && drizzle !== null) {
+      this.fetchTournaments();
+    }
+  }
 
-  return (
-    <Box>
-      {
-        !drizzleState && (
-        <Box m={4}>
-          <ConnectionBanner
-            currentNetwork={currentNetwork}
-            requiredNetwork={RIMBLE_CONFIG.requiredNetwork}
-            onWeb3Fallback={null}
-          />
-        </Box>
-        )
-      }
-        <Box maxWidth={"1180px"} p={3} mx={"auto"}>
+  fetchTournaments = async () => {
+    const { drizzle } = this.props
+
+    const contract = drizzle.contracts.Tournaments;
+    const tournamentsCount = await contract.methods.getTournamentsCount().call();
+    this.setState({
+      tournamentsCount,
+    })
+  }
+
+  render() {
+    const { drizzleState, address, store, drizzle } = this.props;
+    const { currentNetwork, tournamentsCount } = this.state;
+
+    const tournaments = [];
+    for(let i = 0; i < tournamentsCount; i++) {
+      tournaments.push(
+        <TournamentCard
+          tournamentId={i}
+          address={address}
+          store={store}
+          drizzle={drizzle}
+        />
+      );
+    }
+
+    return (
+      <Box>
+        {
+          !drizzleState && (
+          <Box m={4}>
+            <ConnectionBanner
+              currentNetwork={currentNetwork}
+              requiredNetwork={RIMBLE_CONFIG.requiredNetwork}
+              onWeb3Fallback={null}
+            />
+          </Box>
+          )
+        }
+          <Box maxWidth={"1180px"} p={3} mx={"auto"}>
             <Text my={4} />
             <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-                {TEMP_TOURNEY.map(game => {
-                return (
-                    <GameCard
-                    game={game}
-                    />
-                );
-                })}
+              { tournaments }
             </Flex>
-        </Box>  
-    </Box>
-  );
+          </Box>  
+      </Box>
+    );
+  }
 }
 
 /*

@@ -695,7 +695,7 @@ class App extends React.Component<any, any> {
               pauseOnHover={ false } />
             <DrizzleContext.Consumer>
             {({ drizzleState }) => {
-                return (          
+                return (
                   <>
 
 
@@ -749,6 +749,8 @@ class App extends React.Component<any, any> {
                         playerProfile={playerProfile}
                         connected={connected}
                         path="/"
+                        drizzle={this.props.drizzle}
+                        drizzleState={drizzleState}
                       />
                       <GameUnity
                         path="/wom"

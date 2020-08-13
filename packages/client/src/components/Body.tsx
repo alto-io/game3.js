@@ -33,8 +33,16 @@ function Body({ drizzle, drizzleState, store }) {
         <OutplayNavigation setRoute={setRoute} route={route} />
         {
           {
-            Play: <Play drizzle={drizzle} drizzleState={drizzleState} />,
-            TournamentView: <TournamentView address={address} store={store} setRoute={setRoute} />,
+            Play: 
+              <Play
+                drizzle={drizzle}
+                drizzleState={drizzleState}
+              />,
+            TournamentView: 
+              <TournamentView 
+                store={store}
+                drizzle={drizzle}
+                setRoute={setRoute} />,
           }[route]
         }
       </Flex>
