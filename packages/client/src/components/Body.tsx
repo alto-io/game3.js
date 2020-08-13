@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Play from "./Play";
-// import Dashboard from './Dashboard';
-// import Wallet from './Wallet';
-// import Tournaments from "./Tournaments";
+import TournamentView from "./TournamentView";
+
+// import DashboardView from './DashboardView';
+// import WalletView from './WalletView';
 import OutplayNavigation from "./OutplayNavigation";
 import { Box, Flex } from "rimble-ui";
 
@@ -33,6 +34,7 @@ function Body({ drizzle, drizzleState, store }) {
         {
           {
             Play: <Play drizzle={drizzle} drizzleState={drizzleState} />,
+            TournamentView: <TournamentView address={address} store={store} setRoute={setRoute} />,
           }[route]
         }
       </Flex>
@@ -43,7 +45,6 @@ function Body({ drizzle, drizzleState, store }) {
 export default Body;
 
 /*
-            Tournaments: <Tournaments address={address} store={store} setRoute={setRoute} />,
             Dashboard: <Dashboard address={address} store={store} setRoute={setRoute} />,
             Wallet:  <Wallet address={address} store={store} setRoute={setRoute} />
 */

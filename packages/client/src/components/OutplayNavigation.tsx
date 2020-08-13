@@ -35,7 +35,7 @@ const OutplayNavigation = ({ route, setRoute }) => {
       </StyledLinkContainer>
       <StyledLinkContainer
         mx={3}
-        routeName={"Tournaments"}
+        routeName={"TournamentView"}
         route={route}
         borderRadius={1}
       >
@@ -44,7 +44,7 @@ const OutplayNavigation = ({ route, setRoute }) => {
           p={3}
           onClick={e => {
             e.preventDefault();
-            setRoute("Tournaments");
+            setRoute("TournamentView");
           }}
         >
           Tournaments
