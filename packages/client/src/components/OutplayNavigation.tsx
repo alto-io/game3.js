@@ -52,7 +52,7 @@ const OutplayNavigation = ({ route, setRoute }) => {
       </StyledLinkContainer>
       <StyledLinkContainer
         mx={3}
-        routeName={"Dashboard"}
+        routeName={"DashboardView"}
         route={route}
         borderRadius={1}
       >
@@ -61,7 +61,7 @@ const OutplayNavigation = ({ route, setRoute }) => {
           p={3}
           onClick={e => {
             e.preventDefault();
-            setRoute("Dashboard");
+            setRoute("DashboardView");
           }}
         >
           Dashboard
@@ -69,7 +69,7 @@ const OutplayNavigation = ({ route, setRoute }) => {
       </StyledLinkContainer>
       <StyledLinkContainer
         mx={3}
-        routeName={"Wallet"}
+        routeName={"WalletView"}
         route={route}
         borderRadius={2}
       >
@@ -78,7 +78,7 @@ const OutplayNavigation = ({ route, setRoute }) => {
           p={3}
           onClick={e => {
             e.preventDefault();
-            setRoute("Wallet");
+            setRoute("WalletView");
           }}
         >
           Wallet

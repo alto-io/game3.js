@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import Play from "./Play";
 import TournamentView from "./TournamentView";
 import CreateTourneyView from "./CreateTourneyView";
+import DashboardView from './DashboardView';
+import WalletView from './WalletView';
 
-// import DashboardView from './DashboardView';
-// import WalletView from './WalletView';
 import OutplayNavigation from "./OutplayNavigation";
 import { Box, Flex } from "rimble-ui";
 
@@ -46,6 +46,16 @@ function Body({ drizzle, drizzleState, store }) {
                 setRoute={setRoute} />,
             CreateTourneyView: 
             <CreateTourneyView 
+              store={store}
+              drizzle={drizzle}
+              setRoute={setRoute} />,
+            DashboardView: 
+            <DashboardView 
+              store={store}
+              drizzle={drizzle}
+              setRoute={setRoute} />,
+            WalletView: 
+            <WalletView 
               store={store}
               drizzle={drizzle}
               setRoute={setRoute} />,
