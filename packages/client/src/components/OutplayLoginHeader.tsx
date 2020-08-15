@@ -37,24 +37,6 @@ class OutplayLoginHeader extends React.Component {
         })
       }    
 
-    renderContent = () => {
-        if (this.props.account && this.props.accountValidated) {
-          return (
-            <AccountOverview
-              account={this.props.account}
-              accountBalanceLow={this.props.accountBalanceLow}
-              accountBalance={this.props.accountBalance}
-            />
-          )
-        } else {
-          return (
-            <Button size="small" onClick={this.handleConnectAccount}>
-              Connect your wallet
-            </Button>
-          )
-        }
-    }
-
     componentDidUpdate() {
 
         if (!this.contractInitialized)
@@ -104,7 +86,7 @@ class OutplayLoginHeader extends React.Component {
                      OP Arcade
                     </Text>
             
-            {account && accountBalance ? (
+            {this.props.account && this.props.accountValidated ? (
               <Flex>
                 <Flex alignItems={"center"} mr={4}>
                   <Image src={walletIcon} mr={2} />
@@ -142,7 +124,9 @@ class OutplayLoginHeader extends React.Component {
               </Flex>
             ) : (
                 <>
-                {this.renderContent()}
+                <Button size="small" onClick={this.handleConnectAccount}>
+                  Connect your wallet
+                </Button>
                 </>
             )}
           </StyledHeader>
