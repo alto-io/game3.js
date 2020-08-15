@@ -126,6 +126,24 @@ class CreateTourneyView extends React.Component<any, any> {
     })
   }
 
+  onActivate = (tournament) => {
+    this.activateTournament(tournament)
+  }
+
+  activateTournament = async (tournament) => {
+    const { drizzle } = this.props
+
+    const address = this.state.address;
+    const contract = drizzle.contracts.Tournaments;
+
+    await contract.methods.activateTournament(tournament.id, tournament.prize)
+      .send({
+        from: address,
+        value: tournament.prize
+      })
+    this.updateTournaments()
+  }  
+
   render() {
     const { drizzle } = this.props
     const { tournamentsCount, contract, ownerView } = this.state
