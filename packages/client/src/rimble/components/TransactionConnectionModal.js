@@ -33,10 +33,10 @@ class TransactionConnectionModal extends React.Component {
       <React.Fragment>
         {/* Start primary content */}
         <Box mb={3}>
-          <Heading.h2>Connect to Rimble App Demo</Heading.h2>
+          <Heading.h2>Connect to OP Arcade</Heading.h2>
           <Text my={3}>
             You need to connect your Ethereum account to use our
-            blockchain features.
+            tournament features.
           </Text>
         </Box>
 

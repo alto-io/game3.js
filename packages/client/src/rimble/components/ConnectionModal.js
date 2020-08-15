@@ -35,7 +35,7 @@ class ConnectionModal extends React.Component {
         <Box mt={4} mb={5}>
           <Heading fontSize={[4, 5]}>Before you connect</Heading>
           <Text fontSize={[2, 3]} my={3}>
-            Connecting lets you use the Rimble Demo App via your
+            Connecting lets you use OP Arcade via your
             Ethereum account.
           </Text>
         </Box>

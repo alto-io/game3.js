@@ -22,7 +22,7 @@ class WrongNetworkModal extends React.Component {
         </Heading.h2>
 
         <Text my={4}>
-          The Rimble Demo App only works on the{" "}
+          OP Arcade only works on the{" "}
           <Text.span style={{ textTransform: "capitalize" }}>
             {this.props.network.required.name}
           </Text.span>{" "}

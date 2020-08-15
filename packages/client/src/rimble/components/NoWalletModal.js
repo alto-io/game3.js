@@ -12,7 +12,7 @@ class NoWalletModal extends React.Component {
     return (
       <React.Fragment>
         <Heading.h2 my={3}>
-          Install MetaMask to use the Rimble App Demo
+          Install MetaMask to use OP Arcade
         </Heading.h2>
 
         <Text my={4}>
@@ -32,8 +32,8 @@ class NoWalletModal extends React.Component {
         </MetaMaskButton>
 
         <Text mt={"4"}>
-          <Text.span bold>Rather use your phone?</Text.span> You can use the
-          Rimble App Demo in mobile browser wallets like{" "}
+          <Text.span bold>Rather use your phone?</Text.span> You can use
+          OP Arcade in mobile browser wallets like{" "}
           <Link
             href="https://status.im/"
             title="status.im website"

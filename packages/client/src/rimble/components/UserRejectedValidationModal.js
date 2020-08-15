@@ -16,7 +16,7 @@ class UserRejectedValidationModal extends React.Component {
         </Heading.h2>
 
         <Text my={4}>
-          To use our blockchain features, sign the message to finish
+          To use our tournament features, sign the message to finish
           connecting.
         </Text>
 

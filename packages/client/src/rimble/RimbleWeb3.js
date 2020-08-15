@@ -336,9 +336,7 @@ class RimbleTransaction extends React.Component {
     console.log("Requesting web3 personal sign");
     return window.web3.personal.sign(
       window.web3.fromUtf8(
-        `Hi there from Rimble! To connect, sign this message to prove you have access to this account. This won’t cost you any Ether.
-
-        Message ID: 48d4f84f-f402-4268-8af4-a692fabff5da (this is for security, you don’t need to remember this)`
+        `To connect to OP Arcade, sign this message to prove you have access to this account. This won’t cost you any Ether.`
       ),
       this.state.account,
       (error, signature) => {
@@ -357,7 +355,7 @@ class RimbleTransaction extends React.Component {
           console.log(successMessage, signature);
           window.toastProvider.addMessage(successMessage, {
             variant: "success",
-            secondaryMessage: "Welcome to the Rimble Demo App 🎉"
+            secondaryMessage: "Success! You can now play in tournaments 🎉"
           });
 
           this.closeValidationPendingModal();

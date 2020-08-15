@@ -13,13 +13,12 @@ class NoWeb3BrowserModal extends React.Component {
           lineHeight={"1.375em"}
           my={3}
         >
-          Switch browsers to use the Rimble App Demo
+          Switch browsers to use OP Arcade
         </Heading.h2>
 
         {RimbleUtil.isMobileDevice() ? (
           <Text my={4}>
-            You can't use our blockchain features, like increasing the count
-            value, in this browser. We recommend using{" "}
+            You can't use our tournament features in this browser. We recommend using{" "}
             <Link
               href="https://status.im/"
               title="status.im website"
@@ -48,8 +47,7 @@ class NoWeb3BrowserModal extends React.Component {
         ) : (
           <Box>
             <Text my={4}>
-              You can't use our blockchain features, like increasing the
-              count value, in this browser. Switch to{" "}
+              You can't use our tournament features, in this browser. Switch to{" "}
               <Link
                 href="https://brave.com/download/"
                 title="Download Brave browser"
@@ -86,7 +84,7 @@ class NoWeb3BrowserModal extends React.Component {
 
             <Text>
               <Text.span bold>Rather use your phone?</Text.span> You can use
-              the Rimble App Demo in mobile browser wallets like{" "}
+              OP Arcade in mobile browser wallets like{" "}
               <Link
                 href="https://status.im/"
                 title="status.im website"
