@@ -52,6 +52,7 @@ interface IProps extends RouteComponentProps {
   connected: boolean;
   drizzle: any;
   drizzleState: any;
+  contractMethodSendWrapper: any;
 }
 
 interface IState {
@@ -248,11 +249,11 @@ export default class Home extends Component<IProps, IState> {
   
   // RENDER
   render() {
-    const { drizzle, drizzleState } = this.props
+    const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
     return (
       <>
 
-          <Body drizzle={drizzle} drizzleState={drizzleState} />
+          <Body drizzle={drizzle} drizzleState={drizzleState} contractMethodSendWrapper={contractMethodSendWrapper} />
     
         <View
           flex={true}

@@ -105,14 +105,25 @@ class CreateTourneyView extends React.Component<any, any> {
     const data = ''
     const prize = drizzle.web3.utils.toBN(1) // TODO
 
-    const receipt = await contract.methods.createTournament(address, timestamp, data, prize)
-      .send({from: address})
-    const { tournamentId } = receipt.events.TournamentCreated.returnValues
 
-    // TODO
-    putTournamentData({ id: tournamentId })
+    this.props.contractMethodSendWrapper(
+      "createTournament", // name
+      [address, timestamp, data, prize], //contract parameters
+      {from: address}, // send parameters
+      (txStatus, transaction) => { // callback
+      console.log("createTournament callback: ", txStatus, transaction);
+      })
 
-    this.updateTournaments()
+
+    // const receipt = await contract.methods.createTournament(address, timestamp, data, prize)
+    //   .send({from: address})
+
+    // const { tournamentId } = receipt.events.TournamentCreated.returnValues
+
+    // // TODO
+    // putTournamentData({ id: tournamentId })
+
+    // this.updateTournaments()
   }
 
   updateTournaments = async () => {
@@ -147,7 +158,7 @@ class CreateTourneyView extends React.Component<any, any> {
   render() {
     const { drizzle } = this.props
     const { tournamentsCount, contract, ownerView } = this.state
-    const { web3, address } = this.props
+    const { web3, address, contractMethodSendWrapper } = this.props
 
     const noTournaments = tournamentsCount <= 0
 

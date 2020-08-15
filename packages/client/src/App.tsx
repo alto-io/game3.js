@@ -683,6 +683,7 @@ class App extends React.Component<any, any> {
             userRejectedValidation,
             validateAccount,
             connectAndValidateAccount,
+            contractMethodSendWrapper,            
             modals,
             network,
             transaction,
@@ -751,6 +752,7 @@ class App extends React.Component<any, any> {
                         path="/"
                         drizzle={this.props.drizzle}
                         drizzleState={drizzleState}
+                        contractMethodSendWrapper={contractMethodSendWrapper}
                       />
                       <GameUnity
                         path="/wom"

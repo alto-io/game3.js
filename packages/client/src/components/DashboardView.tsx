@@ -7,9 +7,12 @@ class DashboardView extends React.Component<any, any> {
     render() {
 
         return (
-          <Box>
-            Coming Soon!
-          </Box>
+            <Box maxWidth={"1180px"} p={3} mx={"auto"}>
+            <Text my={4} />
+                <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
+                Coming Soon!
+                </Flex>
+          </Box>  
         );
       }
 

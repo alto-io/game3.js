@@ -511,7 +511,7 @@ class RimbleTransaction extends React.Component {
     }, 1000);
   };
 
-  contractMethodSendWrapper = (contractMethod, callback) => {
+  contractMethodSendWrapper = (contractMethod, contractParameters, sendParameters, callback) => {
     console.log("contractMethodSendWrapper Callback: ", callback);
     // Is it web3 capable?
     if (!this.web3ActionPreflight()) {
@@ -553,8 +553,8 @@ class RimbleTransaction extends React.Component {
     const { contract, account } = this.state;
 
     try {
-      contract.methods[contractMethod]()
-        .send({ from: account })
+      contract.methods[contractMethod](...contractParameters)
+        .send(sendParameters)
         .on("transactionHash", hash => {
           // Submitted to block and received transaction hash
           // Set properties on the current transaction
