@@ -19,7 +19,7 @@
     "node": ">=0.12"
   },
   "scripts": {
-    "sol:compile": "truffle compile",
+    "sol:compile": "truffle compile --config trufle-config.js",
     "sol:deploy": "truffle migrate --reset --compile-all",
     "sol:test": "truffle test",
     "clean:dependencies": "rimraf ./**/node_modules",
