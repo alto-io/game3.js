@@ -17,6 +17,7 @@ RUN apk --no-cache --virtual build-dependencies add \
     make \
     g++ \
     && yarn install \
+    && yarn sol:compile \
     && apk del build-dependencies
 
 # Files
