@@ -35,7 +35,7 @@
     "build:client": "yarn workspace @game3js/client build",
     "build:server": "yarn workspace @game3js/server build",
     "build:move": "mv ./packages/client/build ./packages/server/build/public",
-    "build": "yarn build:common && yarn build:client && yarn build:server && yarn build:move",
+    "build": "yarn sol:compile && yarn build:common && yarn build:client && yarn build:server && yarn build:move",
     "serve": "yarn workspace @game3js/server serve",
     "postinstall": "rimraf node_modules/@types/react-native"
   },
