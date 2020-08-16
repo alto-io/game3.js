@@ -1,5 +1,12 @@
 # Game3.js (The Web 3.0 Game Framework)
 
+👋 Thank you for checking out Game3.js! 
+
+Please take note that this project is still under heavy development. 
+Don't hesitate to file a Github issue or reach out to us on Gitter 👇 if you have any questions. 
+
+ 
+
 [![Join the community on Gitter](https://img.shields.io/gitter/room/alto-io/game3-js?style=for-the-badge)](https://gitter.im/game3-js/community)
 
 ## 🚀 Getting Started

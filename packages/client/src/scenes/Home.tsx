@@ -214,6 +214,8 @@ export default class Home extends Component<IProps, IState> {
       mode,
     };
 
+    console.log(options);
+
     navigate(`/new${qs.stringify(options, true)}`);
   }
 
@@ -254,58 +256,61 @@ export default class Home extends Component<IProps, IState> {
       <>
 
           <Body drizzle={drizzle} drizzleState={drizzleState} contractMethodSendWrapper={contractMethodSendWrapper} />
-    
-        <View
-          flex={true}
-          center={true}
-          style={{
-            padding: 32,
-            flexDirection: 'column',
-          }}
-        >
+          {    
+          /*
+                  <View
+                    flex={true}
+                    center={true}
+                    style={{
+                      padding: 32,
+                      flexDirection: 'column',
+                    }}
+                  >
 
-          <Helmet>
-            <title>{Constants.APP_TITLE}</title>
-          </Helmet>
+                    <Helmet>
+                      <title>{Constants.APP_TITLE}</title>
+                    </Helmet>
 
-          <View flex={true} center={true} column={true}>
-          {
-            // <h1 style={{ color: 'white' }}>
-            //   {Constants.APP_TITLE}
-            // </h1>
-            // <Space size="xxs" />
-            // <GitHub />
-          }
-          </View>
+                    <View flex={true} center={true} column={true}>
+                    {
+                      // <h1 style={{ color: 'white' }}>
+                      //   {Constants.APP_TITLE}
+                      // </h1>
+                      // <Space size="xxs" />
+                      // <GitHub />
+                    }
+                    </View>
 
-          {
-            this.renderReplayVideo()
-          }
+                    {
+                      this.renderReplayVideo()
+                    }
 
-          {
-            this.props.connected &&
-            <>
-              {
-                this.renderName()
-              }
-            </>
-          }
+                    {
+                      this.props.connected &&
+                      <>
+                        {
+                          this.renderName()
+                        }
+                      </>
+                    }
 
-          <Space size="m" />
+                    <Space size="m" />
 
-          <Box
-            style={{
-              width: 500,
-              maxWidth: '100%',
-            }}
-          >
-          {this.renderLeaderboard()}
-          </Box>
+                    <Box
+                      style={{
+                        width: 500,
+                        maxWidth: '100%',
+                      }}
+                    >
+                    {this.renderLeaderboard()}
+                    </Box>
 
-          <Space size="m" />
-          {this.renderRoom()}
+                    <Space size="m" />
+                    {this.renderRoom()}
 
-        </View>
+                  </View>
+            */
+            }
       </>);
   }
 

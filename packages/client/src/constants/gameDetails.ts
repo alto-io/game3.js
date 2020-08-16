@@ -2,17 +2,28 @@ export const GAME_DETAILS = [
   {
     name: "World of Mines",
     image: "wom.gif",
-    button: "Play"
+    type: "unity",
+    button: "Play",
+    route: "wom"
   },
   {
     name: "TOSIOS",
     image: "tosios.gif",
-    button: "Play"
+    type: "pixijs",
+    button: "Play",
+    route: "new",
+    options: {
+      mode: "score attack",
+      roomMap: "small",
+      roomMaxPlayers: "1",
+      roomName: ""
+    }
   },
   {
     name: "Battle Racers",
     image: "br.gif",
-    button: "Coming Soon"
+    button: "Coming Soon",
+    type: "teaser"
   },
 
 ];

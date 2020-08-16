@@ -2,10 +2,25 @@ import React from "react";
 import { Card, Button, Flex, Box, Text } from "rimble-ui";
 import RainbowBox from "./RainbowBox";
 import RainbowImage from "./RainbowImage";
+import { navigate } from '@reach/router';
+import qs from 'querystringify';
 
 function GameCard({
   game
 }) {
+
+  const handleCreateRoomClick = () => {
+    switch (game.name) {
+      case "World of Mines":
+        navigate(`/wom`);
+      break;
+      case "TOSIOS":
+        game.options.playerName = "You";
+        navigate(`/new${qs.stringify(game.options, true)}`);
+      break;
+    }
+  };
+
   return (
     <Box width={[1, 1 / 2, 1 / 3]} p={3}>
       <Card p={0} borderColor={"#d6d6d6"}>
@@ -31,6 +46,7 @@ function GameCard({
               mb={2}
               type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
               name={"recepient"} // set the name to the method's argument key
+              onClick={handleCreateRoomClick}
             >
               {game.button}
         </Button>
