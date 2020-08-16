@@ -17,8 +17,6 @@ RUN apk --no-cache --virtual build-dependencies add \
     make \
     g++ \
     && yarn install \
-    && npm install -g truffle \
-    && truffle init \
     && yarn sol:compile \
     && apk del build-dependencies
 
