@@ -15,12 +15,12 @@ interface IProps extends RouteComponentProps {
   gameSessionId: string;
   recordFileHash: string;
   tournamentId: string;
-  web3: any;
+  drizzle: any;
+  drizzleState: any;
 }
 
 interface IState {
   sessionData: any;
-  contract: any;
 }
 
 export default class GameResult extends React.Component<IProps, IState> {
@@ -29,36 +29,23 @@ export default class GameResult extends React.Component<IProps, IState> {
 
     this.state = {
       sessionData: null,
-      contract: null,
     }
   }
 
   componentDidMount = () => {
-    const { gameSessionId, playerAddress, web3 } = this.props
+    const { gameSessionId, playerAddress } = this.props
     this.updateScore(gameSessionId, playerAddress)
-    this.initContract(web3)
   }
 
   componentWillReceiveProps = (newProps) => {
-    const { gameSessionId, playerAddress, web3 } = this.props
+    const { gameSessionId, playerAddress } = this.props
     const { gameSessionId: newGameSessionId, 
-      playerAddress: newPlayerAddress, web3: newWeb3 } = newProps
+      playerAddress: newPlayerAddress } = newProps
 
     if (gameSessionId !== newGameSessionId ||
       playerAddress !== newPlayerAddress) {
       this.updateScore(newGameSessionId, newPlayerAddress)
     }
-    if (newWeb3 !== web3) {
-      this.initContract(newWeb3)
-    }
-  }
-
-  initContract = async (web3) => {
-    if (!web3) {
-      return
-    }
-    const contract = await getTournamentContract(web3)
-    this.setState({ contract })
   }
 
   updateScore = async (gameSessionId, playerAddress) => {
@@ -73,8 +60,9 @@ export default class GameResult extends React.Component<IProps, IState> {
 
   submitResult = async () => {
     const { tournamentId, recordFileHash, playerAddress,
-      onToggle, gameSessionId } = this.props
-    const { contract } = this.state
+      onToggle, gameSessionId, drizzle } = this.props
+
+    const contract = drizzle.contracts.Tournaments;
 
     const result = await putGameReplay(gameSessionId, playerAddress, recordFileHash)
     console.log(result)

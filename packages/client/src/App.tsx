@@ -759,6 +759,9 @@ class App extends React.Component<any, any> {
                       />
                       <Game
                         path="/:roomId"
+                        address={account}
+                        drizzle={this.props.drizzle}
+                        drizzleState={drizzleState}
                       />
                       <Replay
                         path="/replay"

@@ -3,7 +3,7 @@ import { drizzleConnect } from "@drizzle/react-plugin"
 
 
 import { format, isPast } from 'date-fns'
-import { Box } from "rimble-ui";
+import { Box, Card, Flex } from "rimble-ui";
 import { TOURNAMENT_STATE_DRAFT, TOURNAMENT_STATE_ACTIVE } from '../constants'
 
 import TournamentResult from './TournamentResult'
@@ -85,7 +85,9 @@ class TournamentCard extends Component<any, any> {
     if (!hasTournament) {
       return (
         <Box width={[1, 1 / 2, 1 / 3]} p={3}>
-          Loading...
+          <Card p={0} borderColor={"#d6d6d6"}>
+            Loading...
+          </Card>
         </Box>
       )
     }
@@ -115,15 +117,22 @@ class TournamentCard extends Component<any, any> {
     }
 
     const tmp = {
-      name: "Tourney 1",
-      image: "RER",
-      button: "TEST"
+      name: "TOSIOS",
+      image: "tosios.gif",
+      type: "pixijs",
+      button: "Join",
+      route: "new",
+      options: {
+        mode: "score attack",
+        roomMap: "small",
+        roomMaxPlayers: "1",
+        roomName: "",
+        tournamentId: tournament.id
+      }
     }
 
     return (
-      <Box width={[1, 1 / 2, 1 / 3]} p={3}>
-        <GameCard game={tmp} />
-      </Box>
+      <GameCard game={tmp} />
     )
   }
 }

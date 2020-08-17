@@ -24,7 +24,8 @@ declare global {
 interface IProps extends RouteComponentProps {
   roomId?: string;
   address?: string;
-  web3?: any;
+  drizzle?: any;
+  drizzleState?: any;
 }
 
 interface IState {
@@ -42,7 +43,7 @@ export default class Game extends Component<IProps, IState> {
 
   public state = {
     playerId: '',
-    tournamentId: 'demo',
+    tournamentId: null,
     playersCount: 0,
     maxPlayersCount: 0,
     showResult: false,
@@ -506,13 +507,16 @@ export default class Game extends Component<IProps, IState> {
       showResult: newShow
     })
     if (!newShow && this.state.gameOver) {
-      const { tournamentId } = this.state
-      const playingTournament = !!tournamentId
+      navigate('/');
+      /*
       if (!playingTournament) {
         navigate('/');
       } else {
         navigate(`/tournaments`)
       }
+      const { tournamentId } = this.state
+      const playingTournament = !!tournamentId
+      */
     }
   }
 
@@ -520,7 +524,7 @@ export default class Game extends Component<IProps, IState> {
   render() {
     const { showResult, gameSessionId, recordFileHash, 
       tournamentId, gameOver } = this.state
-    const { address, web3 } = this.props
+    const { address, drizzle, drizzleState } = this.props
 
     return (
       <View>
@@ -529,14 +533,15 @@ export default class Game extends Component<IProps, IState> {
             <title>{`Death Match (${this.state.playersCount})`}</title>
           </Helmet>
           <div ref={this.gameCanvas} />
-          { gameOver && (<GameResult
+          { gameOver && tournamentId && (<GameResult
             show={showResult}
             onToggle={this.onResultToggle}
             playerAddress={address}
             gameSessionId={gameSessionId}
             recordFileHash={recordFileHash}
             tournamentId={tournamentId}
-            web3={web3}
+            drizzle={drizzle}
+            drizzleState={drizzleState}
           />)}
           {isMobile && this.renderJoySticks()}
 
