@@ -7,9 +7,10 @@ import { isMobile } from 'react-device-detect';
 import { Helmet } from 'react-helmet';
 import ReactNipple from 'react-nipple';
 import { View } from '../components';
+import { Card } from "rimble-ui";
 import GameManager from '../managers/GameManager';
 
-import { localSaveReplay, clientSaveTournamentReplay, putTournamentResult } from "../helpers/database";
+import { localSaveReplay, clientSaveTournamentReplay } from "../helpers/database";
 
 import GameResult from '../components/GameResult'
 
@@ -70,8 +71,8 @@ export default class Game extends Component<IProps, IState> {
 
     this.gameCanvas = React.createRef();
     this.gameManager = new GameManager(
-      window.innerWidth,
-      window.innerHeight,
+      1024,
+      600,
       this.handleActionSend,
     );
   }
@@ -522,30 +523,27 @@ export default class Game extends Component<IProps, IState> {
     const { address, web3 } = this.props
 
     return (
-      <View
-        style={{
-          position: 'relative',
-          height: '100%',
-        }}
-      >
-        <Helmet>
-          <title>{`Death Match (${this.state.playersCount})`}</title>
-        </Helmet>
-        <div ref={this.gameCanvas} />
-        { gameOver && (<GameResult
-          show={showResult}
-          onToggle={this.onResultToggle}
-          playerAddress={address}
-          gameSessionId={gameSessionId}
-          recordFileHash={recordFileHash}
-          tournamentId={tournamentId}
-          web3={web3}
-        />)}
-        {isMobile && this.renderJoySticks()}
+      <View>
+        <Card maxWidth={'1088px'} maxHeight={'664px'} px={4} mx={'auto'}>
+          <Helmet>
+            <title>{`Death Match (${this.state.playersCount})`}</title>
+          </Helmet>
+          <div ref={this.gameCanvas} />
+          { gameOver && (<GameResult
+            show={showResult}
+            onToggle={this.onResultToggle}
+            playerAddress={address}
+            gameSessionId={gameSessionId}
+            recordFileHash={recordFileHash}
+            tournamentId={tournamentId}
+            web3={web3}
+          />)}
+          {isMobile && this.renderJoySticks()}
 
-        { 
-          // <video id="recorded" loop></video>
-        }
+          { 
+            // <video id="recorded" loop></video>
+          }
+        </Card>
       </View>
     );
   }
