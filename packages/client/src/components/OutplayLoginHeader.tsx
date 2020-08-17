@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Text, Box, Button, Flex, Image } from "rimble-ui";
+import { Card, Text, Box, Button, Flex, Image, Link } from "rimble-ui";
 
 import RimbleWeb3 from "../rimble/RimbleWeb3";
 
@@ -14,6 +14,7 @@ import AccountOverview from "../rimble/components/AccountOverview";
 import walletIcon from "./../images/icon-wallet.svg";
 import balanceIcon from "./../images/icon-balance.svg";
 import shortenAddress from "../core/utilities/shortenAddress";
+import { navigate } from '@reach/router';
 
 const StyledHeader = styled(Flex)`
 border-bottom: 1px solid #d6d6d6;
@@ -24,6 +25,10 @@ box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.01);
 class OutplayLoginHeader extends React.Component {
 
     private contractInitialized:boolean = false;
+
+    handleClickLogo = () => {
+      navigate('/');
+    }
 
     handleConnectAccount = () => {
         this.props.connectAndValidateAccount(result => {
@@ -77,15 +82,19 @@ class OutplayLoginHeader extends React.Component {
         <>
             <StyledHeader justifyContent={"space-between"} p={3} bg={"white"}>
             {/* <Image src={logo} /> */}
-            <Text
+            <Link
                       fontWeight={600}
                       fontSize={"32px"}
                       color={"#2B2C36"}
                       lineHeight={1}
+                      title={
+                        "Back to Home"
+                      }
+                      onClick={this.handleClickLogo}
                     >
                      OP Arcade
-                    </Text>
-            
+            </Link>
+
             {this.props.account && this.props.accountValidated ? (
               <Flex>
                 <Flex alignItems={"center"} mr={4}>
