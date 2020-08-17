@@ -12,11 +12,11 @@ function GameCard({
   const handleCreateRoomClick = () => {
     switch (game.name) {
       case "World of Mines":
-        navigate(`/wom`);
+        navigate(`/game/wom`);
       break;
       case "TOSIOS":
         game.options.playerName = "You";
-        navigate(`/new${qs.stringify(game.options, true)}`);
+        navigate(`/game/new${qs.stringify(game.options, true)}`);
       break;
     }
   };

@@ -139,7 +139,7 @@ export default class Game extends Component<IProps, IState> {
         this.room = await this.client.create(Constants.ROOM_NAME, options);
 
         // We replace the "new" in the URL with the room's id
-        window.history.replaceState(null, '', `/${this.room.id}`);
+        window.history.replaceState(null, '', `/game/${this.room.id}`);
       } else {
         this.room = await this.client.joinById(roomId, options);
       }
