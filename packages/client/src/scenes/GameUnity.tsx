@@ -69,8 +69,8 @@ export class GameUnity extends React.Component<any,any> {
   initializeUnity() {
     // load unity from the same server (public folder)
     this.unityContent = new UnityContent(
-      "/unitygame/Build/unitygame.json",
-      "/unitygame/Build/UnityLoader.js"
+      "/unitygame.json",
+      "/UnityLoader.js"
     );
 
     this.unityContent.on("progress", progression => {
