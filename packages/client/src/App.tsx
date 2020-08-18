@@ -62,6 +62,7 @@ import { getAccounts, initWallet, updateWallet } from "./helpers/wallet";
 import { getLocalDatabaseManager, getPlayerProfile } from "./helpers/database";
 
 import Home from './scenes/Home';
+import GameContainer from './scenes/GameContainer';
 import Game from './scenes/Game';
 import GameUnity from './scenes/GameUnity';
 import Recorder from './scenes/Recorder';
@@ -754,15 +755,20 @@ class App extends React.Component<any, any> {
                         drizzleState={drizzleState}
                         contractMethodSendWrapper={contractMethodSendWrapper}
                       />
-                      <GameUnity
-                        path="/wom"
-                      />
-                      <Game
-                        path="/:roomId"
-                        address={account}
-                        drizzle={this.props.drizzle}
-                        drizzleState={drizzleState}
-                      />
+
+                      <GameContainer
+                        path="game">
+                        <Game
+                          path=":roomId"
+                          address={account}
+                          drizzle={this.props.drizzle}
+                          drizzleState={drizzleState}
+                        />
+                        <GameUnity
+                          path="wom"
+                        />
+                      </GameContainer>
+
                       <Replay
                         path="/replay"
                         playerProfile={ playerProfile }
