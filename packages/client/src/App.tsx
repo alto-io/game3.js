@@ -63,8 +63,6 @@ import { getLocalDatabaseManager, getPlayerProfile } from "./helpers/database";
 
 import Home from './scenes/Home';
 import GameContainer from './scenes/GameContainer';
-import Game from './scenes/Game';
-import GameUnity from './scenes/GameUnity';
 import Recorder from './scenes/Recorder';
 import Tournaments from './scenes/Tournaments'
 import Replay from './scenes/Replay';
@@ -757,16 +755,11 @@ class App extends React.Component<any, any> {
                       />
 
                       <GameContainer
-                        path="game">
-                        <Game
-                          path=":roomId"
-                          address={account}
-                          drizzle={this.props.drizzle}
-                          drizzleState={drizzleState}
-                        />
-                        <GameUnity
-                          path="wom"
-                        />
+                        path="game/*"
+                        address={account}
+                        drizzle={this.props.drizzle}
+                        drizzleState={drizzleState}
+                        >
                       </GameContainer>
 
                       <Replay
