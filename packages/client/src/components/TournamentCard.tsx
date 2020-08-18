@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import { drizzleConnect } from "@drizzle/react-plugin"
 
-
 import { format, isPast } from 'date-fns'
-import { Box, Card, Flex } from "rimble-ui";
+import { Box, Card } from "rimble-ui";
 import { TOURNAMENT_STATE_DRAFT, TOURNAMENT_STATE_ACTIVE } from '../constants'
 
 import TournamentResult from './TournamentResult'
@@ -55,20 +54,7 @@ class TournamentCard extends Component<any, any> {
       ownTournament = tournament.organizer.toLowerCase() === address.toLowerCase()
     }
 
-    const resultsCount = await contract.methods.getResultsCount(tournament.id).call()
-    const results = []
-    for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
-      const rawResult = await contract.methods.getResult(tournament.id, resultIdx).call()
-      results.push({
-        tournamentId: tournament.id,
-        resultId: resultIdx,
-        isWinner: rawResult['0'],
-        playerAddress: rawResult['1'],
-        sessionId: rawResult['2'],
-      })
-    }
-    tournament.results = results
-    tournament.canDeclareWinner = results.find(r => r.isWinner) === null
+    // tournament.canDeclareWinner = results.find(r => r.isWinner) === null
 
     this.setState({
       tournament,
@@ -104,17 +90,6 @@ class TournamentCard extends Component<any, any> {
     const prizeStr = `${drizzle.web3.utils.fromWei(tournament.prize)} ETH`
     const endTimeStr = format(new Date(tournament.endTime),
       'MMM d, yyyy, HH:mm:ss')
-
-    let results = []
-    if (ownTournament) {
-      results = tournament.results.map(result =>
-        <TournamentResult
-          result={result}
-          onPlayResult={onPlayResult}
-          onDeclareWinner={onDeclareWinner}
-          canDeclareWinner={tournament.canDeclareWinner}
-        />)
-    }
 
     const tmp = {
       name: "TOSIOS",
