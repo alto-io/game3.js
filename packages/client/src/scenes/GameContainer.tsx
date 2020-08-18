@@ -111,14 +111,11 @@ export default class GameContainer extends Component<IProps, IState> {
   stopRecording = async () => {
     this.mediaRecorder.stop();
 
-    console.log("stopRecording");
-
-    /*
 
     // TODO: playerId = roomId? change to something more meaningful
-    const playerId = this.state.playerId;
+    const playerId = this.state.playerId || 'player';
     const tournamentId = this.state.tournamentId || 'demo';
-    const time = this.gameManager.gameEndsAt - Date.now();
+    const time = Date.now(); // this.gameManager.gameEndsAt - Date.now();
 
     console.log('Recorded Blobs: ', this.recordedBlobs);
 
@@ -143,7 +140,6 @@ export default class GameContainer extends Component<IProps, IState> {
       //const result = await putTournamentResult(tournamentId, resultId, fileHash);
       //console.log(result)
     }
-    */
 }    
 
 
