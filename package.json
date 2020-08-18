@@ -30,7 +30,7 @@
     "start:common": "yarn workspace @game3js/common start",
     "start:client": "yarn workspace @game3js/client start",
     "start:server": "yarn workspace @game3js/server start",
-    "start": "yarn build:common && concurrently --kill-others-on-fail \"yarn start:common\" \"yarn start:client\" \"yarn start:server\"",
+    "start": "yarn sol:compile && yarn build:common && concurrently --kill-others-on-fail \"yarn start:common\" \"yarn start:client\" \"yarn start:server\"",
     "build:common": "yarn workspace @game3js/common build",
     "build:client": "yarn workspace @game3js/client build",
     "build:server": "yarn workspace @game3js/server build",
