@@ -259,7 +259,8 @@ export default class Home extends Component<IProps, IState> {
 
 
 
-          {    
+          {   
+          /* 
                   <View
                     flex={true}
                     center={true}
@@ -311,6 +312,7 @@ export default class Home extends Component<IProps, IState> {
                     {this.renderRoom()}
 
                   </View>
+                  */
             }
       </>);
   }
