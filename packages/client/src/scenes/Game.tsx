@@ -21,7 +21,6 @@ import 'react-toastify/dist/ReactToastify.css'
 
 interface IProps extends RouteComponentProps {
   roomId?: string;
-  address?: string;
   drizzle?: any;
   drizzleState?: any;
   startRecording: any;
@@ -105,7 +104,7 @@ export default class Game extends Component<IProps, IState> {
       };
     }
     options.tournamentId = tournamentId
-    options.playerAddress = this.props.address
+    options.playerAddress = this.props.drizzleState.accounts[0]
 
     // Connect
     try {
@@ -426,7 +425,7 @@ export default class Game extends Component<IProps, IState> {
   render() {
     const { showResult, gameSessionId, recordFileHash, 
       tournamentId, gameOver } = this.state
-    const { address, drizzle, drizzleState } = this.props
+    const { drizzle, drizzleState } = this.props
 
     return (
       <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
@@ -438,8 +437,8 @@ export default class Game extends Component<IProps, IState> {
           { gameOver && tournamentId && (<GameResult
             show={showResult}
             onToggle={this.onResultToggle}
-            playerAddress={address}
-            gameSessionId={gameSessionId}
+            playerAddress={drizzleState.accounts[0]}
+            gameSessionId={(gameOver && gameSessionId) || null}
             recordFileHash={recordFileHash}
             tournamentId={tournamentId}
             drizzle={drizzle}
@@ -452,7 +451,11 @@ export default class Game extends Component<IProps, IState> {
           }
         </Card>
         { tournamentId && (
-          <TournamentResultsCard tournamentId={tournamentId} drizzle={drizzle} playerAddress={address} />
+          <TournamentResultsCard
+            tournamentId={tournamentId}
+            drizzle={drizzle}
+            playerAddress={drizzleState.accounts[0]}
+          />
         )}
       </Flex>
     );

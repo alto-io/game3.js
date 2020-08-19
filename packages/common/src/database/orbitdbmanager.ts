@@ -240,6 +240,7 @@ export class OrbitDBManager implements DBManager {
       id: sessionId,
       sessionData,
     }
+    console.log('serverPutGameSession:')
     console.log(entry)
     await this.gameSessions.put(entry)
     return { result: sessionId }
