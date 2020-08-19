@@ -57,8 +57,7 @@ export default class GameContainer extends Component<IProps, IState> {
   }
 
   // HANDLERS: Gameplay Recorder
-  startRecording() {
-    console.log(this)
+  startRecording = async (params) => {
     this.canvas = document.querySelector('canvas');
   
     if (this.canvas) {
@@ -106,6 +105,10 @@ export default class GameContainer extends Component<IProps, IState> {
 
     this.mediaRecorder.start(100); // collect 100ms of data
     // console.log('MediaRecorder started', this.mediaRecorder);
+
+    // TEMP: if a WoM game, save after 10 secs
+    setInterval(this.stopRecording, 5000);
+
   }
 
   
@@ -164,6 +167,11 @@ export default class GameContainer extends Component<IProps, IState> {
               />
               <GameUnity
                 path="wom"
+                startRecording={this.startRecording}
+                stopRecording={this.stopRecording}
+                drizzle={drizzle}
+                drizzleState={drizzleState}
+                contractMethodSendWrapper={contractMethodSendWrapper}
               />
           </Router>
         );

@@ -3,7 +3,16 @@ import Unity, { UnityContent } from "react-unity-webgl";
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
 import { Card } from "rimble-ui";
 
-export class GameUnity extends React.Component<any,any> {
+interface IProps extends RouteComponentProps {
+  roomId?: string;
+  drizzle?: any;
+  drizzleState?: any;
+  startRecording: any;
+  stopRecording: any;
+  contractMethodSendWrapper?: any;
+}
+
+export class GameUnity extends React.Component<IProps, any> {
 
   constructor(props) {
     super(props);
@@ -25,6 +34,7 @@ export class GameUnity extends React.Component<any,any> {
     this.unityContent.send("OutplayManager", "SetLevel",
     this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
     this.unityContent.send("OutplayManager", "StartGame", "start");
+    this.props.startRecording.call(null, "wom");
     
     // const updateUser = this.context.updateUser;
     // const response = await this.nakamaServiceInstance.PlayGame();
