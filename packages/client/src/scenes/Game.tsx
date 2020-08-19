@@ -6,11 +6,15 @@ import React, { Component, RefObject } from 'react';
 import { isMobile } from 'react-device-detect';
 import { Helmet } from 'react-helmet';
 import ReactNipple from 'react-nipple';
-import { View } from '../components';
-import { Card } from "rimble-ui";
+import { Card, Flex } from "rimble-ui";
+
 import GameManager from '../managers/GameManager';
 
+import { localSaveReplay, clientSaveTournamentReplay } from "../helpers/database";
+
+import { View } from '../components'
 import GameResult from '../components/GameResult'
+import TournamentResultsCard from '../components/TournamentResultsCard'
 
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -425,7 +429,7 @@ export default class Game extends Component<IProps, IState> {
     const { address, drizzle, drizzleState } = this.props
 
     return (
-      <View>
+      <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
         <Card maxWidth={'1088px'} maxHeight={'664px'} px={4} mx={'auto'}>
           <Helmet>
             <title>{`Death Match (${this.state.playersCount})`}</title>
@@ -447,7 +451,10 @@ export default class Game extends Component<IProps, IState> {
             // <video id="recorded" loop></video>
           }
         </Card>
-      </View>
+        { tournamentId && (
+          <TournamentResultsCard tournamentId={tournamentId} drizzle={drizzle} playerAddress={address} />
+        )}
+      </Flex>
     );
   }
 

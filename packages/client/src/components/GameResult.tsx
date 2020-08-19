@@ -6,7 +6,6 @@ import Modal from './Modal'
 import { View, Button } from '../components'
 
 import { getGameSession, putGameReplay } from '../helpers/database'
-import { getTournamentContract } from '../helpers/web3'
 
 interface IProps extends RouteComponentProps {
   show: boolean;
