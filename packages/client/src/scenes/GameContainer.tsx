@@ -19,6 +19,7 @@ interface IProps extends RouteComponentProps {
   address: any;
   drizzle: any;
   drizzleState: any;
+  contractMethodSendWrapper: any;
 }
   
   interface IState {
@@ -150,15 +151,17 @@ export default class GameContainer extends Component<IProps, IState> {
 
     // RENDER
     render() {
+      const { account, drizzle, drizzleState, contractMethodSendWrapper } = this.props
         return (
             <Router>
               <Game
                 path=":roomId"
                 startRecording={this.startRecording}
                 stopRecording={this.stopRecording}
-                address={this.props.account}
-                drizzle={this.props.drizzle}
-                drizzleState={this.props.drizzleState}
+                address={account}
+                drizzle={drizzle}
+                drizzleState={drizzleState}
+                contractMethodSendWrapper={contractMethodSendWrapper}
               />
               <GameUnity
                 path="wom"

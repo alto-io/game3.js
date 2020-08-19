@@ -7,22 +7,7 @@ import { View, Button } from '../components'
 
 import { getGameSession, putGameReplay } from '../helpers/database'
 
-interface IProps extends RouteComponentProps {
-  show: boolean;
-  onToggle?: any;
-  playerAddress: string;
-  gameSessionId: string;
-  recordFileHash: string;
-  tournamentId: string;
-  drizzle: any;
-  drizzleState: any;
-}
-
-interface IState {
-  sessionData: any;
-}
-
-export default class GameResult extends React.Component<IProps, IState> {
+export default class GameResult extends React.Component<any, any> {
   constructor(props) {
     super(props)
 
@@ -59,16 +44,17 @@ export default class GameResult extends React.Component<IProps, IState> {
 
   submitResult = async () => {
     const { tournamentId, recordFileHash, playerAddress,
-      onToggle, gameSessionId, drizzle } = this.props
-
-    const contract = drizzle.contracts.Tournaments;
+      onToggle, gameSessionId, contractMethodSendWrapper } = this.props
 
     const result = await putGameReplay(gameSessionId, playerAddress, recordFileHash)
     console.log(result)
 
-    contract.methods.submitResult(tournamentId, gameSessionId)
-      .send({
-        from: playerAddress
+    contractMethodSendWrapper(
+      "submitResult", // name
+      [tournamentId, gameSessionId], //contract parameters
+      {from: playerAddress}, // send parameters
+      (txStatus, transaction) => { // callback
+        console.log("submitResult callback: ", txStatus, transaction);
       })
     onToggle(true)
   }

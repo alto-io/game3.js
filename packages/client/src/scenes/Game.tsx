@@ -425,7 +425,7 @@ export default class Game extends Component<IProps, IState> {
   render() {
     const { showResult, gameSessionId, recordFileHash, 
       tournamentId, gameOver } = this.state
-    const { drizzle, drizzleState } = this.props
+    const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
 
     return (
       <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
@@ -443,6 +443,7 @@ export default class Game extends Component<IProps, IState> {
             tournamentId={tournamentId}
             drizzle={drizzle}
             drizzleState={drizzleState}
+            contractMethodSendWrapper={contractMethodSendWrapper}
           />)}
           {isMobile && this.renderJoySticks()}
 

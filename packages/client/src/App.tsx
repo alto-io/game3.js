@@ -760,6 +760,7 @@ class App extends React.Component<any, any> {
                         address={account}
                         drizzle={this.props.drizzle}
                         drizzleState={drizzleState}
+                        contractMethodSendWrapper={contractMethodSendWrapper}
                         >
                       </GameContainer>
 

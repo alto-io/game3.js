@@ -255,9 +255,11 @@ export default class Home extends Component<IProps, IState> {
     return (
       <>
 
-          <Body drizzle={drizzle} drizzleState={drizzleState} contractMethodSendWrapper={contractMethodSendWrapper} />
-
-
+          <Body
+            drizzle={drizzle}
+            drizzleState={drizzleState}
+            contractMethodSendWrapper={contractMethodSendWrapper}
+          />
 
           {   
           /* 
