@@ -72,12 +72,12 @@ class TournamentCard extends Component<any, any> {
       roomName: '',
       tournamentId: tournament.id,
       playerName: 'You',
+      viewOnly: tournament.timeIsUp,
     }
     navigate(`/game/new${qs.stringify(options, true)}`);
   }
 
   render () {
-    const { drizzle } = this.props
     const { tournament, ownTournament } = this.state
 
     const hasTournament = !!tournament
@@ -98,8 +98,7 @@ class TournamentCard extends Component<any, any> {
       return (null)
     }
 
-    const canPlay = !ownTournament && isActive && !tournament.timeIsUp
-    const prizeStr = `${drizzle.web3.utils.fromWei(tournament.prize)} ETH`
+//    const prizeStr = `${drizzle.web3.utils.fromWei(tournament.prize)} ETH`
     const endTimeStr = format(new Date(tournament.endTime),
       'MMM d, yyyy, HH:mm:ss')
 

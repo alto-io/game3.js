@@ -151,14 +151,13 @@ export default class GameContainer extends Component<IProps, IState> {
 
     // RENDER
     render() {
-      const { account, drizzle, drizzleState, contractMethodSendWrapper } = this.props
+      const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
         return (
             <Router>
               <Game
                 path=":roomId"
                 startRecording={this.startRecording}
                 stopRecording={this.stopRecording}
-                address={account}
                 drizzle={drizzle}
                 drizzleState={drizzleState}
                 contractMethodSendWrapper={contractMethodSendWrapper}

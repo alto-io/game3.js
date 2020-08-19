@@ -10,8 +10,6 @@ import { Card, Flex } from "rimble-ui";
 
 import GameManager from '../managers/GameManager';
 
-import { localSaveReplay, clientSaveTournamentReplay } from "../helpers/database";
-
 import { View } from '../components'
 import GameResult from '../components/GameResult'
 import TournamentResultsCard from '../components/TournamentResultsCard'
@@ -25,6 +23,7 @@ interface IProps extends RouteComponentProps {
   drizzleState?: any;
   startRecording: any;
   stopRecording: any;
+  contractMethodSendWrapper?: any;
 }
 
 interface IState {
@@ -36,6 +35,7 @@ interface IState {
   gameSessionId: string;
   recordFileHash: string;
   gameOver: boolean;
+  viewOnly: boolean;
 }
 
 export default class Game extends Component<IProps, IState> {
@@ -49,6 +49,7 @@ export default class Game extends Component<IProps, IState> {
     gameSessionId: null,
     recordFileHash: null,
     gameOver: false,
+    viewOnly: false,
   };
 
   private gameCanvas: RefObject<HTMLDivElement>;
@@ -105,6 +106,14 @@ export default class Game extends Component<IProps, IState> {
     }
     options.tournamentId = tournamentId
     options.playerAddress = this.props.drizzleState.accounts[0]
+
+    if (options.viewOnly === 'true') {
+      this.setState({
+        tournamentId,
+        viewOnly: true,
+      })
+      return
+    }
 
     // Connect
     try {
@@ -424,11 +433,12 @@ export default class Game extends Component<IProps, IState> {
   // RENDER
   render() {
     const { showResult, gameSessionId, recordFileHash, 
-      tournamentId, gameOver } = this.state
+      tournamentId, gameOver, viewOnly } = this.state
     const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
 
     return (
       <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
+        { !viewOnly && (
         <Card maxWidth={'1088px'} maxHeight={'664px'} px={4} mx={'auto'}>
           <Helmet>
             <title>{`Death Match (${this.state.playersCount})`}</title>
@@ -446,11 +456,11 @@ export default class Game extends Component<IProps, IState> {
             contractMethodSendWrapper={contractMethodSendWrapper}
           />)}
           {isMobile && this.renderJoySticks()}
-
           { 
             // <video id="recorded" loop></video>
           }
         </Card>
+        )}
         { tournamentId && (
           <TournamentResultsCard
             tournamentId={tournamentId}
