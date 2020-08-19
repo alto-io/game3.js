@@ -118,7 +118,8 @@ const DEFAULT_ADDRESS = CREATE_WALLET_ON_GUEST_ACCOUNT
 // Optional parameters to pass into RimbleWeb3
 const RIMBLE_CONFIG = {
   // accountBalanceMinimum: 0.001,
-  requiredNetwork: 5777 // ganache
+  requiredNetwork: 5777, // ganache
+  //requiredNetwork: 4, // rinkeby
 };
 
 const INITIAL_STATE: IAppState = {
