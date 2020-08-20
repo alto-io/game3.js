@@ -17,10 +17,10 @@ import balanceIcon from "./../images/icon-balance.svg";
 import shortenAddress from "../core/utilities/shortenAddress";
 import { navigate } from '@reach/router';
 
-const StyledHeader = styled(Flex)`
-border-bottom: 1px solid #d6d6d6;
-box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.01);
-`;
+// const StyledHeader = styled(Flex)`
+// border-bottom: 1px solid #d6d6d6;
+// box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.01);
+// `;
 
 const StyledLink = styled(Link)`
 display: flex;
@@ -90,7 +90,7 @@ class OutplayLoginHeader extends React.Component {
         } = this.props;     
     return (
         <>
-            <StyledHeader justifyContent={"space-between"} p={3} bg={"white"}>
+            <Flex justifyContent={"space-between"} p={3} bg={"white"}>
             <StyledLink
                       fontWeight={600}
                       fontSize={"1.13rem"}
@@ -152,7 +152,7 @@ class OutplayLoginHeader extends React.Component {
                 </Button>
                 </>
             )}
-          </StyledHeader>
+          </Flex>
            <TransactionToastUtil transactions={transactions} />
         </>
     );
