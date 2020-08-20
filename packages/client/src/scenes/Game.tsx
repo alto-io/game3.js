@@ -1,4 +1,4 @@
-import { navigate, RouteComponentProps } from '@reach/router';
+import { globalHistory, navigate, RouteComponentProps } from '@reach/router';
 import { Constants, Keys, Maths, Types } from '@game3js/common';
 import { Client, Room } from 'colyseus.js';
 import qs from 'querystringify';
@@ -16,6 +16,7 @@ import TournamentResultsCard from '../components/TournamentResultsCard'
 
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { isThisSecond } from 'date-fns';
 
 interface IProps extends RouteComponentProps {
   roomId?: string;
@@ -71,11 +72,13 @@ export default class Game extends Component<IProps, IState> {
 
   
   async componentDidMount() {
-    await this.start();
+    await this.start();  
+    window.addEventListener("beforeunload", this.handlePageUnloading);
   }
 
   componentWillUnmount() {
     this.stop();
+    window.removeEventListener("beforeunload", this.handlePageUnloading);
   }
 
 
@@ -305,6 +308,15 @@ export default class Game extends Component<IProps, IState> {
     this.room.send("action", action);
   }
 
+  // Temporary handler when user reloads while playing the game
+  handlePageUnloading = (e: event) => {
+    if (!this.state.gameOver){
+      let promptMessage = "Test";
+      (e|| window.event).returnValue = promptMessage;
+      return promptMessage;
+    }
+  }
+  
 
   // HANDLERS: Inputs
   handleMouseDown = (event: any) => {
@@ -435,40 +447,42 @@ export default class Game extends Component<IProps, IState> {
     const { showResult, gameSessionId, recordFileHash, 
       tournamentId, gameOver, viewOnly } = this.state
     const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
+    console.log(gameOver);
 
     return (
-      <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
-        { !viewOnly && (
-        <Card maxWidth={'1088px'} maxHeight={'664px'} px={4} mx={'auto'}>
-          <Helmet>
-            <title>{`Death Match (${this.state.playersCount})`}</title>
-          </Helmet>
-          <div ref={this.gameCanvas} />
-          { gameOver && tournamentId && (<GameResult
-            show={showResult}
-            onToggle={this.onResultToggle}
-            playerAddress={drizzleState.accounts[0]}
-            gameSessionId={(gameOver && gameSessionId) || null}
-            recordFileHash={recordFileHash}
-            tournamentId={tournamentId}
-            drizzle={drizzle}
-            drizzleState={drizzleState}
-            contractMethodSendWrapper={contractMethodSendWrapper}
-          />)}
-          {isMobile && this.renderJoySticks()}
-          { 
-            // <video id="recorded" loop></video>
-          }
-        </Card>
-        )}
-        { tournamentId && (
-          <TournamentResultsCard
-            tournamentId={tournamentId}
-            drizzle={drizzle}
-            playerAddress={drizzleState.accounts[0]}
-          />
-        )}
-      </Flex>
+        <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
+          { !viewOnly && (
+          <Card maxWidth={'1088px'} maxHeight={'664px'} px={4} mx={'auto'}>
+            <Helmet>
+              <title>{`Death Match (${this.state.playersCount})`}</title>
+            </Helmet>
+            <div ref={this.gameCanvas} />
+
+            { gameOver && tournamentId && (<GameResult
+              show={showResult}
+              onToggle={this.onResultToggle}
+              playerAddress={drizzleState.accounts[0]}
+              gameSessionId={(gameOver && gameSessionId) || null}
+              recordFileHash={recordFileHash}
+              tournamentId={tournamentId}
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contractMethodSendWrapper={contractMethodSendWrapper}
+            />)}
+            {isMobile && this.renderJoySticks()}
+            { 
+              // <video id="recorded" loop></video>
+            }
+          </Card>
+          )}
+          { tournamentId && (
+            <TournamentResultsCard
+              tournamentId={tournamentId}
+              drizzle={drizzle}
+              playerAddress={drizzleState.accounts[0]}
+            />
+          )}
+        </Flex>
     );
   }
 

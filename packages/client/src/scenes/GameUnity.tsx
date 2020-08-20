@@ -10,6 +10,7 @@ interface IProps extends RouteComponentProps {
   startRecording: any;
   stopRecording: any;
   contractMethodSendWrapper?: any;
+  isGameRunning?: boolean;
 }
 
 export class GameUnity extends React.Component<IProps, any> {
@@ -20,7 +21,8 @@ export class GameUnity extends React.Component<IProps, any> {
       rotation: 0,
       unityShouldBeMounted: true,
       gameReady: false,
-      selectedLevel: false
+      selectedLevel: false,
+      isGameRunning: false
     };
 
     this.initializeUnity();
@@ -28,6 +30,14 @@ export class GameUnity extends React.Component<IProps, any> {
 
   speed = 30;
   unityContent = null as any;
+
+  componentDidMount() {
+    window.addEventListener("beforeunload", this.handlePageUnloading);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("beforeunload", this.handlePageUnloading);
+  }
 
   onPlayGame = async (e) => {
 
@@ -89,10 +99,12 @@ export class GameUnity extends React.Component<IProps, any> {
 
     this.unityContent.on("loaded", () => {
       console.log("Yay! Unity is loaded!");
+
       //// BUG: React doesn't like to render state change on new accounts :(
       this.setState(
         {
-          gameReady: true
+          gameReady: true,
+          isGameRunning: true
         }
       );
     });
@@ -109,6 +121,14 @@ export class GameUnity extends React.Component<IProps, any> {
     this.unityContent.on("SendNumber", rotation => {
       this.setState({ rotation: Math.round(rotation) });
     });
+
+    this.unityContent.on("quitted", () => {
+      this.setState({isGameRunning: false})
+    });
+
+    this.unityContent.on("error", () => {
+      this.setState({isGameRunning: false})
+    })
   }
 
   onClickSendToJS() {
@@ -132,7 +152,16 @@ export class GameUnity extends React.Component<IProps, any> {
     this.setState({ unityShouldBeMounted: false });
   }
 
+  // Temporary handler when user reloads while playing the game
+  handlePageUnloading = (e: event) => {
+   let promptMessage = "Test";
+   (e|| window.event).returnValue = promptMessage;
+   return promptMessage;
+  }
+
   render() {
+    const { isGameRunning } = this.state;
+    console.log(isGameRunning);
     return (
         <View>
              <Card maxWidth={'1024px'} px={4} mx={'auto'}>  
@@ -161,7 +190,6 @@ export class GameUnity extends React.Component<IProps, any> {
                 }
             </div>
             </Card>       
-
         </View>
     );
   }

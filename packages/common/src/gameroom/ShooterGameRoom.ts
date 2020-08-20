@@ -65,6 +65,7 @@ export class ShooterGameRoom extends Room<GameState> {
   }
 
   onLeave(client: Client) {
+    console.log("Left");
     this.state.playerRemove(client.sessionId);
     console.log(`Player joined: id=${client.sessionId}`);
   }
