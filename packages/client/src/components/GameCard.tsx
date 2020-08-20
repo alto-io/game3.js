@@ -1,5 +1,6 @@
 import React from "react";
 import { Card, Button, Flex, Box, Text } from "rimble-ui";
+import styled from "styled-components";
 import RainbowImage from "./RainbowImage";
 import { navigate } from '@reach/router';
 import qs from 'querystringify';
@@ -7,6 +8,13 @@ import qs from 'querystringify';
 function GameCard({
   game
 }) {
+
+  const StyledButton = styled(Button)`
+    font-family: 'Apercu Light';
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  `
 
   const handleCreateRoomClick = () => {
     switch (game.name) {
@@ -39,7 +47,7 @@ function GameCard({
               </Text>
           </Flex>
 
-          <Button
+          <StyledButton
               mt={"26px"}
               mb={2}
               type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
@@ -47,7 +55,7 @@ function GameCard({
               onClick={handleCreateRoomClick}
             >
               {game.button}
-        </Button>
+        </StyledButton>
         </Flex>
       </Card>
     </Box>

@@ -31,6 +31,17 @@ align-items: center;
 }
 `;
 
+const StyledTextLink = styled(Link)`
+  &:hover {
+    text-decoration: none;
+  }
+`
+const StyledButton = styled(Button)`
+  font-family: 'Apercu Light';
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+`
 
 class OutplayLoginHeader extends React.Component {
 
@@ -109,49 +120,54 @@ class OutplayLoginHeader extends React.Component {
             OP<br/>Arcade
             </StyledLink>
 
-            {this.props.account && this.props.accountValidated ? (
-              <Flex>
-                <Flex alignItems={"center"} mr={4}>
-                  <Image src={walletIcon} mr={2} />
-                  <Box>
-                    <Text
-                      fontWeight={600}
-                      fontSize={"12px"}
-                      color={"#2B2C36"}
-                      lineHeight={1}
-                    >
-                      Connected as
-                    </Text>
-                    <Text fontSize={1} color={"primary"}>
-                      {shortenAddress(account)}
-                    </Text>
-                  </Box>
+            
+            
+            <Flex justifyContent="center" alignItems="center">
+              <StyledTextLink href="https://outplay.games/" target="_blank" title="To outplay.games" mr={4}>About Us</StyledTextLink>
+              {this.props.account && this.props.accountValidated ? (
+                <Flex>
+                  <Flex alignItems={"center"} mr={4}>
+                    <Image src={walletIcon} mr={2} />
+                    <Box>
+                      <Text
+                        fontWeight={600}
+                        fontSize={"12px"}
+                        color={"#2B2C36"}
+                        lineHeight={1}
+                      >
+                        Connected as
+                      </Text>
+                      <Text fontSize={1} color={"primary"}>
+                        {shortenAddress(account)}
+                      </Text>
+                    </Box>
+                  </Flex>
+        
+                  <Flex alignItems={"center"}>
+                    <Image src={balanceIcon} mr={2} />
+                    <Box>
+                      <Text
+                        fontWeight={600}
+                        fontSize={"12px"}
+                        color={"#2B2C36"}
+                        lineHeight={1}
+                      >
+                        Balance
+                      </Text>
+                      <Text fontSize={1} color={"primary"}>
+                        {accountBalance.toString()} ETH
+                      </Text>
+                    </Box>
+                  </Flex>
                 </Flex>
-      
-                <Flex alignItems={"center"}>
-                  <Image src={balanceIcon} mr={2} />
-                  <Box>
-                    <Text
-                      fontWeight={600}
-                      fontSize={"12px"}
-                      color={"#2B2C36"}
-                      lineHeight={1}
-                    >
-                      Balance
-                    </Text>
-                    <Text fontSize={1} color={"primary"}>
-                      {accountBalance.toString()} ETH
-                    </Text>
-                  </Box>
-                </Flex>
-              </Flex>
-            ) : (
-                <>
-                <Button size="small" onClick={this.handleConnectAccount}>
-                  Connect your wallet
-                </Button>
-                </>
-            )}
+              ) : (
+                  <>
+                  <StyledButton color="primary" size="small" onClick={this.handleConnectAccount}>
+                    Connect your wallet
+                  </StyledButton>
+                  </>
+              )}
+            </Flex>
           </Flex>
            <TransactionToastUtil transactions={transactions} />
         </>
