@@ -36,7 +36,7 @@ function GameCard({
           </Flex>
 
           <Flex justifyContent={"center"} mt={3} mb={4}>
-              <Text fontWeight={600} lineHeight={"1em"}>
+              <Text fontWeight={600} lineHeight={"1em"} fontSize={[4, 3, 3]}>
                   {game.name}
               </Text>
           </Flex>
