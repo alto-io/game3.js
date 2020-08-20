@@ -17,9 +17,18 @@ import balanceIcon from "./../images/icon-balance.svg";
 import shortenAddress from "../core/utilities/shortenAddress";
 import { navigate } from '@reach/router';
 
-const StyledHeader = styled(Flex)`
-border-bottom: 1px solid #d6d6d6;
-box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.01);
+// const StyledHeader = styled(Flex)`
+// border-bottom: 1px solid #d6d6d6;
+// box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.01);
+// `;
+
+const StyledLink = styled(Link)`
+display: flex;
+flex-direction: row;
+align-items: center;
+&:hover {
+  text-decoration: none;
+}
 `;
 
 
@@ -78,15 +87,15 @@ class OutplayLoginHeader extends React.Component {
         initContract,
         initAccount,
         drizzle
-        } = this.props;        
+        } = this.props;     
     return (
         <>
-            <StyledHeader justifyContent={"space-between"} p={3} bg={"white"}>
-            <Link
+            <Flex justifyContent={"space-between"} p={3} bg={"white"}>
+            <StyledLink
                       fontWeight={600}
-                      fontSize={"32px"}
+                      fontSize={"1.13rem"}
                       color={"#2B2C36"}
-                      lineHeight={1}
+                      lineHeight={0.8}
                       title={
                         "Back to Home"
                       }
@@ -97,8 +106,8 @@ class OutplayLoginHeader extends React.Component {
               borderColor={"white"}
               overflow={"hidden"}
               src={logo} />
-            OP Arcade
-            </Link>
+            OP<br/>Arcade
+            </StyledLink>
 
             {this.props.account && this.props.accountValidated ? (
               <Flex>
@@ -143,7 +152,7 @@ class OutplayLoginHeader extends React.Component {
                 </Button>
                 </>
             )}
-          </StyledHeader>
+          </Flex>
            <TransactionToastUtil transactions={transactions} />
         </>
     );

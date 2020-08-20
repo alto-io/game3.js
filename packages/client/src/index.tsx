@@ -9,7 +9,7 @@ import * as serviceWorker from './serviceWorker';
 import { ThemeProvider } from "styled-components";
 import CustomTheme from "./CustomTheme";
 
-// import './index.css';
+import './index.css';
 
 // import { createGlobalStyle } from "styled-components";
 // import { globalStyle } from "./styles";

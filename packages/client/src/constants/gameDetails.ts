@@ -1,7 +1,17 @@
+const cardBg = {
+  colors: {
+    yellow: '#ffb600', 
+    magenta: '#ff007b', 
+    purple: '#af5eff',
+    seaGreen: '#06df9b'
+  }
+}
+
 export const GAME_DETAILS = [
   {
     name: "World of Mines",
     image: "wom.gif",
+    color: cardBg.colors.yellow,
     type: "unity",
     button: "Play",
     route: "wom"
@@ -9,6 +19,7 @@ export const GAME_DETAILS = [
   {
     name: "TOSIOS",
     image: "tosios.gif",
+    color: cardBg.colors.magenta,
     type: "pixijs",
     button: "Play",
     route: "new",
@@ -22,6 +33,7 @@ export const GAME_DETAILS = [
   {
     name: "Battle Racers",
     image: "br.gif",
+    color: cardBg.colors.purple,
     button: "Coming Soon",
     type: "teaser"
   },
