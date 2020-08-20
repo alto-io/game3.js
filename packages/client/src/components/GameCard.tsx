@@ -1,6 +1,5 @@
 import React from "react";
 import { Card, Button, Flex, Box, Text } from "rimble-ui";
-import RainbowBox from "./RainbowBox";
 import RainbowImage from "./RainbowImage";
 import { navigate } from '@reach/router';
 import qs from 'querystringify';
@@ -21,18 +20,9 @@ function GameCard({
     }
   };
 
-  const cardBg = {
-    colors: {
-      yellow: '#ffb600', 
-      magenta: '#ff007b', 
-      purple: '#af5eff',
-      seaGreen: '#06df9b'
-    }
-  }
-
   return (
     <Box width={[1, 1 / 2, 1 / 3]} p={3}>
-      <Card p={0} theme={cardBg} bg="purple">
+      <Card p={0} bg={game.color}>
         <Flex
           alignItems={"center"}
           justifyContent={"space-between"}
