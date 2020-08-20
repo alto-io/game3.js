@@ -60,6 +60,8 @@ class TournamentCard extends Component<any, any> {
       tournament,
       ownTournament
     })
+
+    console.log(tournament);
   }
 
   handleJoinClick = () => {
@@ -94,9 +96,9 @@ class TournamentCard extends Component<any, any> {
 
     const isActive = tournament.state === TOURNAMENT_STATE_ACTIVE
     // don't show own tournaments
-    if (ownTournament || !isActive) {
-      return (null)
-    }
+    // if (ownTournament || !isActive) {
+    //   return (null)
+    // }
 
 //    const prizeStr = `${drizzle.web3.utils.fromWei(tournament.prize)} ETH`
     const endTimeStr = format(new Date(tournament.endTime),
@@ -118,6 +120,12 @@ class TournamentCard extends Component<any, any> {
           >
             <Flex justifyContent={"center"} mt={3} mb={4}>
               <RainbowImage src={"images/" + gameImage} />
+            </Flex>
+
+            <Flex justifyContent={"center"} mt={3} mb={4}>
+              <Text fontWeight={600} lineHeight={"1em"}>
+                Prize: {tournament.prize} ETH
+              </Text>
             </Flex>
 
             <Flex justifyContent={"center"} mt={3} mb={4}>

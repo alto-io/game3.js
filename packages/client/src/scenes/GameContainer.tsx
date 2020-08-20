@@ -107,7 +107,7 @@ export default class GameContainer extends Component<IProps, IState> {
     // console.log('MediaRecorder started', this.mediaRecorder);
 
     // TEMP: if a WoM game, save after 10 secs
-    setInterval(this.stopRecording, 5000);
+    if (params === "wom") setTimeout(this.stopRecording, 5000);
 
   }
 

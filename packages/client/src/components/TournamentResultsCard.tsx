@@ -55,10 +55,34 @@ class TournamentResultsCard extends Component<any, any> {
     results = results.filter(result => !!result.sessionData)
     results.sort((el1, el2) => el2.sessionData.timeLeft - el1.sessionData.timeLeft)
 
+    // temp: placeholder results for demo
+    results = 
+    [
+      {
+        playerAddress: "0x40848f628B796690502b1F3Da5C31Ea4b4FD838C",
+        sessionData: {
+          timeLeft: "0:55"
+        }
+      },
+      {
+        playerAddress: "0xB83A97B94A7f26047cBDBAdf5eBe53224Eb12fEc",
+        sessionData: {
+          timeLeft: "0:50"
+        }
+      },
+      {
+        playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
+        sessionData: {
+          timeLeft: "0:30"
+        }
+      }
+    ]
+
     this.setState({
       results,
       isLoading: false
     })
+
   }
 
 
