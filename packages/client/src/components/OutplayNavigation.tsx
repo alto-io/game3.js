@@ -7,7 +7,10 @@ const StyledLinkContainer = styled(Box)`
     // props.routeName === props.route ? props.theme.colors.primary : ""};
     props.routeName === props.route ? "#0093d5" : ""};
   padding: 0.5rem 1rem;  
-  a,
+  a {
+    color: ${props =>
+      props.routeName === props.route ? "#fff" : "#a8a8a8"};
+  }
   a:hover {
     color: ${props =>
       // props.routeName === props.route ? "white" : props.theme.colors.primary};

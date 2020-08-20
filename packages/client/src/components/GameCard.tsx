@@ -21,10 +21,18 @@ function GameCard({
     }
   };
 
+  const cardBg = {
+    colors: {
+      yellow: '#ffb600', 
+      magenta: '#ff007b', 
+      purple: '#af5eff',
+      seaGreen: '#06df9b'
+    }
+  }
+
   return (
     <Box width={[1, 1 / 2, 1 / 3]} p={3}>
-      <Card p={0} borderColor={"#d6d6d6"}>
-        <RainbowBox height={"5px"} />
+      <Card p={0} theme={cardBg} bg="purple">
         <Flex
           alignItems={"center"}
           justifyContent={"space-between"}
