@@ -11,9 +11,13 @@ function GameCard({
 
   const StyledButton = styled(Button)`
     font-family: 'Apercu Light';
-    font-size: 0.7rem;
+    font-size: 1rem;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+
+    @media screen and (min-width 768px) {
+      font-size: 0.7rem;
+    }
   `
 
   const handleCreateRoomClick = () => {
