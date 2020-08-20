@@ -20,14 +20,19 @@ const RainbowBorder = styled(Flex)`
 const ShadowImage = styled(Image)`
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
+  height: 170px;
+  width: 270px;
+
+  @media screen and (min-width: 375px) {
+    height: 200px;
+    width: 300px;
+  }
 `;
 
 const RainbowImage = ({ src }) => {
   return (
     <RainbowBorder borderRadius={3}>
       <ShadowImage
-        height={"200px"}
-        width={"300px"}
         border={"none"}
         borderWidth={0}
         borderColor={"white"}

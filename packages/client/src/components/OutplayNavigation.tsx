@@ -4,18 +4,52 @@ import { Flex, Box, Link } from "rimble-ui";
 
 const StyledLinkContainer = styled(Box)`
   background: ${props =>
-    props.routeName === props.route ? props.theme.colors.primary : ""};
-  a,
+    // props.routeName === props.route ? props.theme.colors.primary : ""};
+    props.routeName === props.route ? "#0093d5" : ""};
+  padding: 0.5rem 1rem;  
+  a {
+    color: ${props =>
+      props.routeName === props.route ? "#fff" : "#a8a8a8"};
+  }
   a:hover {
     color: ${props =>
-      props.routeName === props.route ? "white" : props.theme.colors.primary};
+      // props.routeName === props.route ? "white" : props.theme.colors.primary};
+      props.routeName === props.route ? "#fff" :"#0093d5"};
     text-decoration: none;
+    transition: 300ms ease;
+  }
+
+  @media screen and (min-width: 768px) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    text-align: center;
+  }
+`;
+
+const StyledNavigation = styled(Flex)`
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  flex-direction: column;
+  margin-bottom: 2rem;
+
+  a {
+    font-size: 1.266rem;
+  }
+
+  @media screen and (min-width: 768px) {
+    flex-direction: row;
+    margin-bottom: 4.375rem;
+
+    a {
+      font-size: 1rem;
+    }
   }
 `;
 
 const OutplayNavigation = ({ route, setRoute }) => {
   return (
-    <Flex justifyContent={"center"} p={3} mb={"70px"}>
+    <StyledNavigation justifyContent={"center"} p={3}>
       <StyledLinkContainer
         mx={3}
         routeName={"Play"}
@@ -104,7 +138,7 @@ const OutplayNavigation = ({ route, setRoute }) => {
       </StyledLinkContainer>
 
 
-    </Flex>
+    </StyledNavigation>
   );
 };
 
