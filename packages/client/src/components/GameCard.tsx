@@ -15,7 +15,7 @@ function GameCard({
     letter-spacing: 0.5px;
     text-transform: uppercase;
 
-    @media screen and (min-width 768px) {
+    @media screen and (min-width: 768px) {
       font-size: 0.7rem;
     }
   `
