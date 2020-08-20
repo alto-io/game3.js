@@ -1,8 +1,24 @@
-@import url('https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap');
+/* @import url('https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap'); */
+@font-face {
+  font-family: 'Apercu Bold';
+  src: url('./assets/fonts/apercu_bold-webfont.woff2') format('woff2'),
+       url('./assets/fonts/apercu_bold-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Apercu Light';
+  src: url('./assets/fonts/apercu_light-webfont.woff2') format('woff2'),
+       url('./assets/fonts/apercu_light-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 
 html, body {
   height: 100%;
-  font-family: 'Press Start 2P';
+  font-family: 'Apercu Light', sans-serif;
   background-color: rgb(76, 42, 55);
 }
 
@@ -13,7 +29,7 @@ body {
 
 h1, p, input, select, button {
   margin: 0;
-  font-family: 'Press Start 2P';
+  font-family: 'Apercu Light', sans-serif;
 }
 
 a {
