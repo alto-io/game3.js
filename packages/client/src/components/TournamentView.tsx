@@ -15,8 +15,8 @@ const TEMP_TOURNEY = [{
 // Optional parameters to pass into RimbleWeb3
 const RIMBLE_CONFIG = {
   // accountBalanceMinimum: 0.001,
-  // requiredNetwork: 5777, // ganache
-  requiredNetwork: 4 // rinkeby
+   requiredNetwork: 5777, // ganache
+  // requiredNetwork: 4 // rinkeby
 };
 
 class TournamentView extends React.Component<any, any> {
@@ -78,6 +78,8 @@ class TournamentView extends React.Component<any, any> {
     this.setState({
       tournamentsCount,
     })
+
+    console.log("tourney count: " + tournamentsCount);
   }
 
   render() {

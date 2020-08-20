@@ -63,8 +63,6 @@ import { getLocalDatabaseManager, getPlayerProfile } from "./helpers/database";
 
 import Home from './scenes/Home';
 import GameContainer from './scenes/GameContainer';
-import Game from './scenes/Game';
-import GameUnity from './scenes/GameUnity';
 import Recorder from './scenes/Recorder';
 import Tournaments from './scenes/Tournaments'
 import Replay from './scenes/Replay';
@@ -120,7 +118,8 @@ const DEFAULT_ADDRESS = CREATE_WALLET_ON_GUEST_ACCOUNT
 // Optional parameters to pass into RimbleWeb3
 const RIMBLE_CONFIG = {
   // accountBalanceMinimum: 0.001,
-  requiredNetwork: 5777 // ganache
+  requiredNetwork: 5777, // ganache
+  //requiredNetwork: 4, // rinkeby
 };
 
 const INITIAL_STATE: IAppState = {
@@ -757,16 +756,12 @@ class App extends React.Component<any, any> {
                       />
 
                       <GameContainer
-                        path="game">
-                        <Game
-                          path=":roomId"
-                          address={account}
-                          drizzle={this.props.drizzle}
-                          drizzleState={drizzleState}
-                        />
-                        <GameUnity
-                          path="wom"
-                        />
+                        path="game/*"
+                        address={account}
+                        drizzle={this.props.drizzle}
+                        drizzleState={drizzleState}
+                        contractMethodSendWrapper={contractMethodSendWrapper}
+                        >
                       </GameContainer>
 
                       <Replay

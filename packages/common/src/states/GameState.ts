@@ -192,7 +192,7 @@ export class GameState extends Schema {
         kills: player.kills,
         timeLeft: this.game.gameEndsAt - Date.now()
       }
-      data.playerData[player.address] = scoreData
+      data.playerData[player.address.toLowerCase()] = scoreData
     }
     await ServerState.dbManager.serverPutGameSession(id, data)
   }

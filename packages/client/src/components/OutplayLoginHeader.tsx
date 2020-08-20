@@ -11,6 +11,7 @@ import TransactionsCard from "./TransactionsCard";
 
 import AccountOverview from "../rimble/components/AccountOverview";
 
+import logo from './../images/op-logo.png';
 import walletIcon from "./../images/icon-wallet.svg";
 import balanceIcon from "./../images/icon-balance.svg";
 import shortenAddress from "../core/utilities/shortenAddress";
@@ -81,7 +82,6 @@ class OutplayLoginHeader extends React.Component {
     return (
         <>
             <StyledHeader justifyContent={"space-between"} p={3} bg={"white"}>
-            {/* <Image src={logo} /> */}
             <Link
                       fontWeight={600}
                       fontSize={"32px"}
@@ -92,7 +92,12 @@ class OutplayLoginHeader extends React.Component {
                       }
                       onClick={this.handleClickLogo}
                     >
-                     OP Arcade
+            <Image
+              paddingRight={2}
+              borderColor={"white"}
+              overflow={"hidden"}
+              src={logo} />
+            OP Arcade
             </Link>
 
             {this.props.account && this.props.accountValidated ? (

@@ -2,11 +2,13 @@ import React, { Component } from 'react'
 import { drizzleConnect } from "@drizzle/react-plugin"
 
 import { format, isPast } from 'date-fns'
-import { Box, Card } from "rimble-ui";
-import { TOURNAMENT_STATE_DRAFT, TOURNAMENT_STATE_ACTIVE } from '../constants'
+import { Card, Button, Flex, Box, Text } from "rimble-ui";
+import RainbowBox from "./RainbowBox";
+import RainbowImage from "./RainbowImage";
+import { navigate } from '@reach/router';
+import qs from 'querystringify';
 
-import TournamentResult from './TournamentResult'
-import GameCard from '../components/GameCard'
+import { TOURNAMENT_STATE_ACTIVE } from '../constants'
 
 class TournamentCard extends Component<any, any> {
   constructor(props) {
@@ -54,16 +56,30 @@ class TournamentCard extends Component<any, any> {
       ownTournament = tournament.organizer.toLowerCase() === address.toLowerCase()
     }
 
-    // tournament.canDeclareWinner = results.find(r => r.isWinner) === null
-
     this.setState({
       tournament,
       ownTournament
     })
+
+    console.log(tournament);
+  }
+
+  handleJoinClick = () => {
+    const { tournament } = this.state
+
+    const options = {
+      mode: 'score attack',
+      roomMap: 'small',
+      roomMaxPlayers: '1',
+      roomName: '',
+      tournamentId: tournament.id,
+      playerName: 'You',
+      viewOnly: tournament.timeIsUp,
+    }
+    navigate(`/game/new${qs.stringify(options, true)}`);
   }
 
   render () {
-    const { onActivate, onPlay, onPlayResult, onDeclareWinner, drizzle } = this.props
     const { tournament, ownTournament } = this.state
 
     const hasTournament = !!tournament
@@ -78,36 +94,68 @@ class TournamentCard extends Component<any, any> {
       )
     }
 
-    // don't show own tournaments
-    if (hasTournament && ownTournament) {
-      return (null)
-    }
-
-    const canActivate = ownTournament && tournament.state === TOURNAMENT_STATE_DRAFT
     const isActive = tournament.state === TOURNAMENT_STATE_ACTIVE
-    const canPlay = !ownTournament && isActive && !tournament.timeIsUp
+    // don't show own tournaments
+    // if (ownTournament || !isActive) {
+    //   return (null)
+    // }
 
-    const prizeStr = `${drizzle.web3.utils.fromWei(tournament.prize)} ETH`
+//    const prizeStr = `${drizzle.web3.utils.fromWei(tournament.prize)} ETH`
     const endTimeStr = format(new Date(tournament.endTime),
       'MMM d, yyyy, HH:mm:ss')
 
-    const tmp = {
-      name: "TOSIOS",
-      image: "tosios.gif",
-      type: "pixijs",
-      button: "Join",
-      route: "new",
-      options: {
-        mode: "score attack",
-        roomMap: "small",
-        roomMaxPlayers: "1",
-        roomName: "",
-        tournamentId: tournament.id
-      }
-    }
+    const gameName = 'TOSIOS'
+    const gameImage = 'tosios.gif'
+    const buttonText = tournament.timeIsUp ? 'View' : 'Join'
 
     return (
-      <GameCard game={tmp} />
+      <Box width={[1, 1 / 2, 1 / 3]} p={3}>
+        <Card p={0} borderColor={"#d6d6d6"}>
+          <RainbowBox height={"5px"} />
+          <Flex
+            alignItems={"center"}
+            justifyContent={"space-between"}
+            flexDirection={"column"}
+            p={3}
+          >
+            <Flex justifyContent={"center"} mt={3} mb={4}>
+              <RainbowImage src={"images/" + gameImage} />
+            </Flex>
+
+            <Flex justifyContent={"center"} mt={3} mb={4}>
+              <Text fontWeight={600} lineHeight={"1em"}>
+                Prize: {tournament.prize} ETH
+              </Text>
+            </Flex>
+
+            <Flex justifyContent={"center"} mt={3} mb={4}>
+              <Text fontWeight={600} lineHeight={"1em"}>
+                {gameName}
+              </Text>
+            </Flex>
+            <Flex justifyContent={"center"} mt={1} mb={2}>
+              <Text fontWeight={300} lineHeight={"0.75em"}>
+                Ending: {endTimeStr}
+              </Text>
+            </Flex>
+            <Flex justifyContent={"center"} mt={1} mb={2}>
+              <Text fontWeight={300} lineHeight={"0.75em"}>
+                Status: { tournament.timeIsUp ? 'Closed' : 'Active' }
+              </Text>
+            </Flex>
+
+            <Button
+                mt={"26px"}
+                mb={2}
+                type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
+                name={"recepient"} // set the name to the method's argument key
+                onClick={this.handleJoinClick}
+              >
+                {buttonText}
+          </Button>
+          </Flex>
+        </Card>
+      </Box>
     )
   }
 }
