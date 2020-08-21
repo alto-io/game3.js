@@ -5,6 +5,7 @@ import { IChainData } from "./types";
 import supportedChains from "./chains";
 import { apiGetGasPrices, apiGetAccountNonce } from "./api";
 import { convertAmountToRawNumber, convertStringToHex } from "./bignumber";
+import { navigate, NavigateOptions } from '@reach/router';
 
 export function capitalize(string: string): string {
   return string
@@ -286,4 +287,13 @@ export function recoverPublicKey(sig: string, hash: string): string {
 
 export function isObject(obj: any): boolean {
   return typeof obj === "object" && !!Object.keys(obj).length;
+}
+
+let beforePathChange = new Event("onpathchange", {cancelable: true});
+
+export async function navigateTo(path: string, options?: NavigateOptions<{}>) {
+  let canceled = dispatchEvent(beforePathChange);
+  if(!canceled) {
+    await navigate(path, options);
+  }
 }

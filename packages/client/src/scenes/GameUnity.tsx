@@ -87,6 +87,7 @@ export class GameUnity extends React.Component<IProps, any> {
     );
 
     this.unityContent.on("progress", progression => {
+      this.setState({isGameRunning: false})
       console.log("Unity progress", progression);
     });
 
@@ -149,7 +150,7 @@ export class GameUnity extends React.Component<IProps, any> {
     const { isGameRunning } = this.state;
     return (
         <View>
-            <LeavingGamePrompt when={isGameRunning}/>
+            <LeavingGamePrompt />
              <Card maxWidth={'1024px'} px={4} mx={'auto'}>  
               <Button
                 block
