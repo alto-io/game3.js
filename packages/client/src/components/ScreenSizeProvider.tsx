@@ -1,6 +1,6 @@
-import React, { Component } from "react";
+import React, { Component, createContext } from "react";
 
-const screenSizeContext = React.createContext({});
+export const ScreenSizeContext = createContext({});
 
 class ScreenSizeProvider extends Component {
   constructor(props) {
@@ -22,16 +22,8 @@ class ScreenSizeProvider extends Component {
       })
     }
 
-    componentDidUnMount () {
+    componentWillUnmount () {
       window.removeEventListener('resize', this.handleResize)
-    }
-
-    render() {
-      return (
-        <screenSizeContext.Provider value={ {state: this.state } }>
-          { this.props.children }
-        </screenSizeContext.Provider>
-      )
     }
 
     handleResize = () => {
@@ -40,6 +32,14 @@ class ScreenSizeProvider extends Component {
         height: window.innerHeight,
         isMobile: window.innerWidth <=  768
       })
+    }
+
+    render() {
+      return (
+        <ScreenSizeContext.Provider value={ {...this.state} }>
+          { this.props.children }
+        </ScreenSizeContext.Provider>
+      )
     }
 }
 

@@ -16,6 +16,8 @@ import walletIcon from "./../images/icon-wallet.svg";
 import balanceIcon from "./../images/icon-balance.svg";
 import shortenAddress from "../core/utilities/shortenAddress";
 import { navigate } from '@reach/router';
+import { ScreenSizeContext } from './ScreenSizeProvider'
+import ScreenSizeProvider from './ScreenSizeProvider';
 
 class OutplayLoginHeader extends React.Component {
   constructor(props) {
@@ -43,26 +45,6 @@ class OutplayLoginHeader extends React.Component {
           }
         })
       }
-      
-    handleResize = () => {
-      this.setState({
-        width: window.innerWidth,
-        height: window.innerHeight
-      })
-    }
-
-    componentDidMount () {
-      window.addEventListener('resize', this.handleResize)
-
-      this.setState({
-        width: window.innerWidth,
-        height: window.innerHeight
-      })
-    }
-
-    componentDidUnMount () {
-      window.removeEventListener('resize', this.handleResize)
-    }
 
     componentDidUpdate() {
 
@@ -91,45 +73,50 @@ class OutplayLoginHeader extends React.Component {
       }    
 
     render() {
-    const {
-        account,
-        accountBalance,
-        accountValidated,
-        transactions
-        } = this.props;     
+      return (
+        <ScreenSizeProvider>
+          <ScreenSizeContext.Consumer>{(context) => {
+            const {
+            account,
+            accountBalance,
+            accountValidated,
+            transactions
+            } = this.props; 
 
-    return (
-        <>
-          {this.state.width > 768 ? (
-            <OutplayLoginHeaderDesktop 
-            account={account}
-            accountBalance={accountBalance}
-            accountValidated={accountValidated}
-            handleClickLogo={this.handleClickLogo}
-            handleConnectAccount={this.handleConnectAccount}
-            logo={logo}
-            walletIcon={walletIcon}
-            balanceIcon={balanceIcon}
-            shortenAddress={shortenAddress}
-          />
-                    
-          ) : <OutplayLoginHeaderMobile 
-            account={account}
-            accountBalance={accountBalance}
-            accountValidated={accountValidated}
-            handleClickLogo={this.handleClickLogo}
-            handleConnectAccount={this.handleConnectAccount}
-            logo={logo}
-            walletIcon={walletIcon}
-            balanceIcon={balanceIcon}
-            shortenAddress={shortenAddress}
-          />}
-
-
-          <TransactionToastUtil transactions={transactions} />
-        </>
-    );
-  }
+            return (
+              <>
+              {this.context.width > 768 ? (
+              <OutplayLoginHeaderDesktop 
+              account={account}
+              accountBalance={accountBalance}
+              accountValidated={accountValidated}
+              handleClickLogo={this.handleClickLogo}
+              handleConnectAccount={this.handleConnectAccount}
+              logo={logo}
+              walletIcon={walletIcon}
+              balanceIcon={balanceIcon}
+              shortenAddress={shortenAddress}
+            />
+                      
+            ) : <OutplayLoginHeaderMobile 
+              account={account}
+              accountBalance={accountBalance}
+              accountValidated={accountValidated}
+              handleClickLogo={this.handleClickLogo}
+              handleConnectAccount={this.handleConnectAccount}
+              logo={logo}
+              walletIcon={walletIcon}
+              balanceIcon={balanceIcon}
+              shortenAddress={shortenAddress}
+            />}
+            <TransactionToastUtil transactions={transactions} />
+            </>
+            )
+          }}
+          </ScreenSizeContext.Consumer>
+        </ScreenSizeProvider>
+      );
+    }
 }
 
 export default OutplayLoginHeader;
