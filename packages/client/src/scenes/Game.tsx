@@ -13,6 +13,7 @@ import GameManager from '../managers/GameManager';
 import { View } from '../components'
 import GameResult from '../components/GameResult'
 import TournamentResultsCard from '../components/TournamentResultsCard'
+import LeavingGamePrompt from '../components/LeavingGamePrompt';
 
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -73,12 +74,15 @@ export default class Game extends Component<IProps, IState> {
   
   async componentDidMount() {
     await this.start();  
-    window.addEventListener("beforeunload", this.handlePageUnloading);
-  }
+    // window.addEventListener("beforeunload", this.handlePageUnloading);
+
+    // history.pushState(null, document.title, location.href);
+    // window.addEventListener('popstate', this.handlePageBackButton);
+   }
 
   componentWillUnmount() {
     this.stop();
-    window.removeEventListener("beforeunload", this.handlePageUnloading);
+    // window.removeEventListener("beforeunload", this.handlePageUnloading);
   }
 
 
@@ -307,15 +311,6 @@ export default class Game extends Component<IProps, IState> {
 
     this.room.send("action", action);
   }
-
-  // Temporary handler when user reloads while playing the game
-  handlePageUnloading = (e: event) => {
-    if (!this.state.gameOver){
-      let promptMessage = "Test";
-      (e|| window.event).returnValue = promptMessage;
-      return promptMessage;
-    }
-  }
   
 
   // HANDLERS: Inputs
@@ -451,6 +446,7 @@ export default class Game extends Component<IProps, IState> {
 
     return (
         <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
+          <LeavingGamePrompt when={!gameOver}/>
           { !viewOnly && (
           <Card maxWidth={'1088px'} maxHeight={'664px'} px={4} mx={'auto'}>
             <Helmet>

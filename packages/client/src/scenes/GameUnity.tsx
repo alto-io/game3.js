@@ -1,6 +1,7 @@
 import React from "react";
 import Unity, { UnityContent } from "react-unity-webgl";
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
+import LeavingGamePrompt from '../components/LeavingGamePrompt';
 import { Card } from "rimble-ui";
 
 interface IProps extends RouteComponentProps {
@@ -30,14 +31,6 @@ export class GameUnity extends React.Component<IProps, any> {
 
   speed = 30;
   unityContent = null as any;
-
-  componentDidMount() {
-    window.addEventListener("beforeunload", this.handlePageUnloading);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("beforeunload", this.handlePageUnloading);
-  }
 
   onPlayGame = async (e) => {
 
@@ -152,18 +145,11 @@ export class GameUnity extends React.Component<IProps, any> {
     this.setState({ unityShouldBeMounted: false });
   }
 
-  // Temporary handler when user reloads while playing the game
-  handlePageUnloading = (e: event) => {
-   let promptMessage = "Test";
-   (e|| window.event).returnValue = promptMessage;
-   return promptMessage;
-  }
-
   render() {
     const { isGameRunning } = this.state;
-    console.log(isGameRunning);
     return (
         <View>
+            <LeavingGamePrompt when={isGameRunning}/>
              <Card maxWidth={'1024px'} px={4} mx={'auto'}>  
               <Button
                 block
