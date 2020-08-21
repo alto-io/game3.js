@@ -1,37 +1,46 @@
-import React, { useState, useEffect, createContext } from "react";
+import React, { Component } from "react";
 
-// shares the state to multiple components
-const screenSizeContext = createContext({});
+const screenSizeContext = React.createContext({});
 
-// provider context to store the state and the logic
-const ScreenSizeProvider = ({ children }) => {
-    // set state of width, height, and breakpoint
-    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-    const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
-    // no dependencies so the useEffect would run when the component  mounts and not when it updates
-    useEffect(()=>{
-      // updates the states
-      const handleWindowResize = () => {
-        setScreenWidth(window.innerWidth);
-        setScreenHeight(window.innerHeight);
-        setIsMobile(window.innerWidth < 768);
-      }
-  
-      // add listener to window
-      window.addEventListener("resize", handleWindowResize);
+class ScreenSizeProvider extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      isMobile: window.innerWidth <= 768
+    }
+  }
 
-      // remove listener so it wont constantly be called
-      return () => window.removeEventListener("resize", handleWindowResize);
-    },[])
-  
-    // store the values inside the provider
-    return (
-      <screenSizeContext.Provider value={{ screenWidth, screenHeight, isMobile }}>
-        {children}
-      </screenSizeContext.Provider>
-    );
+    componentDidMount () {
+      window.addEventListener('resize', this.handleResize)
+
+      this.setState({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        isMobile: window.innerWidth <= 768
+      })
+    }
+
+    componentDidUnMount () {
+      window.removeEventListener('resize', this.handleResize)
+    }
+
+    render() {
+      return (
+        <screenSizeContext.Provider value={ {state: this.state } }>
+          { this.props.children }
+        </screenSizeContext.Provider>
+      )
+    }
+
+    handleResize = () => {
+      this.setState({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        isMobile: window.innerWidth <=  768
+      })
+    }
 }
 
 export default ScreenSizeProvider;
