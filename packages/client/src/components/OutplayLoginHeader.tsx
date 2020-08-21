@@ -1,9 +1,9 @@
 import React from "react";
 import { Card, Text, Box, Button, Flex, Image, Link } from "rimble-ui";
+import OutplayLoginHeaderDesktop from "./OutplayLoginHeaderDesktop";
+import OutplayLoginHeaderMobile from "./OutplayLoginHeaderMobile";
 
 import RimbleWeb3 from "../rimble/RimbleWeb3";
-
-import styled from "styled-components";
 
 import TransactionToastUtil from "../rimble/TransactionToastUtil";
 import SmartContractControls from "./SmartContractControls";
@@ -17,33 +17,14 @@ import balanceIcon from "./../images/icon-balance.svg";
 import shortenAddress from "../core/utilities/shortenAddress";
 import { navigate } from '@reach/router';
 
-// const StyledHeader = styled(Flex)`
-// border-bottom: 1px solid #d6d6d6;
-// box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.01);
-// `;
-
-const StyledLink = styled(Link)`
-display: flex;
-flex-direction: row;
-align-items: center;
-&:hover {
-  text-decoration: none;
-}
-`;
-
-const StyledTextLink = styled(Link)`
-  &:hover {
-    text-decoration: none;
-  }
-`
-const StyledButton = styled(Button)`
-  font-family: 'Apercu Light';
-  font-size: 0.7rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-`
-
 class OutplayLoginHeader extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      width: window.innerWidth,
+      height: window.innerHeight
+    };
+  }
 
     private contractInitialized:boolean = false;
 
@@ -61,7 +42,27 @@ class OutplayLoginHeader extends React.Component {
             console.log("Callback ERROR");
           }
         })
-      }    
+      }
+      
+    handleResize = () => {
+      this.setState({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+
+    componentDidMount () {
+      window.addEventListener('resize', this.handleResize)
+
+      this.setState({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+
+    componentDidUnMount () {
+      window.removeEventListener('resize', this.handleResize)
+    }
 
     componentDidUpdate() {
 
@@ -91,106 +92,44 @@ class OutplayLoginHeader extends React.Component {
 
     render() {
     const {
-        contract,
         account,
         accountBalance,
-        transactions,
-        initContract,
-        initAccount,
-        drizzle
+        accountValidated,
+        transactions
         } = this.props;     
+
     return (
         <>
-            <Flex justifyContent={"space-between"} p={3} bg={"white"}>
-            <StyledLink
-                      fontWeight={600}
-                      fontSize={"1.13rem"}
-                      color={"#2B2C36"}
-                      lineHeight={0.8}
-                      title={
-                        "Back to Home"
-                      }
-                      onClick={this.handleClickLogo}
-                    >
-            <Image
-              paddingRight={2}
-              borderColor={"white"}
-              overflow={"hidden"}
-              src={logo} />
-            OP<br/>Arcade
-            </StyledLink>
+          {this.state.width > 768 ? (
+            <OutplayLoginHeaderDesktop 
+            account={account}
+            accountBalance={accountBalance}
+            accountValidated={accountValidated}
+            handleClickLogo={this.handleClickLogo}
+            handleConnectAccount={this.handleConnectAccount}
+            logo={logo}
+            walletIcon={walletIcon}
+            balanceIcon={balanceIcon}
+            shortenAddress={shortenAddress}
+          />
+                    
+          ) : <OutplayLoginHeaderMobile 
+            account={account}
+            accountBalance={accountBalance}
+            accountValidated={accountValidated}
+            handleClickLogo={this.handleClickLogo}
+            handleConnectAccount={this.handleConnectAccount}
+            logo={logo}
+            walletIcon={walletIcon}
+            balanceIcon={balanceIcon}
+            shortenAddress={shortenAddress}
+          />}
 
-            
-            
-            <Flex justifyContent="center" alignItems="center">
-              <StyledTextLink href="https://outplay.games/" target="_blank" title="To outplay.games" mr={4}>About Us</StyledTextLink>
-              {this.props.account && this.props.accountValidated ? (
-                <Flex>
-                  <Flex alignItems={"center"} mr={4}>
-                    <Image src={walletIcon} mr={2} />
-                    <Box>
-                      <Text
-                        fontWeight={600}
-                        fontSize={"12px"}
-                        color={"#2B2C36"}
-                        lineHeight={1}
-                      >
-                        Connected as
-                      </Text>
-                      <Text fontSize={1} color={"primary"}>
-                        {shortenAddress(account)}
-                      </Text>
-                    </Box>
-                  </Flex>
-        
-                  <Flex alignItems={"center"}>
-                    <Image src={balanceIcon} mr={2} />
-                    <Box>
-                      <Text
-                        fontWeight={600}
-                        fontSize={"12px"}
-                        color={"#2B2C36"}
-                        lineHeight={1}
-                      >
-                        Balance
-                      </Text>
-                      <Text fontSize={1} color={"primary"}>
-                        {accountBalance.toString()} ETH
-                      </Text>
-                    </Box>
-                  </Flex>
-                </Flex>
-              ) : (
-                  <>
-                  <StyledButton color="primary" size="small" onClick={this.handleConnectAccount}>
-                    Connect your wallet
-                  </StyledButton>
-                  </>
-              )}
-            </Flex>
-          </Flex>
-           <TransactionToastUtil transactions={transactions} />
+
+          <TransactionToastUtil transactions={transactions} />
         </>
     );
   }
 }
 
 export default OutplayLoginHeader;
-
-/*
-
-          <div>
-            <Card maxWidth={'640px'} px={4} mx={'auto'}>
-              <SmartContractControls
-                contract={contract}
-                account={account}
-                transactions={transactions}
-                initContract={initContract}
-                contractMethodSendWrapper={contractMethodSendWrapper}
-              />
-            </Card>
-
-            <TransactionsCard transactions={transactions} />
-          </div>
-
-          */
