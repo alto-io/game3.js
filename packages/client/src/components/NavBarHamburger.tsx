@@ -16,6 +16,8 @@ const BurgerContainer = styled(Flex)`
   .active3 {
     transform: rotate(-45deg) translate(7px, -3px);
   }
+
+  z-index: 5;
 `
 
 const BurgerDiv = styled(Box)`

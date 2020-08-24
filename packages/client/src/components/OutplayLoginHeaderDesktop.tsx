@@ -3,15 +3,19 @@ import {Text, Box, Button, Flex, Image, Link } from "rimble-ui";
 import styled from "styled-components";
 
 const StyledLink = styled(Link)`
-display: flex;
-flex-direction: row;
-align-items: center;
-&:hover {
-  text-decoration: none;
-}
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  transition: 300ms ease;
+
+  &:hover {
+    text-decoration: none;
+  }
 `;
 
 const StyledTextLink = styled(Link)`
+  transition: 300ms ease;
+  
   &:hover {
     text-decoration: none;
   }
