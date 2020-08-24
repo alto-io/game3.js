@@ -289,11 +289,28 @@ export function isObject(obj: any): boolean {
   return typeof obj === "object" && !!Object.keys(obj).length;
 }
 
-let beforePathChange = new Event("onpathchange", {cancelable: true});
+
+// Create custom event for when before navigating using navigate function
+let myFunc: Function = null;
+let beforePathChange: CustomEvent;
+
+function createEventOnce(func: Function, params: any) {
+  if(!myFunc) {
+    myFunc = func
+
+    beforePathChange = new CustomEvent("onpathchange", {
+    cancelable: true,
+    detail: {
+      continue: () => myFunc(params.path, params.options)
+    }
+  });
+  }
+} 
 
 export async function navigateTo(path: string, options?: NavigateOptions<{}>) {
-  let canceled = dispatchEvent(beforePathChange);
-  if(!canceled) {
+  createEventOnce(navigate, {path, options});
+
+  if(dispatchEvent(beforePathChange)) {
     await navigate(path, options);
   }
 }

@@ -442,7 +442,7 @@ export default class Game extends Component<IProps, IState> {
     const { showResult, gameSessionId, recordFileHash, 
       tournamentId, gameOver, viewOnly } = this.state
     const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
-    console.log(gameOver);
+    console.log("The Game is over?",gameOver);
 
     return (
         <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
