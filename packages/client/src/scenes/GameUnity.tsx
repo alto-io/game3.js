@@ -76,10 +76,10 @@ export class GameUnity extends React.Component<IProps, any> {
 
         // TODO: add any relevant game end code
         case 'GameEndFail':
-
+          this.setState({ isGameRunning: false });
       break;
         case 'GameEndSuccess':
-
+          this.setState({ isGameRunning: false });
       break;
 
     }
@@ -97,7 +97,7 @@ export class GameUnity extends React.Component<IProps, any> {
     );
 
     this.unityContent.on("progress", progression => {
-      this.setState({isGameRunning: false})
+      this.setState({isGameRunning: true})
       console.log("Unity progress", progression);
     });
 
@@ -160,7 +160,7 @@ export class GameUnity extends React.Component<IProps, any> {
     const { isGameRunning } = this.state;
     return (
         <View>
-            <LeavingGamePrompt />
+            <LeavingGamePrompt when={isGameRunning} />
              <Card maxWidth={'1024px'} px={4} mx={'auto'}>  
               <Button
                 block

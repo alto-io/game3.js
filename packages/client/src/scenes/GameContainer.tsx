@@ -8,7 +8,9 @@ import { localSaveReplay, clientSaveTournamentReplay } from "../helpers/database
 
 import Game from './Game';
 import GameUnity from './GameUnity';
+import TournamentResultsCard from '../components/TournamentResultsCard';
 
+import CSS from 'csstype';
 
 declare global {
   interface Window { MediaRecorder: any; }
@@ -156,24 +158,29 @@ export default class GameContainer extends Component<IProps, IState> {
     render() {
       const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
         return (
-            <Router>
-              <Game
-                path=":roomId"
-                startRecording={this.startRecording}
-                stopRecording={this.stopRecording}
-                drizzle={drizzle}
-                drizzleState={drizzleState}
-                contractMethodSendWrapper={contractMethodSendWrapper}
-              />
-              <GameUnity
-                path="wom"
-                startRecording={this.startRecording}
-                stopRecording={this.stopRecording}
-                drizzle={drizzle}
-                drizzleState={drizzleState}
-                contractMethodSendWrapper={contractMethodSendWrapper}
-              />
+          <Router>
+            <Game
+              path=":roomId"
+              startRecording={this.startRecording}
+              stopRecording={this.stopRecording}
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contractMethodSendWrapper={contractMethodSendWrapper}
+            />
+            <GameUnity
+              path="wom"
+              startRecording={this.startRecording}
+              stopRecording={this.stopRecording}
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contractMethodSendWrapper={contractMethodSendWrapper}
+            />
           </Router>
         );
     }
+}
+
+const gamescenecontainerDesign: CSS.Properties = {
+  background: '#EEEEEE',
+  display: 'flex',
 }
