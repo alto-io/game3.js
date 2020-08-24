@@ -15,8 +15,9 @@ function GameCard({
     letter-spacing: 0.5px;
     text-transform: uppercase;
 
-    @media screen and (min-width: 768px) {
-      font-size: 0.7rem;
+    @media screen and (min-width: 1024px) {
+      font-size: 0.75rem;
+      letter-spacing: 0.4px;
     }
   `
 
@@ -33,7 +34,7 @@ function GameCard({
   };
 
   return (
-    <Box width={[1, 1 / 2, 1 / 3]} p={3}>
+    <Box width={[1, 1/2, 1/2, 1/3 ]} p={3}>
       <Card p={0} bg={game.color}>
         <Flex
           alignItems={"center"}
@@ -59,7 +60,7 @@ function GameCard({
               onClick={handleCreateRoomClick}
             >
               {game.button}
-        </StyledButton>
+          </StyledButton>
         </Flex>
       </Card>
     </Box>

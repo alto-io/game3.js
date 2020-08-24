@@ -19,8 +19,8 @@ const StyledTextLink = styled(Link)`
 
 const StyledButton = styled(Button)`
   font-family: 'Apercu Light';
-  font-size: 0.7rem;
-  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
 `
 
