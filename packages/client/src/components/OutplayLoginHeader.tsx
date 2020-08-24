@@ -19,21 +19,6 @@ import { navigate } from '@reach/router';
 
 import { navigateTo } from '../helpers/utilities';
 
-// const StyledHeader = styled(Flex)`
-// border-bottom: 1px solid #d6d6d6;
-// box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.01);
-// `;
-
-const StyledLink = styled(Link)`
-display: flex;
-flex-direction: row;
-align-items: center;
-&:hover {
-  text-decoration: none;
-}
-`;
-
-
 class OutplayLoginHeader extends React.Component {
   constructor(props) {
     super(props);
