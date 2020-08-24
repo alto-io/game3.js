@@ -15,18 +15,30 @@ const RainbowBorder = styled(Flex)`
   );
   padding: 1px;
   display: inline-flex;
+  ${'' /* width: 275px;
+  height: 175px; */}
+  width: 275px;
+  height: 175px;
+  
+  @media screen and (min-width: 425px) {
+    ${'' /* width: 375px;
+    height: 275px; */}
+    min-width: 375px;
+    min-height: 275px;
+  }
+
+  @media screen and (min-width: 640px) {
+    min-width: 275px;
+    min-height: 175px;
+  }
+
 `;
 
 const ShadowImage = styled(Image)`
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
-  height: 170px;
-  width: 270px;
-
-  @media screen and (min-width: 375px) {
-    height: 200px;
-    width: 300px;
-  }
+  height: auto;
+  width: 100%;
 `;
 
 const RainbowImage = ({ src }) => {
@@ -39,6 +51,7 @@ const RainbowImage = ({ src }) => {
         overflow={"hidden"}
         bg={"white"}
         src={src}
+        className="thistheimage"
       />
     </RainbowBorder>
   );
