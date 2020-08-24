@@ -22,7 +22,7 @@ class ScreenSizeProvider extends Component {
       })
     }
 
-    componentDidUnMount () {
+    componentWillUnmount () {
       window.removeEventListener('resize', this.handleResize)
     }
 

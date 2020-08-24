@@ -60,7 +60,7 @@ class OutplayLoginHeader extends React.Component {
       })
     }
 
-    componentDidUnMount () {
+    componentWillUnmount () {
       window.removeEventListener('resize', this.handleResize)
     }
 
