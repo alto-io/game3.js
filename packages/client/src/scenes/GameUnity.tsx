@@ -70,8 +70,18 @@ export class GameUnity extends React.Component<IProps, any> {
           }
         );
       break;
+
+        // TODO: add any relevant game end code
+        case 'GameEndFail':
+
+      break;
+        case 'GameEndSuccess':
+
+      break;
+
     }
 
+    console.log(outplayEvent);
     // send out an event
     // this.eventDispatcher.dispatch(outplayEvent);
   }
