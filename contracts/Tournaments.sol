@@ -17,6 +17,7 @@ contract Tournaments is Ownable {
     uint            endTime;
     string          data;
     uint            prize;
+    uint            maxTries;
     TournamentState state;
     uint            balance;
   }
@@ -29,6 +30,7 @@ contract Tournaments is Ownable {
 
   Tournament[] public tournaments;
   mapping(uint => GameResult[]) public results;
+  mapping(uint => mapping (address => uint[])) public resultsPlayerMap;
 
   /**
     Events
@@ -80,6 +82,11 @@ contract Tournaments is Ownable {
     _;
   }
 
+  modifier enoughTriesLeft(uint id, address user) {
+    require(tournaments[id].maxTries < resultsPlayerMap[id][user].length, "Max tries reached");
+    _;
+  }
+
   modifier onlyOrganizer(uint tournamentId) {
     require(msg.sender == tournaments[tournamentId].organizer,
       "Must be tournament's organizer");
@@ -123,7 +130,8 @@ contract Tournaments is Ownable {
     address payable organizer,
     uint            endTime,
     string calldata data,
-    uint256         prize
+    uint256         prize,
+    uint            maxTries
   )
     external
     notInPast(endTime)
@@ -131,7 +139,8 @@ contract Tournaments is Ownable {
     noTournamentsOverflow()
     returns (uint)
   {
-    tournaments.push(Tournament(organizer, endTime, data, prize, TournamentState.Draft, 0));
+    tournaments.push(Tournament(organizer, endTime, data, prize,
+      maxTries, TournamentState.Draft, 0));
     emit TournamentCreated(tournaments.length - 1);
     return (tournaments.length - 1);
   }
@@ -159,9 +168,12 @@ contract Tournaments is Ownable {
     correctTournamentState(tournamentId, TournamentState.Active)
     tournamentNotEnded(tournamentId)
     notOrganizer(tournamentId)
+    enoughTriesLeft(tournamentId, msg.sender)
   {
-      results[tournamentId].push(GameResult(false, msg.sender, data));
-      emit ResultSubmitted(tournamentId, msg.sender, (results[tournamentId].length - 1));
+    results[tournamentId].push(GameResult(false, msg.sender, data));
+    uint resultId = results[tournamentId].length - 1;
+    resultsPlayerMap[tournamentId][msg.sender].push(resultId);
+    emit ResultSubmitted(tournamentId, msg.sender, resultId);
   }
 
   function declareWinner(uint tournamentId, uint resultId)
