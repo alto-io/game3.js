@@ -18,13 +18,13 @@ const StyledTextLink = styled(Link)`
 `
 const Dropdown = styled.ul`
   background-color: #fff;
-  display: flex;
   color: #4E174F;
+  display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: flex-end;
-  list-style: none;
   font-size: 1rem;
+  list-style: none;
   letter-spacing: 0.5px;
   margin: 0;
 
@@ -99,7 +99,7 @@ class OutplayLoginHeaderMobile extends Component {
             )}
             
 
-            <NavBarHamburger handleBurger={this.handleBurger}/>
+            <NavBarHamburger handleBurger={this.handleBurger} isOpen={this.state.isOpen}/>
           </Flex> 
         </Flex>
 
