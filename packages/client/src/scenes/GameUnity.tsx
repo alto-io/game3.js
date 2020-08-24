@@ -1,6 +1,7 @@
 import React from "react";
 import Unity, { UnityContent } from "react-unity-webgl";
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
+import LeavingGamePrompt from '../components/LeavingGamePrompt';
 import { Card } from "rimble-ui";
 
 interface IProps extends RouteComponentProps {
@@ -10,6 +11,7 @@ interface IProps extends RouteComponentProps {
   startRecording: any;
   stopRecording: any;
   contractMethodSendWrapper?: any;
+  isGameRunning?: boolean;
 }
 
 export class GameUnity extends React.Component<IProps, any> {
@@ -20,7 +22,8 @@ export class GameUnity extends React.Component<IProps, any> {
       rotation: 0,
       unityShouldBeMounted: true,
       gameReady: false,
-      selectedLevel: false
+      selectedLevel: false,
+      isGameRunning: false
     };
 
     this.initializeUnity();
@@ -94,15 +97,18 @@ export class GameUnity extends React.Component<IProps, any> {
     );
 
     this.unityContent.on("progress", progression => {
+      this.setState({isGameRunning: false})
       console.log("Unity progress", progression);
     });
 
     this.unityContent.on("loaded", () => {
       console.log("Yay! Unity is loaded!");
+
       //// BUG: React doesn't like to render state change on new accounts :(
       this.setState(
         {
-          gameReady: true
+          gameReady: true,
+          isGameRunning: true
         }
       );
     });
@@ -119,6 +125,14 @@ export class GameUnity extends React.Component<IProps, any> {
     this.unityContent.on("SendNumber", rotation => {
       this.setState({ rotation: Math.round(rotation) });
     });
+
+    this.unityContent.on("quitted", () => {
+      this.setState({isGameRunning: false})
+    });
+
+    this.unityContent.on("error", () => {
+      this.setState({isGameRunning: false})
+    })
   }
 
   onClickSendToJS() {
@@ -143,8 +157,10 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   render() {
+    const { isGameRunning } = this.state;
     return (
         <View>
+            <LeavingGamePrompt />
              <Card maxWidth={'1024px'} px={4} mx={'auto'}>  
               <Button
                 block
@@ -171,7 +187,6 @@ export class GameUnity extends React.Component<IProps, any> {
                 }
             </div>
             </Card>       
-
         </View>
     );
   }
