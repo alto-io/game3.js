@@ -5,6 +5,7 @@ import { IChainData } from "./types";
 import supportedChains from "./chains";
 import { apiGetGasPrices, apiGetAccountNonce } from "./api";
 import { convertAmountToRawNumber, convertStringToHex } from "./bignumber";
+import { navigate, NavigateOptions } from '@reach/router';
 
 export function capitalize(string: string): string {
   return string
@@ -286,4 +287,30 @@ export function recoverPublicKey(sig: string, hash: string): string {
 
 export function isObject(obj: any): boolean {
   return typeof obj === "object" && !!Object.keys(obj).length;
+}
+
+
+// Create custom event for when before navigating using navigate function
+let myFunc: Function = null;
+let beforePathChange: CustomEvent;
+
+function createEventOnce(func: Function, params: any) {
+  if(!myFunc) {
+    myFunc = func
+
+    beforePathChange = new CustomEvent("onpathchange", {
+    cancelable: true,
+    detail: {
+      continue: () => myFunc(params.path, params.options)
+    }
+  });
+  }
+} 
+
+export async function navigateTo(path: string, options?: NavigateOptions<{}>) {
+  createEventOnce(navigate, {path, options});
+
+  if(dispatchEvent(beforePathChange)) {
+    await navigate(path, options);
+  }
 }
