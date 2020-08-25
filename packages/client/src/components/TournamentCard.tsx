@@ -5,6 +5,7 @@ import { format, isPast } from 'date-fns'
 import { Card, Button, Flex, Box, Text } from "rimble-ui";
 import RainbowBox from "./RainbowBox";
 import RainbowImage from "./RainbowImage";
+import JoinPromptModal from "./JoinPromptModal";
 import { navigate } from '@reach/router';
 import qs from 'querystringify';
 
@@ -16,8 +17,11 @@ class TournamentCard extends Component<any, any> {
 
     this.state = {
       tournament: null,
-      ownTournament: false
+      ownTournament: false,
+      isOpen: false
     }
+    this.handleCloseModal = this.handleCloseModal.bind(this);
+    this.handleOpenModal = this.handleOpenModal.bind(this);
   }
 
   componentDidMount() {
@@ -77,6 +81,15 @@ class TournamentCard extends Component<any, any> {
       viewOnly: tournament.timeIsUp,
     }
     navigate(`/game/new${qs.stringify(options, true)}`);
+  }
+
+  handleCloseModal = e => {
+    this.setState({isOpen: false});
+  }
+
+  handleOpenModal = e => {
+    e.preventDefault();
+    this.setState({isOpen: true});
   }
 
   render () {
@@ -149,10 +162,18 @@ class TournamentCard extends Component<any, any> {
                 mb={2}
                 type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
                 name={"recepient"} // set the name to the method's argument key
-                onClick={this.handleJoinClick}
+                onClick={this.props.account && this.props.accountValidated ? this.handleJoinClick : this.handleOpenModal}
               >
                 {buttonText}
-          </Button>
+            </Button>
+
+            <JoinPromptModal 
+              isOpen={this.state.isOpen}
+              handleCloseModal={this.handleCloseModal}
+              connectAndValidateAccount={this.props.connectAndValidateAccount}
+              account={this.props.account}
+              accountValidated={this.props.accountValidated}
+            />
           </Flex>
         </Card>
       </Box>
