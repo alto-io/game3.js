@@ -77,9 +77,12 @@ export class GameUnity extends React.Component<IProps, any> {
         // TODO: add any relevant game end code
         case 'GameEndFail':
           this.setState({ isGameRunning: false });
+          this.props.stopRecording.call(null, "wom");
+
       break;
         case 'GameEndSuccess':
           this.setState({ isGameRunning: false });
+          this.props.stopRecording.call(null, "wom");
       break;
 
     }
