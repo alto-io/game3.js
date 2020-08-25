@@ -7,10 +7,11 @@ import shortenAddress from "../core/utilities/shortenAddress"
 
 import { RouteComponentProps } from '@reach/router';
 
+import CSS from 'csstype';
+import {baseColors, fonts, shadows, } from '../styles';
+
 interface IProps extends RouteComponentProps {
-  tournamentId?: string,
-  drizzle: any,
-  address: string
+  drizzle: any
 }
 
 class TournamentResultsCard extends Component<IProps, any> {
@@ -31,70 +32,65 @@ class TournamentResultsCard extends Component<IProps, any> {
     const { tournamentId, address } = this.props
     const { tournamentId: newId, address: newAddress } = newProps
 
-    // Check if the player is in a tournamentId
-    if (tournamentId && tournamentId !== newId || address !== newAddress) {
+    if (tournamentId !== newId || address !== newAddress) {
       this.getBlockchainInfo(newProps)
-    } else {
-      console.log("Not in a tournament");
     }
   }
 
   getBlockchainInfo = async (props) => {
     const { tournamentId, drizzle } = props
 
-    if (tournamentId) {
-      this.setState({ isLoading: true })
+    this.setState({ isLoading: true })
 
-      console.log(`getBlockchainInfo: ${tournamentId}`)
+    console.log(`getBlockchainInfo: ${tournamentId}`)
 
-      const contract = drizzle.contracts.Tournaments;
-      const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
-      let results = []
-      for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
-        const rawResult = await contract.methods.getResult(tournamentId, resultIdx).call()
-        results.push({
-          tournamentId: tournamentId,
-          resultId: resultIdx,
-          isWinner: rawResult['0'],
-          playerAddress: rawResult['1'],
-          sessionId: rawResult['2'],
-        })
-      }
-
-      const promises = results.map(result => getGameSession(result.sessionId, result.playerAddress))
-      const sessions = await Promise.all(promises)
-      results.forEach((result, idx) => result.sessionData = sessions[idx])
-      results = results.filter(result => !!result.sessionData)
-      results.sort((el1, el2) => el2.sessionData.timeLeft - el1.sessionData.timeLeft)
-
-      // temp: placeholder results for demo
-      results = 
-      [
-        {
-          playerAddress: "0x40848f628B796690502b1F3Da5C31Ea4b4FD838C",
-          sessionData: {
-            timeLeft: "0:55"
-          }
-        },
-        {
-          playerAddress: "0xB83A97B94A7f26047cBDBAdf5eBe53224Eb12fEc",
-          sessionData: {
-            timeLeft: "0:50"
-          }
-        },
-        {
-          playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
-          sessionData: {
-            timeLeft: "0:30"
-          }
-        }
-      ]
-
-      this.setState({
-        results,
-        isLoading: false
+    const contract = drizzle.contracts.Tournaments;
+    const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
+    let results = []
+    for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
+    const rawResult = await contract.methods.getResult(tournamentId, resultIdx).call()
+      results.push({
+        tournamentId: tournamentId,
+        resultId: resultIdx,
+        isWinner: rawResult['0'],
+        playerAddress: rawResult['1'],
+        sessionId: rawResult['2'],
       })
     }
+
+    const promises = results.map(result => getGameSession(result.sessionId, result.playerAddress))
+    const sessions = await Promise.all(promises)
+    results.forEach((result, idx) => result.sessionData = sessions[idx])
+    results = results.filter(result => !!result.sessionData)
+    results.sort((el1, el2) => el2.sessionData.timeLeft - el1.sessionData.timeLeft)
+
+    // temp: placeholder results for demo
+    results = 
+    [
+      {
+        playerAddress: "0x40848f628B796690502b1F3Da5C31Ea4b4FD838C",
+        sessionData: {
+          timeLeft: "0:55"
+        }
+      },
+      {
+        playerAddress: "0xB83A97B94A7f26047cBDBAdf5eBe53224Eb12fEc",
+        sessionData: {
+          timeLeft: "0:50"
+        }
+      },
+      {
+        playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
+        sessionData: {
+          timeLeft: "0:30"
+        }
+      }
+    ]
+
+    this.setState({
+      results,
+      isLoading: false
+    })
   }
 
 
@@ -103,36 +99,80 @@ class TournamentResultsCard extends Component<IProps, any> {
 
     if (isLoading) {
       return (
-        <Box width={[1, 1 / 2, 1 / 3]} p={3}>
-          <Card p={0} borderColor={"#d6d6d6"}>
-            Loading...
-          </Card>
-        </Box>
+        <div style={divLoadingStyle}>
+          Loading...
+        </div>
       )
     }
 
     const resultDivs = results.map(result => (result.sessionData && (
-      <Flex justifyContent={"space-between"} flexDirection={"row"} mb={3}>
-        <Box lineHeight={"1em"}>
+      <div style={resultDivStyle} key={result.playerAddress}>
+        <span style={playerAddressStyle}>
           { shortenAddress(result.playerAddress) }
-        </Box>
-        <Box lineHeight={"1em"}>
+        </span>
+        <span style={timeLeftStyle}>
           { result.sessionData.timeLeft }
-        </Box>
-      </Flex>
+        </span>
+      </div>
     )) || null )
 
     return (
-      <Box width={[1, 1 / 2, 1 / 3]} p={3}>
-        <Card p={0} borderColor={"#d6d6d6"}>
-        <Heading as={"h5"} pl={3}>Leaderboard</Heading>
-          <Box width={1} p={3}>
-            { resultDivs }
-          </Box>
-        </Card>
-      </Box>
+      <div style={leaderBoardStyle}>
+        <h1>Leaderboard</h1>
+        <div style={resultDivsStyle}>
+          { resultDivs }
+        </div>
+      </div>
     )
   }
+}
+
+const leaderBoardStyle: CSS.Properties = {
+  width: '100%',
+  height: '100%',
+  padding: '0.8rem 1rem',
+  background: baseColors.white,
+  boxShadow: shadows.soft
+}
+
+const divLoadingStyle: CSS.Properties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+}
+
+const titleHeader: CSS.Properties = {
+  textTransform: 'uppercase',
+  fontFamily: fonts.family.OpenSans,
+  margin: '1rem auto',
+  fontSize: fonts.size.h4,
+  fontWeight: fonts.weight.medium,
+  color: baseColors.dark
+}
+
+const resultDivsStyle: CSS.Properties = {
+  width: '100%',
+  padding: '1rem',
+  display: 'flex',
+  flexDirection: 'column'
+}
+
+const resultDivStyle: CSS.Properties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center'
+}
+
+const playerAddressStyle: CSS.Properties = {
+  fontSize: fonts.size.medium,
+  color: baseColors.dark,
+  fontFamily: fonts.family.OpenSans
+}
+
+const timeLeftStyle: CSS.Properties = {
+  fontSize: fonts.size.medium,
+  color: baseColors.lightBlue,
+  fontFamily: fonts.family.OpenSans
 }
 
 export default TournamentResultsCard

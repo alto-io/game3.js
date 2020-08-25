@@ -9,6 +9,7 @@ import { localSaveReplay, clientSaveTournamentReplay } from "../helpers/database
 import Game from './Game';
 import GameUnity from './GameUnity';
 import TournamentResultsCard from '../components/TournamentResultsCard';
+import GameScene from '../components/GameScene';
 
 import CSS from 'csstype';
 
@@ -146,7 +147,7 @@ export default class GameContainer extends Component<IProps, IState> {
       //const result = await putTournamentResult(tournamentId, resultId, fileHash);
       //console.log(result)
     }
-}    
+  }    
 
 
     // METHODS
@@ -156,8 +157,14 @@ export default class GameContainer extends Component<IProps, IState> {
 
     // RENDER
     render() {
-      const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
-        return (
+      const { drizzle, drizzleState, contractMethodSendWrapper, address } = this.props
+
+      return (
+        <GameScene 
+          drizzle={drizzle}
+          tournamentId={this.state.tournamentId} // undefined 
+          playerAddress={address}
+         >
           <Router>
             <Game
               path=":roomId"
@@ -167,6 +174,7 @@ export default class GameContainer extends Component<IProps, IState> {
               drizzleState={drizzleState}
               contractMethodSendWrapper={contractMethodSendWrapper}
             />
+
             <GameUnity
               path="wom"
               startRecording={this.startRecording}
@@ -176,11 +184,7 @@ export default class GameContainer extends Component<IProps, IState> {
               contractMethodSendWrapper={contractMethodSendWrapper}
             />
           </Router>
-        );
+        </GameScene>
+      );
     }
-}
-
-const gamescenecontainerDesign: CSS.Properties = {
-  background: '#EEEEEE',
-  display: 'flex',
 }

@@ -73,16 +73,11 @@ export default class Game extends Component<IProps, IState> {
 
   
   async componentDidMount() {
-    await this.start();  
-    // window.addEventListener("beforeunload", this.handlePageUnloading);
-
-    // history.pushState(null, document.title, location.href);
-    // window.addEventListener('popstate', this.handlePageBackButton);
+    await this.start();
    }
 
   componentWillUnmount() {
     this.stop();
-    // window.removeEventListener("beforeunload", this.handlePageUnloading);
   }
 
 
@@ -445,8 +440,8 @@ export default class Game extends Component<IProps, IState> {
     console.log("The Game is over?",gameOver);
 
     return (
-        <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
-
+        // <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>/
+        <>
           <LeavingGamePrompt when={!gameOver}/>
 
           { !viewOnly && (
@@ -485,13 +480,7 @@ export default class Game extends Component<IProps, IState> {
               //playerAddress={drizzleState.accounts[0]}
             ///>
           /*)*/}
-
-          <TournamentResultsCard
-            tournamentId={tournamentId}
-            drizzle={drizzle}
-            playerAddress={drizzleState.accounts[0]}
-          />
-        </Flex>
+        </>
     );
   }
 
