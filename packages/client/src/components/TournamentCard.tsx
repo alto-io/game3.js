@@ -157,15 +157,28 @@ class TournamentCard extends Component<any, any> {
               </Text>
             </Flex>
 
-            <Button
+
+            {!tournament.timeIsUp ? (
+              <Button
+              mt={"26px"}
+              mb={2}
+              type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
+              name={"recepient"} // set the name to the method's argument key
+              onClick={this.props.account && this.props.accountValidated ? this.handleJoinClick : this.handleOpenModal}
+            >
+              {buttonText}
+              </Button>
+            ) : (
+              <Button
                 mt={"26px"}
                 mb={2}
                 type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
                 name={"recepient"} // set the name to the method's argument key
-                onClick={this.props.account && this.props.accountValidated ? this.handleJoinClick : this.handleOpenModal}
+                onClick={this.handleJoinClick}
               >
                 {buttonText}
-            </Button>
+              </Button>
+            )}
 
             <JoinPromptModal 
               isOpen={this.state.isOpen}
