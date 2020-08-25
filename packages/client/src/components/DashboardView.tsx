@@ -7,6 +7,8 @@ import { Constants, Types, Database } from '@game3js/common';
 import { updatePlayerProfile, refreshLeaderboard, getFileFromHash } from "../helpers/database";
 import { navigate, RouteComponentProps } from '@reach/router';
 
+import PlayerTournamentResults from "./PlayerTournamentResults";
+
 interface IState {
   leaderboard: Array<Database.LeaderboardEntry>;
   replayingVideo: boolean;
@@ -121,27 +123,27 @@ class DashboardView extends Component<any, IState> {
   }
 
     render() {
+      return (
+        <Box maxWidth={"1180px"} p={3} mx={"auto"}>
+          <PlayerTournamentResults />
+          {/* <Text my={4} />
+          <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
+          Your Game Replays
+          </Flex>
+          <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
+            <video id="recorded" loop></video>                
+          </Flex>
 
-        return (
-            <Box maxWidth={"1180px"} p={3} mx={"auto"}>
-            <Text my={4} />
-                <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-                Your Game Replays
-                </Flex>
-                <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-                  <video id="recorded" loop></video>                
-                </Flex>
-
-                <Box
-                      style={{
-                        width: 500,
-                        maxWidth: '100%',
-                      }}
-                    >
-                    {this.renderReplays()}
-                    </Box>                
-          </Box>  
-        );
+          <Box
+            style={{
+              width: 500,
+              maxWidth: '100%',
+            }}
+          >
+          {this.renderReplays()}
+          </Box>                 */}
+        </Box>  
+      );
       }
 
 }
