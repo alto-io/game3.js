@@ -4,6 +4,8 @@ import disableBrowserBackButton from 'disable-browser-back-navigation';
 
 interface IProps extends RouteComponentProps {
 	when?: boolean; // This is like the "when" prop of react-router's Prompt component
+  tournamentId: any;
+  viewOnly?: boolean; // Temporarily set to optional since WOM don't have this prop yet
 }
 
 interface IState {
@@ -76,15 +78,18 @@ export default class LeavingGamePrompt extends Component<IProps, IState> {
 
   eventDispatcher = (e: any) => {
   	console.log("Test eventDispatcher");
-  	const { when } = this.props;
-  		
-  	if (when === undefined) {
-  		this.handleEvents(e);
-  	} else {
-  		if (when) {
-  			this.handleEvents(e);
-  		}
-  	}
+  	const { when, tournamentId, viewOnly } = this.props;
+  	
+    // Will only prompt the user if he's on tournament
+    if (tournamentId && !viewOnly) {
+      if (when === undefined) {
+        this.handleEvents(e);
+      } else {
+        if (when) {
+          this.handleEvents(e);
+        }
+      }
+    }	
   }
 
   // Render null

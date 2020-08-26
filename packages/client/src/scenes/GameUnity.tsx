@@ -14,6 +14,7 @@ interface IProps extends RouteComponentProps {
   stopRecording: any;
   contractMethodSendWrapper?: any;
   isGameRunning?: boolean;
+  tournamentId: any;
 }
 
 export class GameUnity extends React.Component<IProps, any> {
@@ -165,8 +166,9 @@ export class GameUnity extends React.Component<IProps, any> {
 
   render() {
     const { isGameRunning } = this.state;
+    const { tournamentId } = this.props;
     return (
-      <GameSceneContainer when={isGameRunning}>
+      <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
         <Button
           block
           disabled={!this.state.gameReady}

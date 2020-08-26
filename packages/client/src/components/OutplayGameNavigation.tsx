@@ -63,7 +63,7 @@ class OutplayGameNavigation extends Component {
           borderRadius={1}
         > 
           <Link
-            href={"/"}
+            to={"/"}
             p={3}
           >
             &#10229; <StyledSpan>Back to Home</StyledSpan> 

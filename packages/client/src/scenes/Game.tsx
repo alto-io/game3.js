@@ -445,7 +445,7 @@ export default class Game extends Component<IProps, IState> {
 
     return (
         // <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>/
-        <GameSceneContainer when={!gameOver} viewOnly={viewOnly}>
+        <GameSceneContainer when={!gameOver} viewOnly={viewOnly} tournamentId={tournamentId}>
           <Helmet>
             <title>{`Death Match (${this.state.playersCount})`}</title>
           </Helmet>
