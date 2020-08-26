@@ -5,6 +5,7 @@ import LeavingGamePrompt from '../components/LeavingGamePrompt';
 import { Card } from "rimble-ui";
 
 interface IProps extends RouteComponentProps {
+  path: string;
   roomId?: string;
   drizzle?: any;
   drizzleState?: any;
@@ -94,9 +95,11 @@ export class GameUnity extends React.Component<IProps, any> {
 
   initializeUnity() {
     // load unity from the same server (public folder)
+    const path = this.props.path;
+
     this.unityContent = new UnityContent(
-      "/unitygame.json",
-      "/UnityLoader.js"
+      "/" + path + "/unitygame.json",
+      "/" + path + "/UnityLoader.js"
     );
 
     this.unityContent.on("progress", progression => {

@@ -171,6 +171,15 @@ export default class GameContainer extends Component<IProps, IState> {
               drizzleState={drizzleState}
               contractMethodSendWrapper={contractMethodSendWrapper}
             />
+            <GameUnity
+              path="flappybird"
+              startRecording={this.startRecording}
+              stopRecording={this.stopRecording}
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contractMethodSendWrapper={contractMethodSendWrapper}
+            />
+
           </Router>
         );
     }
