@@ -7,6 +7,11 @@ const cardBg = {
   }
 }
 
+export const DEFAULT_GAME_DIMENSION = {
+  width: 950,
+  height: 550
+}
+
 export const GAME_DETAILS = [
   {
     name: "World of Mines",

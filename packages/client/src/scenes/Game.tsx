@@ -7,6 +7,7 @@ import { isMobile } from 'react-device-detect';
 import { Helmet } from 'react-helmet';
 import ReactNipple from 'react-nipple';
 import { Card, Flex } from "rimble-ui";
+import CSS from 'csstype';
 
 import GameManager from '../managers/GameManager';
 
@@ -14,6 +15,8 @@ import { View } from '../components'
 import GameResult from '../components/GameResult'
 import TournamentResultsCard from '../components/TournamentResultsCard'
 import LeavingGamePrompt from '../components/LeavingGamePrompt';
+import GameSceneContainer from '../components/GameSceneContainer';
+import {DEFAULT_GAME_DIMENSION} from '../constants'
 
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -65,24 +68,19 @@ export default class Game extends Component<IProps, IState> {
 
     this.gameCanvas = React.createRef();
     this.gameManager = new GameManager(
-      1024,
-      600,
+      DEFAULT_GAME_DIMENSION.width,
+      DEFAULT_GAME_DIMENSION.height,
       this.handleActionSend,
     );
   }
 
   
   async componentDidMount() {
-    await this.start();  
-    // window.addEventListener("beforeunload", this.handlePageUnloading);
-
-    // history.pushState(null, document.title, location.href);
-    // window.addEventListener('popstate', this.handlePageBackButton);
+    await this.start();
    }
 
   componentWillUnmount() {
     this.stop();
-    // window.removeEventListener("beforeunload", this.handlePageUnloading);
   }
 
 
@@ -442,24 +440,20 @@ export default class Game extends Component<IProps, IState> {
     const { showResult, gameSessionId, recordFileHash, 
       tournamentId, gameOver, viewOnly } = this.state
     const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
+
     console.log("The Game is over?",gameOver);
 
     return (
-        <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
+        // <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>/
+        <GameSceneContainer when={!gameOver} viewOnly={viewOnly}>
+          <Helmet>
+            <title>{`Death Match (${this.state.playersCount})`}</title>
+          </Helmet>
 
-          <LeavingGamePrompt when={!gameOver}/>
+          <div ref={this.gameCanvas}/>
 
-          { !viewOnly && (
-          <Card maxWidth={'1088px'} maxHeight={'664px'} px={4} mx={'auto'}>
-
-            <Helmet>
-              <title>{`Death Match (${this.state.playersCount})`}</title>
-            </Helmet>
-
-            <div ref={this.gameCanvas} />
-
-            { gameOver && tournamentId && (
-              <GameResult
+          { gameOver && tournamentId && (
+            <GameResult
                 show={showResult}
                 onToggle={this.onResultToggle}
                 playerAddress={drizzleState.accounts[0]}
@@ -470,14 +464,12 @@ export default class Game extends Component<IProps, IState> {
                 drizzleState={drizzleState}
                 contractMethodSendWrapper={contractMethodSendWrapper}
               />
-            )}
-
-            {isMobile && this.renderJoySticks()}
-            { 
-              // <video id="recorded" loop></video>
-            }
-          </Card>
           )}
+
+          {isMobile && this.renderJoySticks()}
+          { 
+              // <video id="recorded" loop></video>
+          }
           { //tournamentId && (
             //<TournamentResultsCard
               //tournamentId={tournamentId}
@@ -485,13 +477,7 @@ export default class Game extends Component<IProps, IState> {
               //playerAddress={drizzleState.accounts[0]}
             ///>
           /*)*/}
-
-          <TournamentResultsCard
-            tournamentId={tournamentId}
-            drizzle={drizzle}
-            playerAddress={drizzleState.accounts[0]}
-          />
-        </Flex>
+        </GameSceneContainer>
     );
   }
 
