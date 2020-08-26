@@ -11,9 +11,8 @@ class PlayerTournamentResults extends Component {
 
     this.state = {
       results: [],
-      isLoading: false,
       tournamentsCount: 0,
-      tournament:[],
+      tournaments:[],
     }
   }
 
@@ -29,11 +28,16 @@ class PlayerTournamentResults extends Component {
     this.setState({
       tournamentsCount
     })
-
-    
+    let tournaments = [];
 
     for (let tournamentId = 0; tournamentId < tournamentsCount; tournamentId++) {
       const tournamentDetails = await contract.methods.getTournament(tournamentId).call()
+      tournaments.push({
+        id: tournamentId,
+        organizer: tournamentDetails[0],
+        prize: tournamentDetails[2],
+      })
+
       const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
       let results = []
       for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
@@ -51,13 +55,8 @@ class PlayerTournamentResults extends Component {
       results.forEach( (result, idx) => result.sessionData = sessions[idx])
       results = results.filter(result => !!result.sessionData)
       results.sort((el1, el2) => el2.sessionData.timeLeft - el1.sessionData.timeLeft)
-
+      
       // // temp: placeholder results for demo
-      const tournament = {
-        id: tournamentId,
-        organizer: tournamentDetails[0],
-        prize: tournamentDetails[2]
-      }
 
       results = 
       [
@@ -86,29 +85,32 @@ class PlayerTournamentResults extends Component {
 
       this.setState({
         results,
-        isLoading: false,
-        tournament: tournament
+        tournaments
       })
-
-      console.log(results)
     }
   }
 
   render() {
     const gameName= 'TOSIOS';
     const gameImage = 'tosios.gif';
-    
+    const { tournaments, results } = this.state;
+
+    const tournamentResults = tournaments.map( tournament => {
+      return (
+      <Flex mb={"5"}>
+        <RainbowImage src={"images/" + gameImage}/>
+        <Box ml={3}>
+          <Text>{gameName} - Tournament {tournament.id}</Text>
+          <Heading as={"h3"}>You have won {tournament.prize} ETH</Heading>
+          <Button>Claim Now</Button>
+        </Box>
+      </Flex>
+      )})
+
     return(
       <Card px={3} py={4}>
-        <Heading as={"h2"}>Your Tournament Results</Heading> 
-        <Flex>
-          <RainbowImage src={"images/" + gameImage}/>
-          <Box ml={3}>
-            <Text>{gameName} -{this.state.tournament.id}</Text>
-            <Heading as={"h3"}>You have won {this.state.tournament.prize} ETH</Heading>
-            <Button>Button Here</Button>
-          </Box>
-        </Flex>    
+        <Heading as={"h2"} mb={"3"}>Your Tournament Results</Heading> 
+        {tournamentResults}
       </Card>
     )
   }
