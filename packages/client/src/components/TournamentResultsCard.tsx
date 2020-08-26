@@ -11,6 +11,7 @@ import qs from 'querystringify';
 
 import CSS from 'csstype';
 import {baseColors, fonts, shadows, } from '../styles';
+
 import { 
   TOURNAMENT_STATE_ACTIVE, 
   TOURNAMENT_STATE_ENDED, 
@@ -225,6 +226,7 @@ const leaderBoardStyle: CSS.Properties = {
   background: `rgb(${baseColors.white})`,
   boxShadow: shadows.soft,
   justifyContent: 'center',
+  borderRadius: '7px'
 }
 
 const divLoadingStyle: CSS.Properties = {
@@ -235,7 +237,7 @@ const divLoadingStyle: CSS.Properties = {
 
 const titleHeader: CSS.Properties = {
   textTransform: 'uppercase',
-  fontFamily: fonts.family.OpenSans,
+  fontFamily: fonts.family.ApercuBold,
   margin: '1rem auto',
   fontSize: fonts.size.h4,
   fontWeight: fonts.weight.medium,
@@ -260,13 +262,13 @@ const resultDivStyle: CSS.Properties = {
 const playerAddressStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
   color: `rgb(${baseColors.dark})`,
-  fontFamily: fonts.family.OpenSans
+  fontFamily: fonts.family.ApercuBold
 }
 
 const timeLeftStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
   color: `rgb(${baseColors.lightBlue})`,
-  fontFamily: fonts.family.OpenSans
+  fontFamily: fonts.family.ApercuBold
 }
 
 const tournamentInfoStyle: CSS.Properties = {
@@ -277,32 +279,34 @@ const tournamentInfoStyle: CSS.Properties = {
   flexDirection: 'column',
   boxShadow: shadows.soft,
   justifyContent: 'center',
-  alignItems: 'center'
+  alignItems: 'center',
+  borderRadius: '7px'
 }
 
 const tourneyTitleStyle: CSS.Properties = {
   fontSize: fonts.size.h5,
-  fontFamily: fonts.family.OpenSans,
+  fontFamily: fonts.family.ApercuBold,
   color: `rgb(${baseColors.dark})`,
   margin: '5px'
 }
 
 const tourneyTitleInfo: CSS.Properties = {
   fontSize: fonts.size.medium,
-  fontFamily: fonts.family.OpenSans,
+  fontFamily: fonts.family.ApercuLight,
   color: `rgb(${baseColors.dark})`
 }
 
 const joinTourneyBtn: CSS.Properties = {
   fontSize: fonts.size.medium,
-  fontFamily: fonts.family.OpenSans,
+  fontFamily: fonts.family.ApercuBold,
   color: `rgb(${baseColors.dark})`,
   background: `rgb(${baseColors.yellow})`,
-  padding: '0.4rem 0.8rem',
+  padding: '1rem 0.9rem',
   width: '100%',
   cursor: 'pointer',
   outline: 'none',
-  border: 'none'
+  border: 'none',
+  borderRadius: '7px'
 }
 
 export default TournamentResultsCard
