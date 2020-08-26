@@ -17,7 +17,8 @@ contract Tournaments is Ownable {
     uint            endTime;
     string          data;
     uint            prize;
-    uint            maxTries;
+    uint            buyInAmount;
+    uint            triesPerBuyIn;
     TournamentState state;
     uint            balance;
   }
@@ -29,8 +30,12 @@ contract Tournaments is Ownable {
   }
 
   Tournament[] public tournaments;
+  // tournamentId => GameResult[]
   mapping(uint => GameResult[]) public results;
+  // tournamentId => (player => GameResultId[]) - all Player's results for TournamentId
   mapping(uint => mapping (address => uint[])) public resultsPlayerMap;
+  // tournamentId => (player => total buy in)
+  mapping(uint => mapping (address => uint)) public buyIn;
 
   /**
     Events
@@ -83,7 +88,8 @@ contract Tournaments is Ownable {
   }
 
   modifier enoughTriesLeft(uint id, address user) {
-    require(tournaments[id].maxTries < resultsPlayerMap[id][user].length, "Max tries reached");
+    require((tournaments[id].triesPerBuyIn * buyIn[id][user] / tournaments[id].buyInAmount)
+      < resultsPlayerMap[id][user].length, "Max tries reached");
     _;
   }
 
@@ -102,6 +108,12 @@ contract Tournaments is Ownable {
   modifier correctPaymentAmount(uint amount) {
     require((amount * 1 wei) == msg.value,
       "Incorrent payment amount");
+    _;
+  }
+
+  modifier correctBuyInAmount(uint tournamentId) {
+    require((tournaments[tournamentId].buyInAmount * 1 wei) == msg.value,
+      "Incorrent buy in amount");
     _;
   }
 
@@ -131,7 +143,8 @@ contract Tournaments is Ownable {
     uint            endTime,
     string calldata data,
     uint256         prize,
-    uint            maxTries
+    uint256         buyInAmount,
+    uint            triesPerBuyIn
   )
     external
     notInPast(endTime)
@@ -140,7 +153,7 @@ contract Tournaments is Ownable {
     returns (uint)
   {
     tournaments.push(Tournament(organizer, endTime, data, prize,
-      maxTries, TournamentState.Draft, 0));
+      buyInAmount, triesPerBuyIn, TournamentState.Draft, 0));
     emit TournamentCreated(tournaments.length - 1);
     return (tournaments.length - 1);
   }
@@ -159,6 +172,20 @@ contract Tournaments is Ownable {
         "Payment amount is lower than prize");
       tournaments[tournamentId].state = TournamentState.Active;
       emit TournamentActivated(tournamentId);
+  }
+
+  function payBuyIn(uint tournamentId, uint value)
+    external
+    payable
+    tournamentIdIsCorrect(tournamentId)
+    tournamentNotEnded(tournamentId)
+    notOrganizer(tournamentId)
+    correctTournamentState(tournamentId, TournamentState.Active)
+    correctPaymentAmount(value)
+    correctBuyInAmount(tournamentId)
+  {
+    buyIn[tournamentId][msg.sender] += value;
+    tournaments[tournamentId].balance += value;
   }
 
   function submitResult(uint tournamentId, string calldata data)
