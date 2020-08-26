@@ -28,6 +28,7 @@ function GameCard({
       break;
       case "TOSIOS":
         game.options.playerName = "You";
+        game.options.isTournament = false
         navigate(`/game/new${qs.stringify(game.options, true)}`);
       break;
     }

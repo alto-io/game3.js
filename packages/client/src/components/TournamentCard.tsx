@@ -75,6 +75,8 @@ class TournamentCard extends Component<any, any> {
       tournamentId: tournament.id,
       playerName: 'You',
       viewOnly: tournament.timeIsUp,
+      gameName: 'TOSIOS',
+      isTournament: true
     }
     navigate(`/game/new${qs.stringify(options, true)}`);
   }

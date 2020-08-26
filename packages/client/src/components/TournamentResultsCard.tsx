@@ -9,17 +9,19 @@ import { RouteComponentProps } from '@reach/router';
 
 import CSS from 'csstype';
 import {baseColors, fonts, shadows, } from '../styles';
+import { 
+  TOURNAMENT_STATE_ACTIVE, 
+  TOURNAMENT_STATE_ENDED, 
+  TOURNAMENT_STATE_DRAFT
+} from '../constants'
 
-interface IProps extends RouteComponentProps {
-  drizzle: any
-}
-
-class TournamentResultsCard extends Component<IProps, any> {
+class TournamentResultsCard extends Component<any, any> {
   constructor(props) {
     super(props)
 
     this.state = {
       results: [],
+      tournament: {},
       isLoading: false
     }
   }
@@ -37,14 +39,28 @@ class TournamentResultsCard extends Component<IProps, any> {
     }
   }
 
-  getBlockchainInfo = async (props) => {
-    const { tournamentId, drizzle } = props
+  async getTournamentAndLeaderBoards(tournamentId: any) {
+    const { drizzle, isTournament } = this.props;
 
     this.setState({ isLoading: true })
 
     console.log(`getBlockchainInfo: ${tournamentId}`)
-
     const contract = drizzle.contracts.Tournaments;
+
+    // Get tournament info
+    const raw = await contract.methods.getTournament(tournamentId).call()
+    const tournament = {
+      id: tournamentId,
+      name: 'My Tournament',
+      timeZone: 'UTC',
+      startTime: '12:00',
+      endTime: parseInt(raw['1']),
+      startDate: '8/16',
+      endDate: '9/4',
+      state: parseInt(raw['3']),
+    }
+
+    // Get tournament results
     const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
     let results = []
     for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
@@ -89,13 +105,62 @@ class TournamentResultsCard extends Component<IProps, any> {
 
     this.setState({
       results,
+      tournament,
       isLoading: false
     })
   }
 
+  getBlockchainInfo = async (props) => {
+    const { tournamentId, drizzle } = props
+
+    // Get the latest tournament
+    const contract = drizzle.contracts.Tournaments;
+
+    const tournamentLength = await contract.methods.getTournamentsCount().call();
+
+    await this.getTournamentAndLeaderBoards(tournamentId === undefined ?
+      tournamentLength - 1 : tournamentId
+    );
+  }
+
+  getStatus(tournament: any) {
+    switch (tournament.state) {
+      case TOURNAMENT_STATE_DRAFT:
+          return 'Draft'
+        break;
+      case TOURNAMENT_STATE_ACTIVE:
+          return 'Ongoing'
+        break;
+      case TOURNAMENT_STATE_ENDED:
+          return 'Done'
+        break;
+      default:
+        break;
+    }
+  }
+
+
+  formatTourneyInfo(tournament: any) {
+    const {
+      startDate,
+      endDate,
+      startTime,
+      timeZone
+    } = tournament;
+    let info = 
+    `${this.getStatus(tournament)} (${startDate} to ${endDate} ${startTime} ${timeZone})`;
+
+    return info;
+  }
+
+  // Formats the title of the tournament along with its ID 
+  formatTourneyTitle(tournament: any) {
+    return `${tournament.name} #${tournament.id}`;
+  }
 
   render () {
-    const { results, isLoading } = this.state
+    const { results, isLoading } = this.state;
+    const { isTournament } = this.props;
 
     if (isLoading) {
       return (
@@ -104,6 +169,16 @@ class TournamentResultsCard extends Component<IProps, any> {
         </div>
       )
     }
+
+    return (
+      <>
+        {isTournament ? (this.renderInTournament()) : (this.renderNotInTournament())}
+      </>
+    )
+  }
+
+  renderInTournament() {
+    const { results, tournament } = this.state;
 
     const resultDivs = results.map(result => (result.sessionData && (
       <div style={resultDivStyle} key={result.playerAddress}>
@@ -117,22 +192,41 @@ class TournamentResultsCard extends Component<IProps, any> {
     )) || null )
 
     return (
-      <div style={leaderBoardStyle}>
-        <h1>Leaderboard</h1>
-        <div style={resultDivsStyle}>
-          { resultDivs }
+      <div style={widgetStyle}>
+        <div style={tournamentInfoStyle}>
+          <span style={tourneyTitleStyle}>{this.formatTourneyTitle(tournament)}</span>
+          <span style={tourneyTitleInfo}>{this.formatTourneyInfo(tournament)}</span>
+        </div>  
+        <div style={leaderBoardStyle}>
+          <h1>Leaderboard</h1>
+          <div style={resultDivsStyle}>
+            { resultDivs }
+          </div>
         </div>
       </div>
     )
   }
+
+  renderNotInTournament() {
+    console.log('Not in tournament')
+    return null;
+  }
+}
+
+const widgetStyle: CSS.Properties = {
+  width: '100%',
+  height: '100%',
+  padding: '0.8rem 1rem',
+  background: `rgb(${baseColors.white})`,
+  justifyContent: 'center',
 }
 
 const leaderBoardStyle: CSS.Properties = {
   width: '100%',
-  height: '100%',
   padding: '0.8rem 1rem',
-  background: baseColors.white,
-  boxShadow: shadows.soft
+  background: `rgb(${baseColors.white})`,
+  boxShadow: shadows.soft,
+  justifyContent: 'center',
 }
 
 const divLoadingStyle: CSS.Properties = {
@@ -147,32 +241,59 @@ const titleHeader: CSS.Properties = {
   margin: '1rem auto',
   fontSize: fonts.size.h4,
   fontWeight: fonts.weight.medium,
-  color: baseColors.dark
+  color: `rgb(${baseColors.dark})`
 }
 
 const resultDivsStyle: CSS.Properties = {
   width: '100%',
   padding: '1rem',
   display: 'flex',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  justifyContent: 'center'
 }
 
 const resultDivStyle: CSS.Properties = {
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'center'
+  alignItems: 'center',
+  margin: '0 0 1rem 0'
 }
 
 const playerAddressStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
-  color: baseColors.dark,
+  color: `rgb(${baseColors.dark})`,
   fontFamily: fonts.family.OpenSans
 }
 
 const timeLeftStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
-  color: baseColors.lightBlue,
+  color: `rgb(${baseColors.lightBlue})`,
   fontFamily: fonts.family.OpenSans
+}
+
+const tournamentInfoStyle: CSS.Properties = {
+  width: '100%',
+  background: `rgb(${baseColors.orange})`,
+  padding: '0.9rem',
+  display: 'flex',
+  flexDirection: 'column',
+  boxShadow: shadows.soft,
+  margin: '1rem 0',
+  justifyContent: 'center',
+  alignItems: 'center'
+}
+
+const tourneyTitleStyle: CSS.Properties = {
+  fontSize: fonts.size.h5,
+  fontFamily: fonts.family.OpenSans,
+  color: `rgb(${baseColors.dark})`,
+  margin: '5px'
+}
+
+const tourneyTitleInfo: CSS.Properties = {
+  fontSize: fonts.size.medium,
+  fontFamily: fonts.family.OpenSans,
+  color: `rgb(${baseColors.dark})`
 }
 
 export default TournamentResultsCard

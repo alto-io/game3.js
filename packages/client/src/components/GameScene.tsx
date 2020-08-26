@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 
 import { Router } from '@reach/router'
+import qs from 'querystringify';
 
 import TournamentResultsCard from './TournamentResultsCard'
 
@@ -10,15 +11,30 @@ export default class GameScene extends Component<any, any> {
 
 	constructor(props) {
 		super(props);
+
+		let params = qs.parse(window.location.search);
+    const { isTournament, gameName, tournamentId } = params;
+
+    this.state = {
+    	isTournament,
+    	gameName,
+    	tournamentId
+    }
+
 	}
 
 	render() {
 		const {
 			children,
-			tournamentId,
 			drizzle,
 			playerAddress
 		} = this.props;
+
+		const {
+			isTournament,
+			gameName,
+			tournamentId
+		} = this.state;
 
 		return (
 			<div style={gamescenecontainerStyle}>
@@ -30,6 +46,7 @@ export default class GameScene extends Component<any, any> {
 						tournamentId={tournamentId}
 						drizzle={drizzle}
 						playerAddress={playerAddress}
+						isTournament={isTournament}
 					/>
 				</div>
 			</div>
@@ -40,15 +57,20 @@ export default class GameScene extends Component<any, any> {
 const gamescenecontainerStyle: CSS.Properties = {
   background: '#EEEEEE',
   display: 'flex',
-  flexDirection: 'row'
+  width: '100%'
 }
 
 const gameStyle: CSS.Properties = {
-	flex: 1,
-	background: '#333' // just to see what's going on
+	flex: 3,
+	display: 'flex',
+	justifyContent: 'center',
+	background: '#ff0000'
 }
 
 const leaderBoardsStyle: CSS.Properties = {
 	flex: 1,
-	background: '#123456' // just to see what's going on
+	display: 'flex',
+	justifyContent: 'center',
+	flexDirection: 'column',
+	background: '#0000ff'
 }

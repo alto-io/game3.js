@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Router } from '@reach/router';
+import qs from 'querystringify';
 
 import { RouteComponentProps } from '@reach/router';
 import { Database } from '@game3js/common';
@@ -26,11 +27,17 @@ interface IProps extends RouteComponentProps {
 }
   
   interface IState {
-    stateVar: any;
+    stateVar: any,
+    tournamentId?: any,
+    gameName: string,
+    isTournament: boolean
   }
 
   const INITIAL_STATE: IState = {
     stateVar: { value: "someValue"},
+    tournamentId: 'demo',
+    gameName: '',
+    isTournament: false
   };
   
 // external functions
@@ -40,10 +47,6 @@ function functionExample(someVar) {
 
 export default class GameContainer extends Component<IProps, IState> {
     
-    public state: IState = {
-        stateVar: null,
-      };
-
     private mediaRecorder: any;
     private recordedBlobs: any;
     private canvas: any;
@@ -51,8 +54,15 @@ export default class GameContainer extends Component<IProps, IState> {
 
     constructor(props: any) {
       super(props);
+
+      let params = qs.parse(window.location.search);
+      const { isTournament, gameName, tournamentId } = params;
+
       this.state = {
-          ...INITIAL_STATE
+          ...INITIAL_STATE,
+          tournamentId: tournamentId,
+          gameName: gameName,
+          isTournament: isTournament
       };
 
       this.startRecording = this.startRecording.bind(this);
@@ -158,12 +168,14 @@ export default class GameContainer extends Component<IProps, IState> {
     // RENDER
     render() {
       const { drizzle, drizzleState, contractMethodSendWrapper, address } = this.props
+      const { tournamentId, gameName, isTournament } = this.state;
 
       return (
         <GameScene 
           drizzle={drizzle}
-          tournamentId={this.state.tournamentId} // undefined 
+          tournamentId={tournamentId} // undefined 
           playerAddress={address}
+          isTournament={isTournament}
          >
           <Router>
             <Game

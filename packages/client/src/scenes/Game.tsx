@@ -7,6 +7,7 @@ import { isMobile } from 'react-device-detect';
 import { Helmet } from 'react-helmet';
 import ReactNipple from 'react-nipple';
 import { Card, Flex } from "rimble-ui";
+import CSS from 'csstype';
 
 import GameManager from '../managers/GameManager';
 
@@ -65,8 +66,8 @@ export default class Game extends Component<IProps, IState> {
 
     this.gameCanvas = React.createRef();
     this.gameManager = new GameManager(
-      1024,
-      600,
+      window.innerWidth,
+      window.innerHeight,
       this.handleActionSend,
     );
   }
@@ -441,17 +442,17 @@ export default class Game extends Component<IProps, IState> {
 
     return (
         // <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>/
-        <>
+        <div style={canvasContainerStyle}>
           <LeavingGamePrompt when={!gameOver}/>
 
           { !viewOnly && (
-          <Card maxWidth={'1088px'} maxHeight={'664px'} px={4} mx={'auto'}>
+          <div style={canvasContainerStyle}>
 
             <Helmet>
               <title>{`Death Match (${this.state.playersCount})`}</title>
             </Helmet>
 
-            <div ref={this.gameCanvas} />
+            <div ref={this.gameCanvas}/>
 
             { gameOver && tournamentId && (
               <GameResult
@@ -471,7 +472,7 @@ export default class Game extends Component<IProps, IState> {
             { 
               // <video id="recorded" loop></video>
             }
-          </Card>
+          </div>
           )}
           { //tournamentId && (
             //<TournamentResultsCard
@@ -480,7 +481,7 @@ export default class Game extends Component<IProps, IState> {
               //playerAddress={drizzleState.accounts[0]}
             ///>
           /*)*/}
-        </>
+        </div>
     );
   }
 
@@ -535,4 +536,9 @@ export default class Game extends Component<IProps, IState> {
       </View>
     );
   }
+}
+
+const canvasContainerStyle: CSS.Properties = {
+  width: '100%',
+  height: '100%'
 }
