@@ -4,6 +4,7 @@ import styled  from "styled-components";
 
 import NavBarHamburger from "./NavBarHamburger";
 import NavBarDropdown from "./NavBarDropdown";
+import ConnectWalletButton from "./ConnectWalletButton";
 
 const StyledButton = styled(Button)`
   font-family: 'Apercu Light';
@@ -53,13 +54,7 @@ class OutplayLoginHeaderMobile extends Component {
 
           <Flex>
             {account && accountValidated ? "" : (
-            <StyledButton 
-                color="primary"
-                size="small"
-                mr={3}
-                onClick={handleConnectAccount}>
-             Connect your Wallet
-            </StyledButton>
+            <ConnectWalletButton handleConnectAccount={handleConnectAccount}/>
             )}
             
 

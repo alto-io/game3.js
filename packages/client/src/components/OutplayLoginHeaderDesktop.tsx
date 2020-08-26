@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import {Text, Box, Button, Flex, Image, Link } from "rimble-ui";
 import styled from "styled-components";
 
+import ConnectWalletButton from "./ConnectWalletButton";
+
 const StyledLink = styled(Link)`
   display: flex;
   flex-direction: row;
@@ -110,12 +112,7 @@ class OutplayLoginHeaderDesktop extends Component {
               </Flex>
             </Flex>
           ) : (
-            <StyledButton 
-                color="primary" 
-                size="small" 
-                onClick={handleConnectAccount}>
-             Connect your wallet
-            </StyledButton>
+            <ConnectWalletButton handleConnectAccount={handleConnectAccount}/>
           )}
 
         </Flex>

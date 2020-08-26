@@ -6,6 +6,7 @@ import { Card } from "rimble-ui";
 import { DEFAULT_GAME_DIMENSION } from '../constants'
 
 interface IProps extends RouteComponentProps {
+  path: string;
   roomId?: string;
   drizzle?: any;
   drizzleState?: any;
@@ -78,9 +79,12 @@ export class GameUnity extends React.Component<IProps, any> {
         // TODO: add any relevant game end code
         case 'GameEndFail':
           this.setState({ isGameRunning: false });
+          this.props.stopRecording.call(null, "wom");
+
       break;
         case 'GameEndSuccess':
           this.setState({ isGameRunning: false });
+          this.props.stopRecording.call(null, "wom");
       break;
 
     }
@@ -92,9 +96,11 @@ export class GameUnity extends React.Component<IProps, any> {
 
   initializeUnity() {
     // load unity from the same server (public folder)
+    const path = this.props.path;
+
     this.unityContent = new UnityContent(
-      "/unitygame.json",
-      "/UnityLoader.js"
+      "/" + path + "/unitygame.json",
+      "/" + path + "/UnityLoader.js"
     );
 
     this.unityContent.on("progress", progression => {
@@ -177,7 +183,11 @@ export class GameUnity extends React.Component<IProps, any> {
         </Button>
 
         <Space size="xxs" />
-        <div style={{width:`${DEFAULT_GAME_DIMENSION.width}px`, height:`${DEFAULT_GAME_DIMENSION.height}px`}}>
+        <div style={
+          {
+            width:`${DEFAULT_GAME_DIMENSION.width}px`,
+            height:`${DEFAULT_GAME_DIMENSION.height}px`
+          }}>
           {
             this.state.unityShouldBeMounted === true && (
               <Unity width="100%" height="100%" unityContent={this.unityContent} />

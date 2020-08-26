@@ -1,11 +1,13 @@
 import React, { Component, Fragment } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
-import { Box, Flex, Text, Link } from "rimble-ui";
+import { Box, Flex, Text, Link, Flash } from "rimble-ui";
 import { Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
 import { Constants, Types, Database } from '@game3js/common';
 
 import { updatePlayerProfile, refreshLeaderboard, getFileFromHash } from "../helpers/database";
 import { navigate, RouteComponentProps } from '@reach/router';
+
+import PlayerTournamentResults from "./PlayerTournamentResults";
 
 interface IState {
   leaderboard: Array<Database.LeaderboardEntry>;
@@ -121,27 +123,33 @@ class DashboardView extends Component<any, IState> {
   }
 
     render() {
+      
+      return (
+        <Box maxWidth={"1180px"} p={3} mx={"auto"}>
+          {this.props.account && this.props.accountValidated ? (
+            <PlayerTournamentResults drizzle={this.props.drizzle} account={this.props.account} setRoute={this.props.setRoute}/>
+          ) : (
+            <Flash> You have to be logged in to view. </Flash>
+          )}
+          
+          {/* <Text my={4} />
+          <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
+          Your Game Replays
+          </Flex>
+          <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
+            <video id="recorded" loop></video>                
+          </Flex>
 
-        return (
-            <Box maxWidth={"1180px"} p={3} mx={"auto"}>
-            <Text my={4} />
-                <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-                Your Game Replays
-                </Flex>
-                <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-                  <video id="recorded" loop></video>                
-                </Flex>
-
-                <Box
-                      style={{
-                        width: 500,
-                        maxWidth: '100%',
-                      }}
-                    >
-                    {this.renderReplays()}
-                    </Box>                
-          </Box>  
-        );
+          <Box
+            style={{
+              width: 500,
+              maxWidth: '100%',
+            }}
+          >
+          {this.renderReplays()}
+          </Box>                 */}
+        </Box>  
+      );
       }
 
 }

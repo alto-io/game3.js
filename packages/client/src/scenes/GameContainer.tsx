@@ -7,12 +7,14 @@ import { Database } from '@game3js/common';
 
 import { localSaveReplay, clientSaveTournamentReplay } from "../helpers/database";
 
+import GameScene from '../components/GameScene';
 import Game from './Game';
 import GameUnity from './GameUnity';
 import TournamentResultsCard from '../components/TournamentResultsCard';
-import GameScene from '../components/GameScene';
+import OutplayGameNavigation from '../components/OutplayGameNavigation';
 
 import CSS from 'csstype';
+
 
 declare global {
   interface Window { MediaRecorder: any; }
@@ -112,10 +114,6 @@ export default class GameContainer extends Component<IProps, IState> {
 
     this.mediaRecorder.start(100); // collect 100ms of data
     // console.log('MediaRecorder started', this.mediaRecorder);
-
-    // TEMP: if a WoM game, save after 10 secs
-    if (params === "wom") setTimeout(this.stopRecording, 5000);
-
   }
 
   
@@ -152,8 +150,6 @@ export default class GameContainer extends Component<IProps, IState> {
       //console.log(result)
     }
   }    
-
-
     // METHODS
     // updateSomething = () => {
 
@@ -165,6 +161,8 @@ export default class GameContainer extends Component<IProps, IState> {
       const { tournamentId } = this.state;
 
       return (
+        <>
+        <OutplayGameNavigation />
         <GameScene 
           drizzle={drizzle}
           tournamentId={tournamentId}
@@ -188,8 +186,18 @@ export default class GameContainer extends Component<IProps, IState> {
               drizzleState={drizzleState}
               contractMethodSendWrapper={contractMethodSendWrapper}
             />
+
+            <GameUnity
+              path="flappybird"
+              startRecording={this.startRecording}
+              stopRecording={this.stopRecording}
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contractMethodSendWrapper={contractMethodSendWrapper}
+            />
           </Router>
         </GameScene>
+        </>
       );
     }
 }

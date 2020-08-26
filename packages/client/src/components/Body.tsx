@@ -8,7 +8,7 @@ import WalletView from './WalletView';
 import OutplayNavigation from "./OutplayNavigation";
 import { Box, Flex } from "rimble-ui";
 
-function Body({ drizzle, drizzleState, store, contractMethodSendWrapper }) {
+function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount }) {
   const [address, setAddress] = useState(null);
   const [route, setRoute] = useState("Play");
 
@@ -43,7 +43,11 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper }) {
               <TournamentView 
                 store={store}
                 drizzle={drizzle}
-                setRoute={setRoute} />,
+                setRoute={setRoute}
+                account={account}
+                accountValidated={accountValidated}
+                connectAndValidateAccount={connectAndValidateAccount}
+                />,
             CreateTourneyView: 
             <CreateTourneyView 
               store={store}
@@ -51,7 +55,9 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper }) {
               contractMethodSendWrapper={contractMethodSendWrapper}
               setRoute={setRoute} />,
             DashboardView: 
-            <DashboardView 
+            <DashboardView
+              account={account}
+              accountValidated={accountValidated}
               store={store}
               drizzle={drizzle}
               setRoute={setRoute} />,

@@ -753,6 +753,9 @@ class App extends React.Component<any, any> {
                         drizzle={this.props.drizzle}
                         drizzleState={drizzleState}
                         contractMethodSendWrapper={contractMethodSendWrapper}
+                        account={account}
+                        accountValidated={accountValidated}
+                        connectAndValidateAccount={connectAndValidateAccount}
                       />
 
                       <GameContainer
