@@ -5,7 +5,15 @@ import { Box, Card, Flex, Heading } from "rimble-ui"
 import { getGameSession } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
-class TournamentResultsCard extends Component<any, any> {
+import { RouteComponentProps } from '@reach/router';
+
+interface IProps extends RouteComponentProps {
+  tournamentId?: string,
+  drizzle: any,
+  address: string
+}
+
+class TournamentResultsCard extends Component<IProps, any> {
   constructor(props) {
     super(props)
 
@@ -23,66 +31,70 @@ class TournamentResultsCard extends Component<any, any> {
     const { tournamentId, address } = this.props
     const { tournamentId: newId, address: newAddress } = newProps
 
-    if (tournamentId !== newId || address !== newAddress) {
+    // Check if the player is in a tournamentId
+    if (tournamentId && tournamentId !== newId || address !== newAddress) {
       this.getBlockchainInfo(newProps)
+    } else {
+      console.log("Not in a tournament");
     }
   }
 
   getBlockchainInfo = async (props) => {
     const { tournamentId, drizzle } = props
 
-    this.setState({ isLoading: true })
+    if (tournamentId) {
+      this.setState({ isLoading: true })
 
-    console.log(`getBlockchainInfo: ${tournamentId}`)
+      console.log(`getBlockchainInfo: ${tournamentId}`)
 
-    const contract = drizzle.contracts.Tournaments;
-    const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
-    let results = []
-    for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
-      const rawResult = await contract.methods.getResult(tournamentId, resultIdx).call()
-      results.push({
-        tournamentId: tournamentId,
-        resultId: resultIdx,
-        isWinner: rawResult['0'],
-        playerAddress: rawResult['1'],
-        sessionId: rawResult['2'],
+      const contract = drizzle.contracts.Tournaments;
+      const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
+      let results = []
+      for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
+        const rawResult = await contract.methods.getResult(tournamentId, resultIdx).call()
+        results.push({
+          tournamentId: tournamentId,
+          resultId: resultIdx,
+          isWinner: rawResult['0'],
+          playerAddress: rawResult['1'],
+          sessionId: rawResult['2'],
+        })
+      }
+
+      const promises = results.map(result => getGameSession(result.sessionId, result.playerAddress))
+      const sessions = await Promise.all(promises)
+      results.forEach((result, idx) => result.sessionData = sessions[idx])
+      results = results.filter(result => !!result.sessionData)
+      results.sort((el1, el2) => el2.sessionData.timeLeft - el1.sessionData.timeLeft)
+
+      // temp: placeholder results for demo
+      results = 
+      [
+        {
+          playerAddress: "0x40848f628B796690502b1F3Da5C31Ea4b4FD838C",
+          sessionData: {
+            timeLeft: "0:55"
+          }
+        },
+        {
+          playerAddress: "0xB83A97B94A7f26047cBDBAdf5eBe53224Eb12fEc",
+          sessionData: {
+            timeLeft: "0:50"
+          }
+        },
+        {
+          playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
+          sessionData: {
+            timeLeft: "0:30"
+          }
+        }
+      ]
+
+      this.setState({
+        results,
+        isLoading: false
       })
     }
-
-    const promises = results.map(result => getGameSession(result.sessionId, result.playerAddress))
-    const sessions = await Promise.all(promises)
-    results.forEach((result, idx) => result.sessionData = sessions[idx])
-    results = results.filter(result => !!result.sessionData)
-    results.sort((el1, el2) => el2.sessionData.timeLeft - el1.sessionData.timeLeft)
-
-    // temp: placeholder results for demo
-    results = 
-    [
-      {
-        playerAddress: "0x40848f628B796690502b1F3Da5C31Ea4b4FD838C",
-        sessionData: {
-          timeLeft: "0:55"
-        }
-      },
-      {
-        playerAddress: "0xB83A97B94A7f26047cBDBAdf5eBe53224Eb12fEc",
-        sessionData: {
-          timeLeft: "0:50"
-        }
-      },
-      {
-        playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
-        sessionData: {
-          timeLeft: "0:30"
-        }
-      }
-    ]
-
-    this.setState({
-      results,
-      isLoading: false
-    })
-
   }
 
 

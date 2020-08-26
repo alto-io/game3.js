@@ -5,6 +5,7 @@ import LeavingGamePrompt from '../components/LeavingGamePrompt';
 import { Card } from "rimble-ui";
 
 interface IProps extends RouteComponentProps {
+  path: string;
   roomId?: string;
   drizzle?: any;
   drizzleState?: any;
@@ -73,21 +74,36 @@ export class GameUnity extends React.Component<IProps, any> {
           }
         );
       break;
+
+        // TODO: add any relevant game end code
+        case 'GameEndFail':
+          this.setState({ isGameRunning: false });
+          this.props.stopRecording.call(null, "wom");
+
+      break;
+        case 'GameEndSuccess':
+          this.setState({ isGameRunning: false });
+          this.props.stopRecording.call(null, "wom");
+      break;
+
     }
 
+    console.log(outplayEvent);
     // send out an event
     // this.eventDispatcher.dispatch(outplayEvent);
   }
 
   initializeUnity() {
     // load unity from the same server (public folder)
+    const path = this.props.path;
+
     this.unityContent = new UnityContent(
-      "/unitygame.json",
-      "/UnityLoader.js"
+      "/" + path + "/unitygame.json",
+      "/" + path + "/UnityLoader.js"
     );
 
     this.unityContent.on("progress", progression => {
-      this.setState({isGameRunning: false})
+      this.setState({isGameRunning: true})
       console.log("Unity progress", progression);
     });
 
@@ -150,7 +166,7 @@ export class GameUnity extends React.Component<IProps, any> {
     const { isGameRunning } = this.state;
     return (
         <View>
-            <LeavingGamePrompt />
+            <LeavingGamePrompt when={isGameRunning} />
              <Card maxWidth={'1024px'} px={4} mx={'auto'}>  
               <Button
                 block

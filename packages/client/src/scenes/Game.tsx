@@ -446,38 +446,51 @@ export default class Game extends Component<IProps, IState> {
 
     return (
         <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>
+
           <LeavingGamePrompt when={!gameOver}/>
+
           { !viewOnly && (
           <Card maxWidth={'1088px'} maxHeight={'664px'} px={4} mx={'auto'}>
+
             <Helmet>
               <title>{`Death Match (${this.state.playersCount})`}</title>
             </Helmet>
+
             <div ref={this.gameCanvas} />
 
-            { gameOver && tournamentId && (<GameResult
-              show={showResult}
-              onToggle={this.onResultToggle}
-              playerAddress={drizzleState.accounts[0]}
-              gameSessionId={(gameOver && gameSessionId) || null}
-              recordFileHash={recordFileHash}
-              tournamentId={tournamentId}
-              drizzle={drizzle}
-              drizzleState={drizzleState}
-              contractMethodSendWrapper={contractMethodSendWrapper}
-            />)}
+            { gameOver && tournamentId && (
+              <GameResult
+                show={showResult}
+                onToggle={this.onResultToggle}
+                playerAddress={drizzleState.accounts[0]}
+                gameSessionId={(gameOver && gameSessionId) || null}
+                recordFileHash={recordFileHash}
+                tournamentId={tournamentId}
+                drizzle={drizzle}
+                drizzleState={drizzleState}
+                contractMethodSendWrapper={contractMethodSendWrapper}
+              />
+            )}
+
             {isMobile && this.renderJoySticks()}
             { 
               // <video id="recorded" loop></video>
             }
           </Card>
           )}
-          { tournamentId && (
-            <TournamentResultsCard
-              tournamentId={tournamentId}
-              drizzle={drizzle}
-              playerAddress={drizzleState.accounts[0]}
-            />
-          )}
+          { //tournamentId && (
+            //<TournamentResultsCard
+              //tournamentId={tournamentId}
+              //drizzle={drizzle}
+              //playerAddress={drizzleState.accounts[0]}
+            ///>
+          /*)*/}
+
+          <TournamentResultsCard
+            tournamentId={tournamentId}
+            drizzle={drizzle}
+            playerAddress={drizzleState.accounts[0]}
+          />
         </Flex>
     );
   }
