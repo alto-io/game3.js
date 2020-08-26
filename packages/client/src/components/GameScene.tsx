@@ -6,6 +6,7 @@ import qs from 'querystringify';
 import TournamentResultsCard from './TournamentResultsCard'
 
 import CSS from 'csstype';
+import { baseColors } from '../styles';
 
 export default class GameScene extends Component<any, any> {
 
@@ -13,14 +14,11 @@ export default class GameScene extends Component<any, any> {
 		super(props);
 
 		let params = qs.parse(window.location.search);
-    const { isTournament, gameName, tournamentId } = params;
+    const { tournamentId } = params;
 
     this.state = {
-    	isTournament,
-    	gameName,
     	tournamentId
     }
-
 	}
 
 	render() {
@@ -31,8 +29,6 @@ export default class GameScene extends Component<any, any> {
 		} = this.props;
 
 		const {
-			isTournament,
-			gameName,
 			tournamentId
 		} = this.state;
 
@@ -46,7 +42,6 @@ export default class GameScene extends Component<any, any> {
 						tournamentId={tournamentId}
 						drizzle={drizzle}
 						playerAddress={playerAddress}
-						isTournament={isTournament}
 					/>
 				</div>
 			</div>
@@ -55,7 +50,7 @@ export default class GameScene extends Component<any, any> {
 }
 
 const gamescenecontainerStyle: CSS.Properties = {
-  background: '#EEEEEE',
+  background: `rgb(${baseColors.lightGrey})`,
   display: 'flex',
   width: '100%'
 }
@@ -64,7 +59,7 @@ const gameStyle: CSS.Properties = {
 	flex: 3,
 	display: 'flex',
 	justifyContent: 'center',
-	background: '#ff0000'
+	margin: '5px 0 5px 5px'
 }
 
 const leaderBoardsStyle: CSS.Properties = {
@@ -72,5 +67,5 @@ const leaderBoardsStyle: CSS.Properties = {
 	display: 'flex',
 	justifyContent: 'center',
 	flexDirection: 'column',
-	background: '#0000ff'
+	margin: '5px 5px 0 5px'
 }

@@ -3,9 +3,11 @@ import React, { Component } from 'react'
 import { Box, Card, Flex, Heading } from "rimble-ui"
 
 import { getGameSession } from '../helpers/database'
+import { navigateTo } from '../helpers/utilities';
 import shortenAddress from "../core/utilities/shortenAddress"
 
 import { RouteComponentProps } from '@reach/router';
+import qs from 'querystringify';
 
 import CSS from 'csstype';
 import {baseColors, fonts, shadows, } from '../styles';
@@ -40,7 +42,7 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   async getTournamentAndLeaderBoards(tournamentId: any) {
-    const { drizzle, isTournament } = this.props;
+    const { drizzle } = this.props;
 
     this.setState({ isLoading: true })
 
@@ -69,6 +71,7 @@ class TournamentResultsCard extends Component<any, any> {
         tournamentId: tournamentId,
         resultId: resultIdx,
         isWinner: rawResult['0'],
+        timeIsUp: false,
         playerAddress: rawResult['1'],
         sessionId: rawResult['2'],
       })
@@ -117,10 +120,9 @@ class TournamentResultsCard extends Component<any, any> {
     const contract = drizzle.contracts.Tournaments;
 
     const tournamentLength = await contract.methods.getTournamentsCount().call();
+    let tI = tournamentId ? tournamentId : tournamentLength - 1;
 
-    await this.getTournamentAndLeaderBoards(tournamentId === undefined ?
-      tournamentLength - 1 : tournamentId
-    );
+    await this.getTournamentAndLeaderBoards(tI);
   }
 
   getStatus(tournament: any) {
@@ -158,9 +160,15 @@ class TournamentResultsCard extends Component<any, any> {
     return `${tournament.name} #${tournament.id}`;
   }
 
+  handleJoinClick = () => {
+    const { tournament } = this.state
+    console.log('Join Tournament')
+    // TODO
+  }
+
   render () {
-    const { results, isLoading } = this.state;
-    const { isTournament } = this.props;
+    const { results, isLoading, tournament } = this.state;
+    const { tournamentId } = this.props;
 
     if (isLoading) {
       return (
@@ -169,16 +177,6 @@ class TournamentResultsCard extends Component<any, any> {
         </div>
       )
     }
-
-    return (
-      <>
-        {isTournament ? (this.renderInTournament()) : (this.renderNotInTournament())}
-      </>
-    )
-  }
-
-  renderInTournament() {
-    const { results, tournament } = this.state;
 
     const resultDivs = results.map(result => (result.sessionData && (
       <div style={resultDivStyle} key={result.playerAddress}>
@@ -198,18 +196,16 @@ class TournamentResultsCard extends Component<any, any> {
           <span style={tourneyTitleInfo}>{this.formatTourneyInfo(tournament)}</span>
         </div>  
         <div style={leaderBoardStyle}>
-          <h1>Leaderboard</h1>
+          <h1 style={titleHeader}>Leaderboard</h1>
           <div style={resultDivsStyle}>
             { resultDivs }
           </div>
         </div>
+        {tournamentId === undefined && (
+          <button style={joinTourneyBtn} onClick={this.handleJoinClick}>JOIN TOURNAMENT</button>
+        )}
       </div>
     )
-  }
-
-  renderNotInTournament() {
-    console.log('Not in tournament')
-    return null;
   }
 }
 
@@ -217,13 +213,15 @@ const widgetStyle: CSS.Properties = {
   width: '100%',
   height: '100%',
   padding: '0.8rem 1rem',
-  background: `rgb(${baseColors.white})`,
   justifyContent: 'center',
 }
 
 const leaderBoardStyle: CSS.Properties = {
   width: '100%',
   padding: '0.8rem 1rem',
+  display: 'flex',
+  flexDirection: 'column',
+  margin: '1rem 0',
   background: `rgb(${baseColors.white})`,
   boxShadow: shadows.soft,
   justifyContent: 'center',
@@ -278,7 +276,6 @@ const tournamentInfoStyle: CSS.Properties = {
   display: 'flex',
   flexDirection: 'column',
   boxShadow: shadows.soft,
-  margin: '1rem 0',
   justifyContent: 'center',
   alignItems: 'center'
 }
@@ -294,6 +291,18 @@ const tourneyTitleInfo: CSS.Properties = {
   fontSize: fonts.size.medium,
   fontFamily: fonts.family.OpenSans,
   color: `rgb(${baseColors.dark})`
+}
+
+const joinTourneyBtn: CSS.Properties = {
+  fontSize: fonts.size.medium,
+  fontFamily: fonts.family.OpenSans,
+  color: `rgb(${baseColors.dark})`,
+  background: `rgb(${baseColors.yellow})`,
+  padding: '0.4rem 0.8rem',
+  width: '100%',
+  cursor: 'pointer',
+  outline: 'none',
+  border: 'none'
 }
 
 export default TournamentResultsCard

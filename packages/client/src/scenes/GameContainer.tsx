@@ -28,16 +28,12 @@ interface IProps extends RouteComponentProps {
   
   interface IState {
     stateVar: any,
-    tournamentId?: any,
-    gameName: string,
-    isTournament: boolean
+    tournamentId?: any
   }
 
   const INITIAL_STATE: IState = {
     stateVar: { value: "someValue"},
-    tournamentId: 'demo',
-    gameName: '',
-    isTournament: false
+    tournamentId: 'demo'
   };
   
 // external functions
@@ -56,13 +52,11 @@ export default class GameContainer extends Component<IProps, IState> {
       super(props);
 
       let params = qs.parse(window.location.search);
-      const { isTournament, gameName, tournamentId } = params;
+      const { tournamentId } = params;
 
       this.state = {
           ...INITIAL_STATE,
-          tournamentId: tournamentId,
-          gameName: gameName,
-          isTournament: isTournament
+          tournamentId: tournamentId
       };
 
       this.startRecording = this.startRecording.bind(this);
@@ -168,14 +162,13 @@ export default class GameContainer extends Component<IProps, IState> {
     // RENDER
     render() {
       const { drizzle, drizzleState, contractMethodSendWrapper, address } = this.props
-      const { tournamentId, gameName, isTournament } = this.state;
+      const { tournamentId } = this.state;
 
       return (
         <GameScene 
           drizzle={drizzle}
-          tournamentId={tournamentId} // undefined 
+          tournamentId={tournamentId}
           playerAddress={address}
-          isTournament={isTournament}
          >
           <Router>
             <Game
