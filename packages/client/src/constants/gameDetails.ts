@@ -37,5 +37,13 @@ export const GAME_DETAILS = [
     button: "Coming Soon",
     type: "teaser"
   },
+  {
+    name: "Flappy Bird Open-Source",
+    image: "flappybird.gif",
+    color: cardBg.colors.seaGreen,
+    type: "unity",
+    button: "Play",
+    route: "flappybird"
+  },
 
 ];

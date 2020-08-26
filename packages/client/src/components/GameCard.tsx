@@ -26,6 +26,10 @@ function GameCard({
       case "World of Mines":
         navigate(`/game/wom`);
       break;
+      case "Flappy Bird Open-Source":
+        navigate(`/game/flappybird`);
+      break;
+
       case "TOSIOS":
         game.options.playerName = "You";
         navigate(`/game/new${qs.stringify(game.options, true)}`);
