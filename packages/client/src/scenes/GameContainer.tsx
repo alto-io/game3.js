@@ -9,8 +9,10 @@ import { localSaveReplay, clientSaveTournamentReplay } from "../helpers/database
 import Game from './Game';
 import GameUnity from './GameUnity';
 import TournamentResultsCard from '../components/TournamentResultsCard';
+import OutplayGameNavigation from '../components/OutplayGameNavigation';
 
 import CSS from 'csstype';
+
 
 declare global {
   interface Window { MediaRecorder: any; }
@@ -152,7 +154,6 @@ export default class GameContainer extends Component<IProps, IState> {
     render() {
       const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
         return (
-<<<<<<< HEAD
             <>
               <OutplayGameNavigation />
               <Router>
@@ -172,37 +173,17 @@ export default class GameContainer extends Component<IProps, IState> {
                   drizzleState={drizzleState}
                   contractMethodSendWrapper={contractMethodSendWrapper}
                 />
+                <GameUnity
+                  path="flappybird"
+                  startRecording={this.startRecording}
+                  stopRecording={this.stopRecording}
+                  drizzle={drizzle}
+                  drizzleState={drizzleState}
+                  contractMethodSendWrapper={contractMethodSendWrapper}
+                />
+
             </Router>
           </>
-=======
-          <Router>
-            <Game
-              path=":roomId"
-              startRecording={this.startRecording}
-              stopRecording={this.stopRecording}
-              drizzle={drizzle}
-              drizzleState={drizzleState}
-              contractMethodSendWrapper={contractMethodSendWrapper}
-            />
-            <GameUnity
-              path="wom"
-              startRecording={this.startRecording}
-              stopRecording={this.stopRecording}
-              drizzle={drizzle}
-              drizzleState={drizzleState}
-              contractMethodSendWrapper={contractMethodSendWrapper}
-            />
-            <GameUnity
-              path="flappybird"
-              startRecording={this.startRecording}
-              stopRecording={this.stopRecording}
-              drizzle={drizzle}
-              drizzleState={drizzleState}
-              contractMethodSendWrapper={contractMethodSendWrapper}
-            />
-
-          </Router>
->>>>>>> master
         );
     }
 }
