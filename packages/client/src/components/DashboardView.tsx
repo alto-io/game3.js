@@ -123,9 +123,10 @@ class DashboardView extends Component<any, IState> {
   }
 
     render() {
+      
       return (
         <Box maxWidth={"1180px"} p={3} mx={"auto"}>
-          <PlayerTournamentResults />
+          <PlayerTournamentResults drizzle={this.props.drizzle}/>
           {/* <Text my={4} />
           <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
           Your Game Replays
