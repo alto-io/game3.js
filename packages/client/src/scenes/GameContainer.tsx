@@ -142,9 +142,7 @@ export default class GameContainer extends Component<IProps, IState> {
       //const result = await putTournamentResult(tournamentId, resultId, fileHash);
       //console.log(result)
     }
-}    
-
-
+}  
     // METHODS
     // updateSomething = () => {
 
@@ -154,6 +152,29 @@ export default class GameContainer extends Component<IProps, IState> {
     render() {
       const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
         return (
+<<<<<<< HEAD
+            <>
+              <OutplayGameNavigation />
+              <Router>
+                <Game
+                  path=":roomId"
+                  startRecording={this.startRecording}
+                  stopRecording={this.stopRecording}
+                  drizzle={drizzle}
+                  drizzleState={drizzleState}
+                  contractMethodSendWrapper={contractMethodSendWrapper}
+                />
+                <GameUnity
+                  path="wom"
+                  startRecording={this.startRecording}
+                  stopRecording={this.stopRecording}
+                  drizzle={drizzle}
+                  drizzleState={drizzleState}
+                  contractMethodSendWrapper={contractMethodSendWrapper}
+                />
+            </Router>
+          </>
+=======
           <Router>
             <Game
               path=":roomId"
@@ -181,6 +202,7 @@ export default class GameContainer extends Component<IProps, IState> {
             />
 
           </Router>
+>>>>>>> master
         );
     }
 }

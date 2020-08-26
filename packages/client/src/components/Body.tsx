@@ -55,7 +55,9 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
               contractMethodSendWrapper={contractMethodSendWrapper}
               setRoute={setRoute} />,
             DashboardView: 
-            <DashboardView 
+            <DashboardView
+              account={account}
+              accountValidated={accountValidated}
               store={store}
               drizzle={drizzle}
               setRoute={setRoute} />,
