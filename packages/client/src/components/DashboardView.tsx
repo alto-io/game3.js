@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
-import { Box, Flex, Text, Link } from "rimble-ui";
+import { Box, Flex, Text, Link, Flash } from "rimble-ui";
 import { Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
 import { Constants, Types, Database } from '@game3js/common';
 
@@ -126,7 +126,12 @@ class DashboardView extends Component<any, IState> {
       
       return (
         <Box maxWidth={"1180px"} p={3} mx={"auto"}>
-          <PlayerTournamentResults drizzle={this.props.drizzle} account={this.props.account}/>
+          {this.props.account && this.props.accountValidated ? (
+            <PlayerTournamentResults drizzle={this.props.drizzle} account={this.props.account}/>
+          ) : (
+            <Flash> You have to be logged in to view. </Flash>
+          )}
+          
           {/* <Text my={4} />
           <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
           Your Game Replays
