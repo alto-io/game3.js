@@ -127,7 +127,7 @@ class DashboardView extends Component<any, IState> {
       return (
         <Box maxWidth={"1180px"} p={3} mx={"auto"}>
           {this.props.account && this.props.accountValidated ? (
-            <PlayerTournamentResults drizzle={this.props.drizzle} account={this.props.account}/>
+            <PlayerTournamentResults drizzle={this.props.drizzle} account={this.props.account} setRoute={this.props.setRoute}/>
           ) : (
             <Flash> You have to be logged in to view. </Flash>
           )}

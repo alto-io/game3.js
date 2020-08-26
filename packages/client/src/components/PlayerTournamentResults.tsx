@@ -1,10 +1,11 @@
 import React, { Component } from "react";
-import { Card, Heading, Flex, Box, Button, Text } from "rimble-ui";
+import { Card, Heading, Flex, Box, Button, Text, Flash } from "rimble-ui";
 import RainbowImage from "./RainbowImage";
 
 import { getGameSession } from "../helpers/database";
 import Tournament from "./Tournament";
 import TournamentResult from "./TournamentResult";
+import { accountMultipleIcon } from "../images/icons";
 class PlayerTournamentResults extends Component {
   constructor(props){
     super(props);
@@ -28,18 +29,19 @@ class PlayerTournamentResults extends Component {
     this.setState({
       tournamentsCount
     })
-    let tournaments = [];
+    // let tournaments = [];
 
     for (let tournamentId = 0; tournamentId < tournamentsCount; tournamentId++) {
       const tournamentDetails = await contract.methods.getTournament(tournamentId).call()
-      tournaments.push({
-        id: tournamentId,
-        organizer: tournamentDetails[0],
-        prize: tournamentDetails[2],
-      })
+      // tournaments.push({
+      //   id: tournamentId,
+      //   organizer: tournamentDetails[0],
+      //   prize: tournamentDetails[2],
+      // })
 
       const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
       let results = []
+
       for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
         const rawResult = await contract.methods.getResult(tournamentId, resultIdx). call()
         results.push({
@@ -56,7 +58,13 @@ class PlayerTournamentResults extends Component {
       results = results.filter(result => !!result.sessionData)
       results.sort((el1, el2) => el2.sessionData.timeLeft - el1.sessionData.timeLeft)
       
-      // // temp: placeholder results for demo
+      const tournament = {
+        id : tournamentId,
+        organizer : tournamentDetails[0],
+        prize: tournamentDetails[2]
+      }
+
+      // temp: placeholder results for demo
 
       results = 
       [
@@ -80,12 +88,21 @@ class PlayerTournamentResults extends Component {
           sessionData: {
             timeLeft: "0:30"
           }
+        },
+        {
+          isWinner: false,
+          playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
+          sessionData: {
+            timeLeft: "0:30"
+          }
         }
       ]
 
+      const playerResults = results.filter( result => result.playerAddress.toLowerCase() === this.props.account.toLowerCase());
+
       this.setState({
-        results,
-        tournaments
+        results : playerResults,
+        tournaments: tournament
       })
     }
   }
@@ -93,24 +110,43 @@ class PlayerTournamentResults extends Component {
   render() {
     const gameName= 'TOSIOS';
     const gameImage = 'tosios.gif';
-    const { tournaments, results } = this.state;
+    const { results, tournaments } = this.state;
 
-    const tournamentResults = tournaments.map( tournament => {
+    const tournamentResults = results.map( result => {
       return (
       <Flex mb={"5"}>
         <RainbowImage src={"images/" + gameImage}/>
         <Box ml={3}>
-          <Text>{gameName} - Tournament {tournament.id}</Text>
-          <Heading as={"h3"}>You have won {tournament.prize} ETH</Heading>
-          <Button>Claim Now</Button>
+          <Text>{gameName} - Tournament {tournaments.id}</Text>
+          {result.isWinner ? (
+            <>
+              <Heading as={"h3"}>You have won {tournaments.prize} ETH</Heading>
+              <Button>Claim Now</Button>
+            </>
+          ) : (
+            <Heading as={"h3"}>You'll win next time</Heading>
+          )}
         </Box>
       </Flex>
       )})
 
     return(
       <Card px={3} py={4}>
-        <Heading as={"h2"} mb={"3"}>Your Tournament Results</Heading> 
-        {tournamentResults}
+        <Heading as={"h2"} mb={"3"}>Your Tournament Results</Heading>
+        {results == '' ? (
+          <Flex mt={3} justfyContent={"center"} flexDirection={"column"} alignItems={"center"}>
+            <Heading as={"h3"}>You haven't joined any tournaments.</Heading>
+            <Button 
+              alignSelf={"center"} 
+              mt={3}
+              onClick={e => {
+                e.preventDefault();
+                this.props.setRoute("TournamentView");
+              }}
+              >Join a Tournament</Button>
+          </Flex>
+        ) : tournamentResults}
+        
       </Card>
     )
   }
