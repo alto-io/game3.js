@@ -89,8 +89,7 @@ contract Tournaments is Ownable {
   }
 
   modifier enoughTriesLeft(uint id, address user) {
-    require((tournaments[id].triesPerBuyIn * buyIn[id][user] / tournaments[id].buyInAmount)
-      < resultsPlayerMap[id][user].length, "Max tries reached");
+    require(getTriesLeft(id, user) < resultsPlayerMap[id][user].length, "Max tries reached");
     _;
   }
 
@@ -350,5 +349,14 @@ contract Tournaments is Ownable {
     uint place = results[tournamentId][resultId].winner - 1;
     return tournaments[tournamentId].balance *
       winnerShares[tournamentId][place] / totalShares[tournamentId];
+  }
+
+  function getTriesLeft(uint tournamentId, address player)
+    public
+    view
+    returns (uint)
+  {
+    return (tournaments[tournamentId].triesPerBuyIn * buyIn[tournamentId][player] / 
+      tournaments[tournamentId].buyInAmount);
   }
 }
