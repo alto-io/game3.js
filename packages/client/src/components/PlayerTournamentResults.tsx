@@ -1,8 +1,12 @@
 import React, { Component } from "react";
 import { Card, Heading, Flex, Box, Button, Text } from "rimble-ui";
 import RainbowImage from "./RainbowImage";
+import styled from "styled-components";
 
-import { getGameSession } from "../helpers/database";
+const StyledCard = styled(Card)`
+  margin: 1rem;
+  width: 100%;
+`
 
 class PlayerTournamentResults extends Component {
 
@@ -30,7 +34,7 @@ class PlayerTournamentResults extends Component {
       )})
 
     return(
-      <Card px={3} py={4}>
+      <StyledCard px={3} py={4}>
         <Heading as={"h2"} mb={"3"}>Your Tournament Results</Heading>
         {resultsCount == '' ? (
           <Flex mt={3} justfyContent={"center"} flexDirection={"column"} alignItems={"center"}>
@@ -46,7 +50,7 @@ class PlayerTournamentResults extends Component {
           </Flex>
         ) : tournamentResults}
         
-      </Card>
+      </StyledCard>
     )
   }
 }

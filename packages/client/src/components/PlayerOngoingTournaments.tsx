@@ -1,8 +1,15 @@
 import React, { Component } from "react";
 import { Card, Heading, Flex, Button, Text, Box} from "rimble-ui";
 import RainbowImage from "./RainbowImage";
+import styled from "styled-components";
 
 import { format } from 'date-fns'
+
+const StyledCard = styled(Card)`
+  margin: 1rem 0;
+  width: 100%;
+`
+
 class PlayerOngoingTournaments extends Component {
   render() {
     const gameName= 'TOSIOS';
@@ -28,8 +35,8 @@ class PlayerOngoingTournaments extends Component {
     });
 
     return(
-      <Card px={3} py={4}>
-      <Heading as={"h2"} mb={"3"}>Your On-going Tournaments</Heading>
+      <StyledCard px={3} py={4}>
+      <Heading as={"h2"} mb={"3"}>Your Ongoing Tournaments</Heading>
       {resultsCount == '' ? (
         <Flex mt={3} justfyContent={"center"} flexDirection={"column"} alignItems={"center"}>
           <Heading as={"h3"}>You haven't joined any tournaments.</Heading>
@@ -44,7 +51,7 @@ class PlayerOngoingTournaments extends Component {
         </Flex>
       ) : tournamentResults}
         
-    </Card>
+    </StyledCard>
     )
   }
 }

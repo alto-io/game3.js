@@ -1,13 +1,26 @@
 import React, { Component } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
 import { Flex, Flash, Box } from "rimble-ui";
+import styled from "styled-components";
 
-import { format, isPast } from 'date-fns';
-import { TOURNAMENT_STATE_DRAFT, TOURNAMENT_STATE_ACTIVE, TOURNAMENT_STATE_ENDED } from '../constants';
+import { isPast } from 'date-fns';
 
 import PlayerTournamentResults from "./PlayerTournamentResults";
 // import PlayerGameReplays from "./PlayerGameReplays";
 import PlayerOngoingTournaments from "./PlayerOngoingTournaments";
+
+const StyledFlex = styled(Flex)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  @media screen and (min-width: 768px) {
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: row;
+  }
+`
 
 class DashboardView extends Component {
   constructor(props) {
@@ -153,7 +166,7 @@ class DashboardView extends Component {
       const { tournaments, resultsCount } = this.state;
 
       return (
-        <Flex maxWidth={"1180px"} p={3} mx={"auto"}>
+        <StyledFlex maxWidth={"1180px"} p={3} mx={"auto"}>
           {account && accountValidated ? (
             <>
             <PlayerTournamentResults 
@@ -162,6 +175,7 @@ class DashboardView extends Component {
               setRoute={setRoute}
               tournaments={tournaments}
               resultsCount={resultsCount}
+              className="tournament-card"
             />
 
             <PlayerOngoingTournaments 
@@ -170,13 +184,14 @@ class DashboardView extends Component {
               setRoute={setRoute}
               tournaments={tournaments}
               resultsCount={resultsCount}
+              className="tournament-card"
             />
             </>
           ) : (
             <Flash> You have to be logged in to view. </Flash>
           )}
           {/* <PlayerGameReplays /> */}
-        </Flex>  
+        </StyledFlex>  
       );
       }
 
