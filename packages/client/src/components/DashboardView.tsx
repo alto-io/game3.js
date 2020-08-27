@@ -16,7 +16,8 @@ class DashboardView extends Component {
       currentNetwork: null,
       address: null,
       tournamentsCount : 0,
-      tournaments: []
+      tournaments: [],
+      resultsCount: 0
     }
   }
 
@@ -101,7 +102,7 @@ class DashboardView extends Component {
         [
           {
             tournamentId: tournament.id,
-            isWinner: true,
+            isWinner: false,
             playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
             sessionData: {
               timeLeft: "0:55"
@@ -123,18 +124,9 @@ class DashboardView extends Component {
               timeLeft: "0:30"
             }
           },
-          {
-            tournamentId: tournament.id,
-            isWinner: false,
-            playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
-            sessionData: {
-              timeLeft: "0:30"
-            }
-          }
         ]
         
-        // if (account && accountValidated) {
-          tournament.results = results.filter( result => result.playerAddress.toLowerCase() === this.props.account.toLowerCase());
+          tournament.results = results.filter( result => result.playerAddress.toLowerCase() === account.toLowerCase());
 
           const winner = results.find( result => result.isWinner === true);
           
@@ -143,12 +135,12 @@ class DashboardView extends Component {
           } else {
             tournament.canDeclareWinner = false;
           }  
-        // }
 
         tournaments.push(tournament);
   
         this.setState({
-          tournaments
+          tournaments,
+          resultsCount
         })
 
         console.log(tournaments);
@@ -157,17 +149,22 @@ class DashboardView extends Component {
   }
 
     render() {
+      const { account, accountValidated, drizzle, setRoute } = this.props;
+      const { tournaments, resultsCount } = this.state;
 
       return (
         <Flex maxWidth={"1180px"} p={3} mx={"auto"}>
-          {this.props.account && this.props.accountValidated ? (
+          {account && accountValidated ? (
             <>
-            {/* <PlayerTournamentResults 
-            drizzle={this.props.drizzle} 
-            account={this.props.account} 
-            setRoute={this.props.setRoute}/>
+            <PlayerTournamentResults 
+            drizzle={drizzle} 
+            account={account} 
+            setRoute={setRoute}
+            tournaments={tournaments}
+            resultsCount={resultsCount}
+            />
 
-            <PlayerOngoingTournaments /> */}
+            {/* <PlayerOngoingTournaments /> */}
             {/* <PlayerGameReplays /> */}
             </>
           ) : (
