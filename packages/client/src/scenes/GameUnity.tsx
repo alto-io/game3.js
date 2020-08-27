@@ -1,8 +1,9 @@
 import React from "react";
 import Unity, { UnityContent } from "react-unity-webgl";
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
-import LeavingGamePrompt from '../components/LeavingGamePrompt';
+import GameSceneContainer from '../components/GameSceneContainer';
 import { Card } from "rimble-ui";
+import { DEFAULT_GAME_DIMENSION } from '../constants'
 
 interface IProps extends RouteComponentProps {
   path: string;
@@ -13,6 +14,7 @@ interface IProps extends RouteComponentProps {
   stopRecording: any;
   contractMethodSendWrapper?: any;
   isGameRunning?: boolean;
+  tournamentId: any;
 }
 
 export class GameUnity extends React.Component<IProps, any> {
@@ -164,36 +166,37 @@ export class GameUnity extends React.Component<IProps, any> {
 
   render() {
     const { isGameRunning } = this.state;
+    const { tournamentId } = this.props;
     return (
-        <View>
-            <LeavingGamePrompt when={isGameRunning} />
-             <Card maxWidth={'1024px'} px={4} mx={'auto'}>  
-              <Button
-                block
-                disabled={!this.state.gameReady}
-                className="mb-3"
-                color="primary"
-                type="button"
-                onClick={this.onPlayGame}
-              >
-              {
-                this.state.gameReady ?
-                "Play Game (100 💎)" :
-                "Loading Game ..."
-              }
-              </Button>
+      <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
+        <Button
+          block
+          disabled={!this.state.gameReady}
+          className="mb-3"
+          color="primary"
+          type="button"
+          onClick={this.onPlayGame}
+        >
+        {
+          this.state.gameReady ?
+          "Play Game (100 💎)" :
+          "Loading Game ..."
+        }
+        </Button>
 
-            <Space size="xxs" />
-
-            <div>
-                  {
-                    this.state.unityShouldBeMounted === true && (
-                    <Unity unityContent={this.unityContent} />
-                  )
-                }
-            </div>
-            </Card>       
-        </View>
+        <Space size="xxs" />
+        <div style={
+          {
+            width:`${DEFAULT_GAME_DIMENSION.width}px`,
+            height:`${DEFAULT_GAME_DIMENSION.height}px`
+          }}>
+          {
+            this.state.unityShouldBeMounted === true && (
+              <Unity width="100%" height="100%" unityContent={this.unityContent} />
+            )
+          } 
+        </div>
+      </GameSceneContainer>
     );
   }
 }
