@@ -6,11 +6,13 @@ import DashboardView from './DashboardView';
 import WalletView from './WalletView';
 
 import OutplayNavigation from "./OutplayNavigation";
+import JoinPromptModal from "./JoinPromptModal";
 import { Box, Flex } from "rimble-ui";
 
 function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount }) {
   const [address, setAddress] = useState(null);
   const [route, setRoute] = useState("Play");
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (drizzleState) {
@@ -24,6 +26,14 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
     }
   };
 
+  const handleOpenModal = e => {
+    setIsOpen(true);
+  }
+
+  const handleCloseModal = e => {
+    setIsOpen(false);
+  }
+
   return (
     <Box height={"100%"}>
       <Flex
@@ -31,7 +41,12 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
         justifyContent={"space-between"}
         height={"100%"}
       >
-        <OutplayNavigation setRoute={setRoute} route={route} />
+        <OutplayNavigation 
+          setRoute={setRoute} 
+          route={route} 
+          handleOpenModal={handleOpenModal}
+          account={account}
+          accountValidated={accountValidated}/>
         {
           {
             Play: 
@@ -60,7 +75,7 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
               accountValidated={accountValidated}
               store={store}
               drizzle={drizzle}
-              setRoute={setRoute} />,
+              setRoute={setRoute}/>,
             WalletView: 
             <WalletView 
               store={store}
@@ -69,6 +84,12 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
           }[route]
         }
       </Flex>
+
+      <JoinPromptModal 
+        isOpen={isOpen}
+        connectAndValidateAccount={connectAndValidateAccount}
+        handleCloseModal={handleCloseModal}
+      />
     </Box>
   );
 }

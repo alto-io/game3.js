@@ -134,15 +134,15 @@ class DashboardView extends Component {
         ]
         
         // if (account && accountValidated) {
-        //   tournament.results = results.filter( result => result.playerAddress.toLowerCase() === this.props.account.toLowerCase());
+          tournament.results = results.filter( result => result.playerAddress.toLowerCase() === this.props.account.toLowerCase());
 
-        //   const winner = results.find( result => result.isWinner === true);
+          const winner = results.find( result => result.isWinner === true);
           
-        //   if (winner !== undefined) {
-        //     tournament.canDeclareWinner = true;
-        //   } else {
-        //     tournament.canDeclareWinner = false;
-        //   }  
+          if (winner !== undefined) {
+            tournament.canDeclareWinner = true;
+          } else {
+            tournament.canDeclareWinner = false;
+          }  
         // }
 
         tournaments.push(tournament);
