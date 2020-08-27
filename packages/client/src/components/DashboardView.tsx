@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
-import { Flex, Flash } from "rimble-ui";
+import { Flex, Flash, Box } from "rimble-ui";
 
 import { format, isPast } from 'date-fns';
 import { TOURNAMENT_STATE_DRAFT, TOURNAMENT_STATE_ACTIVE, TOURNAMENT_STATE_ENDED } from '../constants';
@@ -157,19 +157,25 @@ class DashboardView extends Component {
           {account && accountValidated ? (
             <>
             <PlayerTournamentResults 
-            drizzle={drizzle} 
-            account={account} 
-            setRoute={setRoute}
-            tournaments={tournaments}
-            resultsCount={resultsCount}
+              drizzle={drizzle} 
+              account={account} 
+              setRoute={setRoute}
+              tournaments={tournaments}
+              resultsCount={resultsCount}
             />
 
-            {/* <PlayerOngoingTournaments /> */}
-            {/* <PlayerGameReplays /> */}
+            <PlayerOngoingTournaments 
+              drizzle={drizzle} 
+              account={account} 
+              setRoute={setRoute}
+              tournaments={tournaments}
+              resultsCount={resultsCount}
+            />
             </>
           ) : (
             <Flash> You have to be logged in to view. </Flash>
           )}
+          {/* <PlayerGameReplays /> */}
         </Flex>  
       );
       }

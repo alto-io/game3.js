@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Card, Heading, Flex, Box, Button, Text, Flash } from "rimble-ui";
+import { Card, Heading, Flex, Box, Button, Text } from "rimble-ui";
 import RainbowImage from "./RainbowImage";
 
 import { getGameSession } from "../helpers/database";
