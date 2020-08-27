@@ -33,11 +33,17 @@ const StyledText = styled(Text)`
   box-shadow: none;
   color: #a8a8a8;
   cursor: pointer;
+  font-size: 1.266rem;
   font-weight: bold;
   transition: 300ms ease;
+  padding-left: 1.125rem;
 
   &:hover{
     color: #0093d5;
+  }
+
+  @media screen and (min-width: 768px) {
+    font-size: 1rem;
   }
 `
 

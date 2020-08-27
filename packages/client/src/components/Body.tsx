@@ -89,6 +89,7 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
         isOpen={isOpen}
         connectAndValidateAccount={connectAndValidateAccount}
         handleCloseModal={handleCloseModal}
+        modalText={"You need to be logged in to view the dashboard"}
       />
     </Box>
   );
