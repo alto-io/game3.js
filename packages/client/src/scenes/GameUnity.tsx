@@ -35,11 +35,22 @@ export class GameUnity extends React.Component<IProps, any> {
 
   onPlayGame = async (e) => {
 
-    this.unityContent.send("OutplayManager", "SetLevel",
-    this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
-    this.unityContent.send("OutplayManager", "StartGame", "start");
-    this.props.startRecording.call(null, "wom");
-    
+    const gameId = this.props.path;
+    switch (gameId)
+    {
+      case "wom":
+        this.unityContent.send("OutplayManager", "SetLevel",
+        this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
+        this.unityContent.send("OutplayManager", "StartGame", "start");
+      break;
+      case "flappybird":
+        this.unityContent.send("Game3JsManager", "StartGame", "start");
+      break;
+
+    }
+
+    this.props.startRecording.call(null, gameId);
+
     // const updateUser = this.context.updateUser;
     // const response = await this.nakamaServiceInstance.PlayGame();
     // if (response.payload.response)
