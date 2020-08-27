@@ -9,7 +9,8 @@ import LeavingGamePrompt from './LeavingGamePrompt';
 
 interface IProps extends RouteComponentProps {
 	viewOnly?: boolean,
-	when?: any
+	when?: any,
+	tournamentId: boolean
 }
 
 export default class GameSceneContainer extends Component<IProps, any> {
@@ -19,13 +20,11 @@ export default class GameSceneContainer extends Component<IProps, any> {
 	}
 
 	render() {
-		const { children, viewOnly, when } = this.props;
-
-		console.log('Gamescene when', when);
+		const { children, viewOnly, when, tournamentId } = this.props;
 
 		return (
 			<div style={canvasContainerStyle}>
-				<LeavingGamePrompt when={when} />
+				<LeavingGamePrompt when={when} tournamentId={tournamentId} viewOnly={viewOnly}/>
 				{viewOnly === undefined ? (
 					<div style={canvasContainerStyle}>
 						{children}	

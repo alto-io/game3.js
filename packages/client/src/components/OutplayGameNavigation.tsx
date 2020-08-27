@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-import { Flex, Box, Link } from "rimble-ui";
+import { Flex, Box } from "rimble-ui";
+import { navigateTo } from '../helpers/utilities';
 
 const StyledLinkContainer = styled(Box)`
   background: #fff;
@@ -31,6 +32,7 @@ const StyledLinkContainer = styled(Box)`
 
 const StyledSpan = styled.span`
   margin-left: 0.5rem;
+  cursor: pointer;
 `;
 
 const StyledNavigation = styled(Flex)`
@@ -54,7 +56,7 @@ const StyledNavigation = styled(Flex)`
 `;
 
 class OutplayGameNavigation extends Component {
-  
+
   render() {
     return(
       <StyledNavigation>
@@ -62,12 +64,9 @@ class OutplayGameNavigation extends Component {
           mx={3}
           borderRadius={1}
         > 
-          <Link
-            href={"/"}
-            p={3}
-          >
-            &#10229; <StyledSpan>Back to Home</StyledSpan> 
-          </Link>
+          <span style={{padding: '1.5rem'}} onClick={() => navigateTo('/')}>
+            <StyledSpan>&#10229; Back to Home</StyledSpan> 
+          </span>
         </StyledLinkContainer>   
       </StyledNavigation>
     )
