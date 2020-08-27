@@ -49,11 +49,11 @@ class TournamentCard extends Component<any, any> {
       prize: raw['2'],
       state: parseInt(raw['3']),
       balance: raw['4'],
-      timeIsUp: true,
+      timeIsUp: false,
       canDeclareWinner: true,
       results: [],
     }
-    // tournament.timeIsUp = isPast(new Date(tournament.endTime))
+    tournament.timeIsUp = isPast(new Date(tournament.endTime))
 
     let ownTournament = false
     if (address) {
