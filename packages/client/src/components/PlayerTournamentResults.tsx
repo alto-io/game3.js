@@ -3,9 +3,7 @@ import { Card, Heading, Flex, Box, Button, Text, Flash } from "rimble-ui";
 import RainbowImage from "./RainbowImage";
 
 import { getGameSession } from "../helpers/database";
-import Tournament from "./Tournament";
-import TournamentResult from "./TournamentResult";
-import { accountMultipleIcon } from "../images/icons";
+
 class PlayerTournamentResults extends Component {
   constructor(props){
     super(props);
