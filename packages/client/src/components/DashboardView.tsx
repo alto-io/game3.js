@@ -1,154 +1,195 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
-import { Box, Flex, Text, Link, Flash } from "rimble-ui";
-import { Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
-import { Constants, Types, Database } from '@game3js/common';
+import { Flex, Flash, Box } from "rimble-ui";
+import styled from "styled-components";
 
-import { updatePlayerProfile, refreshLeaderboard, getFileFromHash } from "../helpers/database";
-import { navigate, RouteComponentProps } from '@reach/router';
+import { isPast } from 'date-fns';
 
 import PlayerTournamentResults from "./PlayerTournamentResults";
+// import PlayerGameReplays from "./PlayerGameReplays";
+import PlayerOngoingTournaments from "./PlayerOngoingTournaments";
 
-interface IState {
-  leaderboard: Array<Database.LeaderboardEntry>;
-  replayingVideo: boolean;
-  leaderboardTimer: any;  
-}
+const StyledFlex = styled(Flex)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 0;
+  max-width: 1180px;
 
-class DashboardView extends Component<any, IState> {
+  @media screen and (min-width: 375px) {
+    margin: 0 auto;
+  }
 
-  public state: IState = {
-    leaderboard: null,
-    replayingVideo: false,
-    leaderboardTimer: null    
-  };
+  @media screen and (min-width: 640px) {
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: row;
+  }
+`
 
-  private video: any;
-
- // BASE
- componentDidMount() {
-  try {
-    this.setState({
-      leaderboardTimer: setInterval(this.updateLeaderboard, Constants.ROOM_REFRESH),
-    }, this.updateLeaderboard);
-
-    } catch (error) {
-      console.error(error);
+class DashboardView extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentNetwork: null,
+      address: null,
+      tournamentsCount : 0,
+      tournaments: []
     }
   }
 
-  updateLeaderboard = async () => { 
-    const leaderboard =  await refreshLeaderboard();
+  componentDidMount() {
+    const { address, networkId, drizzleStatus, drizzle} =  this.props
 
-    // format leaderboard for render
+    this.updateAddress(address)
+    this.updateDrizzle(networkId, drizzleStatus, drizzle)
+  }
 
-    this.setState({
-      leaderboard,
-    });
-  }  
+  componentWillReceiveProps(newProps) {
+    const { address, networkId, drizzleStatus, drizzle } = this.props
+    const { address: newAddress, networkId: newNetworkId, 
+      drizzleStatus: newDrizzleStatus, drizzle: newDrizzle } = newProps
 
-  handleReplayClick = async (hash: string) => {
+    if (address !== newAddress) {
+      this.updateAddress(newAddress)
+    }
+    if (networkId !== newNetworkId || drizzleStatus !== newDrizzleStatus
+      || drizzle !== newDrizzle) {
+      this.updateDrizzle(newNetworkId, newDrizzleStatus, newDrizzle)
+    }
+  }
 
-    // start reading the file from DB
-    const replayFile = await getFileFromHash(hash);
+  updateAddress = (address) => {
+    this.setState({ address })
+  }
 
-    const url = window.URL.createObjectURL(replayFile);
+  updateDrizzle = (networkId, drizzleStatus, drizzle) => {
+    if (networkId) {
+      this.setState({ currentNetwork: networkId} );
+    }
+    if (!drizzleStatus.initialized && window.web3 && drizzle !== null) {
+      window.web3.version.getNetwork((error, networkId) => {
+        this.setState({ currentNetwork: parseInt(networkId) } );
+      });
+    }
+    if (drizzleStatus.initialized && window.web3 && drizzle !== null) {
+      this.fetchPlayerTournaments();
+    }
+  }
 
-    this.video = document.querySelector('video');
-    this.video.src = url;
-    this.video.play();
+  fetchPlayerTournaments = async () => {
+    const { drizzle, account, accountValidated } = this.props;
 
-    this.setState(
-      {
-        replayingVideo: true
+      const contract = drizzle.contracts.Tournaments;
+      const tournamentsCount = await contract.methods.getTournamentsCount().call();
+  
+      let tournaments = [];
+  
+      for (let tournamentId = 0; tournamentId < tournamentsCount; tournamentId++) {
+        const tournamentDetails = await contract.methods.getTournament(tournamentId).call()
+        
+        const tournament = {
+          id: tournamentId,
+          organizer: tournamentDetails['0'],
+          endTime: parseInt(tournamentDetails['1']),
+          prize: tournamentDetails['2'],
+          state: parseInt(tournamentDetails['3']),
+          balance: tournamentDetails['4'],
+          timeIsUp: false,
+          canDeclareWinner: false,
+          results: [],
+          playerAddress: ''
+        }
+  
+        tournament.timeIsUp = isPast(new Date(tournament.endTime));
+  
+        const resultsCount = await contract.methods.getResultsCount(tournament.id).call()
+        let results = []
+        for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
+          const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
+          results.push({
+            tournamentId: tournament.id,
+            resultId: resultIdx,
+            isWinner: resultDetails['0'],
+            playerAdress: resultDetails['1'],
+            sessionData: resultDetails['2']
+          })
+        }
+  
+        results = 
+        [
+          {
+            tournamentId: tournament.id,
+            isWinner: false,
+            playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
+            sessionData: {
+              timeLeft: "0:55"
+            }
+          },
+          {
+            tournamentId: tournament.id,
+            isWinner: false,
+            playerAddress: "0xB83A97B94A7f26047cBDBAdf5eBe53224Eb12fEc",
+            sessionData: {
+              timeLeft: "0:50"
+            }
+          },
+          {
+            tournamentId: tournament.id,
+            isWinner: false,
+            playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
+            sessionData: {
+              timeLeft: "0:30"
+            }
+          },
+        ]
+        
+        tournament.results = results.filter( result => result.playerAddress.toLowerCase() === account.toLowerCase());
+
+        if (tournament.results.length !== 0) {
+          tournament.playerAddress = tournament.results[0].playerAddress;
+        }
+
+        tournaments.push(tournament);
+
       }
-    )
-  }
 
-  renderReplays = () => {
-    const {
-      leaderboard,
-    } = this.state;
+      let newTournaments = tournaments.filter( tournament => tournament.playerAddress !== '');
+      
+      this.setState({
+        tournaments: newTournaments
+      })
 
-    if (!leaderboard) {
-      return (
-        <View
-          flex={true}
-          center={true}
-          style={{
-            borderRadius: 8,
-            backgroundColor: '#efefef',
-            color: 'darkgrey',
-            height: 128,
-          }}
-        >
-          {'Refreshing Leaderboard attempts...'}
-        </View>
-      );
-    }
-
-    if (leaderboard.length <= 0) {
-      return (
-        <View
-          flex={true}
-          center={true}
-          style={{
-            borderRadius: 8,
-            backgroundColor: '#efefef',
-            color: 'darkgrey',
-            height: 128,
-          }}
-        >
-          {'No entries yet, start a game to join'}
-        </View>
-      );
-    }
-
-    
-
-    return leaderboard.map(({time, id, hash}, index) => {
-      return (
-        <Fragment key={id}>
-          <Replay
-            id={id}
-            time={time}
-            hash={hash}
-            onClick={this.handleReplayClick}
-          />
-          {(index !== leaderboard.length - 1) && <Space size="xxs" />}
-        </Fragment>
-
-     )
-    });
   }
 
     render() {
-      
+      const { account, accountValidated, drizzle, setRoute } = this.props;
+      const { tournaments } = this.state;
+
       return (
-        <Box maxWidth={"1180px"} p={3} mx={"auto"}>
-          {this.props.account && this.props.accountValidated ? (
-            <PlayerTournamentResults drizzle={this.props.drizzle} account={this.props.account} setRoute={this.props.setRoute}/>
+        <StyledFlex>
+          {account && accountValidated ? (
+            <>
+            <PlayerTournamentResults 
+              drizzle={drizzle} 
+              account={account} 
+              setRoute={setRoute}
+              tournaments={tournaments}
+            />
+
+            <PlayerOngoingTournaments 
+              drizzle={drizzle} 
+              account={account} 
+              setRoute={setRoute}
+              tournaments={tournaments}
+            />
+            </>
           ) : (
             <Flash> You have to be logged in to view. </Flash>
           )}
-          
-          {/* <Text my={4} />
-          <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-          Your Game Replays
-          </Flex>
-          <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-            <video id="recorded" loop></video>                
-          </Flex>
-
-          <Box
-            style={{
-              width: 500,
-              maxWidth: '100%',
-            }}
-          >
-          {this.renderReplays()}
-          </Box>                 */}
-        </Box>  
+          {/* <PlayerGameReplays /> */}
+        </StyledFlex>  
       );
       }
 
@@ -157,8 +198,11 @@ class DashboardView extends Component<any, IState> {
  * Export connected component.
  */
 const mapStateToProps = state => {
-    return {
-    };
+  return {
+    drizzleStatus: state.drizzleStatus,
+    address: state.accounts[0],
+    networkId: state.web3.networkId
   };
+};
   
-  export default drizzleConnect(DashboardView, mapStateToProps);
+export default drizzleConnect(DashboardView, mapStateToProps);

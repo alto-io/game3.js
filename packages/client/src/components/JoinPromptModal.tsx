@@ -22,7 +22,7 @@ class JoinPromptModal extends Component{
     return (
       <>
         <Modal isOpen={this.props.isOpen}>
-          <Card width={"500px"} p={0}>
+          <Card p={0}>
               <Button.Text
                 icononly
                 icon={"Close"}
@@ -37,7 +37,7 @@ class JoinPromptModal extends Component{
 
               <Box p={4}>
                 <Heading.h3>No Wallet Connected</Heading.h3>
-                <Text>You need to be logged in to join a tournament</Text>
+                <Text>{this.props.modalText}</Text>
               </Box>
 
               <Flex

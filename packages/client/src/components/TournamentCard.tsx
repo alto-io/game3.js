@@ -186,6 +186,7 @@ class TournamentCard extends Component<any, any> {
               connectAndValidateAccount={this.props.connectAndValidateAccount}
               account={this.props.account}
               accountValidated={this.props.accountValidated}
+              modalText={"You need to be logged in to join a tournament"}
             />
           </Flex>
         </Card>
