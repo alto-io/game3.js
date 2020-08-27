@@ -14,8 +14,14 @@ const StyledFlex = styled(Flex)`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  margin: 0;
+  max-width: 1180px;
 
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 375px) {
+    margin: 0 auto;
+  }
+
+  @media screen and (min-width: 640px) {
     justify-content: center;
     align-items: flex-start;
     flex-direction: row;
@@ -29,8 +35,7 @@ class DashboardView extends Component {
       currentNetwork: null,
       address: null,
       tournamentsCount : 0,
-      tournaments: [],
-      resultsCount: 0
+      tournaments: []
     }
   }
 
@@ -93,7 +98,8 @@ class DashboardView extends Component {
           balance: tournamentDetails['4'],
           timeIsUp: false,
           canDeclareWinner: false,
-          results: []
+          results: [],
+          playerAddress: ''
         }
   
         tournament.timeIsUp = isPast(new Date(tournament.endTime));
@@ -139,34 +145,30 @@ class DashboardView extends Component {
           },
         ]
         
-          tournament.results = results.filter( result => result.playerAddress.toLowerCase() === account.toLowerCase());
+        tournament.results = results.filter( result => result.playerAddress.toLowerCase() === account.toLowerCase());
 
-          const winner = results.find( result => result.isWinner === true);
-          
-          if (winner !== undefined) {
-            tournament.canDeclareWinner = true;
-          } else {
-            tournament.canDeclareWinner = false;
-          }  
+        if (tournament.results.length !== 0) {
+          tournament.playerAddress = tournament.results[0].playerAddress;
+        }
 
         tournaments.push(tournament);
-  
-        this.setState({
-          tournaments,
-          resultsCount
-        })
 
-        console.log(tournaments);
       }
- 
+
+      let newTournaments = tournaments.filter( tournament => tournament.playerAddress !== '');
+      
+      this.setState({
+        tournaments: newTournaments
+      })
+
   }
 
     render() {
       const { account, accountValidated, drizzle, setRoute } = this.props;
-      const { tournaments, resultsCount } = this.state;
+      const { tournaments } = this.state;
 
       return (
-        <StyledFlex maxWidth={"1180px"} p={3} mx={"auto"}>
+        <StyledFlex>
           {account && accountValidated ? (
             <>
             <PlayerTournamentResults 
@@ -174,8 +176,6 @@ class DashboardView extends Component {
               account={account} 
               setRoute={setRoute}
               tournaments={tournaments}
-              resultsCount={resultsCount}
-              className="tournament-card"
             />
 
             <PlayerOngoingTournaments 
@@ -183,8 +183,6 @@ class DashboardView extends Component {
               account={account} 
               setRoute={setRoute}
               tournaments={tournaments}
-              resultsCount={resultsCount}
-              className="tournament-card"
             />
             </>
           ) : (
