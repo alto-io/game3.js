@@ -9,7 +9,8 @@ contract Tournaments is Ownable {
   enum TournamentState {
     Draft,
     Active,
-    Ended
+    Ended,
+    WinnersDeclared
   }
 
   struct Tournament {
@@ -32,6 +33,7 @@ contract Tournaments is Ownable {
   Tournament[] public tournaments;
   // tournamentId => GameResult[]
   mapping(uint => GameResult[]) public results;
+  mapping(uint => uint[]) public winnerShares;
   // tournamentId => (player => GameResultId[]) - all Player's results for TournamentId
   mapping(uint => mapping (address => uint[])) public resultsPlayerMap;
   // tournamentId => (player => total buy in)
@@ -44,20 +46,26 @@ contract Tournaments is Ownable {
   event TournamentActivated(uint tournamentId);
   event ResultSubmitted(uint tournamentId, address indexed player,
     uint256 indexed resultId);
-  event WinnerDeclared(uint tournamentId, address indexed player, uint256 indexed resultId);
+  event WinnersDeclared(uint tournamentId, uint256[] resultId);
   event TournamentStopped(uint tournamentId);
 
   /**
     Modifiers
   */
-  modifier amountNotZero(uint amount) {
-    require(amount != 0, "Amount must not be zero");
-    _;
-  }
-
+  
   modifier noTournamentsOverflow(){
     require((tournaments.length + 1) > tournaments.length,
       "Too many tournaments");
+    _;
+  }
+
+  modifier sharesAreCorrect(uint[] memory shares) {
+    uint sharesCount = shares.length;
+    require(sharesCount >= 1, "Must have at least one share");
+
+    for (uint i = 0; i < sharesCount; i++) {
+      require((shares[i]) > 0, "Must not have zero shares");
+    }
     _;
   }
 
@@ -129,6 +137,12 @@ contract Tournaments is Ownable {
     _;
   }
 
+  modifier correctWinnersCount(uint tournamentId, uint[] memory resultIds) {
+    require(winnerShares[tournamentId].length == resultIds.length,
+      "Winners count must be equal to shares count");
+    _;
+  }
+
   modifier enoughBalanceForPrize(uint tournamentId) {
     require(tournaments[tournamentId].balance >= tournaments[tournamentId].prize,
       "Not enough tournament balance");
@@ -139,21 +153,29 @@ contract Tournaments is Ownable {
     Methods
   */
   function createTournament(
-    address payable organizer,
-    uint            endTime,
-    string calldata data,
-    uint256         prize,
-    uint256         buyInAmount,
-    uint            triesPerBuyIn
+    address payable     organizer,
+    uint                endTime,
+    string calldata     data,
+    uint256             prize,
+    uint256[] calldata  shares,
+    uint256             buyInAmount,
+    uint                triesPerBuyIn
   )
     external
     notInPast(endTime)
-    amountNotZero(prize)
     noTournamentsOverflow()
+    sharesAreCorrect(shares)
     returns (uint)
   {
+    require(prize != 0, "Prize must not be zero");
+    require(buyInAmount != 0, "Buy in amount must not be zero");
+    require(triesPerBuyIn != 0, "Tries count must not be zero");
+
     tournaments.push(Tournament(organizer, endTime, data, prize,
       buyInAmount, triesPerBuyIn, TournamentState.Draft, 0));
+
+    winnerShares[tournaments.length - 1] = shares;
+
     emit TournamentCreated(tournaments.length - 1);
     return (tournaments.length - 1);
   }
@@ -203,33 +225,52 @@ contract Tournaments is Ownable {
     emit ResultSubmitted(tournamentId, msg.sender, resultId);
   }
 
-  function declareWinner(uint tournamentId, uint resultId)
+  function declareWinners(uint tournamentId, uint[] calldata resultIds)
     external
     tournamentIdIsCorrect(tournamentId)
-    resultIdIsCorrect(tournamentId, resultId)
     onlyOrganizer(tournamentId)
     correctTournamentState(tournamentId, TournamentState.Active)
-    resultIsNotWinner(tournamentId, resultId)
     enoughBalanceForPrize(tournamentId)
+    correctWinnersCount(tournamentId, resultIds)
   {
+    require((tournaments[tournamentId].state == TournamentState.Active) || 
+      (tournaments[tournamentId].state == TournamentState.Ended),
+      "Incorrect tournament state");
+
+    uint resultCount = resultIds.length;
+    for (uint i = 0; i < resultCount; i++) {
+      uint resultId = resultIds[i];
+
+      require(resultId < results[tournamentId].length, "Incorrect result Id");
+      require(results[tournamentId][resultId].winner == false, "Result is already a winner");
+
       results[tournamentId][resultId].winner = true;
-      results[tournamentId][resultId].player.transfer(tournaments[tournamentId].prize);
-      tournaments[tournamentId].balance -= tournaments[tournamentId].prize;
-      emit WinnerDeclared(tournamentId, msg.sender, resultId);
+      // approve shared amount
+    }
+
+    //results[tournamentId][resultId].player.transfer(tournaments[tournamentId].prize);
+    //tournaments[tournamentId].balance -= tournaments[tournamentId].prize;
+    
+    tournaments[tournamentId].state = TournamentState.WinnersDeclared;
+
+    emit WinnersDeclared(tournamentId, resultIds);
   }
 
-  function stopTournament(uint tournamentId)
+  function cancelTournament(uint tournamentId)
     external
     tournamentIdIsCorrect(tournamentId)
     onlyOrganizer(tournamentId)
     correctTournamentState(tournamentId, TournamentState.Active)
   {
     tournaments[tournamentId].state = TournamentState.Ended;
+
+    /* TODO return prize and buyIns
     uint oldBalance = tournaments[tournamentId].balance;
     tournaments[tournamentId].balance = 0;
     if (oldBalance > 0){
       tournaments[tournamentId].organizer.transfer(oldBalance);
     }
+    */
     emit TournamentStopped(tournamentId);
   }
 
