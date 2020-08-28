@@ -6,7 +6,7 @@ import { Box, Flex, Text, Link } from "rimble-ui";
 import { GAME_DETAILS } from '../constants';
 import GameCard from '../components/GameCard';
 
-function Play({ drizzle, drizzleState, drizzleStatus, account, networkId }) {
+function Play({ drizzle, drizzleStatus, account, accountValidated, networkId, handleSetIsContractOwner }) {
   const [currentNetwork, setCurrentNetwork] = useState(null);
   const [address, setAddress] = useState(null);
 
@@ -34,6 +34,37 @@ function Play({ drizzle, drizzleState, drizzleStatus, account, networkId }) {
       });
     }
   }, [networkId, drizzleStatus, drizzle]);
+
+  //  Fetch tournaments and check organizer
+  useEffect(()=>{
+    if (account && accountValidated) {
+      fetchTournaments();
+    }
+  }, [account, address, accountValidated])
+
+  const fetchTournaments = async () => {
+    const contract = drizzle.contracts.Tournaments;
+    const tournamentsCount = await contract.methods.getTournamentsCount().call();
+
+    let tournaments = [];
+    let tournamentsOwned = [];
+
+    for (let tournamentId = 0; tournamentId < tournamentsCount; tournamentId++) {
+      const tournamentDetails = await contract.methods.getTournament(tournamentId).call();
+
+      const tournament = {
+        id: tournamentId,
+        organizer: tournamentDetails['0'].toLowerCase()
+      }
+
+      tournaments.push(tournament);
+      tournamentsOwned = tournaments.filter( tournament => tournament.organizer === account.toLowerCase());
+
+      if (tournamentsOwned.length !== 0) {
+        handleSetIsContractOwner(true);
+      }
+    }
+  }
 
   return (
     <Box>
