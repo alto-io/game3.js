@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
 
-import { Select, Flex, Button, Card, Box, Pill, Heading, Text } from "rimble-ui";
+import { Select, Flex, Button, Card, Field, Input, 
+         Box, Pill, Heading, Text, Form} from "rimble-ui";
 
 import RainbowBox from './RainbowBox';
 import Tournament from './Tournament';
@@ -17,7 +18,8 @@ class CreateTourneyView extends Component<any, any> {
 
     this.state = {     
       selectedContract: this.DEFAULT_CONTRACT,
-      selectedMethod: null,
+      selectedMethod: this.DEFAULT_CONTRACT_METHOD,
+      contractOutput: "",
       currentNetwork: null,
       address: null,
       tournamentsCount: 0
@@ -26,13 +28,6 @@ class CreateTourneyView extends Component<any, any> {
 
   componentDidMount() {
     const { address, networkId, drizzleStatus, drizzle } = this.props
-
-    this.setState(
-      {
-        selectedContract: drizzle.contractList[0].contractName
-      }
-    )
-
     this.updateAddress(address)
     this.updateDrizzle(networkId, drizzleStatus, drizzle)
   }
@@ -142,9 +137,150 @@ class CreateTourneyView extends Component<any, any> {
         value: tournament.prize
       })
     this.updateTournaments()
-  }  
+  }
+
+  changeSelectedContract = (event) => {
+    this.setState({ selectedContract: event.target.value });
+  }
+
+  changeSelectedMethod = (event) => {
+    this.setState({ selectedMethod: event.target.value });
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+
+   
+    const data = new FormData(e.target);
+
+    for(var pair of data.entries()) {
+      console.log(pair[0]+ ', '+ pair[1]); 
+   }    
+
+  };
 
   render() {
+
+    const { drizzle } = this.props
+
+    const { 
+      selectedContract, selectedMethod, contractOutput
+    } = this.state
+  
+    const contractList = drizzle.contractList;
+    const contractAbi = drizzle.contracts[selectedContract].abi;
+
+    const contractMethodArray = contractAbi.filter(obj => {
+      return obj.name === selectedMethod;
+    });
+    
+    let abiInputs = null;
+
+    if (contractMethodArray.length > 0)
+    {
+      abiInputs = contractMethodArray[0].inputs;
+    }
+
+    return (
+      <Form onSubmit={this.handleSubmit}>
+        <Box>
+          <Box maxWidth={"1180px"} p={3} mx={"auto"}>
+            <Card borderRadius={"15px 15px 15px 15px"} p={0} mx={2} my={2}>
+              <RainbowBox
+                borderRadius={"15px 15px 0px 0px"}
+                height={"10px"}
+                borderColor={"#d6d6d6"}
+              />
+
+              <Flex alignItems="center">
+                <Box ml={3} mt={3} width={1 / 2} style={{ textAlign: "left" }}>
+                <Select id="selectedContract" name="selectedContract"
+                        onChange={this.changeSelectedContract}
+                        value={selectedContract}>
+
+                  {
+                    contractList && contractList.map( (contract) =>
+                    {
+                        return (
+                        <option key={contract.address}>{contract.contractName}</option> 
+                        )
+                    })
+                  }
+                </Select>
+                </Box>
+                <Box mr={3} mt={3} width={1 / 2} style={{ textAlign: "right" }}>
+                <Select id="selectedMethod" name="selectedMethod"
+                onChange={this.changeSelectedMethod}
+                value={selectedMethod}>
+                >
+                  {
+                    contractAbi && contractAbi.map((abi) =>
+                    {
+                        return (
+                        <option key={abi.signature}>{abi.name}</option> 
+                        )
+                    })
+                  }
+                </Select>
+                </Box>
+              </Flex>
+              
+              <Box style={{ textAlign: "center" }}>
+                
+                {
+                abiInputs && abiInputs.map(input => {
+                return (
+                    <Field   
+                    size={"medium"}
+                    mt={3} mr={3} mb={3}
+                    label={input.name}>
+                      <Input id={input.name} name={input.name} required={true}/>
+                  </Field>
+                );
+                })
+                }
+              </Box>
+              <Box my={4} style={{ textAlign: "center" }}>
+                <Button size={"medium"} mr={3} mb={3}>
+                  Call Contract Method
+                </Button>
+              </Box>
+
+              <Box 
+              mt={3} mb={3}
+              style={{ textAlign: "center" }}>
+              <Card>
+                <Pill>{"Output"}</Pill>
+              <Text fontSize="2" textAlign="center">
+                {}
+                </Text>
+              </Card>
+              </Box>
+              
+
+              
+            </Card>
+          </Box>
+        </Box>
+      </Form>
+    )
+  }
+}
+
+/*
+ * Export connected component.
+ */
+const mapStateToProps = state => {
+  return {
+    drizzleStatus: state.drizzleStatus,
+    address: state.accounts[0],
+    networkId: state.web3.networkId
+  };
+};
+
+export default drizzleConnect(CreateTourneyView, mapStateToProps);
+
+
 
     /*
     const { drizzle } = this.props
@@ -265,143 +401,3 @@ class CreateTourneyView extends Component<any, any> {
       </Fragment>
     )
 */
-
-  const { drizzle } = this.props
- 
-  const contractList = drizzle.contractList;
-
-  const contractMethods = drizzle.contracts[this.DEFAULT_CONTRACT].methods;
-
-
-
-  const { 
-    selectedContract
-  } = this.state
-
-  return (
-    <Box>
-      <Box maxWidth={"1180px"} p={3} mx={"auto"}>
-        <Card borderRadius={"15px 15px 15px 15px"} p={0} mx={2} my={2}>
-          <RainbowBox
-            borderRadius={"15px 15px 0px 0px"}
-            height={"10px"}
-            borderColor={"#d6d6d6"}
-          />
-
-          <Flex alignItems="center">
-            <Box ml={3} mt={3} width={1 / 2} style={{ textAlign: "left" }}>
-            <Select>
-
-              {
-                contractList && contractList.map( (contract) =>
-                {
-                  const name = contract.contractName;
-                  if (name === this.DEFAULT_CONTRACT)
-                  {
-                    return (
-                      <option selected key={name}>{name}</option> 
-                       )
-                  }
-                  else
-                  {
-                    return (
-                    <option key={name}>{name}</option> 
-                    )
-                  }
-                })
-              }
-            </Select>
-            </Box>
-            <Box mr={3} mt={3} width={1 / 2} style={{ textAlign: "right" }}>
-            <Select>
-              {
-                contractMethods && 
-                Object.keys(contractMethods).map((name) =>
-                {
-
-                  if (name === this.DEFAULT_CONTRACT_METHOD)
-                  {
-                    return (
-                      <option selected key={name}>{name}</option> 
-                       )
-                  }
-                  else
-                  {
-                    return (
-                    <option key={name}>{name}</option> 
-                    )
-                  }
-                })
-              }
-            </Select>
-            </Box>
-          </Flex>
-          
-          <Box style={{ textAlign: "center" }}>
-            
- 
-
-            <Heading.h1 mb={3} textAlign="center">
-              Don't rely on wallet UX
-            </Heading.h1>
-            <Text fontSize="5" textAlign="center">
-              • Wallets can't be specific
-            </Text>
-            <Text fontSize="5" textAlign="center">
-              • It's not in their remit to make your dApp usable
-            </Text>
-            <Text fontSize="5" textAlign="center">
-              • Your messaging can speak to the task at hand
-            </Text>
-            <Text fontSize="5" textAlign="center">
-              • Phrase your communication around what the user is doing
-            </Text>
-          </Box>
-          <Box my={4} style={{ textAlign: "center" }}>
-            <Button size={"medium"} mr={3} mb={3} 
-              onClick={() => {
-                // setRoute("Lesson2");
-              }}
-            >
-              Show transaction confirmation
-            </Button>
-            <Button
-              size={"medium"}
-              mr={3}
-              mb={3}
-              onClick={() => {
-                // setRoute("Lesson2");
-              }}
-            >
-              Show transaction sending
-            </Button>
-            <Button
-              size={"medium"}
-              mr={3}
-              mb={3}
-              onClick={() => {
-                // setRoute("Lesson2");
-              }}
-            >
-              Show No ETH warning
-            </Button>
-          </Box>
-        </Card>
-      </Box>
-    </Box>    
-  )
-  }
-}
-
-/*
- * Export connected component.
- */
-const mapStateToProps = state => {
-  return {
-    drizzleStatus: state.drizzleStatus,
-    address: state.accounts[0],
-    networkId: state.web3.networkId
-  };
-};
-
-export default drizzleConnect(CreateTourneyView, mapStateToProps);
