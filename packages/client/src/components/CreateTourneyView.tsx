@@ -6,15 +6,19 @@ import { Select, Flex, Button, Card, Box, Pill, Heading, Text } from "rimble-ui"
 import RainbowBox from './RainbowBox';
 import Tournament from './Tournament';
 
-
 class CreateTourneyView extends Component<any, any> {
+
+  DEFAULT_CONTRACT = "Tournaments";
+  DEFAULT_CONTRACT_METHOD = "createTournament";
 
   constructor(props) {
     super(props)
 
-    this.state = {
+
+    this.state = {     
+      selectedContract: this.DEFAULT_CONTRACT,
+      selectedMethod: null,
       currentNetwork: null,
-      selectedContract: null,
       address: null,
       tournamentsCount: 0
     }
@@ -263,7 +267,13 @@ class CreateTourneyView extends Component<any, any> {
 */
 
   const { drizzle } = this.props
-  
+ 
+  const contractList = drizzle.contractList;
+
+  const contractMethods = drizzle.contracts[this.DEFAULT_CONTRACT].methods;
+
+
+
   const { 
     selectedContract
   } = this.state
@@ -279,40 +289,57 @@ class CreateTourneyView extends Component<any, any> {
           />
 
           <Flex alignItems="center">
-            <Box width={1 / 2} style={{ textAlign: "left" }}>
-              <Button.Text
-                ml={3}
-                mt={3}
-                onClick={() => {
-                //  setRoute("Lesson1");
-                }}
-              >
-                Previous
-              </Button.Text>
+            <Box ml={3} mt={3} width={1 / 2} style={{ textAlign: "left" }}>
+            <Select>
+
+              {
+                contractList && contractList.map( (contract) =>
+                {
+                  const name = contract.contractName;
+                  if (name === this.DEFAULT_CONTRACT)
+                  {
+                    return (
+                      <option selected key={name}>{name}</option> 
+                       )
+                  }
+                  else
+                  {
+                    return (
+                    <option key={name}>{name}</option> 
+                    )
+                  }
+                })
+              }
+            </Select>
             </Box>
-            <Box width={1 / 2} style={{ textAlign: "right" }}>
-              <Button.Text
-                mr={3}
-                mt={3}
-                onClick={() => {
-                //  setRoute("Lesson3");
-                }}
-              >
-                Next
-              </Button.Text>
+            <Box mr={3} mt={3} width={1 / 2} style={{ textAlign: "right" }}>
+            <Select>
+              {
+                contractMethods && 
+                Object.keys(contractMethods).map((name) =>
+                {
+
+                  if (name === this.DEFAULT_CONTRACT_METHOD)
+                  {
+                    return (
+                      <option selected key={name}>{name}</option> 
+                       )
+                  }
+                  else
+                  {
+                    return (
+                    <option key={name}>{name}</option> 
+                    )
+                  }
+                })
+              }
+            </Select>
             </Box>
           </Flex>
           
           <Box style={{ textAlign: "center" }}>
             
-            <Select>
-              {
-                drizzle.contractList.map( 
-                (contract) =>
-                 <option key={contract.contractName}>{contract.contractName}</option> 
-                )
-              }
-            </Select>
+ 
 
             <Heading.h1 mb={3} textAlign="center">
               Don't rely on wallet UX
