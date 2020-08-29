@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Flex, Box, Link } from "rimble-ui";
+import { Flex, Box, Link, Text } from "rimble-ui";
 
 const StyledLinkContainer = styled(Box)`
   background: ${props =>
@@ -28,6 +28,25 @@ const StyledLinkContainer = styled(Box)`
   }
 `;
 
+const StyledText = styled(Text)`
+  background: #fff;
+  box-shadow: none;
+  color: #a8a8a8;
+  cursor: pointer;
+  font-size: 1.266rem;
+  font-weight: bold;
+  transition: 300ms ease;
+  padding-left: 1.125rem;
+
+  &:hover{
+    color: #0093d5;
+  }
+
+  @media screen and (min-width: 768px) {
+    font-size: 1rem;
+  }
+`
+
 const StyledNavigation = styled(Flex)`
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   flex-direction: column;
@@ -47,7 +66,7 @@ const StyledNavigation = styled(Flex)`
   }
 `;
 
-const OutplayNavigation = ({ route, setRoute }) => {
+const OutplayNavigation = ({ route, setRoute, account, accountValidated, handleOpenModal }) => {
   return (
     <StyledNavigation justifyContent={"center"} p={3}>
       <StyledLinkContainer
@@ -90,7 +109,8 @@ const OutplayNavigation = ({ route, setRoute }) => {
         route={route}
         borderRadius={1}
       >
-        <Link
+        {account && accountValidated ? (
+          <Link
           href={"dashboard"}
           p={3}
           onClick={e => {
@@ -100,6 +120,8 @@ const OutplayNavigation = ({ route, setRoute }) => {
         >
           Dashboard
         </Link>
+        ) : (<StyledText onClick={handleOpenModal}>Dashboard</StyledText>)}
+        
       </StyledLinkContainer>
       <StyledLinkContainer
         mx={3}
