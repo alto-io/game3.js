@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
 
-import { Flex, Button, Card, Box, Pill, Heading, Text } from "rimble-ui";
+import { Select, Flex, Button, Card, Box, Pill, Heading, Text } from "rimble-ui";
 
 import RainbowBox from './RainbowBox';
 import Tournament from './Tournament';
@@ -261,6 +261,9 @@ class CreateTourneyView extends Component<any, any> {
       </Fragment>
     )
 */
+
+  const { drizzle } = this.props
+  
   const { 
     selectedContract
   } = this.state
@@ -301,9 +304,16 @@ class CreateTourneyView extends Component<any, any> {
           </Flex>
           
           <Box style={{ textAlign: "center" }}>
-            <Pill color="primary" mb={3}>
-              {selectedContract}
-            </Pill>
+            
+            <Select>
+              {
+                drizzle.contractList.map( 
+                (contract) =>
+                 <option key={contract.contractName}>{contract.contractName}</option> 
+                )
+              }
+            </Select>
+
             <Heading.h1 mb={3} textAlign="center">
               Don't rely on wallet UX
             </Heading.h1>
