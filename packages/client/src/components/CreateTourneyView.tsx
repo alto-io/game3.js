@@ -1,41 +1,20 @@
 import React, { Component, Fragment } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
-import ConnectionBanner from "@rimble/connection-banner";
-import { Box, Flex, Text, Link } from "rimble-ui";
 
-import TournamentCard from '../components/TournamentCard';
-import { getTournamentContract } from '../helpers/web3';
+import { Flex, Button, Card, Box, Pill, Heading, Text } from "rimble-ui";
 
-
-import { Button, View, Separator, Space } from '../components'
-import Tournament from '../components/Tournament'
-import styled from 'styled-components'
-import { putTournamentData, getFileFromHash } from "../helpers/database"
-
-import { colors } from "../styles"
-
-const SBold = styled.div`
-  margin: 1em 0;
-  color: rgb(${colors.black});
-  t-size: 20px;
-  font-weight: 700;
-`;
+import RainbowBox from './RainbowBox';
+import Tournament from './Tournament';
 
 
-// Optional parameters to pass into RimbleWeb3
-const RIMBLE_CONFIG = {
-  // accountBalanceMinimum: 0.001,
-  requiredNetwork: 5777, // ganache
-  // requiredNetwork: 4 // rinkeby
-};
-
-class CreateTourneyView extends React.Component<any, any> {
+class CreateTourneyView extends Component<any, any> {
 
   constructor(props) {
     super(props)
 
     this.state = {
       currentNetwork: null,
+      selectedContract: null,
       address: null,
       tournamentsCount: 0
     }
@@ -43,6 +22,12 @@ class CreateTourneyView extends React.Component<any, any> {
 
   componentDidMount() {
     const { address, networkId, drizzleStatus, drizzle } = this.props
+
+    this.setState(
+      {
+        selectedContract: drizzle.contractList[0].contractName
+      }
+    )
 
     this.updateAddress(address)
     this.updateDrizzle(networkId, drizzleStatus, drizzle)
@@ -156,6 +141,8 @@ class CreateTourneyView extends React.Component<any, any> {
   }  
 
   render() {
+
+    /*
     const { drizzle } = this.props
     const { tournamentsCount, contract, ownerView } = this.state
     const { web3, address, contractMethodSendWrapper } = this.props
@@ -178,7 +165,6 @@ class CreateTourneyView extends React.Component<any, any> {
         />
       )
     }
-
     return (
       <Fragment>
         <View
@@ -274,6 +260,99 @@ class CreateTourneyView extends React.Component<any, any> {
         </View>
       </Fragment>
     )
+*/
+  const { 
+    selectedContract
+  } = this.state
+
+  return (
+    <Box>
+      <Box maxWidth={"1180px"} p={3} mx={"auto"}>
+        <Card borderRadius={"15px 15px 15px 15px"} p={0} mx={2} my={2}>
+          <RainbowBox
+            borderRadius={"15px 15px 0px 0px"}
+            height={"10px"}
+            borderColor={"#d6d6d6"}
+          />
+
+          <Flex alignItems="center">
+            <Box width={1 / 2} style={{ textAlign: "left" }}>
+              <Button.Text
+                ml={3}
+                mt={3}
+                onClick={() => {
+                //  setRoute("Lesson1");
+                }}
+              >
+                Previous
+              </Button.Text>
+            </Box>
+            <Box width={1 / 2} style={{ textAlign: "right" }}>
+              <Button.Text
+                mr={3}
+                mt={3}
+                onClick={() => {
+                //  setRoute("Lesson3");
+                }}
+              >
+                Next
+              </Button.Text>
+            </Box>
+          </Flex>
+          
+          <Box style={{ textAlign: "center" }}>
+            <Pill color="primary" mb={3}>
+              {selectedContract}
+            </Pill>
+            <Heading.h1 mb={3} textAlign="center">
+              Don't rely on wallet UX
+            </Heading.h1>
+            <Text fontSize="5" textAlign="center">
+              • Wallets can't be specific
+            </Text>
+            <Text fontSize="5" textAlign="center">
+              • It's not in their remit to make your dApp usable
+            </Text>
+            <Text fontSize="5" textAlign="center">
+              • Your messaging can speak to the task at hand
+            </Text>
+            <Text fontSize="5" textAlign="center">
+              • Phrase your communication around what the user is doing
+            </Text>
+          </Box>
+          <Box my={4} style={{ textAlign: "center" }}>
+            <Button size={"medium"} mr={3} mb={3} 
+              onClick={() => {
+                // setRoute("Lesson2");
+              }}
+            >
+              Show transaction confirmation
+            </Button>
+            <Button
+              size={"medium"}
+              mr={3}
+              mb={3}
+              onClick={() => {
+                // setRoute("Lesson2");
+              }}
+            >
+              Show transaction sending
+            </Button>
+            <Button
+              size={"medium"}
+              mr={3}
+              mb={3}
+              onClick={() => {
+                // setRoute("Lesson2");
+              }}
+            >
+              Show No ETH warning
+            </Button>
+          </Box>
+        </Card>
+      </Box>
+    </Box>    
+  )
   }
 }
 
