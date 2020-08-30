@@ -7,6 +7,8 @@ import { Select, Flex, Button, Card, Field, Input,
 import RainbowBox from './RainbowBox';
 import Tournament from './Tournament';
 
+import web3 from 'web3';
+
 class CreateTourneyView extends Component<any, any> {
 
   DEFAULT_CONTRACT = "Tournaments";
@@ -20,6 +22,7 @@ class CreateTourneyView extends Component<any, any> {
       selectedContract: this.DEFAULT_CONTRACT,
       selectedMethod: this.DEFAULT_CONTRACT_METHOD,
       contractOutput: "",
+      contractInputs: {},
       currentNetwork: null,
       address: null,
       tournamentsCount: 0
@@ -159,6 +162,33 @@ class CreateTourneyView extends Component<any, any> {
 
   };
 
+  handleInputChange = (e) => {
+    let currentInputs = this.state.contractInputs;
+    currentInputs[e.target.name] = e.target.value;
+
+    this.setState({
+      contractInputs: currentInputs
+    })
+
+    this.validateInput(e);
+  }
+
+  validateInput = (e) => {
+    const id = e.target.id;
+    const type = id.split('(')[1].split(')')[0];
+    const value = e.target.value;
+    const colorValid = "#28C081";
+    const colorInvalid = "#DC2C10";
+
+    switch (type) {
+      case 'address':
+        e.target.valid = web3.utils.isAddress(value);
+        e.target.style['border-color'] = e.target.valid ? colorValid : colorInvalid;
+      break;
+    }
+
+  }
+
   render() {
 
     const { drizzle } = this.props
@@ -233,8 +263,12 @@ class CreateTourneyView extends Component<any, any> {
                     <Field   
                     size={"medium"}
                     mt={3} mr={3} mb={3}
-                    label={input.name}>
-                      <Input id={input.name} name={input.name} required={true}/>
+                    label={input.name + " (" + input.type + ")"}>
+                      <Input id={input.name + " (" + input.type + ")"} 
+                             name={input.name} 
+                             required={true}
+                             onChange={this.handleInputChange}
+                             />
                   </Field>
                 );
                 })
