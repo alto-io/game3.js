@@ -13,12 +13,14 @@ export default class GameResult extends React.Component<any, any> {
 
     this.state = {
       sessionData: null,
+      tournament: {}
     }
   }
 
   componentDidMount = () => {
-    const { gameSessionId, playerAddress } = this.props
-    this.updateScore(gameSessionId, playerAddress)
+    const { gameSessionId, playerAddress } = this.props;
+    this.updateScore(gameSessionId, playerAddress);
+    this.getTournamentInfo();
   }
 
   componentWillReceiveProps = (newProps) => {
@@ -37,6 +39,7 @@ export default class GameResult extends React.Component<any, any> {
       return
     }
     const sessionData = await getGameSession(gameSessionId, playerAddress)
+    console.log("Session Data", sessionData);
     this.setState({
       sessionData
     })
@@ -59,18 +62,41 @@ export default class GameResult extends React.Component<any, any> {
     onToggle(true)
   }
 
+  async getTournamentInfo() {
+    let tournament = { // Test Tournament Info
+      maxTries: 3 
+    }
+
+    this.setState({
+      tournament
+    })
+  }
+
   render () {
-    const { show, onToggle } = this.props
-    const { sessionData } = this.state
+    const { show, onToggle, didWin } = this.props
+    const { sessionData, tournament } = this.state
 
     const score = (sessionData && sessionData.timeLeft) || ''
+    const currentHighScore = (sessionData && sessionData.currentHighestNumber);
+    const gameNo = (sessionData && sessionData.gameNo);
+
+    console.log('Your current high score is', currentHighScore);
+    console.log('Your current game no is', gameNo);
 
     return (
       <Modal show={show} toggleModal={onToggle}>
         <View style={{ margin: '20px' }}>Game result: {score}</View>
-        <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
-          <Button onClick={this.submitResult}>Submit score</Button>
-        </View>
+        { (didWin || gameNo === tournament.maxTries) && (
+          <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
+            <Button onClick={this.submitResult}>Submit score</Button>
+          </View>
+        )}
+
+        {(!didWin || gameNo < tournament.maxTries) && (
+          <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
+            <Button onClick={this.submitResult}>Try Again</Button>
+          </View>
+        )}
       </Modal>
     )
   }

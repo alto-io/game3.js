@@ -463,6 +463,7 @@ export default class Game extends Component<IProps, IState> {
                 drizzle={drizzle}
                 drizzleState={drizzleState}
                 contractMethodSendWrapper={contractMethodSendWrapper}
+                didWin={true}
               />
           )}
 

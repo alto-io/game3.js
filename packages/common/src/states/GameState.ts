@@ -190,7 +190,9 @@ export class GameState extends Schema {
       const player: Player = this.players[playerId]
       const scoreData = {
         kills: player.kills,
-        timeLeft: this.game.gameEndsAt - Date.now()
+        timeLeft: this.game.gameEndsAt - Date.now(),
+        gameNo: 0,
+        currentHighestNumber: 0
       }
       data.playerData[player.address.toLowerCase()] = scoreData
     }
