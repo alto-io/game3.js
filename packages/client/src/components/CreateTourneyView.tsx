@@ -9,6 +9,9 @@ import Tournament from './Tournament';
 
 import web3 from 'web3';
 
+import Datetime from 'react-datetime';
+import '../react-datetime.css';
+
 class CreateTourneyView extends Component<any, any> {
 
   DEFAULT_CONTRACT = "Tournaments";
@@ -147,7 +150,10 @@ class CreateTourneyView extends Component<any, any> {
   }
 
   changeSelectedMethod = (event) => {
-    this.setState({ selectedMethod: event.target.value });
+    this.setState({ 
+      selectedMethod: event.target.value,
+      contractInputs: {}
+    });
   }
 
   handleSubmit = (e) => {
@@ -173,6 +179,16 @@ class CreateTourneyView extends Component<any, any> {
     this.validateInput(e);
   }
 
+  // TODO: special case for endTime, can this be abstracted?
+  handleDatetimeChange = (momentObj) => {
+    let currentInputs = this.state.contractInputs;
+    currentInputs["endTime"] = momentObj.format('x');
+
+    this.setState({
+      contractInputs: currentInputs
+    })
+  }
+
   validateInput = (e) => {
     const id = e.target.id;
     const type = id.split('(')[1].split(')')[0];
@@ -187,6 +203,13 @@ class CreateTourneyView extends Component<any, any> {
       break;
     }
 
+  }
+
+
+  renderDatetimeInput = (props) => {
+    return (
+      <Input {...props} />
+    )
   }
 
   render() {
@@ -259,18 +282,42 @@ class CreateTourneyView extends Component<any, any> {
                 
                 {
                 abiInputs && abiInputs.map(input => {
-                return (
-                    <Field   
-                    size={"medium"}
-                    mt={3} mr={3} mb={3}
-                    label={input.name + " (" + input.type + ")"}>
-                      <Input id={input.name + " (" + input.type + ")"} 
-                             name={input.name} 
-                             required={true}
-                             onChange={this.handleInputChange}
-                             />
-                  </Field>
-                );
+                  switch (input.name) {
+                    case "endTime":
+                      return (
+                        <Field   
+                        size={"medium"}
+                        mt={3} mr={3} mb={3}
+                        label={input.name + " (" + input.type + ")"}>
+                          {
+                              <Datetime id={input.name + " (" + input.type + ")"} 
+                                    name={input.name} 
+                                    required={true}
+                                    onChange={this.handleDatetimeChange}
+                                    renderInput={this.renderDatetimeInput}
+                                    />
+                          }
+                      </Field>
+                      );
+                    break;
+
+                    default:
+                      return (
+                        <Field   
+                        size={"medium"}
+                        mt={3} mr={3} mb={3}
+                        label={input.name + " (" + input.type + ")"}>
+                          {
+                              <Input id={input.name + " (" + input.type + ")"} 
+                                    name={input.name} 
+                                    required={true}
+                                    onChange={this.handleInputChange}
+                                    />
+                          }
+                      </Field>
+                      );
+                    break;
+                  }
                 })
                 }
               </Box>
