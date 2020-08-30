@@ -166,6 +166,8 @@ class CreateTourneyView extends Component<any, any> {
       console.log(pair[0]+ ', '+ pair[1]); 
    }    
 
+   console.log(this.state);
+
   };
 
   handleInputChange = (e) => {
@@ -352,6 +354,7 @@ class CreateTourneyView extends Component<any, any> {
  * Export connected component.
  */
 const mapStateToProps = state => {
+  console.log("state", state);
   return {
     drizzleStatus: state.drizzleStatus,
     address: state.accounts[0],

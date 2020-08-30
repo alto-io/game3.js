@@ -19,6 +19,9 @@ import { navigate } from '@reach/router';
 
 import { navigateTo } from '../helpers/utilities';
 
+import { drizzleConnect } from "@drizzle/react-plugin";
+import web3 from 'web3';
+
 class OutplayLoginHeader extends React.Component {
   constructor(props) {
     super(props);
@@ -95,11 +98,17 @@ class OutplayLoginHeader extends React.Component {
     render() {
     const {
         account,
-        accountBalance,
+        accountBalances,
         accountValidated,
         transactions
         } = this.props;     
+       
+        let accountBalance = null
 
+        if (account && accountBalances[account])
+        {
+          accountBalance = web3.utils.fromWei(accountBalances[account].toString(), "ether")
+        }
     return (
         <>
           {this.state.width > 768 ? (
@@ -134,4 +143,17 @@ class OutplayLoginHeader extends React.Component {
   }
 }
 
-export default OutplayLoginHeader;
+/*
+ * Export connected component.
+ */
+const mapStateToProps = state => {
+  return {
+    drizzleStatus: state.drizzleStatus,
+    account: state.accounts[0],
+    accountBalances: state.accountBalances
+  };
+};
+
+
+
+export default drizzleConnect(OutplayLoginHeader, mapStateToProps);
