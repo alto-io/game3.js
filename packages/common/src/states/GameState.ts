@@ -52,7 +52,8 @@ export class GameState extends Schema {
       onGameEnd: this.handleGameEnd,
     });
 
-    this.sessionId = uuidv4();
+    // this.sessionId = uuidv4();
+    this.sessionId = 'updatethissessionidtomakenewsessiondata' // Just for testing purposes
     this.tournamentId = tournamentId;
 
     // Map
@@ -181,22 +182,24 @@ export class GameState extends Schema {
 
   saveGameSession = async () => {
     const id = this.sessionId
-    const data = {
-      sessionId: id,
-      tournamentId: this.tournamentId,
-      playerData: {},
-    }
-    for (const playerId in this.players) {
-      const player: Player = this.players[playerId]
-      const scoreData = {
-        kills: player.kills,
-        timeLeft: this.game.gameEndsAt - Date.now(),
-        gameNo: 0,
-        currentHighestNumber: 0
-      }
-      data.playerData[player.address.toLowerCase()] = scoreData
-    }
-    await ServerState.dbManager.serverPutGameSession(id, data)
+    await ServerState.dbManager.makeNewGameSession(
+      id, 
+      this.tournamentId, 
+      this.game.gameEndsAt - Date.now(),
+      this.players
+    );
+
+   // for (const playerId in this.players) {
+     // const player: Player = this.players[playerId]
+      // const scoreData = {
+      //   kills: player.kills,
+      //   timeLeft: this.game.gameEndsAt - Date.now(),
+      //   gameNo: 0,
+      //   currentHighestNumber: 0
+      // }
+
+     
+   // }
   }
 
   // PLAYERS: single

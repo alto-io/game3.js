@@ -236,48 +236,172 @@ export class OrbitDBManager implements DBManager {
 
   // called from colyseus game state
   async serverPutGameSession(sessionId, sessionData) {
+    console.log("PUT_GSESSION: Function Invoked...");
     const entry = {
       id: sessionId,
       sessionData,
     }
-    console.log('serverPutGameSession:')
+    console.log("PUT_GSESSION: The new data...");
     console.log(entry)
     await this.gameSessions.put(entry)
+    console.log("PUT_GSESSION: Data inserted!...");
+    console.log("PUT_GSESSION: Returning...");
     return { result: sessionId }
   }
 
-  async serverUpdateScore(score, sessionId, playerAddress) {
-    console.log('serverUpdateScore:')
-    console.log(score);
-    
+  async serverUpdateScore(sessionId, playerAddress) {
+    console.log("UPDATE_SCORE: Function Invoked...");
+
     const data = await this.gameSessions.get(sessionId);
+    console.log("UPDATE_SCORE: Fetched data", data);
     let playerData = null
     if (data.length > 0) {
+      console.log("UPDATE_SCORE: Session Exist!");
       playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
-    }
+      console.log("UPDATE_SCORE: Session id", sessionId);
+      console.log("UPDATE_SCORE: Session", data[0]);
+      console.log("UPDATE_SCORE: Session data", data[0].sessionData);
+      console.log("UPDATE_SCORE: Player data", playerData);
+      console.log("UPDATE_SCORE: Update score...", playerData);
 
-    playerData.currentHighestNumber = score;
-    await this.gameSessions.put(playerData);
+      console.log("UPDATE_SCORE: Current High Score", playerData.currentHighestNumber);
+      console.log("UPDATE_SCORE: Current Score", playerData.timeLeft);
+
+      if (playerData.timeLeft > playerData.currentHighestNumber) {
+        playerData.currentHighestNumber = playerData.timeLeft;
+        console.log("UPDATE_SCORE: Thew new data", playerData);
+        data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+        await this.gameSessions.put(data[0]);
+        console.log("UPDATE_SCORE: Updated!");
+        console.log("UPDATE_SCORE: Returning...");
+        return { result: playerData }
+      } else {
+        console.log("UPDATE_SCORE: Current score is lower than highscore, no need to update!");
+        console.log("UPDATE_SCORE: Returning...");
+        return { result: playerData }
+      }
+      
+    } else {
+      console.log("UPDATE_SCORE: No Data...");
+      console.log("UPDATE_SCORE: Returning...");
+      return { result: 'none' }
+    }
   }
 
   async updateGameNumber(sessionId, playerAddress) {
+    // Get session first
 
+    const data = await this.gameSessions.get(sessionId);
+    if (data.length > 0) {
+      let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
+
+      playerData.gameNo += 1;
+      data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+      await this.gameSessions.put(data[0]);
+      return { result: playerData }
+    } else {
+      return { result: 'none' }
+    }
+  }
+
+  async makeNewGameSession(sessionId, tournamentId, timeLeft, players) {
+    console.log("NEW: Function Invoked...");
+    const sessionData = {
+      sessionId,
+      tournamentId,
+      playerData: {}
+    }
+
+    // Check if this user already have a session available
+    const data = await this.gameSessions.get(sessionId);
+    console.log("NEW: fetched session data", data);
+    if (data.length <= 0) {
+      // No data create new
+      console.log("NEW: NO SESSION DATA EXIST");
+      console.log("NEW: Adding player in session...");
+
+      for (const playerId in players) {
+        const player = players[playerId]
+        
+        const scoreData = {
+          kills: player.kills,
+          timeLeft: timeLeft,
+          gameNo: 0,
+          currentHighestNumber: 0
+        }
+
+        sessionData.playerData[player.address.toLowerCase()] = scoreData;
+      }
+
+      console.log("NEW: Players added!!");
+
+      console.log("NEW: Adding new session data to db...", sessionData);
+      await this.serverPutGameSession(sessionId, sessionData);
+      console.log("NEW: Session Data created!!!");
+      console.log("NEW: Function Finished...");
+    } else {
+      console.log("NEW: Session Exist!!");
+      console.log("NEW: Updating playerData...")
+
+      // if (tournamentId !== data[0].tournamentId) {
+      //   console.log("NEW: No tournament record");
+      //   console.log("NEW: Making new one...");
+      // }
+      
+      for (const playerId in players) {
+        const player = players[playerId]
+      
+        data[0].sessionData.playerData[player.address.toLowerCase()].kills = player.kills;
+        data[0].sessionData.playerData[player.address.toLowerCase()].timeLeft = timeLeft;
+      }
+      await this.gameSessions.put(data[0]);
+      console.log("NEW: Updated!");
+      console.log("NEW: Finished...");
+    } 
   }
 
   async serverGetGameSession(sessionId, playerAddress) {
-    console.log('serverGetGameSession')
-    console.log(`sessionId: ${sessionId}`)
-    console.log(`playerAddress: ${playerAddress}`)
+    console.log("GET_GSESSION: Function Invoked...");
+    console.log(`GET_GSESSION: sessionId: ${sessionId}`)
+    console.log(`GET_GSESSION: playerAddress: ${playerAddress}`)
+
     if (!sessionId || !playerAddress) {
+      console.log("GET_GSESSION: NO sessionId or playerAddress...");
+      console.log("GET_GSESSION: Returning...");
       return null
     }
+
     const data = await this.gameSessions.get(sessionId)
     let playerData = null
     if (data.length > 0) {
+      console.log("GET_GSESSION: Data exist!!");
+
       playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
+      console.log("GET: PLAYER DATA", playerData);
+      if (!('currentHighestNumber' in playerData) && !('gameNo' in playerData)) {
+        playerData.currentHighestNumber = 0;
+        playerData.gameNo = 0;
+      }
+
+      console.log(playerData);
+      console.log("GET_GSESSION: Returning...");
+      return playerData
+    } else {
+      console.log("GET_GSESSION: No Data");
+      console.log("GET_GSESSION: Returning...");
+      return { result: 'none' }
     }
-    console.log('playerData:')
-    console.log(playerData)
-    return playerData
+  }
+
+  async getGameNo(gameSessionId, playerAddress) {
+    // get game session first
+
+    const data = await this.gameSessions.get(gameSessionId);
+    if (data.length > 0) {
+      let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
+      return playerData.gameNo;
+    } else {
+      return {result: 'none'}
+    }
   }
 }
