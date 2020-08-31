@@ -1,9 +1,9 @@
 import React from "react";
 import { Card, Text, Box, Button, Flex, Image, Link } from "rimble-ui";
+import OutplayLoginHeaderDesktop from "./OutplayLoginHeaderDesktop";
+import OutplayLoginHeaderMobile from "./OutplayLoginHeaderMobile";
 
 import RimbleWeb3 from "../rimble/RimbleWeb3";
-
-import styled from "styled-components";
 
 import TransactionToastUtil from "../rimble/TransactionToastUtil";
 import SmartContractControls from "./SmartContractControls";
@@ -17,27 +17,24 @@ import balanceIcon from "./../images/icon-balance.svg";
 import shortenAddress from "../core/utilities/shortenAddress";
 import { navigate } from '@reach/router';
 
-// const StyledHeader = styled(Flex)`
-// border-bottom: 1px solid #d6d6d6;
-// box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.01);
-// `;
+import { navigateTo } from '../helpers/utilities';
 
-const StyledLink = styled(Link)`
-display: flex;
-flex-direction: row;
-align-items: center;
-&:hover {
-  text-decoration: none;
-}
-`;
-
+import { drizzleConnect } from "@drizzle/react-plugin";
+import web3 from 'web3';
 
 class OutplayLoginHeader extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      width: window.innerWidth,
+      height: window.innerHeight
+    };
+  }
 
     private contractInitialized:boolean = false;
 
     handleClickLogo = () => {
-      navigate('/');
+      navigateTo('/');
     }
 
     handleConnectAccount = () => {
@@ -50,7 +47,27 @@ class OutplayLoginHeader extends React.Component {
             console.log("Callback ERROR");
           }
         })
-      }    
+      }
+      
+    handleResize = () => {
+      this.setState({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+
+    componentDidMount () {
+      window.addEventListener('resize', this.handleResize)
+
+      this.setState({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+
+    componentWillUnmount () {
+      window.removeEventListener('resize', this.handleResize)
+    }
 
     componentDidUpdate() {
 
@@ -80,101 +97,63 @@ class OutplayLoginHeader extends React.Component {
 
     render() {
     const {
-        contract,
         account,
-        accountBalance,
-        transactions,
-        initContract,
-        initAccount,
-        drizzle
+        accountBalances,
+        accountValidated,
+        transactions
         } = this.props;     
+       
+        let accountBalance = null
+
+        if (account && accountBalances[account])
+        {
+          accountBalance = web3.utils.fromWei(accountBalances[account].toString(), "ether")
+        }
     return (
         <>
-            <Flex justifyContent={"space-between"} p={3} bg={"white"}>
-            <StyledLink
-                      fontWeight={600}
-                      fontSize={"1.13rem"}
-                      color={"#2B2C36"}
-                      lineHeight={0.8}
-                      title={
-                        "Back to Home"
-                      }
-                      onClick={this.handleClickLogo}
-                    >
-            <Image
-              paddingRight={2}
-              borderColor={"white"}
-              overflow={"hidden"}
-              src={logo} />
-            OP<br/>Arcade
-            </StyledLink>
+          {this.state.width > 768 ? (
+            <OutplayLoginHeaderDesktop 
+            account={account}
+            accountBalance={accountBalance}
+            accountValidated={accountValidated}
+            handleClickLogo={this.handleClickLogo}
+            handleConnectAccount={this.handleConnectAccount}
+            logo={logo}
+            walletIcon={walletIcon}
+            balanceIcon={balanceIcon}
+            shortenAddress={shortenAddress}
+          />
+                    
+          ) : <OutplayLoginHeaderMobile 
+            account={account}
+            accountBalance={accountBalance}
+            accountValidated={accountValidated}
+            handleClickLogo={this.handleClickLogo}
+            handleConnectAccount={this.handleConnectAccount}
+            logo={logo}
+            walletIcon={walletIcon}
+            balanceIcon={balanceIcon}
+            shortenAddress={shortenAddress}
+          />}
 
-            {this.props.account && this.props.accountValidated ? (
-              <Flex>
-                <Flex alignItems={"center"} mr={4}>
-                  <Image src={walletIcon} mr={2} />
-                  <Box>
-                    <Text
-                      fontWeight={600}
-                      fontSize={"12px"}
-                      color={"#2B2C36"}
-                      lineHeight={1}
-                    >
-                      Connected as
-                    </Text>
-                    <Text fontSize={1} color={"primary"}>
-                      {shortenAddress(account)}
-                    </Text>
-                  </Box>
-                </Flex>
-      
-                <Flex alignItems={"center"}>
-                  <Image src={balanceIcon} mr={2} />
-                  <Box>
-                    <Text
-                      fontWeight={600}
-                      fontSize={"12px"}
-                      color={"#2B2C36"}
-                      lineHeight={1}
-                    >
-                      Balance
-                    </Text>
-                    <Text fontSize={1} color={"primary"}>
-                      {accountBalance.toString()} ETH
-                    </Text>
-                  </Box>
-                </Flex>
-              </Flex>
-            ) : (
-                <>
-                <Button size="small" onClick={this.handleConnectAccount}>
-                  Connect your wallet
-                </Button>
-                </>
-            )}
-          </Flex>
-           <TransactionToastUtil transactions={transactions} />
+
+          <TransactionToastUtil transactions={transactions} />
         </>
     );
   }
 }
 
-export default OutplayLoginHeader;
-
 /*
+ * Export connected component.
+ */
+const mapStateToProps = state => {
+  return {
+    drizzleStatus: state.drizzleStatus,
+    account: state.accounts[0],
+    accountBalances: state.accountBalances
+  };
+};
 
-          <div>
-            <Card maxWidth={'640px'} px={4} mx={'auto'}>
-              <SmartContractControls
-                contract={contract}
-                account={account}
-                transactions={transactions}
-                initContract={initContract}
-                contractMethodSendWrapper={contractMethodSendWrapper}
-              />
-            </Card>
 
-            <TransactionsCard transactions={transactions} />
-          </div>
 
-          */
+export default drizzleConnect(OutplayLoginHeader, mapStateToProps);

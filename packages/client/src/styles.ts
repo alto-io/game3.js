@@ -45,6 +45,9 @@ export const fonts = {
   },
   family: {
     OpenSans: `"Open Sans", sans-serif`,
+    ApercuLight: `Apercu Light`,
+    ApercuBold: `Apercu Bold`,
+    Apercu: `Apercu`
   },
 };
 

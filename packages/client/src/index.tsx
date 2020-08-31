@@ -8,8 +8,8 @@ import * as serviceWorker from './serviceWorker';
 
 import { ThemeProvider } from "styled-components";
 import CustomTheme from "./CustomTheme";
-
 import './index.css';
+import ScreenSizeProvider from "./components/ScreenSizeProvider";
 
 // import { createGlobalStyle } from "styled-components";
 // import { globalStyle } from "./styles";
@@ -29,7 +29,9 @@ ReactDOM.render(
   <>
     {/*<GlobalStyle/>*/}
     <ThemeProvider theme={CustomTheme}>
-      <DrizzleLoader />
+      <ScreenSizeProvider>
+        <DrizzleLoader />
+      </ScreenSizeProvider>
     </ThemeProvider>
   </>,
   document.getElementById("root"),

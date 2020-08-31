@@ -1,15 +1,20 @@
 import React from "react";
 import Unity, { UnityContent } from "react-unity-webgl";
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
+import GameSceneContainer from '../components/GameSceneContainer';
 import { Card } from "rimble-ui";
+import { DEFAULT_GAME_DIMENSION } from '../constants'
 
 interface IProps extends RouteComponentProps {
+  path: string;
   roomId?: string;
   drizzle?: any;
   drizzleState?: any;
   startRecording: any;
   stopRecording: any;
   contractMethodSendWrapper?: any;
+  isGameRunning?: boolean;
+  tournamentId: any;
 }
 
 export class GameUnity extends React.Component<IProps, any> {
@@ -20,7 +25,8 @@ export class GameUnity extends React.Component<IProps, any> {
       rotation: 0,
       unityShouldBeMounted: true,
       gameReady: false,
-      selectedLevel: false
+      selectedLevel: false,
+      isGameRunning: false
     };
 
     this.initializeUnity();
@@ -31,11 +37,22 @@ export class GameUnity extends React.Component<IProps, any> {
 
   onPlayGame = async (e) => {
 
-    this.unityContent.send("OutplayManager", "SetLevel",
-    this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
-    this.unityContent.send("OutplayManager", "StartGame", "start");
-    this.props.startRecording.call(null, "wom");
-    
+    const gameId = this.props.path;
+    switch (gameId)
+    {
+      case "wom":
+        this.unityContent.send("OutplayManager", "SetLevel",
+        this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
+        this.unityContent.send("OutplayManager", "StartGame", "start");
+      break;
+      case "flappybird":
+        this.unityContent.send("Game3JsManager", "StartGame", "start");
+      break;
+
+    }
+
+    this.props.startRecording.call(null, gameId);
+
     // const updateUser = this.context.updateUser;
     // const response = await this.nakamaServiceInstance.PlayGame();
     // if (response.payload.response)
@@ -70,29 +87,47 @@ export class GameUnity extends React.Component<IProps, any> {
           }
         );
       break;
+
+        // TODO: add any relevant game end code
+        case 'GameEndFail':
+          this.setState({ isGameRunning: false });
+          this.props.stopRecording.call(null, "wom");
+
+      break;
+        case 'GameEndSuccess':
+          this.setState({ isGameRunning: false });
+          this.props.stopRecording.call(null, "wom");
+      break;
+
     }
 
+    console.log(outplayEvent);
     // send out an event
     // this.eventDispatcher.dispatch(outplayEvent);
   }
 
   initializeUnity() {
     // load unity from the same server (public folder)
+    const path = this.props.path;
+
     this.unityContent = new UnityContent(
-      "/unitygame.json",
-      "/UnityLoader.js"
+      "/" + path + "/unitygame.json",
+      "/" + path + "/UnityLoader.js"
     );
 
     this.unityContent.on("progress", progression => {
+      this.setState({isGameRunning: true})
       console.log("Unity progress", progression);
     });
 
     this.unityContent.on("loaded", () => {
       console.log("Yay! Unity is loaded!");
+
       //// BUG: React doesn't like to render state change on new accounts :(
       this.setState(
         {
-          gameReady: true
+          gameReady: true,
+          isGameRunning: true
         }
       );
     });
@@ -109,6 +144,14 @@ export class GameUnity extends React.Component<IProps, any> {
     this.unityContent.on("SendNumber", rotation => {
       this.setState({ rotation: Math.round(rotation) });
     });
+
+    this.unityContent.on("quitted", () => {
+      this.setState({isGameRunning: false})
+    });
+
+    this.unityContent.on("error", () => {
+      this.setState({isGameRunning: false})
+    })
   }
 
   onClickSendToJS() {
@@ -133,36 +176,38 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   render() {
+    const { isGameRunning } = this.state;
+    const { tournamentId } = this.props;
     return (
-        <View>
-             <Card maxWidth={'1024px'} px={4} mx={'auto'}>  
-              <Button
-                block
-                disabled={!this.state.gameReady}
-                className="mb-3"
-                color="primary"
-                type="button"
-                onClick={this.onPlayGame}
-              >
-              {
-                this.state.gameReady ?
-                "Play Game (100 💎)" :
-                "Loading Game ..."
-              }
-              </Button>
+      <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
+        <Button
+          block
+          disabled={!this.state.gameReady}
+          className="mb-3"
+          color="primary"
+          type="button"
+          onClick={this.onPlayGame}
+        >
+        {
+          this.state.gameReady ?
+          "Play Game (100 💎)" :
+          "Loading Game ..."
+        }
+        </Button>
 
-            <Space size="xxs" />
-
-            <div>
-                  {
-                    this.state.unityShouldBeMounted === true && (
-                    <Unity unityContent={this.unityContent} />
-                  )
-                }
-            </div>
-            </Card>       
-
-        </View>
+        <Space size="xxs" />
+        <div style={
+          {
+            width:`${DEFAULT_GAME_DIMENSION.width}px`,
+            height:`${DEFAULT_GAME_DIMENSION.height}px`
+          }}>
+          {
+            this.state.unityShouldBeMounted === true && (
+              <Unity width="100%" height="100%" unityContent={this.unityContent} />
+            )
+          } 
+        </div>
+      </GameSceneContainer>
     );
   }
 }

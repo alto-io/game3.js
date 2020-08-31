@@ -1,13 +1,19 @@
 import React, { Component, Fragment } from 'react';
 import { Router } from '@reach/router';
+import qs from 'querystringify';
 
 import { RouteComponentProps } from '@reach/router';
 import { Database } from '@game3js/common';
 
 import { localSaveReplay, clientSaveTournamentReplay } from "../helpers/database";
 
+import GameScene from '../components/GameScene';
 import Game from './Game';
 import GameUnity from './GameUnity';
+import TournamentResultsCard from '../components/TournamentResultsCard';
+import OutplayGameNavigation from '../components/OutplayGameNavigation';
+
+import CSS from 'csstype';
 
 
 declare global {
@@ -23,11 +29,13 @@ interface IProps extends RouteComponentProps {
 }
   
   interface IState {
-    stateVar: any;
+    stateVar: any,
+    tournamentId?: any
   }
 
   const INITIAL_STATE: IState = {
     stateVar: { value: "someValue"},
+    tournamentId: 'demo'
   };
   
 // external functions
@@ -37,10 +45,6 @@ function functionExample(someVar) {
 
 export default class GameContainer extends Component<IProps, IState> {
     
-    public state: IState = {
-        stateVar: null,
-      };
-
     private mediaRecorder: any;
     private recordedBlobs: any;
     private canvas: any;
@@ -48,8 +52,13 @@ export default class GameContainer extends Component<IProps, IState> {
 
     constructor(props: any) {
       super(props);
+
+      let params = qs.parse(window.location.search);
+      const { tournamentId } = params;
+
       this.state = {
-          ...INITIAL_STATE
+          ...INITIAL_STATE,
+          tournamentId: tournamentId
       };
 
       this.startRecording = this.startRecording.bind(this);
@@ -105,10 +114,6 @@ export default class GameContainer extends Component<IProps, IState> {
 
     this.mediaRecorder.start(100); // collect 100ms of data
     // console.log('MediaRecorder started', this.mediaRecorder);
-
-    // TEMP: if a WoM game, save after 10 secs
-    if (params === "wom") setTimeout(this.stopRecording, 5000);
-
   }
 
   
@@ -144,9 +149,7 @@ export default class GameContainer extends Component<IProps, IState> {
       //const result = await putTournamentResult(tournamentId, resultId, fileHash);
       //console.log(result)
     }
-}    
-
-
+  }    
     // METHODS
     // updateSomething = () => {
 
@@ -154,26 +157,49 @@ export default class GameContainer extends Component<IProps, IState> {
 
     // RENDER
     render() {
-      const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
-        return (
-            <Router>
-              <Game
-                path=":roomId"
-                startRecording={this.startRecording}
-                stopRecording={this.stopRecording}
-                drizzle={drizzle}
-                drizzleState={drizzleState}
-                contractMethodSendWrapper={contractMethodSendWrapper}
-              />
-              <GameUnity
-                path="wom"
-                startRecording={this.startRecording}
-                stopRecording={this.stopRecording}
-                drizzle={drizzle}
-                drizzleState={drizzleState}
-                contractMethodSendWrapper={contractMethodSendWrapper}
-              />
+      const { drizzle, drizzleState, contractMethodSendWrapper, address } = this.props
+      const { tournamentId } = this.state;
+
+      return (
+        <>
+        <OutplayGameNavigation />
+        <GameScene 
+          drizzle={drizzle}
+          tournamentId={tournamentId}
+          playerAddress={address}
+         >
+          <Router>
+            <Game
+              path=":roomId"
+              startRecording={this.startRecording}
+              stopRecording={this.stopRecording}
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contractMethodSendWrapper={contractMethodSendWrapper}
+            />
+
+            <GameUnity
+              path="wom"
+              startRecording={this.startRecording}
+              stopRecording={this.stopRecording}
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contractMethodSendWrapper={contractMethodSendWrapper}
+              tournamentId={tournamentId}
+            />
+
+            <GameUnity
+              path="flappybird"
+              startRecording={this.startRecording}
+              stopRecording={this.stopRecording}
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contractMethodSendWrapper={contractMethodSendWrapper}
+              tournamentId={tournamentId}
+            />
           </Router>
-        );
+        </GameScene>
+        </>
+      );
     }
 }

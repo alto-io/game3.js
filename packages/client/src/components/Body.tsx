@@ -6,11 +6,14 @@ import DashboardView from './DashboardView';
 import WalletView from './WalletView';
 
 import OutplayNavigation from "./OutplayNavigation";
+import JoinPromptModal from "./JoinPromptModal";
 import { Box, Flex } from "rimble-ui";
 
-function Body({ drizzle, drizzleState, store, contractMethodSendWrapper }) {
+function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount }) {
   const [address, setAddress] = useState(null);
   const [route, setRoute] = useState("Play");
+  const [isOpen, setIsOpen] = useState(false);
+  const [isContractOwner, setIsContractOwner] = useState(false);
 
   useEffect(() => {
     if (drizzleState) {
@@ -24,6 +27,18 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper }) {
     }
   };
 
+  const handleOpenModal = e => {
+    setIsOpen(true);
+  }
+
+  const handleCloseModal = e => {
+    setIsOpen(false);
+  }
+
+  const handleSetIsContractOwner = (bool) => {
+    setIsContractOwner(bool);
+  }
+
   return (
     <Box height={"100%"}>
       <Flex
@@ -31,19 +46,34 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper }) {
         justifyContent={"space-between"}
         height={"100%"}
       >
-        <OutplayNavigation setRoute={setRoute} route={route} />
+        <OutplayNavigation 
+          drizzle={drizzle}
+          drizzleState={drizzleState}
+          setRoute={setRoute} 
+          route={route} 
+          handleOpenModal={handleOpenModal}
+          account={account}
+          accountValidated={accountValidated}
+          isContractOwner={isContractOwner}/>
         {
           {
             Play: 
               <Play
+                account={account}
+                accountValidated={accountValidated}
                 drizzle={drizzle}
                 drizzleState={drizzleState}
+                handleSetIsContractOwner={handleSetIsContractOwner}
               />,
             TournamentView: 
               <TournamentView 
                 store={store}
                 drizzle={drizzle}
-                setRoute={setRoute} />,
+                setRoute={setRoute}
+                account={account}
+                accountValidated={accountValidated}
+                connectAndValidateAccount={connectAndValidateAccount}
+                />,
             CreateTourneyView: 
             <CreateTourneyView 
               store={store}
@@ -51,10 +81,12 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper }) {
               contractMethodSendWrapper={contractMethodSendWrapper}
               setRoute={setRoute} />,
             DashboardView: 
-            <DashboardView 
+            <DashboardView
+              account={account}
+              accountValidated={accountValidated}
               store={store}
               drizzle={drizzle}
-              setRoute={setRoute} />,
+              setRoute={setRoute}/>,
             WalletView: 
             <WalletView 
               store={store}
@@ -63,6 +95,13 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper }) {
           }[route]
         }
       </Flex>
+
+      <JoinPromptModal 
+        isOpen={isOpen}
+        connectAndValidateAccount={connectAndValidateAccount}
+        handleCloseModal={handleCloseModal}
+        modalText={"You need to be logged in to view the dashboard"}
+      />
     </Box>
   );
 }

@@ -7,6 +7,11 @@ const cardBg = {
   }
 }
 
+export const DEFAULT_GAME_DIMENSION = {
+  width: 950,
+  height: 550
+}
+
 export const GAME_DETAILS = [
   {
     name: "World of Mines",
@@ -36,6 +41,14 @@ export const GAME_DETAILS = [
     color: cardBg.colors.purple,
     button: "Coming Soon",
     type: "teaser"
+  },
+  {
+    name: "Flappy Bird Open-Source",
+    image: "flappybird.gif",
+    color: cardBg.colors.seaGreen,
+    type: "unity",
+    button: "Play",
+    route: "flappybird"
   },
 
 ];

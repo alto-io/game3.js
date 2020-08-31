@@ -83,7 +83,7 @@ class TournamentView extends React.Component<any, any> {
   }
 
   render() {
-    const { drizzleState, address, store, drizzle } = this.props;
+    const { drizzleState, address, store, drizzle, account, accountValidated, connectAndValidateAccount } = this.props;
     const { currentNetwork, tournamentsCount } = this.state;
 
     const tournaments = [];
@@ -94,6 +94,9 @@ class TournamentView extends React.Component<any, any> {
           address={address}
           store={store}
           drizzle={drizzle}
+          account={account}
+          accountValidated={accountValidated}
+          connectAndValidateAccount={connectAndValidateAccount}
         />
       );
     }

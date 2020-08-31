@@ -251,7 +251,8 @@ export default class Home extends Component<IProps, IState> {
   
   // RENDER
   render() {
-    const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
+    const { drizzle, drizzleState, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount} = this.props
+
     return (
       <>
 
@@ -259,6 +260,9 @@ export default class Home extends Component<IProps, IState> {
             drizzle={drizzle}
             drizzleState={drizzleState}
             contractMethodSendWrapper={contractMethodSendWrapper}
+            account={account}
+            accountValidated={accountValidated}
+            connectAndValidateAccount={connectAndValidateAccount}
           />
 
           {   
