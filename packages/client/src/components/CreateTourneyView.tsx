@@ -21,7 +21,7 @@ class CreateTourneyView extends Component<any, any> {
     super(props)
 
 
-    this.state = {     
+    this.state = {
       selectedContract: this.DEFAULT_CONTRACT,
       selectedMethod: this.DEFAULT_CONTRACT_METHOD,
       contractOutput: "",
@@ -94,18 +94,20 @@ class CreateTourneyView extends Component<any, any> {
     const timestamp = Date.now() + 10 * 24 * 60 * 60 * 1000
     const data = ''
     const prize = drizzle.web3.utils.toBN(1) // TODO
-
+    const shares = [2, 3, 5];
+    const buyInAmount = 1;
+    const triesPerBuyin = 1;
 
     this.props.contractMethodSendWrapper(
       "createTournament", // name
-      [address, timestamp, data, prize], //contract parameters
+      [address, timestamp, data, prize, shares, buyInAmount, triesPerBuyin], //contract parameters
       {from: address}, // send parameters
       (txStatus, transaction) => { // callback
       console.log("createTournament callback: ", txStatus, transaction);
       })
 
 
-    // const receipt = await contract.methods.createTournament(address, timestamp, data, prize)
+    // const receipt = await contract.methods.createTournament(address, timestamp, data, prize, shares, buyInAmount, triesPerBuyin)
     //   .send({from: address})
 
     // const { tournamentId } = receipt.events.TournamentCreated.returnValues
@@ -164,10 +166,11 @@ class CreateTourneyView extends Component<any, any> {
 
     for(var pair of data.entries()) {
       console.log(pair[0]+ ', '+ pair[1]); 
-   }    
+   }
 
    console.log(this.state);
 
+  this.createTournament();
   };
 
   handleInputChange = (e) => {

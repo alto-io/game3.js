@@ -73,7 +73,7 @@ class OutplayLoginHeaderDesktop extends Component {
             About Us
           </StyledTextLink>
 
-          {account && accountBalance ? (
+          {account && accountValidated ? (
             <Flex>
               {/* ID */}
               <Flex alignItems={"center"} mr={4}>

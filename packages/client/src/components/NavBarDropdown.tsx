@@ -80,7 +80,7 @@ class NavBarDropdown extends Component {
     return(
       <StyledBox>
         <Dropdown className={isOpen ? "active" : ""}>
-        {account && accountBalance ? (
+        {account && accountValidated ? (
           <>
             {/* ID */}
             <li>
