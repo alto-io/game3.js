@@ -28,7 +28,8 @@ class CreateTourneyView extends Component<any, any> {
       contractInputs: [],
       currentNetwork: null,
       address: null,
-      tournamentsCount: 0
+      tournamentsCount: 0,
+      updater: false
     }
   }
 
@@ -38,7 +39,7 @@ class CreateTourneyView extends Component<any, any> {
     this.updateAddress(address)
     this.updateDrizzle(networkId, drizzleStatus, drizzle)
 
-    this.storeInputsToState();
+    this.storeInputsToState(this.DEFAULT_CONTRACT, this.DEFAULT_CONTRACT_METHOD);
   }
 
   componentWillReceiveProps(newProps) {
@@ -152,13 +153,23 @@ class CreateTourneyView extends Component<any, any> {
   }
 
   changeSelectedContract = (event) => {
-    this.setState({ selectedContract: event.target.value });
+    this.setState({ 
+      selectedContract: event.target.value,
+      contractInputs: [],
+    });
+
+    this.storeInputsToState(event.target.value, null);
+    this.forceUpdate();
   }
 
   changeSelectedMethod = (event) => {
     this.setState({ 
       selectedMethod: event.target.value,
+      contractInputs: [],
     });
+
+    this.storeInputsToState(null, event.target.value);
+    this.forceUpdate();
   }
 
   handleSubmit = (e) => {
@@ -222,18 +233,25 @@ class CreateTourneyView extends Component<any, any> {
     )
   }
 
-  storeInputsToState = () => {
+  storeInputsToState = (newContract, newMethod) => {
 
     const { drizzle } = this.props
 
+    let storedContract = newContract;
+    let storedMethod = newMethod;
+
     const { 
-      selectedContract, selectedMethod
+      selectedContract, selectedMethod, updater
     } = this.state
+
+    if (storedContract === null) storedContract = selectedContract;
+    if (storedMethod === null) storedMethod = selectedMethod;
+
   
-    const contractAbi = drizzle.contracts[selectedContract].abi;
+    const contractAbi = drizzle.contracts[storedContract].abi;
 
     const contractMethodArray = contractAbi.filter(obj => {
-      return obj.name === selectedMethod
+      return obj.name === storedMethod
     });
     
     let abiInputs = null;
@@ -269,7 +287,8 @@ class CreateTourneyView extends Component<any, any> {
     })
 
     this.setState({
-      contractInputs: inputs
+      contractInputs: inputs,
+      updater: !updater
     });
   }
 
@@ -283,6 +302,8 @@ class CreateTourneyView extends Component<any, any> {
   
     const contractList = drizzle.contractList;
     const contractAbi = drizzle.contracts[selectedContract].abi;
+
+    console.log(contractInputs)
 
     return (
       <Form onSubmit={this.handleSubmit}>
