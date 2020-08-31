@@ -288,6 +288,8 @@ class CreateTourneyView extends Component<any, any> {
                 {
                 abiInputs && abiInputs.map(input => {
                   switch (input.name) {
+
+                    // Tourney special cases
                     case "endTime":
                       return (
                         <Field   
@@ -300,6 +302,25 @@ class CreateTourneyView extends Component<any, any> {
                                     required={true}
                                     onChange={this.handleDatetimeChange}
                                     renderInput={this.renderDatetimeInput}
+                                    defaultValue={Date.now() + 10 * 24 * 60 * 60 * 1000}
+                                    />
+                          }
+                      </Field>
+                      );
+                    break;
+
+                    case "organizer":
+                      return (
+                        <Field   
+                        size={"medium"}
+                        mt={3} mr={3} mb={3}
+                        label={input.name + " (" + input.type + ")"}>
+                          {
+                              <Input id={input.name + " (" + input.type + ")"} 
+                                    name={input.name} 
+                                    required={true}
+                                    onChange={this.handleInputChange}
+                                    value={this.props.address}
                                     />
                           }
                       </Field>
@@ -317,6 +338,8 @@ class CreateTourneyView extends Component<any, any> {
                                     name={input.name} 
                                     required={true}
                                     onChange={this.handleInputChange}
+                                    value={this.props}
+                                    value={"1"}
                                     />
                           }
                       </Field>
