@@ -37,6 +37,11 @@ const StyledNavigation = styled(Flex)`
     font-size: 1.266rem;
   }
 
+  a.disabled {
+    color: #ddd;
+    pointer-events: none;
+  }
+
   @media screen and (min-width: 768px) {
     flex-direction: row;
     margin-bottom: 4.375rem;
@@ -47,7 +52,8 @@ const StyledNavigation = styled(Flex)`
   }
 `;
 
-const OutplayNavigation = ({ route, setRoute }) => {
+const OutplayNavigation = ({ route, setRoute, account, accountValidated, handleOpenModal, isContractOwner }) => {
+
   return (
     <StyledNavigation justifyContent={"center"} p={3}>
       <StyledLinkContainer
@@ -97,6 +103,7 @@ const OutplayNavigation = ({ route, setRoute }) => {
             e.preventDefault();
             setRoute("DashboardView");
           }}
+          className={!account && !accountValidated ? "disabled" : ""}
         >
           Dashboard
         </Link>
@@ -114,30 +121,32 @@ const OutplayNavigation = ({ route, setRoute }) => {
             e.preventDefault();
             setRoute("WalletView");
           }}
+          className={!account && !accountValidated ? "disabled" : ""}
         >
           Wallet
         </Link>
       </StyledLinkContainer>
      
-      <StyledLinkContainer
+     { isContractOwner === true ? (
+       <StyledLinkContainer
         mx={3}
         routeName={"CreateTourneyView"}
         route={route}
         borderRadius={2}
-      >
-        <Link
-          href={"createtourney"}
-          p={3}
-          onClick={e => {
-            e.preventDefault();
-            setRoute("CreateTourneyView");
-          }}
         >
-          Create Tourney
-        </Link>
-      </StyledLinkContainer>
-
-
+          <Link
+            href={"createtourney"}
+            p={3}
+            onClick={e => {
+              e.preventDefault();
+              setRoute("CreateTourneyView");
+            }}
+          >
+            Create Tourney
+          </Link>
+        </StyledLinkContainer>
+      ) : ""}
+      
     </StyledNavigation>
   );
 };

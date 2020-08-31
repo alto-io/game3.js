@@ -6,7 +6,7 @@ import { Box, Flex, Text, Link } from "rimble-ui";
 import { GAME_DETAILS } from '../constants';
 import GameCard from '../components/GameCard';
 
-function Play({ drizzle, drizzleState, drizzleStatus, account, networkId }) {
+function Play({ drizzle, drizzleStatus, account, accountValidated, networkId, handleSetIsContractOwner }) {
   const [currentNetwork, setCurrentNetwork] = useState(null);
   const [address, setAddress] = useState(null);
 
@@ -34,6 +34,25 @@ function Play({ drizzle, drizzleState, drizzleStatus, account, networkId }) {
       });
     }
   }, [networkId, drizzleStatus, drizzle]);
+
+  //  Fetch tournaments and check organizer
+  useEffect(()=>{
+    if (account && accountValidated) {
+      checkOwner();
+    }
+  }, [account, address, accountValidated])
+
+  const checkOwner = async () => {
+    const contract = drizzle.contracts.Tournaments;
+    const owner = await contract.methods.owner().call();
+
+
+    if (owner.toLowerCase() !== account.toLowerCase()) {
+      handleSetIsContractOwner(false);
+    } else {
+      handleSetIsContractOwner(true);
+    }
+  }
 
   return (
     <Box>
