@@ -37,6 +37,11 @@ const StyledNavigation = styled(Flex)`
     font-size: 1.266rem;
   }
 
+  a.disabled {
+    color: #ddd;
+    pointer-events: none;
+  }
+
   @media screen and (min-width: 768px) {
     flex-direction: row;
     margin-bottom: 4.375rem;
@@ -98,6 +103,7 @@ const OutplayNavigation = ({ route, setRoute, account, accountValidated, handleO
             e.preventDefault();
             setRoute("DashboardView");
           }}
+          className={!account && !accountValidated ? "disabled" : ""}
         >
           Dashboard
         </Link>
@@ -115,6 +121,7 @@ const OutplayNavigation = ({ route, setRoute, account, accountValidated, handleO
             e.preventDefault();
             setRoute("WalletView");
           }}
+          className={!account && !accountValidated ? "disabled" : ""}
         >
           Wallet
         </Link>

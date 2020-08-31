@@ -38,31 +38,19 @@ function Play({ drizzle, drizzleStatus, account, accountValidated, networkId, ha
   //  Fetch tournaments and check organizer
   useEffect(()=>{
     if (account && accountValidated) {
-      fetchTournaments();
+      checkOwner();
     }
   }, [account, address, accountValidated])
 
-  const fetchTournaments = async () => {
+  const checkOwner = async () => {
     const contract = drizzle.contracts.Tournaments;
-    const tournamentsCount = await contract.methods.getTournamentsCount().call();
+    const owner = await contract.methods.owner().call();
 
-    let tournaments = [];
-    let tournamentsOwned = [];
 
-    for (let tournamentId = 0; tournamentId < tournamentsCount; tournamentId++) {
-      const tournamentDetails = await contract.methods.getTournament(tournamentId).call();
-
-      const tournament = {
-        id: tournamentId,
-        organizer: tournamentDetails['0'].toLowerCase()
-      }
-
-      tournaments.push(tournament);
-      tournamentsOwned = tournaments.filter( tournament => tournament.organizer === account.toLowerCase());
-
-      if (tournamentsOwned.length !== 0) {
-        handleSetIsContractOwner(true);
-      }
+    if (owner.toLowerCase() !== account.toLowerCase()) {
+      handleSetIsContractOwner(false);
+    } else {
+      handleSetIsContractOwner(true);
     }
   }
 

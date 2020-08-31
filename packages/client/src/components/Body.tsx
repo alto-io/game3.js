@@ -35,8 +35,8 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
     setIsOpen(false);
   }
 
-  const handleSetIsContractOwner = () => {
-    setIsContractOwner(true);
+  const handleSetIsContractOwner = (bool) => {
+    setIsContractOwner(bool);
   }
 
   return (
