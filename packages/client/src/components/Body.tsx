@@ -13,6 +13,7 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
   const [address, setAddress] = useState(null);
   const [route, setRoute] = useState("Play");
   const [isOpen, setIsOpen] = useState(false);
+  const [isContractOwner, setIsContractOwner] = useState(false);
 
   useEffect(() => {
     if (drizzleState) {
@@ -34,6 +35,10 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
     setIsOpen(false);
   }
 
+  const handleSetIsContractOwner = (bool) => {
+    setIsContractOwner(bool);
+  }
+
   return (
     <Box height={"100%"}>
       <Flex
@@ -48,13 +53,17 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
           route={route} 
           handleOpenModal={handleOpenModal}
           account={account}
-          accountValidated={accountValidated}/>
+          accountValidated={accountValidated}
+          isContractOwner={isContractOwner}/>
         {
           {
             Play: 
               <Play
+                account={account}
+                accountValidated={accountValidated}
                 drizzle={drizzle}
                 drizzleState={drizzleState}
+                handleSetIsContractOwner={handleSetIsContractOwner}
               />,
             TournamentView: 
               <TournamentView 

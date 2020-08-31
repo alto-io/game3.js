@@ -28,7 +28,6 @@ contract Tournaments is Ownable {
     uint            winner;
     address payable player;
     string          data;
-    bool            prizeWithdrawn;
   }
 
   Tournament[] public tournaments;
@@ -50,6 +49,7 @@ contract Tournaments is Ownable {
   event ResultSubmitted(uint tournamentId, address indexed player,
     uint256 indexed resultId);
   event WinnersDeclared(uint tournamentId, uint256[] resultId);
+  event PrizeTransfered(uint tournamentId, uint256 resultId, uint256 amount);
   event TournamentStopped(uint tournamentId);
 
   /**
@@ -89,7 +89,7 @@ contract Tournaments is Ownable {
   }
 
   modifier enoughTriesLeft(uint id, address user) {
-    require(getTriesLeft(id, user) < resultsPlayerMap[id][user].length, "Max tries reached");
+    require(getTriesLeft(id, user) > 0, "Max tries reached");
     _;
   }
 
@@ -132,12 +132,6 @@ contract Tournaments is Ownable {
   modifier resultIsWinner(uint tournamentId, uint resultId) {
     require(results[tournamentId][resultId].winner >= 1,
       "Result is not a winner");
-    _;
-  }
-
-  modifier prizeNotWithdrawn(uint tournamentId, uint resultId) {
-    require(results[tournamentId][resultId].prizeWithdrawn == false,
-      "Prize is already withdrawn");
     _;
   }
 
@@ -232,7 +226,7 @@ contract Tournaments is Ownable {
     notOrganizer(tournamentId)
     enoughTriesLeft(tournamentId, msg.sender)
   {
-    results[tournamentId].push(GameResult(0, msg.sender, data, false));
+    results[tournamentId].push(GameResult(0, msg.sender, data));
     uint resultId = results[tournamentId].length - 1;
     resultsPlayerMap[tournamentId][msg.sender].push(resultId);
     emit ResultSubmitted(tournamentId, msg.sender, resultId);
@@ -251,14 +245,21 @@ contract Tournaments is Ownable {
       "Incorrect tournament state");
 
     uint resultCount = resultIds.length;
+    uint totalSentAmount = 0;
     for (uint i = 0; i < resultCount; i++) {
-      uint resultId = resultIds[i];
+      require(resultIds[i] < results[tournamentId].length, "Incorrect result Id");
+      require(results[tournamentId][resultIds[i]].winner == 0, "Result is already a winner");
 
-      require(resultId < results[tournamentId].length, "Incorrect result Id");
-      require(results[tournamentId][resultId].winner == 0, "Result is already a winner");
+      results[tournamentId][resultIds[i]].winner = i + 1;
 
-      results[tournamentId][resultId].winner = i + 1;
+      // send result
+      uint amount = calcPrizeShare(tournamentId, resultIds[i]);
+      results[tournamentId][resultIds[i]].player.transfer(amount);
+      // need to keep total balance unchanged while calculating prize shares
+      totalSentAmount += amount;
+      emit PrizeTransfered(tournamentId, resultIds[i], amount);
     }
+    tournaments[tournamentId].balance -= totalSentAmount;
 
     tournaments[tournamentId].state = TournamentState.WinnersDeclared;
     emit WinnersDeclared(tournamentId, resultIds);
@@ -300,12 +301,11 @@ contract Tournaments is Ownable {
     view
     tournamentIdIsCorrect(tournamentId)
     resultIdIsCorrect(tournamentId, resultId)
-    returns (uint, address, string memory, bool)
+    returns (uint, address, string memory)
   {
     return (results[tournamentId][resultId].winner,
       results[tournamentId][resultId].player,
-      results[tournamentId][resultId].data,
-      results[tournamentId][resultId].prizeWithdrawn);
+      results[tournamentId][resultId].data);
   }
 
   function getTournamentsCount()
@@ -325,22 +325,6 @@ contract Tournaments is Ownable {
     return results[tournamentId].length;
   }
 
-  function withdrawPrize(uint tournamentId, uint resultId)
-    external
-    tournamentIdIsCorrect(tournamentId)
-    resultIdIsCorrect(tournamentId, resultId)
-    resultIsWinner(tournamentId, resultId)
-    prizeNotWithdrawn(tournamentId, resultId)
-  {
-    // calc total prize amount
-    uint amount = calcPrizeShare(tournamentId, resultId);
-
-    results[tournamentId][resultId].prizeWithdrawn = true;
-
-    results[tournamentId][resultId].player.transfer(amount);
-    tournaments[tournamentId].balance -= amount;
-  }
-
   function calcPrizeShare(uint tournamentId, uint resultId)
     public
     view
@@ -357,6 +341,6 @@ contract Tournaments is Ownable {
     returns (uint)
   {
     return (tournaments[tournamentId].triesPerBuyIn * buyIn[tournamentId][player] / 
-      tournaments[tournamentId].buyInAmount);
+      tournaments[tournamentId].buyInAmount) - resultsPlayerMap[tournamentId][player].length;
   }
 }
