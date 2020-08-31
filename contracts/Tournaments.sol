@@ -245,6 +245,7 @@ contract Tournaments is Ownable {
       "Incorrect tournament state");
 
     uint resultCount = resultIds.length;
+    uint totalSentAmount = 0;
     for (uint i = 0; i < resultCount; i++) {
       require(resultIds[i] < results[tournamentId].length, "Incorrect result Id");
       require(results[tournamentId][resultIds[i]].winner == 0, "Result is already a winner");
@@ -254,10 +255,11 @@ contract Tournaments is Ownable {
       // send result
       uint amount = calcPrizeShare(tournamentId, resultIds[i]);
       results[tournamentId][resultIds[i]].player.transfer(amount);
-      tournaments[tournamentId].balance -= amount;
-
+      // need to keep total balance unchanged while calculating prize shares
+      totalSentAmount += amount;
       emit PrizeTransfered(tournamentId, resultIds[i], amount);
     }
+    tournaments[tournamentId].balance -= totalSentAmount;
 
     tournaments[tournamentId].state = TournamentState.WinnersDeclared;
     emit WinnersDeclared(tournamentId, resultIds);
