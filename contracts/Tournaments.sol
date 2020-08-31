@@ -89,7 +89,7 @@ contract Tournaments is Ownable {
   }
 
   modifier enoughTriesLeft(uint id, address user) {
-    require(getTriesLeft(id, user) > resultsPlayerMap[id][user].length, "Max tries reached");
+    require(getTriesLeft(id, user) > 0, "Max tries reached");
     _;
   }
 
