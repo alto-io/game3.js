@@ -246,6 +246,24 @@ export class OrbitDBManager implements DBManager {
     return { result: sessionId }
   }
 
+  async serverUpdateScore(score, sessionId, playerAddress) {
+    console.log('serverUpdateScore:')
+    console.log(score);
+    
+    const data = await this.gameSessions.get(sessionId);
+    let playerData = null
+    if (data.length > 0) {
+      playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
+    }
+
+    playerData.currentHighestNumber = score;
+    await this.gameSessions.put(playerData);
+  }
+
+  async updateGameNumber(sessionId, playerAddress) {
+
+  }
+
   async serverGetGameSession(sessionId, playerAddress) {
     console.log('serverGetGameSession')
     console.log(`sessionId: ${sessionId}`)

@@ -96,6 +96,17 @@ app.get('/gameSession', async (req: any, res: any) => {
   res.json(result);
 });
 
+app.post('/gameSession/score', async (req: any, res: any) => {
+  const sessionId = req.query.sessionId;
+  const playerAddress = req.query.playerAddress;
+  const score = req.query.score;
+
+  const result = await GlobalState.ServerState.dbManager
+    .serverUpdateScore(score, playerAddress, sessionId);
+  
+  res.json(result);
+})
+
 // Serve the frontend client
 app.get('*', (req: any, res: any) => {
   res.sendFile(join(__dirname, 'public', 'index.html'));

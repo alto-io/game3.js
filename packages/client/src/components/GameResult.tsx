@@ -19,7 +19,7 @@ export default class GameResult extends React.Component<any, any> {
 
   componentDidMount = () => {
     const { gameSessionId, playerAddress } = this.props;
-    this.updateScore(gameSessionId, playerAddress);
+    this.getSessionData(gameSessionId, playerAddress);
     this.getTournamentInfo();
   }
 
@@ -30,11 +30,11 @@ export default class GameResult extends React.Component<any, any> {
 
     if (gameSessionId !== newGameSessionId ||
       playerAddress !== newPlayerAddress) {
-      this.updateScore(newGameSessionId, newPlayerAddress)
+      this.getSessionData(newGameSessionId, newPlayerAddress)
     }
   }
 
-  updateScore = async (gameSessionId, playerAddress) => {
+  getSessionData = async (gameSessionId, playerAddress) => {
     if (!gameSessionId || !playerAddress) {
       return
     }
