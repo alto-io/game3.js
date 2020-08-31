@@ -2,8 +2,26 @@ import React, { Component } from 'react';
 import { Modal, Card, Button, Flex, Box, Heading, Text } from "rimble-ui";
 
 class BuyInPromptModal extends Component {
+  constructor(props) {
+    super(props);
+    this.handleConfirm = this.handleConfirm.bind(this);
+  }
+
+  confirmTransaction = async () => {
+    const { drizzle, tournamentId, tournamentBalance, handleJoinClick } = this.props;
+
+    const contract = drizzle.contracts.Tournaments;
+    const buyIn = await contract.methods.payBuyIn(tournamentId, tournamentBalance).call();
+    console.log(tournamentId);
+    handleJoinClick();
+  }
+
+  handleConfirm = e => {
+    this.confirmTransaction();
+  }
+
   render() {
-    const { isOpen, handleCloseBuyinModal, handleJoinClick } = this.props;
+    const { isOpen, handleCloseBuyinModal } = this.props;
 
     return(
       <Modal isOpen={isOpen}>
@@ -32,7 +50,7 @@ class BuyInPromptModal extends Component {
           justifyContent={"center"}
         >
           <Button.Outline onClick={handleCloseBuyinModal}>Cancel</Button.Outline>
-          <Button ml={3}>Confirm Transaction</Button>
+          <Button ml={3} onClick={this.handleConfirm}>Confirm Transaction</Button>
         </Flex>
       </Card>
     </Modal>

@@ -205,6 +205,9 @@ class TournamentCard extends Component<any, any> {
               isOpen={this.state.isBuyinModalOpen}
               handleCloseBuyinModal={this.handleCloseBuyinModal}
               handleJoinClick={this.handleJoinClick}
+              drizzle={this.props.drizzle}
+              tournamentId={tournament.id}
+              tournamentBalance={tournament.balance}
             />
           </Flex>
         </Card>
