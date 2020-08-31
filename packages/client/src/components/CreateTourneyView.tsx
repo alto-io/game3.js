@@ -175,16 +175,43 @@ class CreateTourneyView extends Component<any, any> {
   handleSubmit = (e) => {
     e.preventDefault();
 
+    const { 
+      selectedContract, selectedMethod, contractInputs
+    } = this.state
+
    
   //   const data = new FormData(e.target);
 
   //   for(var pair of data.entries()) {
   //     console.log(pair[0]+ ', '+ pair[1]); 
   //  }
+  //  console.log(this.state.contractInputs);
 
-   console.log(this.state.contractInputs);
+    let contractParams = []
 
-  this.createTournament();
+    contractInputs.map( (param) => {
+      switch (param.type) {
+        case 'uint256[]':
+          let arr = param.value.split(',');
+          contractParams.push(arr);
+        break;
+        default:
+          contractParams.push(param.value);
+        break;
+      }
+    })
+
+  console.log(contractParams);
+
+
+  this.props.contractMethodSendWrapper(
+    selectedMethod, // name
+    contractParams,
+    {from: this.props.address}, // send parameters
+    (txStatus, transaction) => { // callback
+    console.log(selectedMethod + " callback: ", txStatus, transaction);
+    })
+
   };
 
   handleInputChange = (e) => {
