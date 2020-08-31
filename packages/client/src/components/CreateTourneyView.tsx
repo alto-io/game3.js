@@ -34,8 +34,23 @@ class CreateTourneyView extends Component<any, any> {
 
   componentDidMount() {
     const { address, networkId, drizzleStatus, drizzle } = this.props
+
     this.updateAddress(address)
     this.updateDrizzle(networkId, drizzleStatus, drizzle)
+
+    const contractAbi = drizzle.contracts[this.DEFAULT_CONTRACT].abi;
+
+    const contractMethodArray = contractAbi.filter(obj => {
+      return obj.name === this.DEFAULT_CONTRACT_METHOD;
+    });
+    
+    let abiInputs = null;
+
+    if (contractMethodArray.length > 0)
+    {
+      abiInputs = contractMethodArray[0].inputs;
+      this.storeInputsToState(abiInputs);
+    }
   }
 
   componentWillReceiveProps(newProps) {
@@ -50,6 +65,7 @@ class CreateTourneyView extends Component<any, any> {
       || drizzle !== newDrizzle) {
       this.updateDrizzle(newNetworkId, newDrizzleStatus, newDrizzle)
     }
+
   }
 
   updateAddress = (address) => {
@@ -217,6 +233,19 @@ class CreateTourneyView extends Component<any, any> {
     )
   }
 
+  storeInputsToState = (abiInputs) => {
+    let inputs = {}
+    abiInputs.map( (input) => {
+      inputs[input.name] = "";
+    })
+
+    this.setState({ 
+      contractInputs: inputs
+    });
+
+    console.log(inputs);
+  }
+
   render() {
 
     const { drizzle } = this.props
@@ -320,7 +349,6 @@ class CreateTourneyView extends Component<any, any> {
                                     name={input.name} 
                                     required={true}
                                     onChange={this.handleInputChange}
-                                    value={this.props.address}
                                     />
                           }
                       </Field>
@@ -338,8 +366,6 @@ class CreateTourneyView extends Component<any, any> {
                                     name={input.name} 
                                     required={true}
                                     onChange={this.handleInputChange}
-                                    value={this.props}
-                                    value={"1"}
                                     />
                           }
                       </Field>
