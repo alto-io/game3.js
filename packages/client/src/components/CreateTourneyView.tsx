@@ -24,6 +24,8 @@ class CreateTourneyView extends Component<any, any> {
     this.state = {
       selectedContract: this.DEFAULT_CONTRACT,
       selectedMethod: this.DEFAULT_CONTRACT_METHOD,
+      payableAmount: null,
+      payable: false,
       contractOutput: "",
       contractInputs: [],
       currentNetwork: null,
@@ -203,11 +205,19 @@ class CreateTourneyView extends Component<any, any> {
 
   console.log(contractParams);
 
+  let sendParams = {
+    from: this.props.address
+  }
+
+  if (this.state.payable) 
+  {
+    sendParams["value"] = web3.utils.toWei(this.state.payableAmount);
+  }
 
   this.props.contractMethodSendWrapper(
     selectedMethod, // name
     contractParams,
-    {from: this.props.address}, // send parameters
+    sendParams, // send parameters
     (txStatus, transaction) => { // callback
     console.log(selectedMethod + " callback: ", txStatus, transaction);
     })
@@ -224,6 +234,14 @@ class CreateTourneyView extends Component<any, any> {
     })
 
   }
+
+  handlePayableAmountChange = (e) => {
+    this.setState({
+      payableAmount: e.target.value
+    })
+
+  }
+
 
   // TODO: special case for endTime, can this be abstracted?
   handleDatetimeChange = (momentObj) => {
@@ -282,10 +300,12 @@ class CreateTourneyView extends Component<any, any> {
     });
     
     let abiInputs = null;
+    let isPayable;
 
     if (contractMethodArray.length > 0)
     {
       abiInputs = contractMethodArray[0].inputs;
+      isPayable = contractMethodArray[0].payable;
     }
     
     let inputs = []
@@ -315,6 +335,7 @@ class CreateTourneyView extends Component<any, any> {
 
     this.setState({
       contractInputs: inputs,
+      payable: isPayable,
       updater: !updater
     });
   }
@@ -396,7 +417,6 @@ class CreateTourneyView extends Component<any, any> {
                                     required={true}
                                     onChange={this.handleDatetimeChange}
                                     renderInput={this.renderDatetimeInput}
-                                    index={index}
                                     value={this.state.contractInputs[index].value}
                                     />
                           }
@@ -415,7 +435,6 @@ class CreateTourneyView extends Component<any, any> {
                                     name={input.name} 
                                     required={true}
                                     onChange={this.handleInputChange}
-                                    index={index}
                                     value={this.state.contractInputs[index].value}
                                     />
                           }
@@ -434,7 +453,6 @@ class CreateTourneyView extends Component<any, any> {
                                     name={input.name} 
                                     required={true}
                                     onChange={this.handleInputChange}
-                                    index={index}
                                     value={this.state.contractInputs[index].value}
                                     />
                           }
@@ -445,10 +463,20 @@ class CreateTourneyView extends Component<any, any> {
                 })
                 }
               </Box>
+
               <Box my={4} style={{ textAlign: "center" }}>
                 <Button size={"medium"} mr={3} mb={3}>
                   Call Contract Method
                 </Button>
+                {
+                this.state.payable && 
+                  <Input id={"payableAmount"} 
+                  name={"payableAmount"} 
+                  onChange={this.handlePayableAmountChange}
+                  placeholder="ETH payable"
+                  value={this.state.payableAmount}
+                  />
+                }
               </Box>
 
               <Box 
