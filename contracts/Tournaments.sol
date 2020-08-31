@@ -357,6 +357,6 @@ contract Tournaments is Ownable {
     returns (uint)
   {
     return (tournaments[tournamentId].triesPerBuyIn * buyIn[tournamentId][player] / 
-      tournaments[tournamentId].buyInAmount);
+      tournaments[tournamentId].buyInAmount) - resultsPlayerMap[tournamentId][player].length;
   }
 }
