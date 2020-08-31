@@ -211,7 +211,7 @@ class CreateTourneyView extends Component<any, any> {
 
   if (this.state.payable) 
   {
-    sendParams["value"] = web3.utils.toWei(this.state.payableAmount);
+    sendParams["value"] = this.state.payableAmount.toString(); // web3.utils.toWei(this.state.payableAmount);
   }
 
   this.props.contractMethodSendWrapper(
