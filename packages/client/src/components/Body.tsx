@@ -47,6 +47,8 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
         height={"100%"}
       >
         <OutplayNavigation 
+          drizzle={drizzle}
+          drizzleState={drizzleState}
           setRoute={setRoute} 
           route={route} 
           handleOpenModal={handleOpenModal}
