@@ -53,7 +53,7 @@ class OutplayLoginHeaderMobile extends Component {
           </Link>
 
           <Flex>
-            {account && accountValidated ? "" : (
+            {account && accountBalance ? "" : (
             <ConnectWalletButton handleConnectAccount={handleConnectAccount}/>
             )}
             

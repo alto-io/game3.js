@@ -1,40 +1,31 @@
 import React, { Component, Fragment } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
-import ConnectionBanner from "@rimble/connection-banner";
-import { Box, Flex, Text, Link } from "rimble-ui";
 
-import TournamentCard from '../components/TournamentCard';
-import { getTournamentContract } from '../helpers/web3';
+import { Select, Flex, Button, Card, Field, Input, 
+         Box, Pill, Heading, Text, Form} from "rimble-ui";
 
+import RainbowBox from './RainbowBox';
+import Tournament from './Tournament';
 
-import { Button, View, Separator, Space } from '../components'
-import Tournament from '../components/Tournament'
-import styled from 'styled-components'
-import { putTournamentData, getFileFromHash } from "../helpers/database"
+import web3 from 'web3';
 
-import { colors } from "../styles"
+import Datetime from 'react-datetime';
+import '../react-datetime.css';
 
-const SBold = styled.div`
-  margin: 1em 0;
-  color: rgb(${colors.black});
-  t-size: 20px;
-  font-weight: 700;
-`;
+class CreateTourneyView extends Component<any, any> {
 
-
-// Optional parameters to pass into RimbleWeb3
-const RIMBLE_CONFIG = {
-  // accountBalanceMinimum: 0.001,
-  requiredNetwork: 5777, // ganache
-  // requiredNetwork: 4 // rinkeby
-};
-
-class CreateTourneyView extends React.Component<any, any> {
+  DEFAULT_CONTRACT = "Tournaments";
+  DEFAULT_CONTRACT_METHOD = "createTournament";
 
   constructor(props) {
     super(props)
 
-    this.state = {
+
+    this.state = {     
+      selectedContract: this.DEFAULT_CONTRACT,
+      selectedMethod: this.DEFAULT_CONTRACT_METHOD,
+      contractOutput: "",
+      contractInputs: {},
       currentNetwork: null,
       address: null,
       tournamentsCount: 0
@@ -43,7 +34,6 @@ class CreateTourneyView extends React.Component<any, any> {
 
   componentDidMount() {
     const { address, networkId, drizzleStatus, drizzle } = this.props
-
     this.updateAddress(address)
     this.updateDrizzle(networkId, drizzleStatus, drizzle)
   }
@@ -153,9 +143,230 @@ class CreateTourneyView extends React.Component<any, any> {
         value: tournament.prize
       })
     this.updateTournaments()
-  }  
+  }
+
+  changeSelectedContract = (event) => {
+    this.setState({ selectedContract: event.target.value });
+  }
+
+  changeSelectedMethod = (event) => {
+    this.setState({ 
+      selectedMethod: event.target.value,
+      contractInputs: {}
+    });
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+
+   
+    const data = new FormData(e.target);
+
+    for(var pair of data.entries()) {
+      console.log(pair[0]+ ', '+ pair[1]); 
+   }    
+
+   console.log(this.state);
+
+  };
+
+  handleInputChange = (e) => {
+    let currentInputs = this.state.contractInputs;
+    currentInputs[e.target.name] = e.target.value;
+
+    this.setState({
+      contractInputs: currentInputs
+    })
+
+    this.validateInput(e);
+  }
+
+  // TODO: special case for endTime, can this be abstracted?
+  handleDatetimeChange = (momentObj) => {
+    let currentInputs = this.state.contractInputs;
+    currentInputs["endTime"] = momentObj.format('x');
+
+    this.setState({
+      contractInputs: currentInputs
+    })
+  }
+
+  validateInput = (e) => {
+    const id = e.target.id;
+    const type = id.split('(')[1].split(')')[0];
+    const value = e.target.value;
+    const colorValid = "#28C081";
+    const colorInvalid = "#DC2C10";
+
+    switch (type) {
+      case 'address':
+        e.target.valid = web3.utils.isAddress(value);
+        e.target.style['border-color'] = e.target.valid ? colorValid : colorInvalid;
+      break;
+    }
+
+  }
+
+
+  renderDatetimeInput = (props) => {
+    return (
+      <Input {...props} />
+    )
+  }
 
   render() {
+
+    const { drizzle } = this.props
+
+    const { 
+      selectedContract, selectedMethod, contractOutput
+    } = this.state
+  
+    const contractList = drizzle.contractList;
+    const contractAbi = drizzle.contracts[selectedContract].abi;
+
+    const contractMethodArray = contractAbi.filter(obj => {
+      return obj.name === selectedMethod;
+    });
+    
+    let abiInputs = null;
+
+    if (contractMethodArray.length > 0)
+    {
+      abiInputs = contractMethodArray[0].inputs;
+    }
+
+    return (
+      <Form onSubmit={this.handleSubmit}>
+        <Box>
+          <Box maxWidth={"1180px"} p={3} mx={"auto"}>
+            <Card borderRadius={"15px 15px 15px 15px"} p={0} mx={2} my={2}>
+              <RainbowBox
+                borderRadius={"15px 15px 0px 0px"}
+                height={"10px"}
+                borderColor={"#d6d6d6"}
+              />
+
+              <Flex alignItems="center">
+                <Box ml={3} mt={3} width={1 / 2} style={{ textAlign: "left" }}>
+                <Select id="selectedContract" name="selectedContract"
+                        onChange={this.changeSelectedContract}
+                        value={selectedContract}>
+
+                  {
+                    contractList && contractList.map( (contract) =>
+                    {
+                        return (
+                        <option key={contract.address}>{contract.contractName}</option> 
+                        )
+                    })
+                  }
+                </Select>
+                </Box>
+                <Box mr={3} mt={3} width={1 / 2} style={{ textAlign: "right" }}>
+                <Select id="selectedMethod" name="selectedMethod"
+                onChange={this.changeSelectedMethod}
+                value={selectedMethod}>
+                >
+                  {
+                    contractAbi && contractAbi.map((abi) =>
+                    {
+                        return (
+                        <option key={abi.signature}>{abi.name}</option> 
+                        )
+                    })
+                  }
+                </Select>
+                </Box>
+              </Flex>
+              
+              <Box style={{ textAlign: "center" }}>
+                
+                {
+                abiInputs && abiInputs.map(input => {
+                  switch (input.name) {
+                    case "endTime":
+                      return (
+                        <Field   
+                        size={"medium"}
+                        mt={3} mr={3} mb={3}
+                        label={input.name + " (" + input.type + ")"}>
+                          {
+                              <Datetime id={input.name + " (" + input.type + ")"} 
+                                    name={input.name} 
+                                    required={true}
+                                    onChange={this.handleDatetimeChange}
+                                    renderInput={this.renderDatetimeInput}
+                                    />
+                          }
+                      </Field>
+                      );
+                    break;
+
+                    default:
+                      return (
+                        <Field   
+                        size={"medium"}
+                        mt={3} mr={3} mb={3}
+                        label={input.name + " (" + input.type + ")"}>
+                          {
+                              <Input id={input.name + " (" + input.type + ")"} 
+                                    name={input.name} 
+                                    required={true}
+                                    onChange={this.handleInputChange}
+                                    />
+                          }
+                      </Field>
+                      );
+                    break;
+                  }
+                })
+                }
+              </Box>
+              <Box my={4} style={{ textAlign: "center" }}>
+                <Button size={"medium"} mr={3} mb={3}>
+                  Call Contract Method
+                </Button>
+              </Box>
+
+              <Box 
+              mt={3} mb={3}
+              style={{ textAlign: "center" }}>
+              <Card>
+                <Pill>{"Output"}</Pill>
+              <Text fontSize="2" textAlign="center">
+                {}
+                </Text>
+              </Card>
+              </Box>
+              
+
+              
+            </Card>
+          </Box>
+        </Box>
+      </Form>
+    )
+  }
+}
+
+/*
+ * Export connected component.
+ */
+const mapStateToProps = state => {
+  console.log("state", state);
+  return {
+    drizzleStatus: state.drizzleStatus,
+    address: state.accounts[0],
+    networkId: state.web3.networkId
+  };
+};
+
+export default drizzleConnect(CreateTourneyView, mapStateToProps);
+
+
+
+    /*
     const { drizzle } = this.props
     const { tournamentsCount, contract, ownerView } = this.state
     const { web3, address, contractMethodSendWrapper } = this.props
@@ -178,7 +389,6 @@ class CreateTourneyView extends React.Component<any, any> {
         />
       )
     }
-
     return (
       <Fragment>
         <View
@@ -274,18 +484,4 @@ class CreateTourneyView extends React.Component<any, any> {
         </View>
       </Fragment>
     )
-  }
-}
-
-/*
- * Export connected component.
- */
-const mapStateToProps = state => {
-  return {
-    drizzleStatus: state.drizzleStatus,
-    address: state.accounts[0],
-    networkId: state.web3.networkId
-  };
-};
-
-export default drizzleConnect(CreateTourneyView, mapStateToProps);
+*/
