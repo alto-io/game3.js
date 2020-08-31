@@ -6,6 +6,7 @@ import { Card, Button, Flex, Box, Text } from "rimble-ui";
 import RainbowBox from "./RainbowBox";
 import RainbowImage from "./RainbowImage";
 import JoinPromptModal from "./JoinPromptModal";
+import BuyinPromptModal from './BuyInPromptModal';
 import { navigate } from '@reach/router';
 import qs from 'querystringify';
 
@@ -18,10 +19,13 @@ class TournamentCard extends Component<any, any> {
     this.state = {
       tournament: null,
       ownTournament: false,
-      isOpen: false
+      isOpen: false,
+      isBuyinModalOpen: false
     }
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
+    this.handleCloseBuyinModal = this.handleCloseBuyinModal.bind(this);
+    this.handleOpenBuyinModal = this.handleOpenBuyinModal.bind(this);
   }
 
   componentDidMount() {
@@ -90,6 +94,14 @@ class TournamentCard extends Component<any, any> {
   handleOpenModal = e => {
     e.preventDefault();
     this.setState({isOpen: true});
+  }
+
+  handleCloseBuyinModal = e => {
+    this.setState({isBuyinModalOpen: false})
+  }
+
+  handleOpenBuyinModal = e => {
+    this.setState({isBuyinModalOpen: true})
   }
 
   render () {
@@ -164,7 +176,7 @@ class TournamentCard extends Component<any, any> {
               mb={2}
               type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
               name={"recepient"} // set the name to the method's argument key
-              onClick={this.props.account && this.props.accountValidated ? this.handleJoinClick : this.handleOpenModal}
+              onClick={this.props.account && this.props.accountValidated ? this.handleOpenBuyinModal : this.handleOpenModal}
             >
               {buttonText}
               </Button>
@@ -187,6 +199,12 @@ class TournamentCard extends Component<any, any> {
               account={this.props.account}
               accountValidated={this.props.accountValidated}
               modalText={"You need to be logged in to join a tournament"}
+            />
+
+            <BuyinPromptModal 
+              isOpen={this.state.isBuyinModalOpen}
+              handleCloseBuyinModal={this.handleCloseBuyinModal}
+              handleJoinClick={this.handleJoinClick}
             />
           </Flex>
         </Card>
