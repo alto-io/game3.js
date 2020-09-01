@@ -343,4 +343,12 @@ contract Tournaments is Ownable {
     return (tournaments[tournamentId].triesPerBuyIn * buyIn[tournamentId][player] / 
       tournaments[tournamentId].buyInAmount) - resultsPlayerMap[tournamentId][player].length;
   }
+
+  function getBuyIn(uint tournamentId)
+    public
+    view
+    returns (uint) 
+  {
+    return tournaments[tournamentId].buyInAmount;
+  }
 }

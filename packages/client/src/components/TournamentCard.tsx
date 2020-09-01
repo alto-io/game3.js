@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { drizzleConnect } from "@drizzle/react-plugin"
 
 import { format, isPast } from 'date-fns'
-import { Card, Button, Flex, Box, Text } from "rimble-ui";
+import { Card, Button, Flex, Box, Text, Flash } from "rimble-ui";
 import RainbowBox from "./RainbowBox";
 import RainbowImage from "./RainbowImage";
 import JoinPromptModal from "./JoinPromptModal";
@@ -12,6 +12,7 @@ import qs from 'querystringify';
 
 import web3 from 'web3';
 import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
+import SmartContractControls from './SmartContractControls';
 
 class TournamentCard extends Component<any, any> {
   constructor(props) {
@@ -21,7 +22,8 @@ class TournamentCard extends Component<any, any> {
       tournament: null,
       ownTournament: false,
       isOpen: false,
-      isBuyinModalOpen: false
+      isBuyinModalOpen: false,
+      accountBuyIn: 0
     }
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -46,7 +48,9 @@ class TournamentCard extends Component<any, any> {
     const { tournamentId, drizzle, address } = props
 
     const contract = drizzle.contracts.Tournaments;
-    const raw = await contract.methods.getTournament(tournamentId).call()
+    const raw = await contract.methods.getTournament(tournamentId).call();
+    const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
+    const triesLeft = await contract.methods.getTriesLeft(tournamentId, this.props.address).call();
     const tournament = {
       id: tournamentId,
       organizer: raw['0'],
@@ -57,8 +61,8 @@ class TournamentCard extends Component<any, any> {
       timeIsUp: false,
       canDeclareWinner: true,
       results: [],
-      buyInAmount: 1,
-      triesLeft : 0
+      buyInAmount: tournamentBuyIn,
+      triesLeft : triesLeft
     }
     tournament.timeIsUp = isPast(new Date(tournament.endTime))
 
@@ -87,40 +91,8 @@ class TournamentCard extends Component<any, any> {
 
     tournament.results = results;
 
-    // results = 
-    // [
-    //   {
-    //     tournamentId: tournament.id,
-    //     isWinner: false,
-    //     playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
-    //     sessionData: {
-    //       timeLeft: "0:55"
-    //     }
-    //   },
-    //   {
-    //     tournamentId: tournament.id,
-    //     isWinner: false,
-    //     playerAddress: "0x3037a73A3D93141CC997A1D3dA94fed6650Ae3b6",
-    //     sessionData: {
-    //       timeLeft: "0:50"
-    //     }
-    //   },
-    //   {
-    //     tournamentId: tournament.id,
-    //     isWinner: false,
-    //     playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
-    //     sessionData: {
-    //       timeLeft: "0:30"
-    //     }
-    //   },
-    // ]
-    
-    const triesLeft = await contract.methods.getTriesLeft(tournamentId, this.props.address).call();
-    tournament.triesLeft = triesLeft;
-
-    const buyIn = await contract.methods.buyIn(tournamentId, this.props.address).call();
-
-    console.log(tournament, buyIn);
+    const buyIn = await contract.methods.buyIn(tournamentId, address).call();
+    this.setState({accountBuyIn : parseInt(buyIn)})
   }
 
   handleJoinClick = () => {
@@ -155,25 +127,26 @@ class TournamentCard extends Component<any, any> {
     this.setState({isBuyinModalOpen: true})
   }
 
-  // onActivate = (tournament) => {
-  //   this.activateTournament(tournament)
-  // }
+  onActivate = (tournament) => {
+    this.activateTournament(tournament)
+  }
 
-  // activateTournament = async (tournament) => {
-  //   const { drizzle } = this.props
+  activateTournament = async (tournament) => {
+    const { drizzle } = this.props
 
-  //   const address = this.state.address;
-  //   const contract = drizzle.contracts.Tournaments;
+    const address = this.state.address;
+    const contract = drizzle.contracts.Tournaments;
 
-  //   await contract.methods.activateTournament(tournament.id, tournament.prize)
-  //     .send({
-  //       from: address,
-  //       value: tournament.prize
-  //     })
-  // }
+    await contract.methods.activateTournament(tournament.id, tournament.prize)
+      .send({
+        from: address,
+        value: tournament.prize
+      })
+  }
 
   render () {
-    const { tournament, ownTournament } = this.state
+    const { tournament, ownTournament, accountBuyIn, isBuyinModalOpen, isOpen } = this.state
+    const { connectAndValidateAccount, account, accountValidated, drizzle, address } = this.props
 
     const hasTournament = !!tournament
 
@@ -201,6 +174,41 @@ class TournamentCard extends Component<any, any> {
     const gameImage = 'tosios.gif'
     const buttonText = tournament.timeIsUp ? 'View' : 'Join'
 
+    const button = () => {
+      if (accountBuyIn === 0 ) {
+        if (!tournament.timeIsUp) {
+          return(
+            <Button
+              mt={"26px"}
+              mb={2}
+              type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
+              name={"recepient"} // set the name to the method's argument key
+              onClick={this.props.account && this.props.accountValidated ? this.handleOpenBuyinModal : this.handleOpenModal}
+            >
+              {buttonText}
+              </Button>
+          )
+        } else {
+          return(
+          <Button
+            mt={"26px"}
+            mb={2}
+            type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
+            name={"recepient"} // set the name to the method's argument key
+            onClick={this.handleJoinClick}
+          >
+            {buttonText}
+          </Button>)
+        }
+      } else {
+        return(
+          <Flash my={3} variant="success">
+            You have some tries left
+          </Flash>
+        )
+      }
+    }
+
     return (
       <Box width={[1, 1 / 2, 1 / 3]} p={3}>
         <Card p={0} borderColor={"#d6d6d6"}>
@@ -217,7 +225,8 @@ class TournamentCard extends Component<any, any> {
 
             <Flex justifyContent={"center"} mt={3} mb={4}>
               <Text fontWeight={600} lineHeight={"1em"}>
-                Prize: { web3.utils.fromWei(tournament.prize)} ETH
+                {/* Prize: { web3.utils.fromWei(tournament.prize)} ETH */}
+                Prize: {tournament.prize} ETH
               </Text>
             </Flex>
 
@@ -237,48 +246,26 @@ class TournamentCard extends Component<any, any> {
               </Text>
             </Flex>
 
-
-            {!tournament.timeIsUp ? (
-              <Button
-              mt={"26px"}
-              mb={2}
-              type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
-              name={"recepient"} // set the name to the method's argument key
-              onClick={this.props.account && this.props.accountValidated ? this.handleOpenBuyinModal : this.handleOpenModal}
-            >
-              {buttonText}
-              </Button>
-            ) : (
-              <Button
-                mt={"26px"}
-                mb={2}
-                type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
-                name={"recepient"} // set the name to the method's argument key
-                onClick={this.handleJoinClick}
-              >
-                {buttonText}
-              </Button>
-            )}
+            {button()}
 
             {/* <Button onClick={() => {this.onActivate(tournament)}}>Activate</Button> */}
             <JoinPromptModal 
-              isOpen={this.state.isOpen}
+              isOpen={isOpen}
               handleCloseModal={this.handleCloseModal}
-              connectAndValidateAccount={this.props.connectAndValidateAccount}
-              account={this.props.account}
-              accountValidated={this.props.accountValidated}
+              connectAndValidateAccount={connectAndValidateAccount}
+              account={account}
+              accountValidated={accountValidated}
               modalText={"You need to be logged in to join a tournament"}
             />
 
             <BuyinPromptModal 
-              isOpen={this.state.isBuyinModalOpen}
+              isOpen={isBuyinModalOpen}
               handleCloseBuyinModal={this.handleCloseBuyinModal}
               handleJoinClick={this.handleJoinClick}
-              drizzle={this.props.drizzle}
+              drizzle={drizzle}
               tournamentId={tournament.id}
               tournamentBuyInAmount={tournament.buyInAmount}
-              address={this.props.address}
-              handleBuyInSuccess={this.props.handleBuyInSuccess}
+              address={address}
             />
           </Flex>
         </Card>
