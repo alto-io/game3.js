@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, Card, Button, Flex, Box, Heading, Text } from "rimble-ui";
+import drizzleConfig from '../drizzleConfig';
 
 class BuyInPromptModal extends Component {
   constructor(props) {
@@ -8,12 +9,15 @@ class BuyInPromptModal extends Component {
   }
 
   confirmTransaction = async () => {
-    const { drizzle, tournamentId, tournamentBuyInAmount, handleJoinClick } = this.props;
-    // const buyInValue = drizzle.web3.utils.toWei(tournamentBuyInAmount.toString());
+    const { drizzle, tournamentId, tournamentBuyInAmount, handleJoinClick, address } = this.props;
     const contract = drizzle.contracts.Tournaments;
 
-    const payBuyIn = await contract.methods.payBuyIn(tournamentId, 1).call();
-    handleJoinClick();
+    await contract.methods.payBuyIn(tournamentId, tournamentBuyInAmount).send({ from: address, value: tournamentBuyInAmount })
+      .then( result => {
+        if (result) {
+          handleJoinClick();
+        }
+      })
   }
 
   handleConfirm = e => {
@@ -24,8 +28,9 @@ class BuyInPromptModal extends Component {
     const { isOpen, handleCloseBuyinModal } = this.props;
 
     return(
+      <>
       <Modal isOpen={isOpen}>
-      <Card width={"420px"} p={0}>
+        <Card width={"420px"} p={0}>
         <Button.Text
           icononly
           icon={"Close"}
@@ -54,6 +59,7 @@ class BuyInPromptModal extends Component {
         </Flex>
       </Card>
     </Modal>
+    </>
     )
   }
 }

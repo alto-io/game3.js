@@ -210,8 +210,8 @@ contract Tournaments is Ownable {
     tournamentNotEnded(tournamentId)
     notOrganizer(tournamentId)
     correctTournamentState(tournamentId, TournamentState.Active)
-    // correctPaymentAmount(value)
-    // correctBuyInAmount(tournamentId)
+    correctPaymentAmount(value)
+    correctBuyInAmount(tournamentId)
   {
     buyIn[tournamentId][msg.sender] += value;
     tournaments[tournamentId].balance += value;

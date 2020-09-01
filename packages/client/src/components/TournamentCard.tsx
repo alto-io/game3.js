@@ -56,7 +56,7 @@ class TournamentCard extends Component<any, any> {
       timeIsUp: false,
       canDeclareWinner: true,
       results: [],
-      buyInAmount: 0.001,
+      buyInAmount: 1,
       triesLeft : 0
     }
     tournament.timeIsUp = isPast(new Date(tournament.endTime))
@@ -116,7 +116,7 @@ class TournamentCard extends Component<any, any> {
     
     const triesLeft = await contract.methods.getTriesLeft(tournamentId, this.props.address).call();
 
-    tournament.triesLeft = 3;
+    console.log(tournament);
   }
 
   handleJoinClick = () => {
@@ -274,6 +274,8 @@ class TournamentCard extends Component<any, any> {
               drizzle={this.props.drizzle}
               tournamentId={tournament.id}
               tournamentBuyInAmount={tournament.buyInAmount}
+              address={this.props.address}
+              handleBuyInSuccess={this.props.handleBuyInSuccess}
             />
           </Flex>
         </Card>
