@@ -88,6 +88,15 @@ app.post('/gameReplay', async (req: any, res: any) => {
   res.json(result);
 });
 
+app.get('gameSessionId', async (req: any, res: any) => {
+  const playerAddress = req.query.playerAddress
+  const tournamentId = req.query.tournamentId
+
+  const result = await GlobalState.ServerState.dbManager
+    .getGameSessionId(playerAddress, tournamentId);
+  res.json(result);
+})
+
 app.get('/gameSession', async (req: any, res: any) => {
   const sessionId = req.query.sessionId
   const playerAddress = req.query.playerAddress

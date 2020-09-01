@@ -111,6 +111,16 @@ export async function getGameNo(gameSessionId, playerAddress, tournamentId): Pro
   return response.data
 }
 
+export async function getGameSessionId(playerAddress, tournamentId): Promise<any> {
+  const params = {
+    playerAddress,
+    tournamentId
+  }
+
+  const response = await api.get('/gameSessionId', { params })
+  return response.data
+}
+
 export async function updateSessionScore(gameSessionId, playerAddress, tournamentId): Promise<any> {
   const params = {
     sessionId: gameSessionId,

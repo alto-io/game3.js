@@ -448,4 +448,14 @@ export class OrbitDBManager implements DBManager {
       return sessionId;
     }
   }
+
+  async getGameSessionId(playerAddress, tournamentId) {
+    let data = await this.gameSessionIds.query(sessionId => 
+      sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId === tournamentId)
+    if (data.length > 0) {
+      return data[0].id
+    } else {
+      return null
+    }
+  }
 }
