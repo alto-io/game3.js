@@ -24,11 +24,14 @@ class CreateTourneyView extends Component<any, any> {
     this.state = {
       selectedContract: this.DEFAULT_CONTRACT,
       selectedMethod: this.DEFAULT_CONTRACT_METHOD,
+      payableAmount: null,
+      payable: false,
       contractOutput: "",
-      contractInputs: {},
+      contractInputs: [],
       currentNetwork: null,
       address: null,
-      tournamentsCount: 0
+      tournamentsCount: 0,
+      updater: false
     }
   }
 
@@ -38,19 +41,7 @@ class CreateTourneyView extends Component<any, any> {
     this.updateAddress(address)
     this.updateDrizzle(networkId, drizzleStatus, drizzle)
 
-    const contractAbi = drizzle.contracts[this.DEFAULT_CONTRACT].abi;
-
-    const contractMethodArray = contractAbi.filter(obj => {
-      return obj.name === this.DEFAULT_CONTRACT_METHOD;
-    });
-    
-    let abiInputs = null;
-
-    if (contractMethodArray.length > 0)
-    {
-      abiInputs = contractMethodArray[0].inputs;
-      this.storeInputsToState(abiInputs);
-    }
+    this.storeInputsToState(this.DEFAULT_CONTRACT, this.DEFAULT_CONTRACT_METHOD);
   }
 
   componentWillReceiveProps(newProps) {
@@ -164,50 +155,104 @@ class CreateTourneyView extends Component<any, any> {
   }
 
   changeSelectedContract = (event) => {
-    this.setState({ selectedContract: event.target.value });
+    this.setState({ 
+      selectedContract: event.target.value,
+      contractInputs: [],
+    });
+
+    this.storeInputsToState(event.target.value, null);
+    this.forceUpdate();
   }
 
   changeSelectedMethod = (event) => {
     this.setState({ 
       selectedMethod: event.target.value,
-      contractInputs: {}
+      contractInputs: [],
     });
+
+    this.storeInputsToState(null, event.target.value);
+    this.forceUpdate();
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
 
+    const { 
+      selectedContract, selectedMethod, contractInputs
+    } = this.state
+
    
-    const data = new FormData(e.target);
+  //   const data = new FormData(e.target);
 
-    for(var pair of data.entries()) {
-      console.log(pair[0]+ ', '+ pair[1]); 
-   }
+  //   for(var pair of data.entries()) {
+  //     console.log(pair[0]+ ', '+ pair[1]); 
+  //  }
+  //  console.log(this.state.contractInputs);
 
-   console.log(this.state);
+    let contractParams = []
 
-  this.createTournament();
+    contractInputs.map( (param) => {
+      switch (param.type) {
+        case 'uint256[]':
+          let arr = param.value.split(',');
+          contractParams.push(arr);
+        break;
+        default:
+          contractParams.push(param.value);
+        break;
+      }
+    })
+
+  console.log(contractParams);
+
+  let sendParams = {
+    from: this.props.address
+  }
+
+  if (this.state.payable) 
+  {
+    sendParams["value"] = this.state.payableAmount.toString(); // web3.utils.toWei(this.state.payableAmount);
+  }
+
+  this.props.contractMethodSendWrapper(
+    selectedMethod, // name
+    contractParams,
+    sendParams, // send parameters
+    (txStatus, transaction) => { // callback
+    console.log(selectedMethod + " callback: ", txStatus, transaction);
+    })
+
   };
 
   handleInputChange = (e) => {
+    const index = e.target.id.split('.')[0];  
     let currentInputs = this.state.contractInputs;
-    currentInputs[e.target.name] = e.target.value;
+    currentInputs[index].value = e.target.value;
 
     this.setState({
       contractInputs: currentInputs
     })
 
-    this.validateInput(e);
   }
+
+  handlePayableAmountChange = (e) => {
+    this.setState({
+      payableAmount: e.target.value
+    })
+
+  }
+
 
   // TODO: special case for endTime, can this be abstracted?
   handleDatetimeChange = (momentObj) => {
+    const index = [1]; // e.target.id.split('.')[0];  
     let currentInputs = this.state.contractInputs;
-    currentInputs["endTime"] = momentObj.format('x');
+    currentInputs[index].value = momentObj.format('x');
 
     this.setState({
       contractInputs: currentInputs
     })
+
   }
 
   validateInput = (e) => {
@@ -233,17 +278,66 @@ class CreateTourneyView extends Component<any, any> {
     )
   }
 
-  storeInputsToState = (abiInputs) => {
-    let inputs = {}
+  storeInputsToState = (newContract, newMethod) => {
+
+    const { drizzle } = this.props
+
+    let storedContract = newContract;
+    let storedMethod = newMethod;
+
+    const { 
+      selectedContract, selectedMethod, updater
+    } = this.state
+
+    if (storedContract === null) storedContract = selectedContract;
+    if (storedMethod === null) storedMethod = selectedMethod;
+
+  
+    const contractAbi = drizzle.contracts[storedContract].abi;
+
+    const contractMethodArray = contractAbi.filter(obj => {
+      return obj.name === storedMethod
+    });
+    
+    let abiInputs = null;
+    let isPayable;
+
+    if (contractMethodArray.length > 0)
+    {
+      abiInputs = contractMethodArray[0].inputs;
+      isPayable = contractMethodArray[0].payable;
+    }
+    
+    let inputs = []
+
     abiInputs.map( (input) => {
-      inputs[input.name] = "";
+      let newInput = 
+      {
+        name: input.name,
+        type: input.type,
+        value: input.value
+      }
+      switch (input.name) {
+        case "organizer":
+          newInput.value = this.props.address;
+        break;
+        case "endTime":
+          newInput.value = Date.now() + 10 * 24 * 60 * 60 * 1000;
+        break;
+        default: 
+          newInput.value = input.value;
+        break;
+
+      }
+
+      inputs.push(newInput);
     })
 
-    this.setState({ 
-      contractInputs: inputs
+    this.setState({
+      contractInputs: inputs,
+      payable: isPayable,
+      updater: !updater
     });
-
-    console.log(inputs);
   }
 
   render() {
@@ -251,22 +345,13 @@ class CreateTourneyView extends Component<any, any> {
     const { drizzle } = this.props
 
     const { 
-      selectedContract, selectedMethod, contractOutput
+      selectedContract, selectedMethod, contractInputs, contractOutput
     } = this.state
   
     const contractList = drizzle.contractList;
     const contractAbi = drizzle.contracts[selectedContract].abi;
 
-    const contractMethodArray = contractAbi.filter(obj => {
-      return obj.name === selectedMethod;
-    });
-    
-    let abiInputs = null;
-
-    if (contractMethodArray.length > 0)
-    {
-      abiInputs = contractMethodArray[0].inputs;
-    }
+    console.log(contractInputs)
 
     return (
       <Form onSubmit={this.handleSubmit}>
@@ -315,7 +400,8 @@ class CreateTourneyView extends Component<any, any> {
               <Box style={{ textAlign: "center" }}>
                 
                 {
-                abiInputs && abiInputs.map(input => {
+                contractInputs && contractInputs.map( (input, index) => {
+ 
                   switch (input.name) {
 
                     // Tourney special cases
@@ -326,12 +412,12 @@ class CreateTourneyView extends Component<any, any> {
                         mt={3} mr={3} mb={3}
                         label={input.name + " (" + input.type + ")"}>
                           {
-                              <Datetime id={input.name + " (" + input.type + ")"} 
+                              <Datetime id={index + "." + input.name + " (" + input.type + ")"} 
                                     name={input.name} 
                                     required={true}
                                     onChange={this.handleDatetimeChange}
                                     renderInput={this.renderDatetimeInput}
-                                    defaultValue={Date.now() + 10 * 24 * 60 * 60 * 1000}
+                                    value={this.state.contractInputs[index].value}
                                     />
                           }
                       </Field>
@@ -345,10 +431,11 @@ class CreateTourneyView extends Component<any, any> {
                         mt={3} mr={3} mb={3}
                         label={input.name + " (" + input.type + ")"}>
                           {
-                              <Input id={input.name + " (" + input.type + ")"} 
+                              <Input id={index + "." + input.name + " (" + input.type + ")"} 
                                     name={input.name} 
                                     required={true}
                                     onChange={this.handleInputChange}
+                                    value={this.state.contractInputs[index].value}
                                     />
                           }
                       </Field>
@@ -362,10 +449,11 @@ class CreateTourneyView extends Component<any, any> {
                         mt={3} mr={3} mb={3}
                         label={input.name + " (" + input.type + ")"}>
                           {
-                              <Input id={input.name + " (" + input.type + ")"} 
+                              <Input id={index + "." + input.name + " (" + input.type + ")"} 
                                     name={input.name} 
                                     required={true}
                                     onChange={this.handleInputChange}
+                                    value={this.state.contractInputs[index].value}
                                     />
                           }
                       </Field>
@@ -375,10 +463,20 @@ class CreateTourneyView extends Component<any, any> {
                 })
                 }
               </Box>
+
               <Box my={4} style={{ textAlign: "center" }}>
                 <Button size={"medium"} mr={3} mb={3}>
                   Call Contract Method
                 </Button>
+                {
+                this.state.payable && 
+                  <Input id={"payableAmount"} 
+                  name={"payableAmount"} 
+                  onChange={this.handlePayableAmountChange}
+                  placeholder="ETH payable"
+                  value={this.state.payableAmount}
+                  />
+                }
               </Box>
 
               <Box 
