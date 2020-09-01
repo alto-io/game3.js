@@ -121,6 +121,15 @@ export async function getGameSessionId(playerAddress, tournamentId): Promise<any
   return response.data
 }
 
+export async function deleteGameSessionId(gameSessionId): Promise<any> {
+  const params = {
+    gameSessionId
+  }
+
+  const response = await api.delete('/gameSessionId/delete', { params })
+  return response.data
+}
+
 export async function updateSessionScore(gameSessionId, playerAddress, tournamentId): Promise<any> {
   const params = {
     sessionId: gameSessionId,

@@ -458,4 +458,8 @@ export class OrbitDBManager implements DBManager {
       return null
     }
   }
+
+  async deleteSessionId(sessionId) {
+    await this.gameSessionIds.del(sessionId);
+  }
 }

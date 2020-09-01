@@ -6,7 +6,7 @@ import Modal from './Modal';
 import { View, Button } from '../components';
 import GameJavascript, { GameJavascriptContext } from '../scenes/GameJavascript';
 
-import { updateGameNo , getGameNo, getGameSession, putGameReplay } from '../helpers/database'
+import { updateGameNo , getGameNo, getGameSession, putGameReplay, getGameSessionId } from '../helpers/database'
 
 export default class GameResult extends React.Component<any, any> {
   constructor(props) {
@@ -19,7 +19,7 @@ export default class GameResult extends React.Component<any, any> {
   }
 
   componentDidMount = async () => {
-    const { gameSessionId, playerAddress } = this.props;
+    const { gameSessionId, playerAddress, tournamentId } = this.props;
     await this.getTournamentInfo();
     await this.updateTriesUsed(gameSessionId, playerAddress); // Decerease user's remaining tries by 1
     await this.getSessionData(gameSessionId, playerAddress);
