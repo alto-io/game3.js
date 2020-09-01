@@ -38,20 +38,22 @@ export default class GameResult extends React.Component<any, any> {
 
   async updateTriesUsed(gameSessionId, playerAddress) {
     const {tourneyMaxTries} = this.state;
+    const {tournamentId} = this.props;
 
-    const currentGameNo = await getGameNo(gameSessionId, playerAddress);
+    const currentGameNo = await getGameNo(gameSessionId, playerAddress, tournamentId);
     console.log("GAME NUMBEEER",currentGameNo);
 
     if (currentGameNo < tourneyMaxTries) {
-      await updateGameNo(gameSessionId, playerAddress)
+      await updateGameNo(gameSessionId, playerAddress, tournamentId)
     }
   } 
 
   getSessionData = async (gameSessionId, playerAddress) => {
+    const {tournamentId} = this.props;
     if (!gameSessionId || !playerAddress) {
       return
     }
-    const sessionData = await getGameSession(gameSessionId, playerAddress)
+    const sessionData = await getGameSession(gameSessionId, playerAddress, tournamentId)
     console.log("Session Data", sessionData);
     this.setState({
       sessionData
@@ -90,7 +92,7 @@ export default class GameResult extends React.Component<any, any> {
   }
 
   render () {
-    const { show, onToggle, didWin, gameSessionId, playerAddress } = this.props
+    const { show, onToggle, didWin, gameSessionId, playerAddress, tournamentId } = this.props
     const { sessionData, tourneyMaxTries } = this.state
 
     const score = (sessionData && sessionData.timeLeft);
@@ -120,7 +122,7 @@ export default class GameResult extends React.Component<any, any> {
               {(!didWin || gameNo < tourneyMaxTries) && (
                 <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
                   <Button 
-                  onClick={async () => await context.updateSessionHighScore(gameSessionId, playerAddress)}>
+                  onClick={async () => await context.updateSessionHighScore(gameSessionId, playerAddress, tournamentId)}>
                     Try Again
                   </Button>
                 </View>

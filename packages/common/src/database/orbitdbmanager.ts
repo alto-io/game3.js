@@ -5,6 +5,7 @@ import { GuestConfig } from './guestconfig'
 import { DBManager } from './dbmanager'
 import { LeaderboardEntry } from './leaderboardentry'
 import { TournamentData } from './tournamentdata'
+import { v4 as uuidv4 } from 'uuid'
 
 const all = require('it-all')
 const { Buffer } = IPFS
@@ -24,6 +25,7 @@ export class OrbitDBManager implements DBManager {
   tournaments:any = null
   tournamentResults:any = null
   gameSessions:any = null
+  gameSessionIds:any = null
 
   defaultServerOptions = {
       relay: { enabled: true, hop: { enabled: true, active: true } },
@@ -90,6 +92,9 @@ export class OrbitDBManager implements DBManager {
 
     this.gameSessions = await this.orbitdb.docstore('gameSessions', docStoreOptions);
     await this.gameSessions.load()
+
+    this.gameSessionIds = await this.orbitdb.docstore('gameSessionIds', docStoreOptions);
+    await this.gameSessionIds.load();
   }
 
   async refreshClientData() {
@@ -113,6 +118,7 @@ export class OrbitDBManager implements DBManager {
     this.tournaments = await this.orbitdb.docstore('tournaments', docStoreOptions)
     this.tournamentResults = await this.orbitdb.docstore('tournamentResults', docStoreOptions)
     this.gameSessions = await this.orbitdb.docstore('gameSessions', docStoreOptions)
+    this.gameSessionIds = await this.orbitdb.docstore('gameSessionIds', docStoreOptions)
     await this.user.load()
   }
 
@@ -249,10 +255,12 @@ export class OrbitDBManager implements DBManager {
     return { result: sessionId }
   }
 
-  async serverUpdateScore(sessionId, playerAddress) {
+  async serverUpdateScore(sessionId, playerAddress, tournamentId) {
     console.log("UPDATE_SCORE: Function Invoked...");
 
-    const data = await this.gameSessions.get(sessionId);
+    const data = await this.gameSessions.query(data => 
+      data.id === sessionId && data.sessionData.tournamentId === tournamentId  
+    );
     console.log("UPDATE_SCORE: Fetched data", data);
     let playerData = null
     if (data.length > 0) {
@@ -288,10 +296,12 @@ export class OrbitDBManager implements DBManager {
     }
   }
 
-  async updateGameNumber(sessionId, playerAddress) {
+  async updateGameNumber(sessionId, playerAddress, tournamentId) {
     // Get session first
 
-    const data = await this.gameSessions.get(sessionId);
+    const data = await this.gameSessions.query(data => 
+      data.id === sessionId && data.sessionData.tournamentId === tournamentId  
+    );
     if (data.length > 0) {
       let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
 
@@ -313,7 +323,9 @@ export class OrbitDBManager implements DBManager {
     }
 
     // Check if this user already have a session available
-    const data = await this.gameSessions.get(sessionId);
+    const data = await this.gameSessions.query(data => 
+      data.id === sessionId && data.sessionData.tournamentId === tournamentId 
+    );
     console.log("NEW: fetched session data", data);
     if (data.length <= 0) {
       // No data create new
@@ -360,7 +372,7 @@ export class OrbitDBManager implements DBManager {
     } 
   }
 
-  async serverGetGameSession(sessionId, playerAddress) {
+  async serverGetGameSession(sessionId, playerAddress, tournamentId) {
     console.log("GET_GSESSION: Function Invoked...");
     console.log(`GET_GSESSION: sessionId: ${sessionId}`)
     console.log(`GET_GSESSION: playerAddress: ${playerAddress}`)
@@ -371,7 +383,9 @@ export class OrbitDBManager implements DBManager {
       return null
     }
 
-    const data = await this.gameSessions.get(sessionId)
+    const data = await this.gameSessions.query(data => 
+      data.id === sessionId && data.sessionData.tournamentId === tournamentId  
+    );
     let playerData = null
     if (data.length > 0) {
       console.log("GET_GSESSION: Data exist!!");
@@ -393,15 +407,45 @@ export class OrbitDBManager implements DBManager {
     }
   }
 
-  async getGameNo(gameSessionId, playerAddress) {
+  async getGameNo(gameSessionId, playerAddress, tournamentId) {
     // get game session first
 
-    const data = await this.gameSessions.get(gameSessionId);
+    const data = await this.gameSessions.query(data => 
+      data.id === gameSessionId && data.sessionData.tournamentId === tournamentId  
+    );
     if (data.length > 0) {
       let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
       return playerData.gameNo;
     } else {
       return {result: 'none'}
+    }
+  }
+
+  async serverCreateSessionId(playerAddress, tournamentId) {
+    console.log("CREATE_SID: Initializing...")
+    console.log(`CREATE_SID: Params playerAddress: ${playerAddress}, tournamentId: ${tournamentId}`)
+    // Check if this player already have a sessionId
+    let data = await this.gameSessionIds.query(sessionId => 
+      sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId === tournamentId)
+    if (data.length > 0){
+      console.log("SID: DATA FOUND!", data);
+      console.log("SID: Returning...");
+      return data[0].id;
+    } else {
+      console.log("SID: DATA NOT FOUND!", data);
+      console.log("SID: Creating new one...");
+      let sessionId = uuidv4();
+      let sessionIdData = {
+        id: sessionId,
+        tournamentId,
+        playerAddress: playerAddress.toLowerCase()
+      }
+      console.log("SID: Created!!", sessionIdData);
+      console.log("SID: Saving to database...");
+      await this.gameSessionIds.put(sessionIdData);
+      console.log("SID: Saved!");
+      console.log("SID: Returning...");
+      return sessionId;
     }
   }
 }
