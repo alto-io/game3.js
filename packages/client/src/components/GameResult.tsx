@@ -70,15 +70,19 @@ export default class GameResult extends React.Component<any, any> {
 
     const result = await putGameReplay(gameSessionId, playerAddress, recordFileHash)
     console.log(result)
-
-    contractMethodSendWrapper(
-      "submitResult", // name
-      [tournamentId, gameSessionId], //contract parameters
-      {from: playerAddress}, // send parameters
-      (txStatus, transaction) => { // callback
-        console.log("submitResult callback: ", txStatus, transaction);
-      })
-    onToggle(true)
+    
+    try {
+      contractMethodSendWrapper(
+        "submitResult", // name
+        [tournamentId, gameSessionId], //contract parameters
+        {from: playerAddress}, // send parameters
+        (txStatus, transaction) => { // callback
+          console.log("submitResult callback: ", txStatus, transaction);
+        })
+      onToggle(true)
+    } catch (err) {
+      console.log('errrrrroooorrr');
+    }
   }
 
   async getTournamentInfo() {
