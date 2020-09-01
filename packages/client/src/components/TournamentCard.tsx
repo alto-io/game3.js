@@ -86,35 +86,36 @@ class TournamentCard extends Component<any, any> {
 
     tournament.results = results;
 
-    results = 
-    [
-      {
-        tournamentId: tournament.id,
-        isWinner: false,
-        playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
-        sessionData: {
-          timeLeft: "0:55"
-        }
-      },
-      {
-        tournamentId: tournament.id,
-        isWinner: false,
-        playerAddress: "0x3037a73A3D93141CC997A1D3dA94fed6650Ae3b6",
-        sessionData: {
-          timeLeft: "0:50"
-        }
-      },
-      {
-        tournamentId: tournament.id,
-        isWinner: false,
-        playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
-        sessionData: {
-          timeLeft: "0:30"
-        }
-      },
-    ]
+    // results = 
+    // [
+    //   {
+    //     tournamentId: tournament.id,
+    //     isWinner: false,
+    //     playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
+    //     sessionData: {
+    //       timeLeft: "0:55"
+    //     }
+    //   },
+    //   {
+    //     tournamentId: tournament.id,
+    //     isWinner: false,
+    //     playerAddress: "0x3037a73A3D93141CC997A1D3dA94fed6650Ae3b6",
+    //     sessionData: {
+    //       timeLeft: "0:50"
+    //     }
+    //   },
+    //   {
+    //     tournamentId: tournament.id,
+    //     isWinner: false,
+    //     playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
+    //     sessionData: {
+    //       timeLeft: "0:30"
+    //     }
+    //   },
+    // ]
     
     const triesLeft = await contract.methods.getTriesLeft(tournamentId, this.props.address).call();
+    tournament.triesLeft = triesLeft;
 
     console.log(tournament);
   }
