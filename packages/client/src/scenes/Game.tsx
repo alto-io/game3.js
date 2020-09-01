@@ -442,6 +442,7 @@ export default class Game extends Component<IProps, IState> {
     const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
 
     console.log("The Game is over?",gameOver);
+    console.log("The Session ID is", gameSessionId);
 
     return (
         // <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>/
@@ -463,6 +464,7 @@ export default class Game extends Component<IProps, IState> {
                 drizzle={drizzle}
                 drizzleState={drizzleState}
                 contractMethodSendWrapper={contractMethodSendWrapper}
+                didWin={true}
               />
           )}
 

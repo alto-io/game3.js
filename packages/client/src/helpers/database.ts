@@ -100,6 +100,48 @@ export async function getGameSession(gameSessionId, playerAddress): Promise<any>
   return response.data
 }
 
+export async function getGameNo(gameSessionId, playerAddress): Promise<any> {
+  const params = {
+    sessionId: gameSessionId,
+    playerAddress,
+  }
+  const response = await api.get('/gameSession/gameNo', { params })
+  return response.data
+}
+
+export async function updateSessionScore(gameSessionId, playerAddress): Promise<any> {
+  const params = {
+    sessionId: gameSessionId,
+    playerAddress
+  }
+
+  const res = await api.post('/gameSession/score', params);
+  return res.data;
+}
+
+export async function updateGameNo(sessionId, playerAddress) {
+  const params = {
+    sessionId,
+    playerAddress
+  }
+
+  const res = await api.post('/gameSession/gameNo', params);
+  return res.data;
+}
+
+export async function makeNewGameSession(playerAddress, sessionId, tournamentId, kills, timeLeft): Promise<any> {
+  const params = {
+    playerAddress,
+    sessionId, 
+    tournamentId, 
+    kills, 
+    timeLeft
+  }
+
+  const res = await api.post('/gameSession/new', params);
+  return res.data
+}
+
 // Local Database Calls
 export async function localSaveReplay(playerId: string, tournamentId: string, time: number, file: File) {
   const result = await dbManager.localSaveReplay(playerId, tournamentId, time, file);

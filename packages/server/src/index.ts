@@ -91,10 +91,47 @@ app.post('/gameReplay', async (req: any, res: any) => {
 app.get('/gameSession', async (req: any, res: any) => {
   const sessionId = req.query.sessionId
   const playerAddress = req.query.playerAddress
+
+  console.log("Server GET sessionId is", sessionId);
+
   const result = await GlobalState.ServerState.dbManager
     .serverGetGameSession(sessionId, playerAddress);
   res.json(result);
 });
+
+app.get('/gameSession/gameNo', async (req: any, res: any) => {
+  const sessionId = req.query.sessionId
+  const playerAddress = req.query.playerAddress
+
+  console.log("Server GET sessionId is", sessionId);
+
+  const result = await GlobalState.ServerState.dbManager
+    .getGameNo(sessionId, playerAddress);
+  
+  res.json(result);
+})
+
+app.post('/gameSession/score', async (req: any, res: any) => {
+  const sessionId = req.body.sessionId;
+  const playerAddress = req.body.playerAddress;
+
+  console.log("Server POST sessionId is", sessionId);
+
+  const result = await GlobalState.ServerState.dbManager
+    .serverUpdateScore(sessionId, playerAddress);
+  
+  res.json(result);
+})
+
+app.post('/gameSession/gameNo', async (req: any, res: any) => {
+  const sessionId = req.body.sessionId;
+  const playerAddress = req.body.playerAddress;
+
+  const result = await GlobalState.ServerState.dbManager
+    .updateGameNumber(sessionId, playerAddress);
+  
+  res.json(result);
+})
 
 // Serve the frontend client
 app.get('*', (req: any, res: any) => {
