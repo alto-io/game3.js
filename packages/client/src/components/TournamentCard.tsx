@@ -24,7 +24,8 @@ class TournamentCard extends Component<any, any> {
       ownTournament: false,
       isOpen: false,
       isBuyinModalOpen: false,
-      accountBuyIn: 0
+      accountBuyIn: 0,
+      isContractOwner: false
     }
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -33,7 +34,13 @@ class TournamentCard extends Component<any, any> {
   }
 
   componentDidMount() {
-    this.getBlockchainInfo(this.props)
+    this.getBlockchainInfo(this.props);
+  }
+
+  componentDidUpdate() {
+    if (this.props.account && this.props.accountValidated) {
+      this.checkOwner();
+    }
   }
 
   componentWillReceiveProps(newProps) {
@@ -130,6 +137,20 @@ class TournamentCard extends Component<any, any> {
     this.setState({isBuyinModalOpen: true})
   }
 
+  checkOwner = async () => {
+    const { drizzle, account } = this.props;
+    const contract = drizzle.contracts.Tournaments;
+    const owner = await contract.methods.owner().call();
+
+
+    if (owner.toLowerCase() !== account.toLowerCase()) {
+      this.setState({isContractOwner: false})
+    } else {
+      this.setState({isContractOwner: true})
+    }
+  }
+
+
   onActivate = (tournament) => {
     this.activateTournament(tournament)
   }
@@ -148,7 +169,7 @@ class TournamentCard extends Component<any, any> {
   }
 
   render () {
-    const { tournament, ownTournament, accountBuyIn, isBuyinModalOpen, isOpen } = this.state
+    const { tournament, ownTournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner } = this.state
     const { connectAndValidateAccount, account, accountValidated, drizzle, address } = this.props
 
     const hasTournament = !!tournament
@@ -256,7 +277,7 @@ class TournamentCard extends Component<any, any> {
               </Text>
             </Flex>
 
-            {button()}
+            {!isContractOwner ? button() : ""}
 
             {/* <Button onClick={() => {this.onActivate(tournament)}}>Activate</Button> */}
             <JoinPromptModal 
