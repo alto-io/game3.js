@@ -26,6 +26,7 @@ class CreateTourneyView extends Component<any, any> {
       selectedMethod: this.DEFAULT_CONTRACT_METHOD,
       payableAmount: null,
       payable: false,
+      view: false,
       contractOutput: "",
       contractInputs: [],
       currentNetwork: null,
@@ -174,9 +175,10 @@ class CreateTourneyView extends Component<any, any> {
     this.forceUpdate();
   }
 
-  handleSubmit = (e) => {
+  handleSubmit = async (e) => {
     e.preventDefault();
 
+    const { drizzle } = this.props
     const { 
       selectedContract, selectedMethod, contractInputs
     } = this.state
@@ -214,15 +216,37 @@ class CreateTourneyView extends Component<any, any> {
     sendParams["value"] = this.state.payableAmount.toString(); // web3.utils.toWei(this.state.payableAmount);
   }
 
-  this.props.contractMethodSendWrapper(
-    selectedMethod, // name
-    contractParams,
-    sendParams, // send parameters
-    (txStatus, transaction) => { // callback
-    console.log(selectedMethod + " callback: ", txStatus, transaction);
-    })
+  if (this.state.view) {
+    const output = await (await drizzle.contracts[selectedContract].methods[selectedMethod].call()).call(); //double call: weird
+    this.setState(
+      {
+        contractOutput: output
+      }
+    )
+  }
 
+
+  else {
+    this.props.contractMethodSendWrapper(
+      selectedMethod, // name
+      contractParams,
+      sendParams, // send parameters
+      this.handleTransactionCallback
+      )
+    }
   };
+
+  handleTransactionCallback = (txStatus, transaction) => {
+    const outputLog = "status: " + txStatus + " ---- \n" 
+                     + "hash: " + transaction.transactionHash + " ---- \n"
+                     + JSON.stringify(transaction, null, 2);
+
+    this.setState(
+      {
+        contractOutput: outputLog
+      }
+    )
+  }
 
   handleInputChange = (e) => {
     const index = e.target.id.split('.')[0];  
@@ -301,11 +325,15 @@ class CreateTourneyView extends Component<any, any> {
     
     let abiInputs = null;
     let isPayable;
+    let isView;
 
     if (contractMethodArray.length > 0)
     {
       abiInputs = contractMethodArray[0].inputs;
       isPayable = contractMethodArray[0].payable;
+      if (contractMethodArray[0].stateMutability) {
+        isView = contractMethodArray[0].stateMutability === "view";
+      }
     }
     
     let inputs = []
@@ -335,8 +363,9 @@ class CreateTourneyView extends Component<any, any> {
 
     this.setState({
       contractInputs: inputs,
+      contractOutput: null,
       payable: isPayable,
-      updater: !updater
+      view: isView
     });
   }
 
@@ -485,7 +514,7 @@ class CreateTourneyView extends Component<any, any> {
               <Card>
                 <Pill>{"Output"}</Pill>
               <Text fontSize="2" textAlign="center">
-                {}
+                {contractOutput}
                 </Text>
               </Card>
               </Box>
