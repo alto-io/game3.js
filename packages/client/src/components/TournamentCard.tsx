@@ -56,6 +56,8 @@ class TournamentCard extends Component<any, any> {
       timeIsUp: false,
       canDeclareWinner: true,
       results: [],
+      buyInAmount: 0.001,
+      triesLeft : 0
     }
     tournament.timeIsUp = isPast(new Date(tournament.endTime))
 
@@ -69,7 +71,52 @@ class TournamentCard extends Component<any, any> {
       ownTournament
     })
 
-    console.log(tournament);
+    let results = [];
+    const resultsCount = await contract.methods.getResultsCount(tournamentId).call();
+    for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
+      const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
+        results.push({
+          tournamentId: tournament.id,
+          resultId: resultIdx,
+          isWinner: resultDetails['0'],
+          playerAdress: resultDetails['1'],
+          sessionData: resultDetails['2']
+        })
+    }
+
+    tournament.results = results;
+
+    results = 
+    [
+      {
+        tournamentId: tournament.id,
+        isWinner: false,
+        playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
+        sessionData: {
+          timeLeft: "0:55"
+        }
+      },
+      {
+        tournamentId: tournament.id,
+        isWinner: false,
+        playerAddress: "0x3037a73A3D93141CC997A1D3dA94fed6650Ae3b6",
+        sessionData: {
+          timeLeft: "0:50"
+        }
+      },
+      {
+        tournamentId: tournament.id,
+        isWinner: false,
+        playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
+        sessionData: {
+          timeLeft: "0:30"
+        }
+      },
+    ]
+    
+    const triesLeft = await contract.methods.getTriesLeft(tournamentId, this.props.address).call();
+
+    tournament.triesLeft = 3;
   }
 
   handleJoinClick = () => {
@@ -104,6 +151,23 @@ class TournamentCard extends Component<any, any> {
     this.setState({isBuyinModalOpen: true})
   }
 
+  // onActivate = (tournament) => {
+  //   this.activateTournament(tournament)
+  // }
+
+  // activateTournament = async (tournament) => {
+  //   const { drizzle } = this.props
+
+  //   const address = this.state.address;
+  //   const contract = drizzle.contracts.Tournaments;
+
+  //   await contract.methods.activateTournament(tournament.id, tournament.prize)
+  //     .send({
+  //       from: address,
+  //       value: tournament.prize
+  //     })
+  // }
+
   render () {
     const { tournament, ownTournament } = this.state
 
@@ -132,6 +196,7 @@ class TournamentCard extends Component<any, any> {
     const gameName = 'TOSIOS'
     const gameImage = 'tosios.gif'
     const buttonText = tournament.timeIsUp ? 'View' : 'Join'
+    const gameTries = 2;
 
     return (
       <Box width={[1, 1 / 2, 1 / 3]} p={3}>
@@ -192,6 +257,7 @@ class TournamentCard extends Component<any, any> {
               </Button>
             )}
 
+            {/* <Button onClick={() => {this.onActivate(tournament)}}>Activate</Button> */}
             <JoinPromptModal 
               isOpen={this.state.isOpen}
               handleCloseModal={this.handleCloseModal}
@@ -207,7 +273,7 @@ class TournamentCard extends Component<any, any> {
               handleJoinClick={this.handleJoinClick}
               drizzle={this.props.drizzle}
               tournamentId={tournament.id}
-              tournamentBalance={tournament.balance}
+              tournamentBuyInAmount={tournament.buyInAmount}
             />
           </Flex>
         </Card>

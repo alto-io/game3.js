@@ -8,11 +8,11 @@ class BuyInPromptModal extends Component {
   }
 
   confirmTransaction = async () => {
-    const { drizzle, tournamentId, tournamentBalance, handleJoinClick } = this.props;
-
+    const { drizzle, tournamentId, tournamentBuyInAmount, handleJoinClick } = this.props;
+    // const buyInValue = drizzle.web3.utils.toWei(tournamentBuyInAmount.toString());
     const contract = drizzle.contracts.Tournaments;
-    const buyIn = await contract.methods.payBuyIn(tournamentId, tournamentBalance).call();
-    console.log(tournamentId);
+
+    const payBuyIn = await contract.methods.payBuyIn(tournamentId, 1).call();
     handleJoinClick();
   }
 
