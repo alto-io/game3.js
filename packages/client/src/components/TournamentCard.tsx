@@ -9,7 +9,8 @@ import JoinPromptModal from "./JoinPromptModal";
 import { navigate } from '@reach/router';
 import qs from 'querystringify';
 
-import { TOURNAMENT_STATE_ACTIVE } from '../constants'
+import web3 from 'web3';
+import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
 
 class TournamentCard extends Component<any, any> {
   constructor(props) {
@@ -137,7 +138,7 @@ class TournamentCard extends Component<any, any> {
 
             <Flex justifyContent={"center"} mt={3} mb={4}>
               <Text fontWeight={600} lineHeight={"1em"}>
-                Prize: {tournament.prize} ETH
+                Prize: { web3.utils.fromWei(tournament.prize)} ETH
               </Text>
             </Flex>
 
@@ -153,7 +154,7 @@ class TournamentCard extends Component<any, any> {
             </Flex>
             <Flex justifyContent={"center"} mt={1} mb={2}>
               <Text fontWeight={300} lineHeight={"0.75em"}>
-                Status: { tournament.timeIsUp ? 'Closed' : 'Active' }
+                Status: {  TOURNAMENT_STATES[tournament.state] }
               </Text>
             </Flex>
 
