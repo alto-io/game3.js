@@ -14,7 +14,7 @@ export default class GameResult extends React.Component<any, any> {
 
     this.state = {
       sessionData: null,
-      tournament: {}
+      tourneyMaxTries: 0
     }
   }
 
@@ -37,12 +37,12 @@ export default class GameResult extends React.Component<any, any> {
   }
 
   async updateTriesUsed(gameSessionId, playerAddress) {
-    const {tournament} = this.state;
+    const {tourneyMaxTries} = this.state;
 
     const currentGameNo = await getGameNo(gameSessionId, playerAddress);
     console.log("GAME NUMBEEER",currentGameNo);
 
-    if (currentGameNo < tournament.maxTries) {
+    if (currentGameNo < tourneyMaxTries) {
       await updateGameNo(gameSessionId, playerAddress)
     }
   } 
@@ -80,18 +80,18 @@ export default class GameResult extends React.Component<any, any> {
   }
 
   async getTournamentInfo() {
-    let tournament = { // Test Tournament Info
-      maxTries: 3 
-    }
+    const { drizzle, tournamentId } = this.props;
+    const contract = drizzle.contracts.Tournaments;
+    const maxTries = await contract.methods.getMaxTries(tournamentId).call()
 
     this.setState({
-      tournament
+      tourneyMaxTries: maxTries
     })
   }
 
   render () {
     const { show, onToggle, didWin, gameSessionId, playerAddress } = this.props
-    const { sessionData, tournament } = this.state
+    const { sessionData, tourneyMaxTries } = this.state
 
     const score = (sessionData && sessionData.timeLeft);
     const highScore = (sessionData && sessionData.currentHighestNumber);
@@ -103,12 +103,12 @@ export default class GameResult extends React.Component<any, any> {
       <GameJavascript>
         <GameJavascriptContext.Consumer>{context => {          
           
-          let shouldSubmit = didWin || gameNo === tournament.maxTries;
-          let isMaxTries = gameNo === tournament.maxTries;
+          let shouldSubmit = didWin || gameNo === tourneyMaxTries;
+          let isMaxTries = gameNo === tourneyMaxTries;
 
           return (
             <Modal show={show} toggleModal={onToggle}>
-              <View style={{ margin: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Game {gameNo} of {tournament.maxTries}</View>
+              <View style={{ margin: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Game {gameNo} of {tourneyMaxTries}</View>
               <View style={{ margin: '20px' }}>Score: {score}</View>
               <View style={{ margin: '20px' }}>High Score: {highScore}</View>
               { (shouldSubmit) && (
@@ -117,7 +117,7 @@ export default class GameResult extends React.Component<any, any> {
                 </View>
               )}
 
-              {(!didWin || gameNo < tournament.maxTries) && (
+              {(!didWin || gameNo < tourneyMaxTries) && (
                 <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
                   <Button 
                   onClick={async () => await context.updateSessionHighScore(gameSessionId, playerAddress)}>
