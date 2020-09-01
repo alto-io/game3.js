@@ -347,8 +347,18 @@ contract Tournaments is Ownable {
   function getBuyIn(uint tournamentId)
     public
     view
+    tournamentIdIsCorrect(tournamentId)
     returns (uint) 
   {
     return tournaments[tournamentId].buyInAmount;
+  }
+
+  function getMaxTries(uint tournamentId)
+    public
+    view
+    tournamentIdIsCorrect(tournamentId)
+    returns (uint)
+  {
+    return tournaments[tournamentId].triesPerBuyIn;
   }
 }

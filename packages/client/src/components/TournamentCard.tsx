@@ -13,6 +13,7 @@ import qs from 'querystringify';
 import web3 from 'web3';
 import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
 import SmartContractControls from './SmartContractControls';
+import { getGameSession, putGameReplay } from '../helpers/database';
 
 class TournamentCard extends Component<any, any> {
   constructor(props) {
@@ -51,6 +52,7 @@ class TournamentCard extends Component<any, any> {
     const raw = await contract.methods.getTournament(tournamentId).call();
     const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
     const triesLeft = await contract.methods.getTriesLeft(tournamentId, this.props.address).call();
+    const maxTries = await contract.methods.getMaxTries(tournamentId).call();
     const tournament = {
       id: tournamentId,
       organizer: raw['0'],
@@ -62,7 +64,8 @@ class TournamentCard extends Component<any, any> {
       canDeclareWinner: true,
       results: [],
       buyInAmount: tournamentBuyIn,
-      triesLeft : triesLeft
+      // triesLeft : triesLeft
+      maxTries : maxTries
     }
     tournament.timeIsUp = isPast(new Date(tournament.endTime))
 
@@ -173,6 +176,7 @@ class TournamentCard extends Component<any, any> {
     const gameName = 'TOSIOS'
     const gameImage = 'tosios.gif'
     const buttonText = tournament.timeIsUp ? 'View' : 'Join'
+    const playBtnText = `Play (n out of ${tournament.maxTries})`
 
     const button = () => {
       if (accountBuyIn === 0 ) {
@@ -183,7 +187,7 @@ class TournamentCard extends Component<any, any> {
               mb={2}
               type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
               name={"recepient"} // set the name to the method's argument key
-              onClick={this.props.account && this.props.accountValidated ? this.handleOpenBuyinModal : this.handleOpenModal}
+              onClick={account && accountValidated ? this.handleOpenBuyinModal : this.handleOpenModal}
             >
               {buttonText}
               </Button>
@@ -202,9 +206,15 @@ class TournamentCard extends Component<any, any> {
         }
       } else {
         return(
-          <Flash my={3} variant="success">
-            You have some tries left
-          </Flash>
+          <Button
+            mt={"26px"}
+            mb={2}
+            type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
+            name={"recepient"} // set the name to the method's argument key
+            onClick={this.handleJoinClick}
+          >
+            {playBtnText}
+          </Button>
         )
       }
     }
