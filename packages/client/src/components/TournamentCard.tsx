@@ -117,7 +117,9 @@ class TournamentCard extends Component<any, any> {
     const triesLeft = await contract.methods.getTriesLeft(tournamentId, this.props.address).call();
     tournament.triesLeft = triesLeft;
 
-    console.log(tournament);
+    const buyIn = await contract.methods.buyIn(tournamentId, this.props.address).call();
+
+    console.log(tournament, buyIn);
   }
 
   handleJoinClick = () => {
@@ -197,7 +199,6 @@ class TournamentCard extends Component<any, any> {
     const gameName = 'TOSIOS'
     const gameImage = 'tosios.gif'
     const buttonText = tournament.timeIsUp ? 'View' : 'Join'
-    const gameTries = 2;
 
     return (
       <Box width={[1, 1 / 2, 1 / 3]} p={3}>

@@ -84,7 +84,7 @@ class TournamentView extends React.Component<any, any> {
 
   render() {
     const { drizzleState, address, store, drizzle, account, accountValidated, connectAndValidateAccount } = this.props;
-    const { currentNetwork, tournamentsCount, buyInSuccess } = this.state;
+    const { currentNetwork, tournamentsCount } = this.state;
 
     const tournaments = [];
     for(let i = 0; i < tournamentsCount; i++) {
