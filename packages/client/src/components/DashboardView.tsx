@@ -5,9 +5,10 @@ import styled from "styled-components";
 
 import { isPast } from 'date-fns';
 
+import { getGameSession } from "../helpers/database";
 import PlayerTournamentResults from "./PlayerTournamentResults";
-// import PlayerGameReplays from "./PlayerGameReplays";
 import PlayerOngoingTournaments from "./PlayerOngoingTournaments";
+// import PlayerGameReplays from "./PlayerGameReplays";
 
 const StyledFlex = styled(Flex)`
   display: flex;
@@ -79,7 +80,7 @@ class DashboardView extends Component {
   }
 
   fetchPlayerTournaments = async () => {
-    const { drizzle, account, accountValidated } = this.props;
+    const { drizzle, address } = this.props;
 
       const contract = drizzle.contracts.Tournaments;
       const tournamentsCount = await contract.methods.getTournamentsCount().call();
@@ -99,6 +100,7 @@ class DashboardView extends Component {
           timeIsUp: false,
           canDeclareWinner: false,
           results: [],
+          buyIn : 0,
           playerAddress: ''
         }
   
@@ -108,59 +110,41 @@ class DashboardView extends Component {
         let results = []
         for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
           const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
-          results.push({
+          const result = ({
             tournamentId: tournament.id,
             resultId: resultIdx,
             isWinner: resultDetails['0'],
-            playerAdress: resultDetails['1'],
-            sessionData: resultDetails['2']
+            playerAddress: resultDetails['1'].toLowerCase(),
+            sessionId: resultDetails['2'],
+            sessionData: {}
           })
-        }
-  
-        results = 
-        [
-          {
-            tournamentId: tournament.id,
-            isWinner: false,
-            playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
-            sessionData: {
-              timeLeft: "0:55"
-            }
-          },
-          {
-            tournamentId: tournament.id,
-            isWinner: false,
-            playerAddress: "0xB83A97B94A7f26047cBDBAdf5eBe53224Eb12fEc",
-            sessionData: {
-              timeLeft: "0:50"
-            }
-          },
-          {
-            tournamentId: tournament.id,
-            isWinner: false,
-            playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
-            sessionData: {
-              timeLeft: "0:30"
-            }
-          },
-        ]
-        
-        tournament.results = results.filter( result => result.playerAddress.toLowerCase() === account.toLowerCase());
-
-        if (tournament.results.length !== 0) {
-          tournament.playerAddress = tournament.results[0].playerAddress;
+          
+          this.fetchGameSession(result.sessionId, address, tournamentId)
+          .then( gameSession => {
+            result.sessionData = gameSession;
+          });
+          
+          results.push(result);
         }
 
-        tournaments.push(tournament);
+        let playerResults = results.filter( result => result.playerAddress === address.toLowerCase());
+        tournament.results = playerResults;
 
+        const buyIn = await contract.methods.buyIn(tournamentId, address);
+
+        if (buyIn !== 0) {
+          tournaments.push(tournament);
+        }
       }
 
-      let newTournaments = tournaments.filter( tournament => tournament.playerAddress !== '');
-      
       this.setState({
-        tournaments: newTournaments
+        tournaments
       })
+  }
 
+  fetchGameSession = async (sessionId, playerAddress, tournamentId) => {
+    const gameSession = await getGameSession(sessionId, playerAddress, tournamentId);
+    return gameSession;
   }
 
     render() {

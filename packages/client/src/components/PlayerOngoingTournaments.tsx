@@ -40,7 +40,7 @@ class PlayerOngoingTournaments extends Component {
             <Text>End Time - { format(new Date(tournament.endTime),'MMM d, yyyy, HH:mm:ss') }</Text>
             <Text>Prize - {tournament.prize} ETH </Text>
             <Text>State - {tournament.state !== 1 ? "Active" : ""}</Text>
-            <Text>Your Score: {tournament.results[0].sessionData.timeLeft}</Text>
+            <Text>Your Score: </Text>
           </Box>
         </StyledFlex>
         </>
