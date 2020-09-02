@@ -130,9 +130,9 @@ class DashboardView extends Component {
         let playerResults = results.filter( result => result.playerAddress === address.toLowerCase());
         tournament.results = playerResults;
 
-        const buyIn = await contract.methods.buyIn(tournamentId, address);
+        const buyIn = await contract.methods.buyIn(tournamentId, address).call();
 
-        if (buyIn !== 0) {
+        if (parseInt(buyIn) !== 0) {
           tournaments.push(tournament);
         }
       }

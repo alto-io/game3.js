@@ -3,7 +3,9 @@ import { Card, Heading, Flex, Button, Text, Box} from "rimble-ui";
 import RainbowImage from "./RainbowImage";
 import styled from "styled-components";
 
-import { format } from 'date-fns'
+import { format } from 'date-fns';
+
+import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
 
 const StyledFlex = styled(Flex)`
   flex-direction: column;
@@ -28,9 +30,15 @@ class PlayerOngoingTournaments extends Component {
     const gameImage = 'tosios.gif';
     const { tournaments, setRoute } = this.props;
 
-    const activeTournaments = tournaments.filter( tournament => tournament.state !== 1);
+    const activeTournaments = tournaments.filter( tournament => tournament.state === 1);
 
     const tournamentResults = activeTournaments.map( tournament => {
+      const results = tournament.results.map( result => {
+        return (
+          <Text key={result.resultId}>Result ID: {result.resultId} Your Score: {result.sessionData.currentHighestNumber}</Text>
+        )
+      });
+      
       return(
         <>
         <StyledFlex mb={"5"} key={tournament.id}>
@@ -39,8 +47,8 @@ class PlayerOngoingTournaments extends Component {
             <Heading as={"h4"}>{gameName} - Tournament {tournament.id}</Heading>
             <Text>End Time - { format(new Date(tournament.endTime),'MMM d, yyyy, HH:mm:ss') }</Text>
             <Text>Prize - {tournament.prize} ETH </Text>
-            <Text>State - {tournament.state !== 1 ? "Active" : ""}</Text>
-            <Text>Your Score: </Text>
+            <Text>State - Active </Text>
+            {results}
           </Box>
         </StyledFlex>
         </>
@@ -49,22 +57,11 @@ class PlayerOngoingTournaments extends Component {
 
     return(
       <StyledCard px={3} py={4}>
-      <Heading as={"h2"} mb={"3"}>Your Ongoing Tournaments</Heading>
-      {tournaments.length === 0 ? (
-        <Flex mt={3} justfyContent={"center"} flexDirection={"column"} alignItems={"center"}>
-          <Heading as={"h3"}>You haven't joined any tournaments.</Heading>
-          <Button 
-            alignSelf={"center"} 
-            mt={3}
-            onClick={e => {
-              e.preventDefault();
-              setRoute("TournamentView");
-            }}
-            >Join a Tournament</Button>
-        </Flex>
-      ) : tournamentResults}
-        
-    </StyledCard>
+        <Heading as={"h2"} mb={"3"}>Your Ongoing Tournaments</Heading>
+        {tournaments.length === 0 ? (
+          <NoTournamentsJoinedCard setRoute={setRoute}/>
+        ) : tournamentResults}
+      </StyledCard>
     )
   }
 }

@@ -3,6 +3,8 @@ import { Card, Heading, Flex, Box, Button, Text } from "rimble-ui";
 import RainbowImage from "./RainbowImage";
 import styled from "styled-components";
 
+import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
+
 const StyledFlex = styled(Flex)`
   flex-direction: column;
 
@@ -36,6 +38,7 @@ class PlayerTournamentResults extends Component {
     const gameName= 'TOSIOS';
     const gameImage = 'tosios.gif';
     const { tournaments, setRoute } = this.props;
+
     const winningResult = (tournament) => {
       const result = tournament.results.find( result => result.isWinner === true);
       return(
@@ -50,7 +53,7 @@ class PlayerTournamentResults extends Component {
     const tournamentResultsCard = tournaments.map( tournament => {
       const results = tournament.results.map( result => {
         return(
-          <Text>Result: {result.resultId} Your Score: {result.sessionData.currentHighestNumber}</Text>
+          <Text key={result.resultId}>Result: {result.resultId} Your Score: {result.sessionData.currentHighestNumber}</Text>
         )
       })
 
@@ -75,17 +78,7 @@ class PlayerTournamentResults extends Component {
       <StyledCard>
         <Heading as={"h2"} mb={"3"}>Your Tournament Results</Heading>
         {tournaments.length === 0 ? (
-          <Flex mt={3} justfyContent={"center"} flexDirection={"column"} alignItems={"center"}>
-            <Heading as={"h3"}>You haven't joined any tournaments.</Heading>
-            <StyledButton 
-              alignSelf={"center"} 
-              mt={3}
-              onClick={e => {
-                e.preventDefault();
-                setRoute("TournamentView");
-              }}
-              >Join a Tournament</StyledButton>
-          </Flex>
+          <NoTournamentsJoinedCard setRoute={setRoute}/>
         ) : tournamentResultsCard}
         
       </StyledCard>
