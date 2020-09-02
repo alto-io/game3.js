@@ -280,6 +280,9 @@ export default class Game extends Component<IProps, IState> {
           showResult: true
         })
         break;
+      case 'restart':
+        this.setState({ gameSessionId: message.params.sessionId, gameOver: false });
+        break;
       case 'joined':
         this.gameManager.hudLogAdd(`"${message.params.name}" joins.`);
         break;

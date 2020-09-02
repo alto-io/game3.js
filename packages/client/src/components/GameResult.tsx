@@ -6,7 +6,12 @@ import Modal from './Modal';
 import { View, Button } from '../components';
 import GameJavascript, { GameJavascriptContext } from '../scenes/GameJavascript';
 
-import { updateGameNo , getGameNo, getGameSession, putGameReplay, getGameSessionId } from '../helpers/database'
+import { 
+  updateGameNo, 
+  getGameNo, 
+  getGameSession, 
+  putGameReplay, 
+  updateSessionScore } from '../helpers/database'
 
 export default class GameResult extends React.Component<any, any> {
   constructor(props) {
@@ -123,10 +128,10 @@ export default class GameResult extends React.Component<any, any> {
                 </View>
               )}
 
-              {(!didWin || gameNo < tourneyMaxTries) && (
+              {(!didWin || !isMaxTries) && (
                 <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
                   <Button 
-                  onClick={async () => await context.updateSessionHighScore(gameSessionId, playerAddress, tournamentId)}>
+                  onClick={async () => await updateSessionScore(gameSessionId, playerAddress, tournamentId)}>
                     Try Again
                   </Button>
                 </View>
