@@ -49,7 +49,7 @@ contract Tournaments is Ownable {
   event ResultSubmitted(uint tournamentId, address indexed player,
     uint256 indexed resultId);
   event WinnersDeclared(uint tournamentId, uint256[] resultId);
-  event PrizeTransfered(uint tournamentId, uint256 resultId, address player, uint256 amount);
+  event PrizeTransfered(uint tournamentId, uint256 resultId, address indexed player, uint256 amount);
   event TournamentStopped(uint tournamentId);
 
   /**
