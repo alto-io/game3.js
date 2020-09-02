@@ -120,14 +120,21 @@ export default class GameResult extends React.Component<any, any> {
           let shouldSubmit = didWin || gameNo === tourneyMaxTries;
           let canTryAgain = gameNo < tourneyMaxTries;
 
+          let scoreMsg = score > highScore ? `New high score!!` : `High score unbeaten`;
+          let finalScore = `Final score ${highScore}`
+
           return (
             <Modal show={show} toggleModal={onToggle}>
               <View style={{ margin: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Game {gameNo} of {tourneyMaxTries}</View>
-              <View style={{ margin: '20px' }}>Score: {score}</View>
-              <View style={{ margin: '20px' }}>High Score: {highScore}</View>
+              <View style={{ margin: '20px', fontSize: '1.8rem' }}>{score}</View>
+              {canTryAgain ? (
+                <View style={{ margin: '20px' }}>{scoreMsg}</View>
+              ) : (
+                <View style={{ margin: '20px' }}>{finalScore}</View>
+              )}
               {/* { (shouldSubmit) && ( */}
               {/* <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto 1rem auto' }}> */}
-              <View style={{ margin: '20px', fontSize: '0.9rem' }}>High score automatically submitted</View>
+              <View style={{ margin: '20px', fontSize: '0.9rem'}}>High score is automatically submitted</View>
               {/* </View> */}
               {/* )} */}
 
