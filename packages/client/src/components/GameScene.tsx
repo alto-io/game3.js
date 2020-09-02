@@ -52,7 +52,8 @@ export default class GameScene extends Component<any, any> {
 const gamescenecontainerStyle: CSS.Properties = {
   background: `rgb(${baseColors.lightGrey})`,
   display: 'flex',
-  width: '100%'
+	width: '100%',
+	padding: '2rem 0'
 }
 
 const gameStyle: CSS.Properties = {

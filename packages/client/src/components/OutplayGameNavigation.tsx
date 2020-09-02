@@ -37,11 +37,13 @@ const StyledSpan = styled.span`
   margin-left: 0.5rem;
   cursor: pointer;
 `;
-
+// margin-bottom: 2rem;
+// margin-bottom: 4.375rem;
+// box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 const StyledNavigation = styled(Flex)`
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   flex-direction: column;
-  margin-bottom: 2rem;
+  
   padding: 1.5rem 0;
   width: 100%;
 
@@ -51,7 +53,7 @@ const StyledNavigation = styled(Flex)`
 
   @media screen and (min-width: 768px) {
     flex-direction: row;
-    margin-bottom: 4.375rem;
+    
 
     span {
       font-size: 1rem;
@@ -62,14 +64,14 @@ const StyledNavigation = styled(Flex)`
 class OutplayGameNavigation extends Component {
 
   render() {
-    return(
+    return (
       <StyledNavigation>
         <StyledLinkContainer
           mx={3}
           borderRadius={1}
-        > 
-          <StyledSpan  onClick={() => navigateTo('/')}>&#10229; Back to Home</StyledSpan> 
-        </StyledLinkContainer>   
+        >
+          <StyledSpan onClick={() => navigateTo('/')}>&#10229; Back to Home</StyledSpan>
+        </StyledLinkContainer>
       </StyledNavigation>
     )
   }

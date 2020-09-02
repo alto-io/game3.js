@@ -83,6 +83,13 @@ app.get('/tournament', async (req: any, res: any) => {
   res.json(result);
 });
 
+app.get('/tournament/results', async (req: any, res: any) => {
+  const tournamentId = req.query.tournamentId;
+
+  const result = await GlobalState.ServerState.dbManager.getTournamentResult(tournamentId);
+  res.json(result);
+})
+
 app.post('/gameReplay', async (req: any, res: any) => {
   const result = await GlobalState.ServerState.dbManager.serverPutGameReplay(req.body);
   res.json(result);
@@ -154,6 +161,10 @@ app.post('/gameSession/gameNo', async (req: any, res: any) => {
   res.json(result);
 })
 
+app.delete('/deleteDBS', async (req: any, res: any) => {
+  await GlobalState.ServerState.dbManager.deleteAllData();
+})
+
 // Serve the frontend client
 app.get('*', (req: any, res: any) => {
   res.sendFile(join(__dirname, 'public', 'index.html'));
@@ -166,3 +177,6 @@ colyseusServer.onShutdown(() => {
 colyseusServer.listen(PORT);
 
 console.log(`Listening on ws://localhost:${PORT}`);
+
+// delete all data in db to reset
+// GlobalState.ServerState.dbManager.deleteAllData()

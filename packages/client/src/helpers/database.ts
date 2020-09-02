@@ -70,6 +70,14 @@ export async function getTournamentData(tournamentData: Database.TournamentData)
   return response.data;
 }
 
+export async function getTournamentResult(tournamentId: number): Promise<any> {
+  const params = {
+    tournamentId
+  }
+  const response = await api.get('/tournament/results', {params});
+  return response.data;
+}
+
 export async function putTournamentData(tournamentData: Database.TournamentData): Promise<any> {
   const response = await api.post('/tournament', tournamentData);
   const { result } = response.data;
@@ -198,4 +206,8 @@ export async function saveTournamentReplay(playerId: string, tournamentId: strin
   console.log(result)
   console.log('------')
   return result;
+}
+
+export async function resetData(): Promise<any> {
+  await api.delete('/deleteDBS');
 }
