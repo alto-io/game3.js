@@ -4,7 +4,7 @@ import { navigateTo } from '../helpers/utilities'
 
 export const GameJavascriptContext = createContext(
   {
-    updateSessionHighScore: (y:any, z:any) => {}
+    updateSessionHighScore: (x: any, y:any, z:any) => {}
   });
 
 export default class GameJavascript extends Component<any, any> {
@@ -13,8 +13,8 @@ export default class GameJavascript extends Component<any, any> {
     super(props);
   }
 
-  async updateSessionHighScore(sessionId: any, playerAddress: any) {
-    let updatedData = await updateSessionScore(sessionId, playerAddress);
+  async updateSessionHighScore(sessionId: any, playerAddress: any, tournamentId: any) {
+    let updatedData = await updateSessionScore(sessionId, playerAddress, tournamentId);
     console.log("Data updated with", updatedData);
 
     // navigate to home for now
