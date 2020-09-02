@@ -28,7 +28,6 @@ export default class GameResult extends React.Component<any, any> {
   componentDidMount = async () => {
     const { gameSessionId, playerAddress, tournamentId } = this.props;
     await this.getTournamentInfo();
-    await this.updateTriesUsed(gameSessionId, playerAddress); // Decerease user's remaining tries by 1
     await this.getSessionData(gameSessionId, playerAddress);
     await updateSessionScore(gameSessionId, playerAddress, tournamentId); // automatically updates highest score
   }
@@ -41,18 +40,6 @@ export default class GameResult extends React.Component<any, any> {
     if (gameSessionId !== newGameSessionId ||
       playerAddress !== newPlayerAddress) {
       this.getSessionData(newGameSessionId, newPlayerAddress)
-    }
-  }
-
-  async updateTriesUsed(gameSessionId, playerAddress) {
-    const { tourneyMaxTries } = this.state;
-    const { tournamentId } = this.props;
-
-    const currentGameNo = await getGameNo(gameSessionId, playerAddress, tournamentId);
-    console.log("GAME NUMBEEER", currentGameNo);
-
-    if (currentGameNo < tourneyMaxTries) {
-      await updateGameNo(gameSessionId, playerAddress, tournamentId)
     }
   }
 
@@ -113,48 +100,40 @@ export default class GameResult extends React.Component<any, any> {
 
     console.log('Your current game no is', gameNo);
 
+    let shouldSubmit = didWin || gameNo === tourneyMaxTries;
+    let canTryAgain = gameNo < tourneyMaxTries;
+
+    let scoreMsg = score > highScore ? `New high score!!` : `High score unbeaten`;
+    let finalScore = `Final score ${highScore}`
+
     return (
-      <GameJavascript>
-        <GameJavascriptContext.Consumer>{context => {
+      <Modal show={show} toggleModal={onToggle}>
+        <View style={{ margin: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Game {gameNo} of {tourneyMaxTries}</View>
+        <View style={{ margin: '20px', fontSize: '1.8rem' }}>{score}</View>
+        {canTryAgain ? (
+          <View style={{ margin: '20px' }}>{scoreMsg}</View>
+        ) : (
+            <View style={{ margin: '20px' }}>{finalScore}</View>
+          )}
+        {/* { (shouldSubmit) && ( */}
+        {/* <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto 1rem auto' }}> */}
+        <View style={{ margin: '20px', fontSize: '0.9rem' }}>High score is automatically submitted</View>
+        {/* </View> */}
+        {/* )} */}
 
-          let shouldSubmit = didWin || gameNo === tourneyMaxTries;
-          let canTryAgain = gameNo < tourneyMaxTries;
-
-          let scoreMsg = score > highScore ? `New high score!!` : `High score unbeaten`;
-          let finalScore = `Final score ${highScore}`
-
-          return (
-            <Modal show={show} toggleModal={onToggle}>
-              <View style={{ margin: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Game {gameNo} of {tourneyMaxTries}</View>
-              <View style={{ margin: '20px', fontSize: '1.8rem' }}>{score}</View>
-              {canTryAgain ? (
-                <View style={{ margin: '20px' }}>{scoreMsg}</View>
-              ) : (
-                <View style={{ margin: '20px' }}>{finalScore}</View>
-              )}
-              {/* { (shouldSubmit) && ( */}
-              {/* <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto 1rem auto' }}> */}
-              <View style={{ margin: '20px', fontSize: '0.9rem'}}>High score is automatically submitted</View>
-              {/* </View> */}
-              {/* )} */}
-
-              {(!didWin || canTryAgain) ? (
-                <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto' }}>
-                  <Button
-                    onClick={async () => {
-                      navigateTo('/');
-                    }}>
-                    Try Again
+        {(!didWin || canTryAgain) ? (
+          <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto' }}>
+            <Button
+              onClick={async () => {
+                navigateTo('/');
+              }}>
+              Try Again
                   </Button>
-                </View>
-              ) : (
-                <View style={{ margin: '20px', fontSize: '1.5rem', fontWeight: 'bold' }}>Thanks For Playing!</View>
-              )}
-            </Modal>
-          )
-        }}
-        </GameJavascriptContext.Consumer>
-      </GameJavascript>
+          </View>
+        ) : (
+            <View style={{ margin: '20px', fontSize: '1.5rem', fontWeight: 'bold' }}>Thanks For Playing!</View>
+          )}
+      </Modal>
     )
   }
 }

@@ -104,6 +104,15 @@ app.get('/gameSessionId', async (req: any, res: any) => {
   res.json(result);
 });
 
+app.post('/gameSessionId/create', async (req: any, res: any) => {
+  const playerAddress = req.body.playerAddress;
+  const tournamentId = req.body.tournamentId;
+
+  const result = await GlobalState.ServerState.dbManager
+    .serverCreateSessionId(playerAddress, tournamentId);
+  res.json(result);
+})
+
 app.delete('/gameSessionId/delete', async (req: any, res: any) => {
   const gameSessionId = req.query.gameSessionId
 
@@ -157,6 +166,18 @@ app.post('/gameSession/gameNo', async (req: any, res: any) => {
 
   const result = await GlobalState.ServerState.dbManager
     .updateGameNumber(sessionId, playerAddress, tournamentId);
+  
+  res.json(result);
+})
+
+app.post('/gameSession/new', async (req: any, res: any) => {
+  const playerAddress = req.body.playerAddress;
+  const tournamentId = req.body.tournamentId;
+  const timeLeft = req.body.timeLeft;
+  const players = req.body.players;
+
+  const result = await GlobalState.ServerState.dbManager
+    .makeNewGameSession(playerAddress, tournamentId, timeLeft, players);
   
   res.json(result);
 })

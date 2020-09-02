@@ -119,6 +119,16 @@ export async function getGameNo(gameSessionId, playerAddress, tournamentId): Pro
   return response.data
 }
 
+export async function createSessionId(playerAddress, tournamentId): Promise<any> {
+  const params = {
+    playerAddress,
+    tournamentId
+  }
+
+  const response = await api.post('/gameSessionId/create', { params })
+  return response.data
+}
+
 export async function getGameSessionId(playerAddress, tournamentId): Promise<any> {
   const params = {
     playerAddress,
@@ -160,13 +170,13 @@ export async function updateGameNo(sessionId, playerAddress, tournamentId) {
   return res.data;
 }
 
-export async function makeNewGameSession(playerAddress, sessionId, tournamentId, kills, timeLeft): Promise<any> {
+export async function makeNewGameSession(playerAddress, tournamentId, players, endsAt): Promise<any> {
+  let timeLeft = endsAt - Date.now()
   const params = {
     playerAddress,
-    sessionId, 
     tournamentId, 
-    kills, 
-    timeLeft
+    timeLeft, 
+    players
   }
 
   const res = await api.post('/gameSession/new', params);
