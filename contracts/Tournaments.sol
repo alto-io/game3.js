@@ -296,15 +296,6 @@ contract Tournaments is Ownable {
       tournaments[tournamentId].balance);
   }
 
-  function getMaxTries(uint tournamentId)
-    public
-    view
-    tournamentIdIsCorrect(tournamentId)
-    returns (uint)
-  {
-    return tournaments[tournamentId].triesPerBuyIn;
-  }
-
   function getResult(uint tournamentId, uint resultId)
     public
     view
@@ -351,5 +342,23 @@ contract Tournaments is Ownable {
   {
     return (tournaments[tournamentId].triesPerBuyIn * buyIn[tournamentId][player] / 
       tournaments[tournamentId].buyInAmount) - resultsPlayerMap[tournamentId][player].length;
+  }
+
+  function getBuyIn(uint tournamentId)
+    public
+    view
+    tournamentIdIsCorrect(tournamentId)
+    returns (uint) 
+  {
+    return tournaments[tournamentId].buyInAmount;
+  }
+
+  function getMaxTries(uint tournamentId)
+    public
+    view
+    tournamentIdIsCorrect(tournamentId)
+    returns (uint)
+  {
+    return tournaments[tournamentId].triesPerBuyIn;
   }
 }

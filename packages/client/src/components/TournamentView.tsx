@@ -1,7 +1,7 @@
 import React from "react";
 import { drizzleConnect } from "@drizzle/react-plugin";
 import ConnectionBanner from "@rimble/connection-banner";
-import { Box, Flex, Text, Link } from "rimble-ui";
+import { Box, Flex, Text } from "rimble-ui";
 
 import TournamentCard from '../components/TournamentCard';
 import { getTournamentContract } from '../helpers/web3';
@@ -27,7 +27,7 @@ class TournamentView extends React.Component<any, any> {
     this.state = {
       currentNetwork: null,
       address: null,
-      tournamentsCount: 0
+      tournamentsCount: 0,
     }
   }
 
@@ -102,25 +102,27 @@ class TournamentView extends React.Component<any, any> {
     }
 
     return (
-      <Box>
-        {
-          !drizzleState && (
-          <Box m={4}>
-            <ConnectionBanner
-              currentNetwork={currentNetwork}
-              requiredNetwork={RIMBLE_CONFIG.requiredNetwork}
-              onWeb3Fallback={null}
-            />
-          </Box>
-          )
-        }
-          <Box maxWidth={"1180px"} p={3} mx={"auto"}>
-            <Text my={4} />
-            <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-              { tournaments }
-            </Flex>
-          </Box>  
-      </Box>
+      <>
+        <Box>
+          {
+            !drizzleState && (
+            <Box m={4}>
+              <ConnectionBanner
+                currentNetwork={currentNetwork}
+                requiredNetwork={RIMBLE_CONFIG.requiredNetwork}
+                onWeb3Fallback={null}
+              />
+            </Box>
+            )
+          }
+            <Box maxWidth={"1180px"} p={3} mx={"auto"}>
+              <Text my={4} />
+              <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
+                { tournaments }
+              </Flex>
+            </Box>  
+        </Box>
+      </>
     );
   }
 }
