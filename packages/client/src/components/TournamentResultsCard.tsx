@@ -118,12 +118,16 @@ class TournamentResultsCard extends Component<any, any> {
     const { tournamentId, drizzle } = props
 
     // Get the latest tournament
+    try {
     const contract = drizzle.contracts.Tournaments;
 
     const tournamentLength = await contract.methods.getTournamentsCount().call();
     let tI = tournamentId ? tournamentId : tournamentLength - 1;
 
     await this.getTournamentAndLeaderBoards(tI);
+    } catch (e) {
+      
+    }
   }
 
   getStatus(tournament: any) {
