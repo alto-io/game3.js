@@ -3,6 +3,7 @@ import { drizzleConnect } from "@drizzle/react-plugin";
 import { Flex, Flash, Card, Box, Text } from "rimble-ui";
 
 import styled from "styled-components";
+import Tournament from './Tournament';
 
 const StyledFlex = styled(Flex)`
   flex-direction: column;
@@ -27,6 +28,7 @@ class PayoutEventsView extends Component<any, any> {
     this.state = {
       currentNetwork: null,
       address: null,
+      events:[],
     }
   }
 
@@ -78,18 +80,39 @@ class PayoutEventsView extends Component<any, any> {
       fromBlock: 0
     })
     .on('data', (event) => {
-      console.log(event);
+      this.addEvent(event)
+    })
+  }
+
+  addEvent = (event) => {
+    const { events } = this.state
+    events.push(event)
+    this.setState({
+      events
     })
   }
 
   render() {
-    const { account, accountValidated} = this.props;
+    const { account, accountValidated} = this.props
+    const { events } = this.state
+
+    const eventsRendered = events.map(event => 
+      <Flex key={event.id}>
+        <Box mr={2}>Amount: {event.returnValues.amount}</Box>
+        <Box mr={2}>tournamentId: {event.returnValues.tournamentId}</Box>
+        <Box mr={2}>resultId: {event.returnValues.resultId}</Box>
+      </Flex>
+    )
+
+    // event.returnValues.amount
+    // tournamentId
+    // resultId
 
     return (
       <StyledCard px={3} py={4}>
         {account && accountValidated ? (
           <>
-            <Text>PayoutEventsView</Text>
+            {eventsRendered}
           </>
         ) : (
           <Flash> You have to be logged in to view. </Flash>
