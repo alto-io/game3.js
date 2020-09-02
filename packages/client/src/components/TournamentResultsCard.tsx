@@ -8,6 +8,7 @@ import shortenAddress from "../core/utilities/shortenAddress"
 
 import { RouteComponentProps } from '@reach/router';
 import qs from 'querystringify';
+import { format } from 'date-fns'
 
 import CSS from 'csstype';
 import {baseColors, fonts, shadows, } from '../styles';
@@ -52,12 +53,13 @@ class TournamentResultsCard extends Component<any, any> {
 
     // Get tournament info
     const raw = await contract.methods.getTournament(tournamentId).call()
+    console.log("Date Value From Contract", raw['1']);
     const tournament = {
       id: tournamentId,
       name: 'My Tournament',
       timeZone: 'UTC',
       startTime: '12:00',
-      endTime: parseInt(raw['1']),
+      endTime: format(new Date(parseInt(raw['1'])),'MMM d, yyyy'),
       startDate: '8/16',
       endDate: '9/4',
       state: parseInt(raw['3']),
@@ -78,8 +80,7 @@ class TournamentResultsCard extends Component<any, any> {
       })
     }
 
-    const promises = results.map(result => getGameSession(result.sessionId, result.playerAddress))
-    const sessions = await Promise.all(promises)
+    const sessions = results.map(async result => await getGameSession(result.sessionId, result.playerAddress, tournamentId)) 
     results.forEach((result, idx) => result.sessionData = sessions[idx])
     results = results.filter(result => !!result.sessionData)
     results.sort((el1, el2) => el2.sessionData.timeLeft - el1.sessionData.timeLeft)
@@ -143,15 +144,15 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
 
-  formatTourneyInfo(tournament: any) {
+  formatTourneyTimeInfo(tournament: any) {
     const {
       startDate,
-      endDate,
+      endTime,
       startTime,
       timeZone
     } = tournament;
     let info = 
-    `${this.getStatus(tournament)} (${startDate} to ${endDate} ${startTime} ${timeZone})`;
+    `Ends on ${endTime} ${timeZone}`;
 
     return info;
   }
@@ -194,7 +195,8 @@ class TournamentResultsCard extends Component<any, any> {
       <div style={widgetStyle}>
         <div style={tournamentInfoStyle}>
           <span style={tourneyTitleStyle}>{this.formatTourneyTitle(tournament)}</span>
-          <span style={tourneyTitleInfo}>{this.formatTourneyInfo(tournament)}</span>
+          <span style={tourneyTitleInfo}>{this.formatTourneyTimeInfo(tournament)}</span>
+          <span style={tourneyTitleInfo}>Status: {this.getStatus(tournament)}</span>
         </div>  
         <div style={leaderBoardStyle}>
           <h1 style={titleHeader}>Leaderboard</h1>
@@ -273,7 +275,7 @@ const timeLeftStyle: CSS.Properties = {
 
 const tournamentInfoStyle: CSS.Properties = {
   width: '100%',
-  background: `rgb(${baseColors.orange})`,
+  background: `rgb(${baseColors.green})`,
   padding: '0.9rem',
   display: 'flex',
   flexDirection: 'column',

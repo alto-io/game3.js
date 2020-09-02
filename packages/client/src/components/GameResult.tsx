@@ -5,6 +5,7 @@ import { RouteComponentProps } from '@reach/router'
 import Modal from './Modal';
 import { View, Button } from '../components';
 import GameJavascript, { GameJavascriptContext } from '../scenes/GameJavascript';
+import { navigateTo } from '../helpers/utilities';
 
 import { 
   updateGameNo, 
@@ -94,6 +95,11 @@ export default class GameResult extends React.Component<any, any> {
     const { drizzle, tournamentId } = this.props;
     const contract = drizzle.contracts.Tournaments;
     const maxTries = await contract.methods.getMaxTries(tournamentId).call()
+    const resultCount = await contract.methods.getResultsCount(0).call()
+    const dataOne = await contract.methods.getResult(0, 0).call()
+
+    console.log("RESULT COUNTS", resultCount);
+    console.log("RESULT One", `${dataOne['2']}`);
 
     this.setState({
       tourneyMaxTries: maxTries
@@ -131,7 +137,10 @@ export default class GameResult extends React.Component<any, any> {
               {(!didWin || !isMaxTries) && (
                 <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
                   <Button 
-                  onClick={async () => await updateSessionScore(gameSessionId, playerAddress, tournamentId)}>
+                  onClick={async () => {
+                    await updateSessionScore(gameSessionId, playerAddress, tournamentId);
+                    navigateTo('/');
+                    }}>
                     Try Again
                   </Button>
                 </View>

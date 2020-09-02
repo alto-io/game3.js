@@ -60,7 +60,7 @@ export class GameState extends Schema {
 
     // Callback
     this.onMessage = onMessage;
-    
+
   }
 
   initializeMap = (mapName: string) => {
@@ -181,30 +181,33 @@ export class GameState extends Schema {
 
   saveGameSession = async () => {
     const id = this.sessionId
-    console.log("IS THE ID RIGHT?:",id);
+    console.log("IS THE ID RIGHT?:", id);
     await ServerState.dbManager.makeNewGameSession(
-      id, 
-      this.tournamentId, 
+      id,
+      this.tournamentId,
       this.game.gameEndsAt - Date.now(),
       this.players
     );
 
-   // for (const playerId in this.players) {
-     // const player: Player = this.players[playerId]
-      // const scoreData = {
-      //   kills: player.kills,
-      //   timeLeft: this.game.gameEndsAt - Date.now(),
-      //   gameNo: 0,
-      //   currentHighestNumber: 0
-      // }
+    // for (const playerId in this.players) {
+    // const player: Player = this.players[playerId]
+    // const scoreData = {
+    //   kills: player.kills,
+    //   timeLeft: this.game.gameEndsAt - Date.now(),
+    //   gameNo: 0,
+    //   currentHighestNumber: 0
+    // }
 
-     
-   // }
+
+    // }
   }
 
   // PLAYERS: single
   async playerAdd(id: string, name: string, address: string) {
     console.log("PLAYER ADD!");
+    console.log("PLAYER ADD: Id", id)
+    console.log("PLAYER ADD: Name", name)
+    console.log("PLAYER ADD: Address", address)
     const spawner = this.getSpawnerRandomly();
     const player = new Player(
       id,
@@ -216,9 +219,9 @@ export class GameState extends Schema {
       name || id,
       address
     );
-
     this.players[id] = player;
     this.sessionId = await ServerState.dbManager.serverCreateSessionId(player.address, this.tournamentId);
+
 
     // Broadcast message to other players
     this.onMessage(new Message('joined', {
