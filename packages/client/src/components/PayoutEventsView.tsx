@@ -70,23 +70,33 @@ class PayoutEventsView extends Component<any, any> {
   }
 
   fetchEvents = async () => {
+    const { drizzle, account } = this.props;
+
+    const contract = drizzle.contracts.Tournaments;
+    contract.events.PrizeTransfered({
+      filter: { player: account },
+      fromBlock: 0
+    })
+    .on('data', (event) => {
+      console.log(event);
+    })
   }
 
-    render() {
-      const { account, accountValidated, drizzle, setRoute } = this.props;
+  render() {
+    const { account, accountValidated} = this.props;
 
-      return (
-        <StyledCard px={3} py={4}>
-          {account && accountValidated ? (
-            <>
-              <Text>PayoutEventsView</Text>
-            </>
-          ) : (
-            <Flash> You have to be logged in to view. </Flash>
-          )}
-        </StyledCard>  
-      );
-      }
+    return (
+      <StyledCard px={3} py={4}>
+        {account && accountValidated ? (
+          <>
+            <Text>PayoutEventsView</Text>
+          </>
+        ) : (
+          <Flash> You have to be logged in to view. </Flash>
+        )}
+      </StyledCard>  
+    );
+  }
 
 }
 /*
