@@ -90,6 +90,7 @@ class TournamentView extends React.Component<any, any> {
     for(let i = 0; i < tournamentsCount; i++) {
       tournaments.push(
         <TournamentCard
+          key={i}
           tournamentId={i}
           address={address}
           store={store}

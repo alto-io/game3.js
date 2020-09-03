@@ -13,7 +13,7 @@ import qs from 'querystringify';
 import web3 from 'web3';
 import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
 import SmartContractControls from './SmartContractControls';
-import { getGameSession, putGameReplay } from '../helpers/database';
+import { getGameNo, getGameSessionId } from '../helpers/database';
 
 class TournamentCard extends Component<any, any> {
   constructor(props) {
@@ -25,7 +25,8 @@ class TournamentCard extends Component<any, any> {
       isOpen: false,
       isBuyinModalOpen: false,
       accountBuyIn: 0,
-      isContractOwner: false
+      isContractOwner: false,
+      gameNo: 0
     }
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -71,8 +72,7 @@ class TournamentCard extends Component<any, any> {
       canDeclareWinner: true,
       results: [],
       buyInAmount: tournamentBuyIn,
-      // triesLeft : triesLeft
-      maxTries : maxTries
+      maxTries : parseInt(maxTries)
     }
     tournament.timeIsUp = isPast(new Date(tournament.endTime))
 
@@ -102,7 +102,8 @@ class TournamentCard extends Component<any, any> {
     tournament.results = results;
 
     const buyIn = await contract.methods.buyIn(tournamentId, address).call();
-    this.setState({accountBuyIn : parseInt(buyIn)})
+    this.setState({accountBuyIn : parseInt(buyIn)});
+    this.fetchGameNo(address, tournamentId);
   }
 
   handleJoinClick = () => {
@@ -138,18 +139,23 @@ class TournamentCard extends Component<any, any> {
   }
 
   checkOwner = async () => {
-    const { drizzle, account } = this.props;
+    const { drizzle, address } = this.props;
     const contract = drizzle.contracts.Tournaments;
     const owner = await contract.methods.owner().call();
 
 
-    if (owner.toLowerCase() !== account.toLowerCase()) {
+    if (owner.toLowerCase() !== address.toLowerCase()) {
       this.setState({isContractOwner: false})
     } else {
       this.setState({isContractOwner: true})
     }
   }
 
+  fetchGameNo = async (account, tournamentId) => {
+    const gameSessionId = await getGameSessionId(account, tournamentId);
+    const gameNo = await getGameNo(gameSessionId, account, tournamentId);
+    this.setState({ gameNo : gameNo });
+  }
 
   onActivate = (tournament) => {
     this.activateTournament(tournament)
@@ -169,7 +175,7 @@ class TournamentCard extends Component<any, any> {
   }
 
   render () {
-    const { tournament, ownTournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner } = this.state
+    const { tournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner, gameNo } = this.state
     const { connectAndValidateAccount, account, accountValidated, drizzle, address } = this.props
 
     const hasTournament = !!tournament
@@ -194,13 +200,26 @@ class TournamentCard extends Component<any, any> {
     const endTimeStr = format(new Date(tournament.endTime),
       'MMM d, yyyy, HH:mm:ss')
 
-    const gameName = 'TOSIOS'
-    const gameImage = 'tosios.gif'
-    const buttonText = tournament.timeIsUp ? 'View' : 'Join'
-    const playBtnText = `Play (n out of ${tournament.maxTries})`
+    const gameName = 'TOSIOS';
+    const gameImage = 'tosios.gif';
+    const buttonText = tournament.timeIsUp ? 'View' : 'Join';
+    const playBtnText = `Play (${typeof gameNo !== "number" ? 0 : gameNo} out of ${tournament.maxTries})`;
 
     const button = () => {
-      if (accountBuyIn === 0 ) {
+      if (accountBuyIn !== 0 && account && accountValidated) {
+        return (
+          <Button
+            mt={"26px"}
+            mb={2}
+            type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
+            name={"recepient"} // set the name to the method's argument key
+            onClick={this.handleJoinClick} 
+            disabled={gameNo === tournament.maxTries ? "disabled" : ""}
+          >
+            {playBtnText}
+          </Button>
+        )
+      } else {
         if (!tournament.timeIsUp) {
           return(
             <Button
@@ -225,18 +244,6 @@ class TournamentCard extends Component<any, any> {
             {buttonText}
           </Button>)
         }
-      } else {
-        return(
-          <Button
-            mt={"26px"}
-            mb={2}
-            type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
-            name={"recepient"} // set the name to the method's argument key
-            onClick={this.handleJoinClick}
-          >
-            {playBtnText}
-          </Button>
-        )
       }
     }
 

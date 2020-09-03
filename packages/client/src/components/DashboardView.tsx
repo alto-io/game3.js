@@ -5,9 +5,11 @@ import styled from "styled-components";
 
 import { isPast } from 'date-fns';
 
+import { getGameSession } from "../helpers/database";
+import PlayerTournamentResults from "./PlayerTournamentResults";
 import PayoutEventsView from "./PayoutEventsView";
-// import PlayerGameReplays from "./PlayerGameReplays";
 import PlayerOngoingTournaments from "./PlayerOngoingTournaments";
+// import PlayerGameReplays from "./PlayerGameReplays";
 
 const StyledFlex = styled(Flex)`
   display: flex;
@@ -79,7 +81,7 @@ class DashboardView extends Component<any, any> {
   }
 
   fetchPlayerTournaments = async () => {
-    const { drizzle } = this.props;
+    const { drizzle, address } = this.props;
 
       const contract = drizzle.contracts.Tournaments;
       const tournamentsCount = await contract.methods.getTournamentsCount().call();
@@ -99,19 +101,51 @@ class DashboardView extends Component<any, any> {
           timeIsUp: false,
           canDeclareWinner: false,
           results: [],
+          buyIn : 0,
           playerAddress: ''
         }
   
         tournament.timeIsUp = isPast(new Date(tournament.endTime));
-        tournaments.push(tournament);
+  
+        const resultsCount = await contract.methods.getResultsCount(tournament.id).call()
+        let results = []
+        for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
+          const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
+          const result = ({
+            tournamentId: tournament.id,
+            resultId: resultIdx,
+            isWinner: resultDetails['0'],
+            playerAddress: resultDetails['1'].toLowerCase(),
+            sessionId: resultDetails['2'],
+            sessionData: {}
+          })
+          
+          this.fetchGameSession(result.sessionId, address, tournamentId)
+          .then( gameSession => {
+            result.sessionData = gameSession;
+          });
+          
+          results.push(result);
+        }
+
+        let playerResults = results.filter( result => result.playerAddress === address.toLowerCase());
+        tournament.results = playerResults;
+
+        const buyIn = await contract.methods.buyIn(tournamentId, address).call();
+
+        if (parseInt(buyIn) !== 0) {
+          tournaments.push(tournament);
+        }
       }
 
-      let newTournaments = tournaments.filter( tournament => tournament.playerAddress !== '');
-      
       this.setState({
-        tournaments: newTournaments
+        tournaments
       })
+  }
 
+  fetchGameSession = async (sessionId, playerAddress, tournamentId) => {
+    const gameSession = await getGameSession(sessionId, playerAddress, tournamentId);
+    return gameSession;
   }
 
     render() {
