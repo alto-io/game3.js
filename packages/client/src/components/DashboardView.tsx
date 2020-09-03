@@ -7,6 +7,7 @@ import { isPast } from 'date-fns';
 
 import { getGameSession } from "../helpers/database";
 import PlayerTournamentResults from "./PlayerTournamentResults";
+import PayoutEventsView from "./PayoutEventsView";
 import PlayerOngoingTournaments from "./PlayerOngoingTournaments";
 // import PlayerGameReplays from "./PlayerGameReplays";
 
@@ -29,7 +30,7 @@ const StyledFlex = styled(Flex)`
   }
 `
 
-class DashboardView extends Component {
+class DashboardView extends Component<any, any> {
   constructor(props) {
     super(props);
     this.state = {
@@ -148,18 +149,19 @@ class DashboardView extends Component {
   }
 
     render() {
-      const { account, accountValidated, drizzle, setRoute } = this.props;
+      const { account, accountValidated, drizzle, 
+        setRoute, store } = this.props;
       const { tournaments } = this.state;
 
       return (
         <StyledFlex>
           {account && accountValidated ? (
             <>
-            <PlayerTournamentResults 
-              drizzle={drizzle} 
-              account={account} 
-              setRoute={setRoute}
-              tournaments={tournaments}
+            <PayoutEventsView 
+              account={account}
+              accountValidated={accountValidated}
+              store={store}
+              drizzle={drizzle}
             />
 
             <PlayerOngoingTournaments 
