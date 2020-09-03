@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 import { isPast } from 'date-fns';
 
-import PlayerTournamentResults from "./PlayerTournamentResults";
+import PayoutEventsView from "./PayoutEventsView";
 // import PlayerGameReplays from "./PlayerGameReplays";
 import PlayerOngoingTournaments from "./PlayerOngoingTournaments";
 
@@ -28,7 +28,7 @@ const StyledFlex = styled(Flex)`
   }
 `
 
-class DashboardView extends Component {
+class DashboardView extends Component<any, any> {
   constructor(props) {
     super(props);
     this.state = {
@@ -79,7 +79,7 @@ class DashboardView extends Component {
   }
 
   fetchPlayerTournaments = async () => {
-    const { drizzle, account, accountValidated } = this.props;
+    const { drizzle } = this.props;
 
       const contract = drizzle.contracts.Tournaments;
       const tournamentsCount = await contract.methods.getTournamentsCount().call();
@@ -103,56 +103,7 @@ class DashboardView extends Component {
         }
   
         tournament.timeIsUp = isPast(new Date(tournament.endTime));
-  
-        const resultsCount = await contract.methods.getResultsCount(tournament.id).call()
-        let results = []
-        for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
-          const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
-          results.push({
-            tournamentId: tournament.id,
-            resultId: resultIdx,
-            isWinner: resultDetails['0'],
-            playerAdress: resultDetails['1'],
-            sessionData: resultDetails['2']
-          })
-        }
-  
-        results = 
-        [
-          {
-            tournamentId: tournament.id,
-            isWinner: false,
-            playerAddress: "0x66aB592434ad055148F20AD9fB18Bf487438943B",
-            sessionData: {
-              timeLeft: "0:55"
-            }
-          },
-          {
-            tournamentId: tournament.id,
-            isWinner: false,
-            playerAddress: "0xB83A97B94A7f26047cBDBAdf5eBe53224Eb12fEc",
-            sessionData: {
-              timeLeft: "0:50"
-            }
-          },
-          {
-            tournamentId: tournament.id,
-            isWinner: false,
-            playerAddress: "0x9DFb1d585F8C42933fF04C61959b079027Cf88bb",
-            sessionData: {
-              timeLeft: "0:30"
-            }
-          },
-        ]
-        
-        tournament.results = results.filter( result => result.playerAddress.toLowerCase() === account.toLowerCase());
-
-        if (tournament.results.length !== 0) {
-          tournament.playerAddress = tournament.results[0].playerAddress;
-        }
-
         tournaments.push(tournament);
-
       }
 
       let newTournaments = tournaments.filter( tournament => tournament.playerAddress !== '');
@@ -164,18 +115,19 @@ class DashboardView extends Component {
   }
 
     render() {
-      const { account, accountValidated, drizzle, setRoute } = this.props;
+      const { account, accountValidated, drizzle, 
+        setRoute, store } = this.props;
       const { tournaments } = this.state;
 
       return (
         <StyledFlex>
           {account && accountValidated ? (
             <>
-            <PlayerTournamentResults 
-              drizzle={drizzle} 
-              account={account} 
-              setRoute={setRoute}
-              tournaments={tournaments}
+            <PayoutEventsView 
+              account={account}
+              accountValidated={accountValidated}
+              store={store}
+              drizzle={drizzle}
             />
 
             <PlayerOngoingTournaments 

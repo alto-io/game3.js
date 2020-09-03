@@ -49,7 +49,7 @@ contract Tournaments is Ownable {
   event ResultSubmitted(uint tournamentId, address indexed player,
     uint256 indexed resultId);
   event WinnersDeclared(uint tournamentId, uint256[] resultId);
-  event PrizeTransfered(uint tournamentId, uint256 resultId, uint256 amount);
+  event PrizeTransfered(uint tournamentId, uint256 resultId, address indexed player, uint256 amount);
   event TournamentStopped(uint tournamentId);
 
   /**
@@ -236,8 +236,6 @@ contract Tournaments is Ownable {
     external
     tournamentIdIsCorrect(tournamentId)
     onlyOrganizer(tournamentId)
-    correctTournamentState(tournamentId, TournamentState.Active)
-    enoughBalanceForPrize(tournamentId)
     correctWinnersCount(tournamentId, resultIds)
   {
     require((tournaments[tournamentId].state == TournamentState.Active) || 
@@ -257,7 +255,7 @@ contract Tournaments is Ownable {
       results[tournamentId][resultIds[i]].player.transfer(amount);
       // need to keep total balance unchanged while calculating prize shares
       totalSentAmount += amount;
-      emit PrizeTransfered(tournamentId, resultIds[i], amount);
+      emit PrizeTransfered(tournamentId, resultIds[i], results[tournamentId][resultIds[i]].player, amount);
     }
     tournaments[tournamentId].balance -= totalSentAmount;
 
