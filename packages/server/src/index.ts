@@ -14,6 +14,8 @@ import * as basicAuth from "express-basic-auth";
 
 import { join } from 'path';
 
+const DemoRoom = require('./DemoRoom');
+
 const basicAuthMiddleware = basicAuth({
     // list of users and passwords
     users: {
@@ -50,6 +52,7 @@ initializeDatabase();
 
 // Game Rooms
 colyseusServer.define(Constants.ROOM_NAME, GameRoom.ShooterGameRoom);
+colyseusServer.define("demo", DemoRoom);
 
 // If you don't want people accessing your server stats, comment this line.
 app.use("/colyseus", basicAuthMiddleware, monitor());
