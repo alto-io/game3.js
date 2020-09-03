@@ -203,7 +203,7 @@ class TournamentCard extends Component<any, any> {
     const gameName = 'TOSIOS';
     const gameImage = 'tosios.gif';
     const buttonText = tournament.timeIsUp ? 'View' : 'Join';
-    const playBtnText = `Play (${gameNo === undefined ? 0 : gameNo} out of ${tournament.maxTries})`;
+    const playBtnText = `Play (${typeof gameNo !== "number" ? 0 : gameNo} out of ${tournament.maxTries})`;
 
     const button = () => {
       if (accountBuyIn !== 0 && account && accountValidated) {
