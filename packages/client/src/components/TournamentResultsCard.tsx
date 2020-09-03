@@ -236,9 +236,17 @@ class TournamentResultsCard extends Component<any, any> {
     // navigateTo(path);
   }
 
+  setResultBgColor(playerAddress, currentPlayerAddress) {
+    if (playerAddress && playerAddress.toLowerCase() === currentPlayerAddress.toLowerCase()) {
+      return baseColors.lightGrey;
+    } else {
+      return baseColors.white;
+    }
+  }
+
   render() {
     const { results, isLoading, tournament } = this.state;
-    const { tournamentId } = this.props;
+    const { tournamentId, playerAddress } = this.props;
 
     if (isLoading) {
       return (
@@ -251,7 +259,9 @@ class TournamentResultsCard extends Component<any, any> {
     let resultDivs = null
     if (results.length > 0) {
       resultDivs = results.map(result => (result.sessionData && (
-        <div style={resultDivStyle} key={result.sessionId}>
+        <div style={
+          {...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`}
+          } key={result.sessionId}>
           <span style={playerAddressStyle}>
             {shortenAddress(result.playerAddress)}
           </span>
@@ -357,7 +367,8 @@ const resultDivStyle: CSS.Properties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  margin: '0 0 1rem 0'
+  margin: '0 0 1rem 0',
+  padding: '0.3rem 0.5rem'
 }
 
 const playerAddressStyle: CSS.Properties = {
