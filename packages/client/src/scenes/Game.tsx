@@ -277,9 +277,6 @@ export default class Game extends Component<IProps, IState> {
         this.gameManager.hudLogAdd(`Game ends...`);
         await this.props.stopRecording.call();
         toast.info("Game finished!");
-        if (!playingTournament) {
-          navigate('/');
-        }
         this.setState({
           showResult: true
         })
@@ -307,9 +304,6 @@ export default class Game extends Component<IProps, IState> {
         gameJavascriptContext.playerIsDead(true);
         gameJavascriptContext.gameIsRunning(false);
         toast.info("Game finished!");
-        if (!playingTournament) {
-          navigate('/');
-        }
         break;
       case 'won':
         this.gameManager.hudLogAdd(`"${message.params.name}" wins!`);
@@ -489,7 +483,7 @@ export default class Game extends Component<IProps, IState> {
             drizzle={drizzle}
             drizzleState={drizzleState}
             contractMethodSendWrapper={contractMethodSendWrapper}
-            didWin={gameJavascriptContext.isPlayerDead}
+            didWin={!gameJavascriptContext.isPlayerDead}
           />
         )}
 

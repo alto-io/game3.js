@@ -32,14 +32,14 @@ export default class GameResult extends React.Component<any, any> {
     await updateSessionScore(gameSessionId, playerAddress, tournamentId); // automatically updates highest score
   }
 
-  componentWillReceiveProps = (newProps) => {
+  componentWillReceiveProps = async (newProps) => {
     const { gameSessionId, playerAddress } = this.props
     const { gameSessionId: newGameSessionId,
       playerAddress: newPlayerAddress } = newProps
 
     if (gameSessionId !== newGameSessionId ||
       playerAddress !== newPlayerAddress) {
-      this.getSessionData(newGameSessionId, newPlayerAddress)
+      await this.getSessionData(newGameSessionId, newPlayerAddress)
     }
   }
 
@@ -99,6 +99,7 @@ export default class GameResult extends React.Component<any, any> {
     const gameNo = (sessionData && sessionData.gameNo);
 
     console.log('Your current game no is', gameNo);
+    console.log('Do you win?', didWin);
 
     let shouldSubmit = didWin || gameNo === tourneyMaxTries;
     let canTryAgain = gameNo < tourneyMaxTries;
