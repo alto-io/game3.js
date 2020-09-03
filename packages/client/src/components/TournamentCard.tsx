@@ -333,6 +333,7 @@ class TournamentCard extends Component<any, any> {
               drizzle={drizzle}
               tournamentId={tournament.id}
               tournamentBuyInAmount={tournament.buyInAmount}
+              maxTries={tournament.maxTries}
               address={address}
             />
           </Flex>
