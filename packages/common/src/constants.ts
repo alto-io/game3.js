@@ -6,6 +6,11 @@ export const ROOM_NAME = 'game'; // Colyseus Room<T>'s name (no need to change)
 export const ROOM_REFRESH = 3000;
 export const DEBUG = false;
 
+// GAME NAMES
+export const TOSIOS = 'tosios';
+export const WOM = 'wom';
+export const FP = 'flappybird';
+
 // Game
 export const MAPS_NAMES = ['small', 'gigantic'];
 export const ROOM_PLAYERS_MIN = 1;

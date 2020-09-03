@@ -11,12 +11,13 @@ import CSS from 'csstype';
 
 import GameManager from '../managers/GameManager';
 
+import { GameJavascriptContext } from './GameJavascript';
 import { View } from '../components'
 import GameResult from '../components/GameResult'
 import TournamentResultsCard from '../components/TournamentResultsCard'
 import LeavingGamePrompt from '../components/LeavingGamePrompt';
 import GameSceneContainer from '../components/GameSceneContainer';
-import {DEFAULT_GAME_DIMENSION} from '../constants'
+import { DEFAULT_GAME_DIMENSION } from '../constants'
 
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -29,6 +30,7 @@ interface IProps extends RouteComponentProps {
   startRecording: any;
   stopRecording: any;
   contractMethodSendWrapper?: any;
+  gameJavascriptContext: any;
 }
 
 interface IState {
@@ -37,9 +39,7 @@ interface IState {
   playersCount: number;
   maxPlayersCount: number;
   showResult: boolean;
-  gameSessionId: string;
   recordFileHash: string;
-  gameOver: boolean;
   viewOnly: boolean;
 }
 
@@ -51,9 +51,7 @@ export default class Game extends Component<IProps, IState> {
     playersCount: 0,
     maxPlayersCount: 0,
     showResult: false,
-    gameSessionId: null,
     recordFileHash: null,
-    gameOver: false,
     viewOnly: false,
   };
 
@@ -74,10 +72,10 @@ export default class Game extends Component<IProps, IState> {
     );
   }
 
-  
+
   async componentDidMount() {
     await this.start();
-   }
+  }
 
   componentWillUnmount() {
     this.stop();
@@ -249,42 +247,59 @@ export default class Game extends Component<IProps, IState> {
   }
 
   handleMessage = async (type: any, message: any) => {
+    const { gameJavascriptContext } = this.props;
+    const { tournamentId } = this.state
+
     switch (message.type) {
       case 'waiting':
         this.gameManager.hudLogAdd(`Waiting for other players...`);
         this.gameManager.hudAnnounceAdd(`Waiting for other players...`);
         break;
       case 'start': // TODO: add better state management for recording and leaving rooms
-        const { tournamentId } = this.state
+
+        // set the game state to running
         const playingTournament = !!tournamentId
-        this.setState({ gameSessionId: message.params.sessionId })
-        if (this.state.gameOver)
-        {
+        if (!gameJavascriptContext.isGameRunning) {
           toast.info("Game finished!");
           if (!playingTournament) {
             navigate('/');
           }
         }
-        else 
-        {
+        else {
           this.gameManager.hudLogAdd(`Game starts!`);
           this.gameManager.hudAnnounceAdd(`Game starts!`);
           this.props.startRecording.call();
         }
         break;
       case 'stop':
+        gameJavascriptContext.gameIsRunning(false);
         this.gameManager.hudLogAdd(`Game ends...`);
-        this.setState({ gameOver: true });
         await this.props.stopRecording.call();
         this.setState({
           showResult: true
         })
         break;
+      case 'restart':
+        break;
       case 'joined':
         this.gameManager.hudLogAdd(`"${message.params.name}" joins.`);
+        console.log("PLAYER ADDRESS IN GAME", message.params.address);
+
+        const params = {
+          playerAddress: message.params.address,
+          tournamentId,
+          isDead: false,
+          isGameRunning: true,
+          players: message.params.players,
+          endsAt: message.params.endsAt
+        }
+
+        await gameJavascriptContext.initiateGame(params);
         break;
       case 'killed':
         this.gameManager.hudLogAdd(`"${message.params.killerName}" kills "${message.params.killedName}".`);
+        gameJavascriptContext.playerIsDead(true);
+        gameJavascriptContext.gameIsRunning(false);
         break;
       case 'won':
         this.gameManager.hudLogAdd(`"${message.params.name}" wins!`);
@@ -309,7 +324,7 @@ export default class Game extends Component<IProps, IState> {
 
     this.room.send("action", action);
   }
-  
+
 
   // HANDLERS: Inputs
   handleMouseDown = (event: any) => {
@@ -417,11 +432,12 @@ export default class Game extends Component<IProps, IState> {
   }
 
   onResultToggle = (show) => {
+    const { gameJavascriptContext } = this.props;
     const newShow = !show
     this.setState({
       showResult: newShow
     })
-    if (!newShow && this.state.gameOver) {
+    if (!newShow && gameJavascriptContext.isGameRunning) {
       navigate('/');
       /*
       if (!playingTournament) {
@@ -437,47 +453,48 @@ export default class Game extends Component<IProps, IState> {
 
   // RENDER
   render() {
-    const { showResult, gameSessionId, recordFileHash, 
-      tournamentId, gameOver, viewOnly } = this.state
-    const { drizzle, drizzleState, contractMethodSendWrapper } = this.props
+    const { showResult, recordFileHash,
+      tournamentId, viewOnly } = this.state
+    const { drizzle, drizzleState, contractMethodSendWrapper, gameJavascriptContext } = this.props
 
-    console.log("The Game is over?",gameOver);
+    console.log("The Session ID is", gameJavascriptContext.sessionId);
+    console.log("The Game is over?", !gameJavascriptContext.isGameRunning);
 
     return (
-        // <Flex alignItems={"center"} justifyContent={"space-between"} flexDirection={"row"}>/
-        <GameSceneContainer when={!gameOver} viewOnly={viewOnly} tournamentId={tournamentId}>
-          <Helmet>
-            <title>{`Death Match (${this.state.playersCount})`}</title>
-          </Helmet>
+      <GameSceneContainer when={gameJavascriptContext.isGameRunning} viewOnly={viewOnly} tournamentId={tournamentId}>
+        <Helmet>
+          <title>{`Death Match (${this.state.playersCount})`}</title>
+        </Helmet>
 
-          <div ref={this.gameCanvas}/>
+        <div ref={this.gameCanvas} />
 
-          { gameOver && tournamentId && (
-            <GameResult
-                show={showResult}
-                onToggle={this.onResultToggle}
-                playerAddress={drizzleState.accounts[0]}
-                gameSessionId={(gameOver && gameSessionId) || null}
-                recordFileHash={recordFileHash}
-                tournamentId={tournamentId}
-                drizzle={drizzle}
-                drizzleState={drizzleState}
-                contractMethodSendWrapper={contractMethodSendWrapper}
-              />
-          )}
+        {(gameJavascriptContext.isPlayerDead || !gameJavascriptContext.isGameRunning) && tournamentId && (
+          <GameResult
+            show={showResult}
+            onToggle={this.onResultToggle}
+            playerAddress={drizzleState.accounts[0]}
+            gameSessionId={(gameJavascriptContext.isGameRunning && gameJavascriptContext.sessionId) || null}
+            recordFileHash={recordFileHash}
+            tournamentId={tournamentId}
+            drizzle={drizzle}
+            drizzleState={drizzleState}
+            contractMethodSendWrapper={contractMethodSendWrapper}
+            didWin={gameJavascriptContext.isPlayerDead}
+          />
+        )}
 
-          {isMobile && this.renderJoySticks()}
-          { 
-              // <video id="recorded" loop></video>
-          }
-          { //tournamentId && (
-            //<TournamentResultsCard
-              //tournamentId={tournamentId}
-              //drizzle={drizzle}
-              //playerAddress={drizzleState.accounts[0]}
-            ///>
-          /*)*/}
-        </GameSceneContainer>
+        {isMobile && this.renderJoySticks()}
+        {
+          // <video id="recorded" loop></video>
+        }
+        { //tournamentId && (
+              //<TournamentResultsCard
+                //tournamentId={tournamentId}
+                //drizzle={drizzle}
+                //playerAddress={drizzleState.accounts[0]}
+              ///>
+            /*)*/}
+      </GameSceneContainer>
     );
   }
 

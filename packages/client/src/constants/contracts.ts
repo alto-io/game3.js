@@ -30,6 +30,16 @@ export const DAI_CONTRACT = {
 export const TOURNAMENT_STATE_DRAFT = 0
 export const TOURNAMENT_STATE_ACTIVE = 1
 export const TOURNAMENT_STATE_ENDED = 2
+export const TOURNAMENT_STATE_WINNERS_DECLARED = 3
+
+export const TOURNAMENT_STATES =
+[
+  "Draft",
+  "Active",
+  "Ended",
+  "Winners Declared"
+]
+
 export const TOURNAMENT_CONTRACT = {
   4: {
     address: '0x6aD65F62559a717Ab9065C2c2B6945986c206CeA',

@@ -70,6 +70,14 @@ export async function getTournamentData(tournamentData: Database.TournamentData)
   return response.data;
 }
 
+export async function getTournamentResult(tournamentId: number): Promise<any> {
+  const params = {
+    tournamentId
+  }
+  const response = await api.get('/tournament/results', {params});
+  return response.data;
+}
+
 export async function putTournamentData(tournamentData: Database.TournamentData): Promise<any> {
   const response = await api.post('/tournament', tournamentData);
   const { result } = response.data;
@@ -91,13 +99,88 @@ export async function putGameReplay(sessionId, playerAddress, fileHash): Promise
   return result;
 }
 
-export async function getGameSession(gameSessionId, playerAddress): Promise<any> {
+export async function getGameSession(gameSessionId, playerAddress, tournamentId): Promise<any> {
   const params = {
     sessionId: gameSessionId,
     playerAddress,
+    tournamentId
   }
   const response = await api.get('/gameSession', { params })
   return response.data
+}
+
+export async function getGameNo(gameSessionId, playerAddress, tournamentId): Promise<any> {
+  const params = {
+    sessionId: gameSessionId,
+    playerAddress,
+    tournamentId
+  }
+  const response = await api.get('/gameSession/gameNo', { params })
+  return response.data
+}
+
+export async function createSessionId(playerAddress, tournamentId): Promise<any> {
+  const params = {
+    playerAddress,
+    tournamentId
+  }
+
+  const response = await api.post('/gameSessionId/create', { params })
+  return response.data
+}
+
+export async function getGameSessionId(playerAddress, tournamentId): Promise<any> {
+  const params = {
+    playerAddress,
+    tournamentId
+  }
+
+  const response = await api.get('/gameSessionId', { params })
+  return response.data
+}
+
+export async function deleteGameSessionId(gameSessionId): Promise<any> {
+  const params = {
+    gameSessionId
+  }
+
+  const response = await api.delete('/gameSessionId/delete', { params })
+  return response.data
+}
+
+export async function updateSessionScore(gameSessionId, playerAddress, tournamentId): Promise<any> {
+  const params = {
+    sessionId: gameSessionId,
+    playerAddress,
+    tournamentId
+  }
+
+  const res = await api.post('/gameSession/score', params);
+  return res.data;
+}
+
+export async function updateGameNo(sessionId, playerAddress, tournamentId) {
+  const params = {
+    sessionId,
+    playerAddress,
+    tournamentId
+  }
+
+  const res = await api.post('/gameSession/gameNo', params);
+  return res.data;
+}
+
+export async function makeNewGameSession(playerAddress, tournamentId, players, endsAt): Promise<any> {
+  let timeLeft = endsAt - Date.now()
+  const params = {
+    playerAddress,
+    tournamentId, 
+    timeLeft, 
+    players
+  }
+
+  const res = await api.post('/gameSession/new', params);
+  return res.data
 }
 
 // Local Database Calls
@@ -133,4 +216,8 @@ export async function saveTournamentReplay(playerId: string, tournamentId: strin
   console.log(result)
   console.log('------')
   return result;
+}
+
+export async function resetData(): Promise<any> {
+  await api.delete('/deleteDBS');
 }

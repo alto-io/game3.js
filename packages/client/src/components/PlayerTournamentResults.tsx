@@ -3,6 +3,8 @@ import { Card, Heading, Flex, Box, Button, Text } from "rimble-ui";
 import RainbowImage from "./RainbowImage";
 import styled from "styled-components";
 
+import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
+
 const StyledFlex = styled(Flex)`
   flex-direction: column;
 
@@ -23,6 +25,13 @@ const StyledCard = styled(Card)`
   }
 `
 
+const StyledButton = styled(Button)`
+  font-family: 'Apercu Light';
+  font-size: 0.75rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+`
+
 class PlayerTournamentResults extends Component {
 
   render() {
@@ -30,24 +39,37 @@ class PlayerTournamentResults extends Component {
     const gameImage = 'tosios.gif';
     const { tournaments, setRoute } = this.props;
 
-    const tournamentResults = tournaments.map( tournament => {
+    const winningResult = (tournament) => {
+      const result = tournament.results.find( result => result.isWinner === true);
+      return(
+        <>
+          <Heading as={"h3"}>You have won {tournament.prize} ETH</Heading>
+          <Text> Your Score: {result.sessionData.currentHighestNumber}</Text>
+          <StyledButton mt={3}>Claim Now</StyledButton>
+        </>
+      )
+    }
+
+    const tournamentResultsCard = tournaments.map( tournament => {
+      const results = tournament.results.map( result => {
+        return(
+          <Text key={result.resultId}>Result: {result.resultId} Your Score: {result.sessionData.currentHighestNumber}</Text>
+        )
+      })
+
       return (
-      <StyledFlex mb={"5"} key={tournament.id}>
+      <StyledFlex mb={"5"} key={tournament.id} alignItems={"center"}>
         <RainbowImage src={"images/" + gameImage}/>
         <Box ml={3}>
-          <Heading as={"h4"}>{gameName} - Tournament {tournament.id}</Heading>
+          <Heading as={"h4"} m={0}>{gameName} - Tournament {tournament.id}</Heading>
           {tournament.results.find( result => result.isWinner === true) !== undefined ? (
-            <>
-              <Heading as={"h3"}>You have won {tournament.prize} ETH</Heading>
-              <Text> Your Score: { tournament.results[0].sessionData.timeLeft }</Text>
-              <Button>Claim Now</Button>
-            </>
-          ) : (
+            winningResult(tournament)
+          ) : 
             <>
               <Heading as={"h3"}>You'll win next time</Heading>
-              <Text> Your Score: { tournament.results[0].sessionData.timeLeft } </Text>
-            </>
-          )}
+              <StyledButton>View Results</StyledButton>
+            </> 
+          }
         </Box>
       </StyledFlex>
       )})
@@ -56,18 +78,8 @@ class PlayerTournamentResults extends Component {
       <StyledCard>
         <Heading as={"h2"} mb={"3"}>Your Tournament Results</Heading>
         {tournaments.length === 0 ? (
-          <Flex mt={3} justfyContent={"center"} flexDirection={"column"} alignItems={"center"}>
-            <Heading as={"h3"}>You haven't joined any tournaments.</Heading>
-            <Button 
-              alignSelf={"center"} 
-              mt={3}
-              onClick={e => {
-                e.preventDefault();
-                setRoute("TournamentView");
-              }}
-              >Join a Tournament</Button>
-          </Flex>
-        ) : tournamentResults}
+          <NoTournamentsJoinedCard setRoute={setRoute}/>
+        ) : tournamentResultsCard}
         
       </StyledCard>
     )

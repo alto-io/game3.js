@@ -14,6 +14,7 @@ import TournamentResultsCard from '../components/TournamentResultsCard';
 import OutplayGameNavigation from '../components/OutplayGameNavigation';
 
 import CSS from 'csstype';
+import GameJavascript, { GameJavascriptContext } from './GameJavascript';
 
 
 declare global {
@@ -27,48 +28,48 @@ interface IProps extends RouteComponentProps {
   drizzleState: any;
   contractMethodSendWrapper: any;
 }
-  
-  interface IState {
-    stateVar: any,
-    tournamentId?: any
-  }
 
-  const INITIAL_STATE: IState = {
-    stateVar: { value: "someValue"},
-    tournamentId: 'demo'
-  };
-  
+interface IState {
+  stateVar: any,
+  tournamentId?: any
+}
+
+const INITIAL_STATE: IState = {
+  stateVar: { value: "someValue" },
+  tournamentId: 'demo'
+};
+
 // external functions
 function functionExample(someVar) {
-    
+
 }
 
 export default class GameContainer extends Component<IProps, IState> {
-    
-    private mediaRecorder: any;
-    private recordedBlobs: any;
-    private canvas: any;
-    private stream: any;
 
-    constructor(props: any) {
-      super(props);
+  private mediaRecorder: any;
+  private recordedBlobs: any;
+  private canvas: any;
+  private stream: any;
 
-      let params = qs.parse(window.location.search);
-      const { tournamentId } = params;
+  constructor(props: any) {
+    super(props);
 
-      this.state = {
-          ...INITIAL_STATE,
-          tournamentId: tournamentId
-      };
+    let params = qs.parse(window.location.search);
+    const { tournamentId } = params;
 
-      this.startRecording = this.startRecording.bind(this);
-      this.stopRecording = this.stopRecording.bind(this);
+    this.state = {
+      ...INITIAL_STATE,
+      tournamentId: tournamentId
+    };
+
+    this.startRecording = this.startRecording.bind(this);
+    this.stopRecording = this.stopRecording.bind(this);
   }
 
   // HANDLERS: Gameplay Recorder
   startRecording = async (params) => {
     this.canvas = document.querySelector('canvas');
-  
+
     if (this.canvas) {
       this.stream = this.canvas.captureStream(); // frames per second
       console.log('Started stream capture from canvas element: ', this.stream);
@@ -78,45 +79,45 @@ export default class GameContainer extends Component<IProps, IState> {
 
     let options: any = { mimeType: 'video/webm' };
     try {
-        this.mediaRecorder = new window.MediaRecorder(this.stream, options);
+      this.mediaRecorder = new window.MediaRecorder(this.stream, options);
     } catch (e0) {
-        console.log('Unable to create MediaRecorder with options Object: ', e0);
+      console.log('Unable to create MediaRecorder with options Object: ', e0);
+      try {
+        options = { mimeType: 'video/webm,codecs=vp9' };
+        this.mediaRecorder = new window.MediaRecorder(this.stream, options);
+      } catch (e1) {
+        console.log('Unable to create MediaRecorder with options Object: ', e1);
         try {
-            options = { mimeType: 'video/webm,codecs=vp9' };
-            this.mediaRecorder = new window.MediaRecorder(this.stream, options);
-        } catch (e1) {
-            console.log('Unable to create MediaRecorder with options Object: ', e1);
-            try {
-                options = 'video/vp8'; // Chrome 47
-                this.mediaRecorder = new window.MediaRecorder(this.stream, options);
-            } catch (e2) {
-                alert('MediaRecorder is not supported by this browser.\n\n' +
-                    'Try Firefox 29 or later, or Chrome 47 or later, ' +
-                    'with Enable experimental Web Platform features enabled from chrome://flags.');
-                console.error('Exception while creating MediaRecorder:', e2);
-                return;
-            }
+          options = 'video/vp8'; // Chrome 47
+          this.mediaRecorder = new window.MediaRecorder(this.stream, options);
+        } catch (e2) {
+          alert('MediaRecorder is not supported by this browser.\n\n' +
+            'Try Firefox 29 or later, or Chrome 47 or later, ' +
+            'with Enable experimental Web Platform features enabled from chrome://flags.');
+          console.error('Exception while creating MediaRecorder:', e2);
+          return;
         }
+      }
     }
     console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
 
     this.mediaRecorder.onstop = (event) => {
-        // console.log('Recorder stopped: ', event);
-        // const superBuffer = new Blob(this.recordedBlobs, { type: 'video/webm' });
-        // this.video.src = window.URL.createObjectURL(superBuffer);
+      // console.log('Recorder stopped: ', event);
+      // const superBuffer = new Blob(this.recordedBlobs, { type: 'video/webm' });
+      // this.video.src = window.URL.createObjectURL(superBuffer);
     }
 
     this.mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-            this.recordedBlobs.push(event.data);
-        }
+      if (event.data && event.data.size > 0) {
+        this.recordedBlobs.push(event.data);
+      }
     }
 
     this.mediaRecorder.start(100); // collect 100ms of data
     // console.log('MediaRecorder started', this.mediaRecorder);
   }
 
-  
+
   stopRecording = async () => {
     this.mediaRecorder.stop();
 
@@ -130,7 +131,7 @@ export default class GameContainer extends Component<IProps, IState> {
 
     const replayDate = new Date();
     const filename = "replay_" + playerId + "_" + replayDate.valueOf() + ".webm";
-    const options = {type:'video/webm'};
+    const options = { type: 'video/webm' };
 
     const file = new File(this.recordedBlobs, filename, options);
 
@@ -149,57 +150,66 @@ export default class GameContainer extends Component<IProps, IState> {
       //const result = await putTournamentResult(tournamentId, resultId, fileHash);
       //console.log(result)
     }
-  }    
-    // METHODS
-    // updateSomething = () => {
+  }
+  // METHODS
+  // updateSomething = () => {
 
-    // }
+  // }
 
-    // RENDER
-    render() {
-      const { drizzle, drizzleState, contractMethodSendWrapper, address } = this.props
-      const { tournamentId } = this.state;
+  // RENDER
+  render() {
+    const { drizzle, drizzleState, contractMethodSendWrapper, address } = this.props
+    const { tournamentId } = this.state;
 
-      return (
-        <>
+    return (
+      <>
         <OutplayGameNavigation />
-        <GameScene 
-          drizzle={drizzle}
-          tournamentId={tournamentId}
-          playerAddress={address}
-         >
-          <Router>
-            <Game
-              path=":roomId"
-              startRecording={this.startRecording}
-              stopRecording={this.stopRecording}
-              drizzle={drizzle}
-              drizzleState={drizzleState}
-              contractMethodSendWrapper={contractMethodSendWrapper}
-            />
+        <GameJavascript>
+          <GameJavascriptContext.Consumer>{context => {
 
-            <GameUnity
-              path="wom"
-              startRecording={this.startRecording}
-              stopRecording={this.stopRecording}
-              drizzle={drizzle}
-              drizzleState={drizzleState}
-              contractMethodSendWrapper={contractMethodSendWrapper}
-              tournamentId={tournamentId}
-            />
+            return (
+              <GameScene
+                drizzle={drizzle}
+                tournamentId={tournamentId}
+                playerAddress={address}
+              >
+                <Router>
+                  <Game
+                    path=":roomId"
+                    startRecording={this.startRecording}
+                    stopRecording={this.stopRecording}
+                    drizzle={drizzle}
+                    drizzleState={drizzleState}
+                    contractMethodSendWrapper={contractMethodSendWrapper}
+                    gameJavascriptContext={context}
+                  />
 
-            <GameUnity
-              path="flappybird"
-              startRecording={this.startRecording}
-              stopRecording={this.stopRecording}
-              drizzle={drizzle}
-              drizzleState={drizzleState}
-              contractMethodSendWrapper={contractMethodSendWrapper}
-              tournamentId={tournamentId}
-            />
-          </Router>
-        </GameScene>
-        </>
-      );
-    }
+                  <GameUnity
+                    path="wom"
+                    startRecording={this.startRecording}
+                    stopRecording={this.stopRecording}
+                    drizzle={drizzle}
+                    drizzleState={drizzleState}
+                    contractMethodSendWrapper={contractMethodSendWrapper}
+                    tournamentId={tournamentId}
+                  />
+
+                  <GameUnity
+                    path="flappybird"
+                    startRecording={this.startRecording}
+                    stopRecording={this.stopRecording}
+                    drizzle={drizzle}
+                    drizzleState={drizzleState}
+                    contractMethodSendWrapper={contractMethodSendWrapper}
+                    tournamentId={tournamentId}
+                  />
+                </Router>
+              </GameScene>
+            )
+          }}
+          </GameJavascriptContext.Consumer>
+        </GameJavascript>
+      </>
+    );
+  }
 }

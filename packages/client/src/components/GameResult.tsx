@@ -2,10 +2,18 @@ import * as React from 'react'
 
 import { RouteComponentProps } from '@reach/router'
 
-import Modal from './Modal'
-import { View, Button } from '../components'
+import Modal from './Modal';
+import { View, Button } from '../components';
+import GameJavascript, { GameJavascriptContext } from '../scenes/GameJavascript';
+import { navigateTo } from '../helpers/utilities';
 
-import { getGameSession, putGameReplay } from '../helpers/database'
+import {
+  updateGameNo,
+  getGameNo,
+  getGameSession,
+  putGameReplay,
+  updateSessionScore
+} from '../helpers/database'
 
 export default class GameResult extends React.Component<any, any> {
   constructor(props) {
@@ -13,33 +21,42 @@ export default class GameResult extends React.Component<any, any> {
 
     this.state = {
       sessionData: null,
+      tourneyMaxTries: 0
     }
   }
 
-  componentDidMount = () => {
-    const { gameSessionId, playerAddress } = this.props
-    this.updateScore(gameSessionId, playerAddress)
+  componentDidMount = async () => {
+    const { gameSessionId, playerAddress, tournamentId } = this.props;
+    await this.getTournamentInfo();
+    await this.getSessionData(gameSessionId, playerAddress);
+    await updateSessionScore(gameSessionId, playerAddress, tournamentId); // automatically updates highest score
   }
 
   componentWillReceiveProps = (newProps) => {
     const { gameSessionId, playerAddress } = this.props
-    const { gameSessionId: newGameSessionId, 
+    const { gameSessionId: newGameSessionId,
       playerAddress: newPlayerAddress } = newProps
 
     if (gameSessionId !== newGameSessionId ||
       playerAddress !== newPlayerAddress) {
-      this.updateScore(newGameSessionId, newPlayerAddress)
+      this.getSessionData(newGameSessionId, newPlayerAddress)
     }
   }
 
-  updateScore = async (gameSessionId, playerAddress) => {
+  getSessionData = async (gameSessionId, playerAddress) => {
+    const { tournamentId } = this.props;
     if (!gameSessionId || !playerAddress) {
       return
     }
-    const sessionData = await getGameSession(gameSessionId, playerAddress)
+    const sessionData = await getGameSession(gameSessionId, playerAddress, tournamentId)
+    console.log("Session Data", sessionData);
     this.setState({
       sessionData
     })
+  }
+
+  async saveGameSession() {
+
   }
 
   submitResult = async () => {
@@ -49,28 +66,73 @@ export default class GameResult extends React.Component<any, any> {
     const result = await putGameReplay(gameSessionId, playerAddress, recordFileHash)
     console.log(result)
 
-    contractMethodSendWrapper(
-      "submitResult", // name
-      [tournamentId, gameSessionId], //contract parameters
-      {from: playerAddress}, // send parameters
-      (txStatus, transaction) => { // callback
-        console.log("submitResult callback: ", txStatus, transaction);
-      })
-    onToggle(true)
+    try {
+      contractMethodSendWrapper(
+        "submitResult", // name
+        [tournamentId, gameSessionId], //contract parameters
+        { from: playerAddress }, // send parameters
+        (txStatus, transaction) => { // callback
+          console.log("submitResult callback: ", txStatus, transaction);
+        })
+      onToggle(true)
+    } catch (err) {
+      console.log('errrrrroooorrr');
+    }
   }
 
-  render () {
-    const { show, onToggle } = this.props
-    const { sessionData } = this.state
+  async getTournamentInfo() {
+    const { drizzle, tournamentId } = this.props;
+    const contract = drizzle.contracts.Tournaments;
+    const maxTries = await contract.methods.getMaxTries(tournamentId).call()
 
-    const score = (sessionData && sessionData.timeLeft) || ''
+    this.setState({
+      tourneyMaxTries: maxTries
+    })
+  }
+
+  render() {
+    const { show, onToggle, didWin, gameSessionId, playerAddress, tournamentId } = this.props
+    const { sessionData, tourneyMaxTries } = this.state
+
+    const score = (sessionData && sessionData.timeLeft);
+    const highScore = (sessionData && sessionData.currentHighestNumber);
+    const gameNo = (sessionData && sessionData.gameNo);
+
+    console.log('Your current game no is', gameNo);
+
+    let shouldSubmit = didWin || gameNo === tourneyMaxTries;
+    let canTryAgain = gameNo < tourneyMaxTries;
+
+    let scoreMsg = score > highScore ? `New high score!!` : `High score unbeaten`;
+    let finalScore = `Final score ${highScore}`
 
     return (
       <Modal show={show} toggleModal={onToggle}>
-        <View style={{ margin: '20px' }}>Game result: {score}</View>
-        <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto'}}>
-          <Button onClick={this.submitResult}>Submit score</Button>
-        </View>
+        <View style={{ margin: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Game {gameNo} of {tourneyMaxTries}</View>
+        <View style={{ margin: '20px', fontSize: '1.8rem' }}>{score}</View>
+        {canTryAgain ? (
+          <View style={{ margin: '20px' }}>{scoreMsg}</View>
+        ) : (
+            <View style={{ margin: '20px' }}>{finalScore}</View>
+          )}
+        {/* { (shouldSubmit) && ( */}
+        {/* <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto 1rem auto' }}> */}
+        <View style={{ margin: '20px', fontSize: '0.9rem' }}>High score is automatically submitted</View>
+        {/* </View> */}
+        {/* )} */}
+
+        {(!didWin || canTryAgain) ? (
+          <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto' }}>
+            <Button
+              onClick={async () => {
+                navigateTo('/');
+              }}>
+              Try Again
+                  </Button>
+          </View>
+        ) : (
+            <View style={{ margin: '20px', fontSize: '1.5rem', fontWeight: 'bold' }}>Thanks For Playing!</View>
+          )}
       </Modal>
     )
   }
