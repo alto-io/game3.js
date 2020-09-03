@@ -1,18 +1,26 @@
 import React, { Component } from 'react'
 import { drizzleConnect } from "@drizzle/react-plugin"
+import { navigate } from '@reach/router';
 
-import { format, isPast } from 'date-fns'
 import { Card, Button, Flex, Box, Text } from "rimble-ui";
 import RainbowBox from "./RainbowBox";
 import RainbowImage from "./RainbowImage";
 import JoinPromptModal from "./JoinPromptModal";
 import BuyinPromptModal from './BuyInPromptModal';
-import { navigate } from '@reach/router';
-import qs from 'querystringify';
+import styled from 'styled-components';
 
+import { format, isPast } from 'date-fns'
+import qs from 'querystringify';
 import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
 import { getGameNo, getGameSessionId } from '../helpers/database';
 import { GAME_DETAILS } from '../constants';
+
+const StyledButton = styled(Button)`
+  font-family: 'Apercu Light';
+  font-size: 0.75rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+`
 
 class TournamentCard extends Component<any, any> {
   constructor(props) {
@@ -230,7 +238,7 @@ class TournamentCard extends Component<any, any> {
     const button = () => {
       if (accountBuyIn !== 0 && account && accountValidated) {
         return (
-          <Button
+          <StyledButton
             mt={"26px"}
             mb={2}
             type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
@@ -239,12 +247,12 @@ class TournamentCard extends Component<any, any> {
             disabled={gameNo === tournament.maxTries ? "disabled" : ""}
           >
             {playBtnText}
-          </Button>
+          </StyledButton>
         )
       } else {
         if (!tournament.timeIsUp) {
           return(
-            <Button
+            <StyledButton
               mt={"26px"}
               mb={2}
               type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
@@ -252,11 +260,11 @@ class TournamentCard extends Component<any, any> {
               onClick={account && accountValidated ? this.handleOpenBuyinModal : this.handleOpenModal}
             >
               {buttonText}
-              </Button>
+            </StyledButton>
           )
         } else {
           return(
-          <Button
+          <StyledButton
             mt={"26px"}
             mb={2}
             type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
@@ -264,7 +272,7 @@ class TournamentCard extends Component<any, any> {
             onClick={this.handleJoinClick}
           >
             {buttonText}
-          </Button>)
+          </StyledButton>)
         }
       }
     }
