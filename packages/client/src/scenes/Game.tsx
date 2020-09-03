@@ -258,11 +258,9 @@ export default class Game extends Component<IProps, IState> {
         this.gameManager.hudAnnounceAdd(`Waiting for other players...`);
         break;
       case 'start': // TODO: add better state management for recording and leaving rooms
-
-        const playingTournament = !!tournamentId
         if (!gameJavascriptContext.isGameRunning) {
           toast.info("Game finished!");
-          if (!playingTournament) {
+          if (tournamentId === undefined) {
             navigate('/');
           }
         }
@@ -276,10 +274,15 @@ export default class Game extends Component<IProps, IState> {
         gameJavascriptContext.gameIsRunning(false);
         this.gameManager.hudLogAdd(`Game ends...`);
         await this.props.stopRecording.call();
+        this.stop();
+        if (tournamentId === undefined) {
+          navigate('/');
+        }
         toast.info("Game finished!");
         this.setState({
           showResult: true
         })
+        gameJavascriptContext.updateSessionHighScore()
         break;
       case 'restart':
         break;
@@ -301,9 +304,17 @@ export default class Game extends Component<IProps, IState> {
         break;
       case 'killed':
         this.gameManager.hudLogAdd(`"${message.params.killerName}" kills "${message.params.killedName}".`);
-        gameJavascriptContext.playerIsDead(true);
         gameJavascriptContext.gameIsRunning(false);
+        gameJavascriptContext.playerIsDead(true);
+        this.stop();
+        this.setState({
+          showResult: true
+        })
+        if (tournamentId === undefined) {
+          navigate('/');
+        }
         toast.info("Game finished!");
+        gameJavascriptContext.updateSessionHighScore()
         break;
       case 'won':
         this.gameManager.hudLogAdd(`"${message.params.name}" wins!`);

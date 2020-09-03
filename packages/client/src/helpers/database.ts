@@ -151,8 +151,10 @@ export async function deleteGameSessionId(gameSessionId): Promise<any> {
   return response.data
 }
 
-export async function updateSessionScore(gameSessionId, playerAddress, tournamentId): Promise<any> {
+export async function updateSessionScore(didWin, gameSessionId, playerAddress, tournamentId): Promise<any> {
+  
   const params = {
+    didWin,
     sessionId: gameSessionId,
     playerAddress,
     tournamentId
@@ -174,7 +176,7 @@ export async function updateGameNo(sessionId, playerAddress, tournamentId) {
 }
 
 export async function makeNewGameSession(sessionId, tournamentId, players, endsAt): Promise<any> {
-  let timeLeft = endsAt - Date.now()
+  let timeLeft = endsAt - Date.now();
   const params = {
     sessionId,
     tournamentId, 

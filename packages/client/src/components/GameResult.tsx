@@ -26,10 +26,9 @@ export default class GameResult extends React.Component<any, any> {
   }
 
   componentDidMount = async () => {
-    const { gameSessionId, playerAddress, tournamentId } = this.props;
+    const { gameSessionId, playerAddress, tournamentId, didWin } = this.props;
     await this.getTournamentInfo();
     await this.getSessionData(gameSessionId, playerAddress);
-    await updateSessionScore(gameSessionId, playerAddress, tournamentId); // automatically updates highest score
   }
 
   componentWillReceiveProps = async (newProps) => {
@@ -39,7 +38,7 @@ export default class GameResult extends React.Component<any, any> {
 
     if (gameSessionId !== newGameSessionId ||
       playerAddress !== newPlayerAddress) {
-      await this.getSessionData(newGameSessionId, newPlayerAddress)
+        await this.getSessionData(newGameSessionId, newPlayerAddress)
     }
   }
 
@@ -94,17 +93,17 @@ export default class GameResult extends React.Component<any, any> {
     const { show, onToggle, didWin, gameSessionId, playerAddress, tournamentId } = this.props
     const { sessionData, tourneyMaxTries } = this.state
 
-    const score = (sessionData && sessionData.timeLeft);
+    const score = didWin ? (sessionData && sessionData.timeLeft) : 0;
     const highScore = (sessionData && sessionData.currentHighestNumber);
     const gameNo = (sessionData && sessionData.gameNo);
 
     console.log('Your current game no is', gameNo);
     console.log('Do you win?', didWin);
-
+    
     let shouldSubmit = didWin || gameNo === tourneyMaxTries;
     let canTryAgain = gameNo < tourneyMaxTries;
 
-    let scoreMsg = score > highScore ? `New high score!!` : `High score unbeaten`;
+    let scoreMsg = score > highScore ? `New high score!!` : ``;
     let finalScore = `Final score ${highScore}`
 
     return (
@@ -122,7 +121,7 @@ export default class GameResult extends React.Component<any, any> {
         {/* </View> */}
         {/* )} */}
 
-        {(!didWin || canTryAgain) ? (
+        {((!didWin && canTryAgain) || canTryAgain) ? (
           <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto' }}>
             <Button
               onClick={async () => {

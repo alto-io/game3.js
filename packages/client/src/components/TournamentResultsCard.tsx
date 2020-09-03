@@ -253,7 +253,7 @@ class TournamentResultsCard extends Component<any, any> {
       resultDivs = results.map(result => (result.sessionData && (
         <div style={resultDivStyle} key={result.sessionId}>
           <span style={playerAddressStyle}>
-            {result.sessionData.name}
+            {shortenAddress(result.playerAddress)}
           </span>
           <span style={timeLeftStyle}>
             {result.sessionData.currentHighestNumber}

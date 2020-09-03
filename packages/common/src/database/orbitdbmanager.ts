@@ -251,7 +251,7 @@ export class OrbitDBManager implements DBManager {
     return { result: sessionId }
   }
 
-  async serverUpdateScore(sessionId, playerAddress, tournamentId) {
+  async serverUpdateScore(didWin, sessionId, playerAddress, tournamentId) {
     if (tournamentId !== undefined) {
       console.log("UPDATE_SCORE: Function Invoked...");
 
@@ -271,22 +271,31 @@ export class OrbitDBManager implements DBManager {
 
         console.log("UPDATE_SCORE: Current High Score", playerData.currentHighestNumber);
         console.log("UPDATE_SCORE: Current Score", playerData.timeLeft);
+        console.log("UPDATE_SCORE: Did win?", didWin);
 
-        if (playerData.timeLeft > playerData.currentHighestNumber) {
-          playerData.currentHighestNumber = playerData.timeLeft;
-          console.log("UPDATE_SCORE: Thew new data", playerData);
-          data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
-          await this.gameSessions.put(data[0]);
-          console.log("UPDATE_SCORE: Updated!");
-          console.log("UPDATE_SCORE: Returning...");
-          return { result: playerData }
+        let playerScore = 0; 
+
+        if (!didWin) {
+          console.log("UPDATE_SCORE: Player did not win");
+          console.log("UPDATE_SCORE: Player score reverts to 0");
         } else {
-          console.log("UPDATE_SCORE: Current score is lower than highscore, no need to update!");
-          console.log("UPDATE_SCORE: Returning...");
-          return { result: playerData }
+          console.log("UPDATE_SCORE: Player did win");
+          playerScore = playerData.timeLeft;
+          
+          if (playerData.timeLeft > playerData.currentHighestNumber) {
+            playerData.currentHighestNumber = playerData.timeLeft;
+            console.log("UPDATE_SCORE: Thew new data", playerData);
+            data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+            await this.gameSessions.put(data[0]);
+            console.log("UPDATE_SCORE: Updated!");
+            console.log("UPDATE_SCORE: Returning...");
+            return { result: playerData }
+          } else {
+            console.log("UPDATE_SCORE: Current score is lower than highscore, no need to update!");
+            console.log("UPDATE_SCORE: Returning...");
+            return { result: playerData }
+          }
         }
-
-
       } else {
         console.log("UPDATE_SCORE: No Data...");
         console.log("UPDATE_SCORE: Returning...");

@@ -2,17 +2,7 @@ import React, {Component, createContext} from 'react';
 import {updateSessionScore, updateGameNo, createSessionId, makeNewGameSession} from '../helpers/database';
 import { navigateTo } from '../helpers/utilities'
 
-export const GameJavascriptContext = createContext(
-  {
-    updateSessionHighScore: (x: any, y:any, z:any) => {},
-    updateGameNumber: (x: any, y:any, z:any) => {},
-    isPlayerDead: '',
-    isGameRunning: '',
-    sessionId: '0',
-    playerIsDead: (x:boolean) => {},
-    gameIsRunning: (x:boolean) => {},
-    initiateGame: (x:any) => {}
-  });
+export const GameJavascriptContext = createContext({});
 
 export default class GameJavascript extends Component<any, any> {
 
@@ -22,20 +12,22 @@ export default class GameJavascript extends Component<any, any> {
     this.state = {
       isPlayerDead: false,
       isGameRunning: true,
-      sessionId: '0'
+      sessionId: '0',
+      playerAddress: '',
+      tournamentId: ''
     }
     this.playerIsDead = this.playerIsDead.bind(this);
     this.gameIsRunning = this.gameIsRunning.bind(this);
     this.setSessionId = this.setSessionId.bind(this);
     this.initiateGame = this.initiateGame.bind(this);
+    this.updateSessionHighScore = this.updateSessionHighScore.bind(this);
   }
 
-  async updateSessionHighScore(sessionId: any, playerAddress: any, tournamentId: any) {
-    let updatedData = await updateSessionScore(sessionId, playerAddress, tournamentId);
-    console.log("Data updated with", updatedData);
+  async updateSessionHighScore() {
+    const { isPlayerDead, sessionId, playerAddress, tournamentId} = this.state;
 
-    // navigate to home for now
-    navigateTo('/');
+    let updatedData = await updateSessionScore(!isPlayerDead, sessionId, playerAddress, tournamentId);
+    console.log("Data updated with", updatedData);
   }
 
   async updateGameNumber(sessionId: any, playerAddress: any, tournamentId: any) {
@@ -70,6 +62,12 @@ export default class GameJavascript extends Component<any, any> {
   async initiateGame(params: any) {
     console.log("GAME JAVASCRIPT: Initiate Game")
     const { playerAddress, tournamentId, isDead, isGameRunning, players, endsAt} = params;
+    
+    this.setState({
+      playerAddress,
+      tournamentId
+    })
+
     console.log("GAME JAVASCRIPT: Playeraddress", playerAddress)
     console.log("GAME JAVASCRIPT: Tourney ID", tournamentId)
     await this.setSessionId(playerAddress, tournamentId);
@@ -84,11 +82,9 @@ export default class GameJavascript extends Component<any, any> {
     return (
       <GameJavascriptContext.Provider value={
         {
+          ...this.state,
           updateSessionHighScore: this.updateSessionHighScore,
           updateGameNumber: this.updateGameNumber,
-          isPlayerDead: this.state.isPlayerDead,
-          isGameRunning: this.state.isGameRunning,
-          sessionId: this.state.sessionId,
           playerIsDead: this.playerIsDead,
           gameIsRunning: this.gameIsRunning,
           initiateGame: this.initiateGame
