@@ -125,7 +125,10 @@ export async function createSessionId(playerAddress, tournamentId): Promise<any>
     tournamentId
   }
 
-  const response = await api.post('/gameSessionId/create', { params })
+  console.log("DATABASE: player_add", playerAddress)
+  console.log("DATABASE: tournamentId", tournamentId)
+
+  const response = await api.post('/gameSessionId/create', params)
   return response.data
 }
 
@@ -170,10 +173,10 @@ export async function updateGameNo(sessionId, playerAddress, tournamentId) {
   return res.data;
 }
 
-export async function makeNewGameSession(playerAddress, tournamentId, players, endsAt): Promise<any> {
+export async function makeNewGameSession(sessionId, tournamentId, players, endsAt): Promise<any> {
   let timeLeft = endsAt - Date.now()
   const params = {
-    playerAddress,
+    sessionId,
     tournamentId, 
     timeLeft, 
     players

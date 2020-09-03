@@ -310,6 +310,7 @@ export class OrbitDBManager implements DBManager {
       if (data.length > 0) {
         let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
         console.log("UPDATE_GNUMBER: Updating...");
+        console.log("UPDATE_GNUMBER: Playerdata", playerData);
         playerData.gameNo += 1;
         data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
         await this.gameSessions.put(data[0]);
@@ -361,6 +362,9 @@ export class OrbitDBManager implements DBManager {
             currentHighestNumber: 0
           }
 
+          console.log("NEW: Player address", player.address)
+          console.log("NEW: Player", player)
+
           sessionData.playerData[player.address.toLowerCase()] = playerData;
         }
 
@@ -381,10 +385,11 @@ export class OrbitDBManager implements DBManager {
 
         for (const playerId in players) {
           const player = players[playerId]
-
+          console.log("NEW: Before", data[0].sessionData.playerData[player.address.toLowerCase()])
           data[0].sessionData.playerData[player.address.toLowerCase()].name = player.name;
           data[0].sessionData.playerData[player.address.toLowerCase()].kills = player.kills;
           data[0].sessionData.playerData[player.address.toLowerCase()].timeLeft = timeLeft;
+          console.log("NEW: After", data[0].sessionData.playerData[player.address.toLowerCase()])
         }
         await this.gameSessions.put(data[0]);
         console.log("NEW: Updated!");
@@ -459,6 +464,7 @@ export class OrbitDBManager implements DBManager {
   }
 
   async serverCreateSessionId(playerAddress, tournamentId) {
+    console.log("SID: Tournament ID", tournamentId);
     if (tournamentId !== undefined) {
       console.log("CREATE_SID: Initializing...")
       console.log(`CREATE_SID: Params playerAddress: ${playerAddress}, tournamentId: ${tournamentId}`)
@@ -467,7 +473,7 @@ export class OrbitDBManager implements DBManager {
         sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId === tournamentId)
       if (data.length > 0) {
         console.log("SID: DATA FOUND!", data);
-        console.log("SID: Returning...");
+        console.log("SID: Returning...", data[0].id);
         return data[0].id;
       } else {
         console.log("SID: DATA NOT FOUND!", data);

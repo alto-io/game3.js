@@ -111,18 +111,21 @@ class TournamentResultsCard extends Component<any, any> {
     // Get tournament results
     // const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
     let sessionsData = await getTournamentResult(tournamentId);
+    console.log("PLAYER ADD: sessionsData", sessionsData);
+
     if (sessionsData.length > 0) {
       for (let resultIdx = 0; resultIdx < (sessionsData.length > 10 ? 10 : sessionsData.length); resultIdx++) {
         let playerAddress = Object.keys(sessionsData[resultIdx].sessionData.playerData)[0];
-        console.log("PLAYER ADD:", playerAddress);
-        results.push({
-          name: sessionsData[resultIdx].sessionData.playerData[playerAddress].name,
-          tournamentId: tournamentId,
-          timeIsUp: false,
-          playerAddress,
-          sessionId: sessionsData[resultIdx].id,
-          sessionData: sessionsData[resultIdx].sessionData.playerData[playerAddress]
-        })
+        console.log("PLAYER ADD: address", playerAddress);
+
+        // results.push({
+        //   name: sessionsData[resultIdx].sessionData.playerData[playerAddress].name,
+        //   tournamentId: tournamentId,
+        //   timeIsUp: false,
+        //   playerAddress,
+        //   sessionId: sessionsData[resultIdx].id,
+        //   sessionData: sessionsData[resultIdx].sessionData.playerData[playerAddress]
+        // })
       }
       // let sessions = [];
       // results.forEach(result => {

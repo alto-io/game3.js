@@ -5,7 +5,7 @@ import { navigateTo } from '../helpers/utilities'
 export const GameJavascriptContext = createContext(
   {
     updateSessionHighScore: (x: any, y:any, z:any) => {},
-    updateGameNo: (x: any, y:any, z:any) => {},
+    updateGameNumber: (x: any, y:any, z:any) => {},
     isPlayerDead: '',
     isGameRunning: '',
     sessionId: '0',
@@ -38,7 +38,7 @@ export default class GameJavascript extends Component<any, any> {
     navigateTo('/');
   }
 
-  async updateGameNo(sessionId: any, playerAddress: any, tournamentId: any) {
+  async updateGameNumber(sessionId: any, playerAddress: any, tournamentId: any) {
     console.log("GAME JAVASCRIPT: UpdateGameNumber")
     await updateGameNo(sessionId, playerAddress, tournamentId);
   }
@@ -59,6 +59,8 @@ export default class GameJavascript extends Component<any, any> {
 
   async setSessionId(playerAddress, tournamentId) {
     console.log("GAME JAVASCRIPT: setSessionId")
+    console.log("GAME JAVASCRIPT-setSessionId: Player_add", playerAddress)
+    console.log("GAME JAVASCRIPT-setSessionId: tournamentId", tournamentId)
     let sessionId = await createSessionId(playerAddress, tournamentId);
     this.setState({
       sessionId
@@ -68,9 +70,12 @@ export default class GameJavascript extends Component<any, any> {
   async initiateGame(params: any) {
     console.log("GAME JAVASCRIPT: Initiate Game")
     const { playerAddress, tournamentId, isDead, isGameRunning, players, endsAt} = params;
+    console.log("GAME JAVASCRIPT: Playeraddress", playerAddress)
+    console.log("GAME JAVASCRIPT: Tourney ID", tournamentId)
     await this.setSessionId(playerAddress, tournamentId);
-    await makeNewGameSession(playerAddress, tournamentId, players, endsAt)
-    await this.updateGameNo(this.state.sessionId, playerAddress, tournamentId);
+    console.log("GAME JAVASCRIPT: Session ID", this.state.sessionId)
+    await makeNewGameSession(this.state.sessionId, tournamentId, players, endsAt)
+    await this.updateGameNumber(this.state.sessionId, playerAddress, tournamentId);
     this.gameIsRunning(isGameRunning);
     this.playerIsDead(isDead);
   }
@@ -80,7 +85,7 @@ export default class GameJavascript extends Component<any, any> {
       <GameJavascriptContext.Provider value={
         {
           updateSessionHighScore: this.updateSessionHighScore,
-          updateGameNo: this.updateGameNo,
+          updateGameNumber: this.updateGameNumber,
           isPlayerDead: this.state.isPlayerDead,
           isGameRunning: this.state.isGameRunning,
           sessionId: this.state.sessionId,

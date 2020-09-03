@@ -31,9 +31,11 @@ export class Player extends Circle {
   @type('number')
   public rotation: number;
 
+  @type('string')
+  public address: string;
+  
   // This property is needed to limit shooting rate
   public lastShootAt: number;
-  public address: string;
 
   // Init
   constructor(

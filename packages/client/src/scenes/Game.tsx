@@ -250,6 +250,8 @@ export default class Game extends Component<IProps, IState> {
     const { gameJavascriptContext } = this.props;
     const { tournamentId } = this.state
 
+    console.log("TOURNAMENT ID", tournamentId)
+
     switch (message.type) {
       case 'waiting':
         this.gameManager.hudLogAdd(`Waiting for other players...`);
@@ -257,7 +259,6 @@ export default class Game extends Component<IProps, IState> {
         break;
       case 'start': // TODO: add better state management for recording and leaving rooms
 
-        // set the game state to running
         const playingTournament = !!tournamentId
         if (!gameJavascriptContext.isGameRunning) {
           toast.info("Game finished!");
@@ -275,6 +276,10 @@ export default class Game extends Component<IProps, IState> {
         gameJavascriptContext.gameIsRunning(false);
         this.gameManager.hudLogAdd(`Game ends...`);
         await this.props.stopRecording.call();
+        toast.info("Game finished!");
+        if (!playingTournament) {
+          navigate('/');
+        }
         this.setState({
           showResult: true
         })
@@ -284,14 +289,15 @@ export default class Game extends Component<IProps, IState> {
       case 'joined':
         this.gameManager.hudLogAdd(`"${message.params.name}" joins.`);
         console.log("PLAYER ADDRESS IN GAME", message.params.address);
-
+        console.log("TOURNEY ID", tournamentId);
+        console.log("PLAYERS ARRAY", message.params.players);
         const params = {
           playerAddress: message.params.address,
           tournamentId,
           isDead: false,
           isGameRunning: true,
           players: message.params.players,
-          endsAt: message.params.endsAt
+          endsAt: message.params.endTimeScore
         }
 
         await gameJavascriptContext.initiateGame(params);
@@ -300,6 +306,10 @@ export default class Game extends Component<IProps, IState> {
         this.gameManager.hudLogAdd(`"${message.params.killerName}" kills "${message.params.killedName}".`);
         gameJavascriptContext.playerIsDead(true);
         gameJavascriptContext.gameIsRunning(false);
+        toast.info("Game finished!");
+        if (!playingTournament) {
+          navigate('/');
+        }
         break;
       case 'won':
         this.gameManager.hudLogAdd(`"${message.params.name}" wins!`);
@@ -473,7 +483,7 @@ export default class Game extends Component<IProps, IState> {
             show={showResult}
             onToggle={this.onResultToggle}
             playerAddress={drizzleState.accounts[0]}
-            gameSessionId={(gameJavascriptContext.isGameRunning && gameJavascriptContext.sessionId) || null}
+            gameSessionId={(!gameJavascriptContext.isGameRunning && gameJavascriptContext.sessionId) || null}
             recordFileHash={recordFileHash}
             tournamentId={tournamentId}
             drizzle={drizzle}
