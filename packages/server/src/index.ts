@@ -83,6 +83,13 @@ app.get('/tournament', async (req: any, res: any) => {
   res.json(result);
 });
 
+app.get('/tournament/results', async (req: any, res: any) => {
+  const tournamentId = req.query.tournamentId;
+
+  const result = await GlobalState.ServerState.dbManager.getTournamentResult(tournamentId);
+  res.json(result);
+})
+
 app.post('/gameReplay', async (req: any, res: any) => {
   const result = await GlobalState.ServerState.dbManager.serverPutGameReplay(req.body);
   res.json(result);
@@ -96,6 +103,15 @@ app.get('/gameSessionId', async (req: any, res: any) => {
     .getGameSessionId(playerAddress, tournamentId);
   res.json(result);
 });
+
+app.post('/gameSessionId/create', async (req: any, res: any) => {
+  const playerAddress = req.body.playerAddress;
+  const tournamentId = req.body.tournamentId;
+
+  const result = await GlobalState.ServerState.dbManager
+    .serverCreateSessionId(playerAddress, tournamentId);
+  res.json(result);
+})
 
 app.delete('/gameSessionId/delete', async (req: any, res: any) => {
   const gameSessionId = req.query.gameSessionId
@@ -154,6 +170,22 @@ app.post('/gameSession/gameNo', async (req: any, res: any) => {
   res.json(result);
 })
 
+app.post('/gameSession/new', async (req: any, res: any) => {
+  const playerAddress = req.body.playerAddress;
+  const tournamentId = req.body.tournamentId;
+  const timeLeft = req.body.timeLeft;
+  const players = req.body.players;
+
+  const result = await GlobalState.ServerState.dbManager
+    .makeNewGameSession(playerAddress, tournamentId, timeLeft, players);
+  
+  res.json(result);
+})
+
+app.delete('/deleteDBS', async (req: any, res: any) => {
+  await GlobalState.ServerState.dbManager.deleteAllData();
+})
+
 // Serve the frontend client
 app.get('*', (req: any, res: any) => {
   res.sendFile(join(__dirname, 'public', 'index.html'));
@@ -166,3 +198,6 @@ colyseusServer.onShutdown(() => {
 colyseusServer.listen(PORT);
 
 console.log(`Listening on ws://localhost:${PORT}`);
+
+// delete all data in db to reset
+// GlobalState.ServerState.dbManager.deleteAllData()

@@ -285,13 +285,14 @@ contract Tournaments is Ownable {
     public
     view
     tournamentIdIsCorrect(tournamentId)
-    returns (address, uint, uint, uint, uint)
+    returns (address, uint, uint, uint, uint, string memory)
   {
     return (tournaments[tournamentId].organizer,
       tournaments[tournamentId].endTime,
       tournaments[tournamentId].prize,
       uint(tournaments[tournamentId].state),
-      tournaments[tournamentId].balance);
+      tournaments[tournamentId].balance,
+      tournaments[tournamentId].data);
   }
 
   function getResult(uint tournamentId, uint resultId)

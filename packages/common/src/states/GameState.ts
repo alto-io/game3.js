@@ -28,7 +28,6 @@ export class GameState extends Schema {
   private spawners: Geometry.RectangleBody[] = [];
   private actions: Types.IAction[] = [];
   private onMessage: (message: Message) => void;
-  private sessionId: string;
   private tournamentId: string;
 
   // INIT
@@ -53,14 +52,13 @@ export class GameState extends Schema {
     });
 
     this.tournamentId = tournamentId;
-    this.sessionId = "0";
 
     // Map
     this.initializeMap(mapName);
 
     // Callback
     this.onMessage = onMessage;
-    
+
   }
 
   initializeMap = (mapName: string) => {
@@ -156,7 +154,7 @@ export class GameState extends Schema {
     this.setPlayersActive(false);
   }
 
-  private handleGameStart = () => {
+  private handleGameStart = async () => {
     if (this.game.mode === 'team deathmatch') {
       this.setPlayersTeamsRandomly();
     }
@@ -165,7 +163,8 @@ export class GameState extends Schema {
     this.setPlayersActive(true);
     this.propsAdd(Constants.FLASKS_COUNT);
     this.monstersAdd(Constants.MONSTERS_COUNT);
-    this.onMessage(new Message('start', { sessionId: this.sessionId }));
+    console.log("START");
+    this.onMessage(new Message('start'));
   }
 
   private handleGameEnd = async (message?: Message) => {
@@ -175,36 +174,15 @@ export class GameState extends Schema {
 
     this.propsClear();
     this.monstersClear();
-    await this.saveGameSession();
-    this.onMessage(new Message('stop', { sessionId: this.sessionId }));
-  }
-
-  saveGameSession = async () => {
-    const id = this.sessionId
-    console.log("IS THE ID RIGHT?:",id);
-    await ServerState.dbManager.makeNewGameSession(
-      id, 
-      this.tournamentId, 
-      this.game.gameEndsAt - Date.now(),
-      this.players
-    );
-
-   // for (const playerId in this.players) {
-     // const player: Player = this.players[playerId]
-      // const scoreData = {
-      //   kills: player.kills,
-      //   timeLeft: this.game.gameEndsAt - Date.now(),
-      //   gameNo: 0,
-      //   currentHighestNumber: 0
-      // }
-
-     
-   // }
+    this.onMessage(new Message('stop'));
   }
 
   // PLAYERS: single
   async playerAdd(id: string, name: string, address: string) {
     console.log("PLAYER ADD!");
+    console.log("PLAYER ADD: Id", id)
+    console.log("PLAYER ADD: Name", name)
+    console.log("PLAYER ADD: Address", address)
     const spawner = this.getSpawnerRandomly();
     const player = new Player(
       id,
@@ -218,11 +196,14 @@ export class GameState extends Schema {
     );
 
     this.players[id] = player;
-    this.sessionId = await ServerState.dbManager.serverCreateSessionId(player.address, this.tournamentId);
 
     // Broadcast message to other players
+    console.log("JOINED");
     this.onMessage(new Message('joined', {
       name: this.players[id].name,
+      address: this.players[id].address,
+      players: this.players,
+      endsAt: this.game.gameEndsAt
     }));
   }
 
