@@ -1,18 +1,11 @@
 import React, { Component } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
-import { Flex, Flash, Card, Box, Text } from "rimble-ui";
-
+import { Box, Card, Heading, Image, Text } from "rimble-ui";
 import styled from "styled-components";
-import Tournament from './Tournament';
 
-const StyledFlex = styled(Flex)`
-  flex-direction: column;
+import { GAME_DETAILS } from '../constants';
 
-  @media screen and (min-width: 768px) {
-    flex-direction: row;
-  }
-`
-const StyledCard = styled(Card)`
+const PlayerTournamentResultsCard = styled(Card)`
   padding: 1rem 0.5rem;
   margin: 1rem;
   
@@ -20,6 +13,22 @@ const StyledCard = styled(Card)`
     padding: 2rem 1rem;
     margin: 0 1rem;
   }
+`
+const EventsCard = styled(Card)`
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column;
+  box-shadow: none;
+
+  @media screen and (min-width: 720px) {
+    flex-direction: row;
+  }
+`
+
+const GameImage = styled(Image)`
+  width: 270px;
+  height: 170px;
 `
 
 class PayoutEventsView extends Component<any, any> {
@@ -29,6 +38,7 @@ class PayoutEventsView extends Component<any, any> {
       currentNetwork: null,
       address: null,
       events:[],
+      tournamentEvents: []
     }
   }
 
@@ -80,7 +90,30 @@ class PayoutEventsView extends Component<any, any> {
       fromBlock: 0
     })
     .on('data', (event) => {
-      this.addEvent(event)
+      this.fetchTournamentDetails(event.tournamentId)
+      .then( tournamentDetails => {
+        this.addEvent({
+          ...event,
+          ...tournamentDetails
+        })
+      })
+      // this.addEvent(event)
+    })
+
+    // Mock Data
+    let sampleEvent = {
+      id: 0,
+      amount: 2,
+      tournamentId: 0,
+      resultId: 1,
+    }
+
+    this.fetchTournamentDetails(sampleEvent.tournamentId)
+    .then( tournamentDetails => {
+      this.addEvent({
+        ...sampleEvent, 
+        ...tournamentDetails
+      });
     })
   }
 
@@ -92,32 +125,55 @@ class PayoutEventsView extends Component<any, any> {
     })
   }
 
+  fetchTournamentDetails = async (tournamentId) => {
+    const { drizzle, parseData } = this.props;
+
+    const contract = drizzle.contracts.Tournaments;
+    const tournamentDetails = await contract.methods.getTournament(tournamentId).call();
+    const data = parseData(tournamentDetails['5']);
+    const gameDetails = GAME_DETAILS.find( game => game.name.toLowerCase() === data[0].toLowerCase());
+  
+    const tournament = {
+      gameName: gameDetails.name,
+      gameStage: data[1],
+      gameImage: gameDetails.image
+    }
+
+    return tournament;
+  }
+  
   render() {
-    const { account, accountValidated} = this.props
+    const { account, accountValidated, tournaments} = this.props
     const { events } = this.state
 
-    const eventsRendered = events.map(event => 
-      <Flex key={event.id}>
-        <Box mr={2}>Amount: {event.returnValues.amount}</Box>
-        <Box mr={2}>tournamentId: {event.returnValues.tournamentId}</Box>
-        <Box mr={2}>resultId: {event.returnValues.resultId}</Box>
-      </Flex>
-    )
+    // const eventsRendered = events.map(event => 
+    //   <Flex key={event.id}>
+    //     <Box mr={2}>Amount: {event.returnValues.amount}</Box>
+    //     <Box mr={2}>tournamentId: {event.returnValues.tournamentId}</Box>
+    //     <Box mr={2}>resultId: {event.returnValues.resultId}</Box>
+    //   </Flex>
+    // )
 
     // event.returnValues.amount
     // tournamentId
     // resultId
+  
+    const eventsRendered = events.map( event => 
+      <EventsCard key={event.id}>
+        <GameImage src={"images/" + event.gameImage} />
+        <Box ml={3}>
+          <Text m={0}>Tournament {event.tournamentId}</Text>
+          <Heading as={"h5"} mb={2}>{event.gameName} {event.gameStage !== undefined ? "- " + event.gameStage : ""}</Heading>
+          <Heading as={"h3"} mb={3}>You have won {event.amount}</Heading>
+        </Box>
+      </EventsCard>
+    );
 
     return (
-      <StyledCard px={3} py={4}>
-        {account && accountValidated ? (
-          <>
-            {eventsRendered}
-          </>
-        ) : (
-          <Flash> You have to be logged in to view. </Flash>
-        )}
-      </StyledCard>  
+      <PlayerTournamentResultsCard>
+        <Heading as={"h2"} mb={3}>Your Tournament Results</Heading>
+        {events.length !== 0 ? eventsRendered : ""}
+      </PlayerTournamentResultsCard>  
     );
   }
 
