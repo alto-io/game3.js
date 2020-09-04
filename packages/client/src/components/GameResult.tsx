@@ -111,7 +111,7 @@ export default class GameResult extends React.Component<any, any> {
         <View style={{ margin: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Game {gameNo} of {tourneyMaxTries}</View>
         <View style={{ margin: '20px', fontSize: '1.8rem' }}>{score}</View>
         {canTryAgain ? (
-          <View style={{ margin: '20px' }}>{scoreMsg}</View>
+          <View style={{ margin: '20px', fontSize: '1.5rem' }}>{scoreMsg}</View>
         ) : (
             <View style={{ margin: '20px' }}>{finalScore}</View>
           )}

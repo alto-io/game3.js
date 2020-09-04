@@ -195,6 +195,33 @@ app.delete('/deleteDBS', async (req: any, res: any) => {
   await GlobalState.ServerState.dbManager.deleteAllData();
 })
 
+app.post('/tournament/new', async (req: any, res: any) => {
+  const tournamentId = req.body.tournamentId;
+
+  const result = await GlobalState.ServerState.dbManager
+    .newTournament(tournamentId);
+  
+  res.json(result)
+})
+
+app.get('/tournaments', async (req: any, res: any) => {
+
+  const result = await GlobalState.ServerState.dbManager
+    .getTournaments();
+  
+  res.json(result)
+})
+
+app.get('/tourney', async (req: any, res: any) => {
+
+  const tournamentId = req.query.tournamentId;
+
+  console.log("TOURNAMENT ID", tournamentId);
+  const result = await GlobalState.ServerState.dbManager.getTournament(tournamentId);
+  
+  res.json(result)
+})
+
 // Serve the frontend client
 app.get('*', (req: any, res: any) => {
   res.sendFile(join(__dirname, 'public', 'index.html'));

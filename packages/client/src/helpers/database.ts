@@ -226,3 +226,24 @@ export async function saveTournamentReplay(playerId: string, tournamentId: strin
 export async function resetData(): Promise<any> {
   await api.delete('/deleteDBS');
 }
+
+export async function newTournament(tournamentId):Promise<any> {
+  const params = { tournamentId }
+  const result = await api.post('/tournament/new', params)
+  return result.data; 
+}
+
+export async function getTournaments():Promise<any> {
+
+  const result = await api.get('/tournaments')
+  return result.data; 
+}
+
+export async function getTournament(tournamentId):Promise<any> {
+  const params = { tournamentId }
+
+  console.log("GET TOURNAMENT CALLED", tournamentId);
+  const result = await api.get('/tourney', {params});
+  console.log("GET TOURNAMENT FETCHED", result);
+  return result.data; 
+}
