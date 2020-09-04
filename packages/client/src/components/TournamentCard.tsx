@@ -1,19 +1,27 @@
 import React, { Component } from 'react'
 import { drizzleConnect } from "@drizzle/react-plugin"
+import { navigate } from '@reach/router';
 
-import { format, isPast } from 'date-fns'
-import { Card, Button, Flex, Box, Text, Flash } from "rimble-ui";
+import { Card, Button, Flex, Box, Text } from "rimble-ui";
 import RainbowBox from "./RainbowBox";
 import RainbowImage from "./RainbowImage";
 import JoinPromptModal from "./JoinPromptModal";
 import BuyinPromptModal from './BuyInPromptModal';
-import { navigate } from '@reach/router';
-import qs from 'querystringify';
+import styled from 'styled-components';
 
-import web3 from 'web3';
+import { format, isPast } from 'date-fns'
+import qs from 'querystringify';
 import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
-import SmartContractControls from './SmartContractControls';
 import { getGameNo, getGameSessionId } from '../helpers/database';
+// import { GAME_DETAILS } from '../constants';
+import { Constants } from "@game3js/common";
+
+const StyledButton = styled(Button)`
+  font-family: 'Apercu Light';
+  font-size: 0.75rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+`
 
 class TournamentCard extends Component<any, any> {
   constructor(props) {
@@ -26,7 +34,11 @@ class TournamentCard extends Component<any, any> {
       isBuyinModalOpen: false,
       accountBuyIn: 0,
       isContractOwner: false,
-      gameNo: 0
+      gameNo: 0,
+      gameDetails: {
+        name: '',
+        image: ''
+      },
     }
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -59,8 +71,9 @@ class TournamentCard extends Component<any, any> {
     const contract = drizzle.contracts.Tournaments;
     const raw = await contract.methods.getTournament(tournamentId).call();
     const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
-    const triesLeft = await contract.methods.getTriesLeft(tournamentId, this.props.address).call();
     const maxTries = await contract.methods.getMaxTries(tournamentId).call();
+    const data = this.parseData(raw['5']);
+
     const tournament = {
       id: tournamentId,
       organizer: raw['0'],
@@ -68,23 +81,16 @@ class TournamentCard extends Component<any, any> {
       prize: raw['2'],
       state: parseInt(raw['3']),
       balance: raw['4'],
+      gameName: data[0],
+      gameStage: data[1],
       timeIsUp: false,
       canDeclareWinner: true,
       results: [],
       buyInAmount: tournamentBuyIn,
       maxTries : parseInt(maxTries)
     }
+
     tournament.timeIsUp = isPast(new Date(tournament.endTime))
-
-    let ownTournament = false
-    if (address) {
-      ownTournament = tournament.organizer.toLowerCase() === address.toLowerCase()
-    }
-
-    this.setState({
-      tournament,
-      ownTournament
-    })
 
     let results = [];
     const resultsCount = await contract.methods.getResultsCount(tournamentId).call();
@@ -104,6 +110,19 @@ class TournamentCard extends Component<any, any> {
     const buyIn = await contract.methods.buyIn(tournamentId, address).call();
     this.setState({accountBuyIn : parseInt(buyIn)});
     this.fetchGameNo(address, tournamentId);
+
+    let ownTournament = false
+    if (address) {
+      ownTournament = tournament.organizer.toLowerCase() === address.toLowerCase()
+    }
+
+    this.getGameDetails(tournament.gameName);
+
+    this.setState({
+      tournament,
+      ownTournament
+    })
+
   }
 
   handleJoinClick = () => {
@@ -158,6 +177,34 @@ class TournamentCard extends Component<any, any> {
     this.setState({ gameNo : gameNo });
   }
 
+  parseData(data) {
+    console.log("The data is", data)
+    return data.split(' ').join('').split(",");
+  }
+
+  getGameDetails = (gameName) => {
+    switch (gameName) {
+      case 'wom':
+        this.setState({
+          gameName: 'World of Mines',
+          gameImage: Constants.WOM_IMG
+        });
+        break;
+      case 'tosios':
+        this.setState({
+          gameName: 'TOSIOS',
+          gameImage: Constants.TOSIOS_IMG
+        });
+        break;
+      case 'fp':
+        this.setState({
+          gameName: 'Flappy Bird Open-Source',
+          gameImage: Constants.FP_IMG
+        });
+      break; 
+    }
+  }
+
   onActivate = (tournament) => {
     this.activateTournament(tournament)
   }
@@ -176,7 +223,7 @@ class TournamentCard extends Component<any, any> {
   }
 
   render () {
-    const { tournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner, gameNo } = this.state
+    const { tournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner, gameNo, gameName, gameImage } = this.state
     const { connectAndValidateAccount, account, accountValidated, drizzle, address } = this.props
 
     const hasTournament = !!tournament
@@ -201,15 +248,13 @@ class TournamentCard extends Component<any, any> {
     const endTimeStr = format(new Date(tournament.endTime),
       'MMM d, yyyy, HH:mm:ss')
 
-    const gameName = 'TOSIOS';
-    const gameImage = 'tosios.gif';
     const buttonText = tournament.timeIsUp ? 'View' : 'Join';
     const playBtnText = `Play (${typeof gameNo !== "number" ? 0 : gameNo} out of ${tournament.maxTries})`;
 
     const button = () => {
       if (accountBuyIn !== 0 && account && accountValidated) {
         return (
-          <Button
+          <StyledButton
             mt={"26px"}
             mb={2}
             type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
@@ -218,12 +263,12 @@ class TournamentCard extends Component<any, any> {
             disabled={gameNo === tournament.maxTries ? "disabled" : ""}
           >
             {playBtnText}
-          </Button>
+          </StyledButton>
         )
       } else {
         if (!tournament.timeIsUp) {
           return(
-            <Button
+            <StyledButton
               mt={"26px"}
               mb={2}
               type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
@@ -231,11 +276,11 @@ class TournamentCard extends Component<any, any> {
               onClick={account && accountValidated ? this.handleOpenBuyinModal : this.handleOpenModal}
             >
               {buttonText}
-              </Button>
+            </StyledButton>
           )
         } else {
           return(
-          <Button
+          <StyledButton
             mt={"26px"}
             mb={2}
             type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
@@ -243,7 +288,7 @@ class TournamentCard extends Component<any, any> {
             onClick={this.handleJoinClick}
           >
             {buttonText}
-          </Button>)
+          </StyledButton>)
         }
       }
     }
@@ -271,7 +316,7 @@ class TournamentCard extends Component<any, any> {
 
             <Flex justifyContent={"center"} mt={3} mb={4}>
               <Text fontWeight={600} lineHeight={"1em"}>
-                {gameName}
+                {gameName} {tournament.gameStage !== undefined ? "- " + tournament.gameStage : ""}
               </Text>
             </Flex>
             <Flex justifyContent={"center"} mt={1} mb={2}>

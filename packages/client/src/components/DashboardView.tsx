@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { isPast } from 'date-fns';
 
 import { getGameSession } from "../helpers/database";
-import PlayerTournamentResults from "./PlayerTournamentResults";
+import { GAME_DETAILS } from '../constants';
 import PayoutEventsView from "./PayoutEventsView";
 import PlayerOngoingTournaments from "./PlayerOngoingTournaments";
 // import PlayerGameReplays from "./PlayerGameReplays";
@@ -80,6 +80,11 @@ class DashboardView extends Component<any, any> {
     }
   }
 
+  parseData = (data) => {
+    console.log("The data is", data)
+    return data.split(' ').join('').split(",");
+  }
+
   fetchPlayerTournaments = async () => {
     const { drizzle, address } = this.props;
 
@@ -90,7 +95,9 @@ class DashboardView extends Component<any, any> {
   
       for (let tournamentId = 0; tournamentId < tournamentsCount; tournamentId++) {
         const tournamentDetails = await contract.methods.getTournament(tournamentId).call()
-        
+        const data = this.parseData(tournamentDetails['5']);
+        const gameDetails = GAME_DETAILS.find( game => game.name.toLowerCase() === data[0].toLowerCase() );
+
         const tournament = {
           id: tournamentId,
           organizer: tournamentDetails['0'],
@@ -98,17 +105,18 @@ class DashboardView extends Component<any, any> {
           prize: tournamentDetails['2'],
           state: parseInt(tournamentDetails['3']),
           balance: tournamentDetails['4'],
+          gameName: gameDetails.name,
+          gameStage: data[1],
+          gameImage: gameDetails.image,
           timeIsUp: false,
           canDeclareWinner: false,
-          results: [],
-          buyIn : 0,
-          playerAddress: ''
+          results: []
         }
   
         tournament.timeIsUp = isPast(new Date(tournament.endTime));
   
-        const resultsCount = await contract.methods.getResultsCount(tournament.id).call()
         let results = []
+        const resultsCount = await contract.methods.getResultsCount(tournament.id).call()
         for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
           const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
           const result = ({
@@ -162,6 +170,8 @@ class DashboardView extends Component<any, any> {
               accountValidated={accountValidated}
               store={store}
               drizzle={drizzle}
+              tournaments={tournaments}
+              parseData={this.parseData}
             />
 
             <PlayerOngoingTournaments 
