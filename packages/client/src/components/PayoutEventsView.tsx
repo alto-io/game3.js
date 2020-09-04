@@ -42,7 +42,7 @@ const EventsCard = styled(Card)`
     margin: 0
   }
   
-  @media screen and (min-width: 720px) {
+  @media screen and (min-width: 768px) {
     justify-content: space-between;
     align-items: center;
     flex-direction: row;
@@ -197,7 +197,7 @@ class PayoutEventsView extends Component<any, any> {
         <Box>
           <p className="tournamentID">Tournament {event.returnValues.tournamentId}</p>
           <h6 className="gameName">{event.gameName} {event.gameStage !== undefined ? "- " + event.gameStage : ""}</h6>
-          <h3 className="prize" mb={3}>You have won {event.returnValues.amount} ETH</h3>
+          <h3 className="prize" mb={"3"}>You have won {event.returnValues.amount} ETH</h3>
         </Box>
       </EventsCard>
     );
