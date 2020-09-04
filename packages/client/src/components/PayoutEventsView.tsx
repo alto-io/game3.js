@@ -122,7 +122,7 @@ class PayoutEventsView extends Component<any, any> {
       fromBlock: 0
     })
     .on('data', (event) => {
-      this.fetchTournamentDetails(event.tournamentId)
+      this.fetchTournamentDetails(event.returnValues.tournamentId)
       .then( tournamentDetails => {
         this.addEvent({
           ...event,
@@ -132,21 +132,21 @@ class PayoutEventsView extends Component<any, any> {
       // this.addEvent(event)
     })
 
-    // Mock Data
-    let sampleEvent = {
-      id: 0,
-      amount: 2,
-      tournamentId: 0,
-      resultId: 1,
-    }
+    // // Mock Data
+    // let sampleEvent = {
+    //   id: 0,
+    //   amount: 2,
+    //   tournamentId: 0,
+    //   resultId: 1,
+    // }
 
-    this.fetchTournamentDetails(sampleEvent.tournamentId)
-    .then( tournamentDetails => {
-      this.addEvent({
-        ...sampleEvent, 
-        ...tournamentDetails
-      });
-    })
+    // this.fetchTournamentDetails(sampleEvent.tournamentId)
+    // .then( tournamentDetails => {
+    //   this.addEvent({
+    //     ...sampleEvent, 
+    //     ...tournamentDetails
+    //   });
+    // })
   }
 
   addEvent = (event) => {
@@ -194,9 +194,9 @@ class PayoutEventsView extends Component<any, any> {
       <EventsCard key={event.id}>
         <GameImage src={"images/" + event.gameImage} />
         <Box>
-          <p className="tournamentID">Tournament {event.tournamentId}</p>
+          <p className="tournamentID">Tournament {event.returnValues.tournamentId}</p>
           <h6 className="gameName">{event.gameName} {event.gameStage !== undefined ? "- " + event.gameStage : ""}</h6>
-          <h3 className="prize" mb={3}>You have won {event.amount} ETH</h3>
+          <h3 className="prize" mb={3}>You have won {event.returnValues.amount} ETH</h3>
         </Box>
       </EventsCard>
     );
