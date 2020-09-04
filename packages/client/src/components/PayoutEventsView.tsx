@@ -190,6 +190,7 @@ class PayoutEventsView extends Component<any, any> {
     // tournamentId
     // resultId
   
+    // If player has winnings
     const eventsRendered = events.map( event => 
       <EventsCard key={event.id}>
         <GameImage src={"images/" + event.gameImage} />
@@ -201,10 +202,27 @@ class PayoutEventsView extends Component<any, any> {
       </EventsCard>
     );
 
+    // If none 
+    const noPayouts = tournaments.filter( tournament => {
+      return tournament.results.filter( result => result.isWinner !== true);
+    });
+
+    const noPayoutsRendered = noPayouts.map( noPayout => 
+      <EventsCard key={noPayout.id}>
+        <GameImage src={"images/" + noPayout.gameImage} />
+          <Box>
+            <p className="tournamentID">Tournament {noPayout.id}</p>
+            <h6 className="gameName">{noPayout.gameName} {noPayout.gameStage !== undefined ? "- " + noPayout.gameStage : ""}</h6>
+            <h3 className="prize" mb={3}>You'll win next time!</h3>
+          </Box>
+      </EventsCard>
+      );
+
     return (
       <PlayerTournamentResultsCard>
         <Heading as={"h2"} mb={3}>Your Tournament Results</Heading>
         {events.length !== 0 ? eventsRendered : ""}
+        {noPayoutsRendered.length !== 0 ? noPayoutsRendered : ""}
       </PlayerTournamentResultsCard>  
     );
   }
