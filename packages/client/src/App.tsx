@@ -707,7 +707,7 @@ class App extends React.Component<any, any> {
                         accountBalance={accountBalance}
                         accountBalanceLow={accountBalanceLow}
                         accountValidated={accountValidated}
-                        connectAndValidateAccount={connectAndValidateAccount}                  
+                        connectAndValidateAccount={connectAndValidateAccount}      
                   />
 
                   {/*

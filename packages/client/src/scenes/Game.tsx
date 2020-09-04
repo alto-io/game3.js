@@ -108,7 +108,7 @@ export default class Game extends Component<IProps, IState> {
       };
     }
     options.tournamentId = tournamentId
-    options.playerAddress = this.props.drizzleState.accounts[0]
+    options.playerAddress = this.props.drizzleState ? this.props.drizzleState.accounts[0] : '0'
 
     if (options.viewOnly === 'true') {
       this.setState({

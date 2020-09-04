@@ -26,7 +26,7 @@ class RimbleContainer extends React.Component {
                 accountBalance={this.props.accountBalance}
                 accountBalanceLow={this.props.accountBalanceLow}
                 accountValidated={this.props.accountValidated}
-                connectAndValidateAccount={this.props.connectAndValidateAccount}   
+                connectAndValidateAccount={this.props.connectAndValidateAccount}
               />
         )}
       </RimbleWeb3.Consumer>

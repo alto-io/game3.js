@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 
 import { Box, Card, Flex, Heading } from "rimble-ui"
 
-import { getGameSession, getTournamentResult } from '../helpers/database'
+import { getGameSession, getTournamentResult, getTournaments, getTournament } from '../helpers/database'
 import { navigateTo } from '../helpers/utilities';
 import shortenAddress from "../core/utilities/shortenAddress"
 
@@ -50,7 +50,7 @@ class TournamentResultsCard extends Component<any, any> {
     return data.split(' ').join('').split(",");
   }
 
-  async getTournamentAndLeaderBoards(tournamentId: any) {
+  async getTournamentAndLeaderBoards(tournamentId: any, loggedIn: boolean) {
     const { drizzle } = this.props;
 
     this.setState({ isLoading: true })
@@ -82,21 +82,40 @@ class TournamentResultsCard extends Component<any, any> {
         isLoading: false
       })
     }
-
-    const raw = await contract.methods.getTournament(tournamentId).call()
-    let data = this.parseData(raw['5']);
-    const gameName = data[0];
-    tournament = {
-      id: tournamentId,
-      name: gameName,
-      gameStage: undefined,
-      timeZone: 'GMT+8',
-      startTime: '12:00',
-      endTime: format(new Date(parseInt(raw['1'])), 'MMM d, yyyy'),
-      startDate: '8/16',
-      endDate: '9/4',
-      state: parseInt(raw['3']),
-      pool: raw['4']
+    let raw = undefined;
+    if (loggedIn) {
+      raw = await contract.methods.getTournament(tournamentId).call()
+      let data = this.parseData(raw['5']);
+      const gameName = data[0];
+      tournament = {
+        id: tournamentId,
+        name: gameName,
+        gameStage: undefined,
+        timeZone: 'GMT+8',
+        startTime: '12:00',
+        endTime: format(new Date(parseInt(raw['1'])), 'MMM d, yyyy'),
+        startDate: '8/16',
+        endDate: '9/4',
+        state: parseInt(raw['3']),
+        pool: raw['4']
+      }
+    } else {
+      raw = await getTournament(tournamentId);
+      console.log("TOURNAMENT DATA FROM DB", raw);
+      let data = this.parseData(raw[0].data);
+      let gameName = data[0];
+      tournament = {
+        id: tournamentId,
+        name: gameName,
+        gameStage: undefined,
+        timeZone: 'GMT+8',
+        startTime: '12:00',
+        endTime: format(new Date(parseInt(raw[0].endTime)), 'MMM d, yyyy'),
+        startDate: '8/16',
+        endDate: '9/4',
+        state: parseInt(raw[0].state),
+        pool: raw[0].pool
+      }
     }
 
     switch (tournament.name) {
@@ -152,18 +171,30 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   getBlockchainInfo = async (props) => {
-    const { tournamentId, drizzle } = props
+    const { tournamentId } = props
 
-    // Get the latest tournament
-    const contract = drizzle.contracts.Tournaments;
-
-    const tournamentLength = await contract.methods.getTournamentsCount().call();
-    let tI = undefined;
-    if (tournamentLength > 0) {
-      tI = tournamentId ? tournamentId : tournamentLength - 1;
+    if (this.props.drizzle.contracts.Tournaments) {
+      const {drizzle} = this.props;
+      // Get the latest tournament
+      const contract = drizzle.contracts.Tournaments;
+  
+      const tournamentLength = await contract.methods.getTournamentsCount().call();
+      let tI = undefined;
+      if (tournamentLength > 0) {
+        tI = tournamentId ? tournamentId : tournamentLength - 1;
+      }
+      console.log("TOURNAMENT ID = ", tI)
+      await this.getTournamentAndLeaderBoards(tI, true);
+    } else {
+      let ids = await getTournaments();
+      console.log("IDSSSS", ids);
+      let tId = undefined;
+      if (ids.length > 0) {
+        tId = ids[ids.length - 1].id
+      }
+      console.log("THE ID IN DB IS", tId);
+      await this.getTournamentAndLeaderBoards(tId, false);
     }
-    console.log("TOURNAMENT ID = ", tI)
-    await this.getTournamentAndLeaderBoards(tI);
   }
 
   getStatus(tournament: any) {

@@ -87,7 +87,7 @@ export class OrbitDBManager implements DBManager {
     this.leaderboardEntries = await this.orbitdb.docstore('leaderboardEntries', docStoreOptions);
     await this.leaderboardEntries.load()
 
-    this.tournaments = await this.orbitdb.kvstore('tournaments', this.defaultOptions);
+    this.tournaments = await this.orbitdb.docstore('tournaments', docStoreOptions);
     await this.tournaments.load()
 
     this.gameSessions = await this.orbitdb.docstore('gameSessions', docStoreOptions);
@@ -273,7 +273,7 @@ export class OrbitDBManager implements DBManager {
         console.log("UPDATE_SCORE: Current Score", playerData.timeLeft);
         console.log("UPDATE_SCORE: Did win?", didWin);
 
-        let playerScore = 0; 
+        let playerScore = 0;
 
         if (!didWin) {
           console.log("UPDATE_SCORE: Player did not win");
@@ -281,7 +281,7 @@ export class OrbitDBManager implements DBManager {
         } else {
           console.log("UPDATE_SCORE: Player did win");
           playerScore = playerData.timeLeft;
-          
+
           if (playerData.timeLeft > playerData.currentHighestNumber) {
             playerData.currentHighestNumber = playerData.timeLeft;
             console.log("UPDATE_SCORE: Thew new data", playerData);
@@ -526,7 +526,7 @@ export class OrbitDBManager implements DBManager {
   async getTournamentResult(tournamentId) {
     console.log("GET_TOURNEYRESULT: Initialize...");
     console.log("GET_TOURNEYRESULT: Fetching sessions...");
-    let sessions = this.gameSessions.query(g_session => 
+    let sessions = this.gameSessions.query(g_session =>
       g_session.sessionData.tournamentId === tournamentId
     )
     if (sessions.length > 0) {
@@ -547,5 +547,61 @@ export class OrbitDBManager implements DBManager {
 
   async deleteAllData() {
     // await this.orbitdb.drop('')
+  }
+
+  async newTournament(tournament) {
+    // TOURNAMENT FORMAT
+    // const tournament = {
+    //   id: string
+    //   endTime: string,
+    //   state: string,
+    //   pool: number,
+    //   data: string,
+    // }
+
+    console.log("CREATE_TOURNEY: Initiating...");
+    let ids = await this.tournaments.query(tournament =>
+      tournament.id > -1);
+
+    console.log("CREATE_TOURNEY: The ids", ids);
+
+    if (ids.length > 0) {
+      if (tournament !== ids[ids.length - 1].id) {
+        console.log("CREATE_TOURNEY: Creating new one...");
+        await this.tournaments.put(tournament)
+        console.log("CREATE_TOURNEY: Added");
+      } else {
+        console.log("CREATE_TOURNEY: Id already exist");
+      }
+    } else {
+      console.log("CREATE_TOURNEY: No tournaments");
+      console.log("CREATE_TOURNEY: Creating new one...");
+      await this.tournaments.put(tournament)
+      console.log("CREATE_TOURNEY: Added");
+      console.log("CREATE_TOURNEY: Returning...");
+    }
+
+  }
+
+  async getTournaments() {
+    console.log("GET_TOURNEYS: Initiating...");
+    console.log("GET_TOURNEYS: Fetching all tourneys");
+    let tournaments = await this.tournaments.query(tournament =>
+      tournament.id > -1
+    )
+    console.log("GET_TOURNEYS: Fetched!", tournaments);
+    console.log("GET_TOURNEYS: Returning...");
+    return tournaments
+  }
+
+  async getTournament(tournamentId) {
+    console.log("GET_TOURNEY: Initiating...");
+    console.log("GET_TOURNEY: Fetching tourney with id:", tournamentId);
+    let tournament = await this.tournaments.query(tournament =>
+      tournament.id === tournamentId
+    )
+    console.log("GET_TOURNEY: Fetched!", tournament);
+    console.log("GET_TOURNEY: Returning...");
+    return tournament
   }
 }
