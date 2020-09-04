@@ -278,10 +278,14 @@ class TournamentResultsCard extends Component<any, any> {
 
   fetchShares = async (tournamentId) => {
     const { drizzle } = this.props;
-    const contract = drizzle.contracts.Tournaments;
-    const shares = await contract.methods.getShares(tournamentId).call();
+    
+    try {
+      const contract = drizzle.contracts.Tournaments;
+      const shares = await contract.methods.getShares(tournamentId).call();
 
-    this.setState({ shares });
+      this.setState({ shares });
+    }
+    catch (e) {}
   }
 
   render() {
