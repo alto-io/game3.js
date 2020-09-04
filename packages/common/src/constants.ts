@@ -11,6 +11,11 @@ export const TOSIOS = 'tosios';
 export const WOM = 'wom';
 export const FP = 'flappybird';
 
+// GAME IMAGES
+export const TOSIOS_IMG = 'tosios.gif';
+export const WOM_IMG = 'wom.gif';
+export const FP_IMG = 'flappybird.gif';
+
 // Game
 export const MAPS_NAMES = ['small', 'gigantic'];
 export const ROOM_PLAYERS_MIN = 1;

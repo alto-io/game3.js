@@ -13,7 +13,8 @@ import { format, isPast } from 'date-fns'
 import qs from 'querystringify';
 import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
 import { getGameNo, getGameSessionId } from '../helpers/database';
-import { GAME_DETAILS } from '../constants';
+// import { GAME_DETAILS } from '../constants';
+import { Constants } from "@game3js/common";
 
 const StyledButton = styled(Button)`
   font-family: 'Apercu Light';
@@ -182,11 +183,26 @@ class TournamentCard extends Component<any, any> {
   }
 
   getGameDetails = (gameName) => {
-    const gameDetails = GAME_DETAILS.find( game => game.name.toLowerCase() === gameName.toLowerCase());
-    this.setState({
-      gameName: gameDetails.name,
-      gameImage: gameDetails.image
-    })
+    switch (gameName) {
+      case 'wom':
+        this.setState({
+          gameName: 'World of Mines',
+          gameImage: Constants.WOM_IMG
+        });
+        break;
+      case 'tosios':
+        this.setState({
+          gameName: 'TOSIOS',
+          gameImage: Constants.TOSIOS_IMG
+        });
+        break;
+      case 'fp':
+        this.setState({
+          gameName: 'Flappy Bird Open-Source',
+          gameImage: Constants.FP_IMG
+        });
+      break; 
+    }
   }
 
   onActivate = (tournament) => {
@@ -300,7 +316,7 @@ class TournamentCard extends Component<any, any> {
 
             <Flex justifyContent={"center"} mt={3} mb={4}>
               <Text fontWeight={600} lineHeight={"1em"}>
-                {gameName}
+                {gameName} {tournament.gameStage !== undefined ? "- " + tournament.gameStage : ""}
               </Text>
             </Flex>
             <Flex justifyContent={"center"} mt={1} mb={2}>
