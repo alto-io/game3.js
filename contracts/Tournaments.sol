@@ -22,6 +22,7 @@ contract Tournaments is Ownable {
     uint            triesPerBuyIn;
     TournamentState state;
     uint            balance;
+    uint[]          shares;
   }
 
   struct GameResult {
@@ -178,7 +179,7 @@ contract Tournaments is Ownable {
     }
 
     tournaments.push(Tournament(organizer, endTime, data, prize,
-      buyInAmount, triesPerBuyIn, TournamentState.Draft, 0));
+      buyInAmount, triesPerBuyIn, TournamentState.Draft, 0, shares));
 
     winnerShares[tournaments.length - 1] = shares;
     totalShares[tournaments.length - 1] = total;
@@ -359,5 +360,14 @@ contract Tournaments is Ownable {
     returns (uint)
   {
     return tournaments[tournamentId].triesPerBuyIn;
+  }
+
+  function getShares(uint tournamentId)
+    public
+    view
+    tournamentIdIsCorrect(tournamentId)
+    returns (uint256[] memory)
+  {
+    return tournaments[tournamentId].shares;
   }
 }
