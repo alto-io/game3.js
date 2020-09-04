@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { isPast } from 'date-fns';
 
 import { getGameSession } from "../helpers/database";
-import { GAME_DETAILS } from '../constants';
+import { Constants } from '@game3js/common';
 import PayoutEventsView from "./PayoutEventsView";
 import PlayerOngoingTournaments from "./PlayerOngoingTournaments";
 // import PlayerGameReplays from "./PlayerGameReplays";
@@ -96,8 +96,7 @@ class DashboardView extends Component<any, any> {
       for (let tournamentId = 0; tournamentId < tournamentsCount; tournamentId++) {
         const tournamentDetails = await contract.methods.getTournament(tournamentId).call()
         const data = this.parseData(tournamentDetails['5']);
-        const gameDetails = GAME_DETAILS.find( game => game.name.toLowerCase() === data[0].toLowerCase() );
-
+        
         const tournament = {
           id: tournamentId,
           organizer: tournamentDetails['0'],
@@ -105,14 +104,28 @@ class DashboardView extends Component<any, any> {
           prize: tournamentDetails['2'],
           state: parseInt(tournamentDetails['3']),
           balance: tournamentDetails['4'],
-          gameName: gameDetails.name,
+          gameName: '',
           gameStage: data[1],
-          gameImage: gameDetails.image,
+          gameImage: '',
           timeIsUp: false,
           canDeclareWinner: false,
           results: []
         }
   
+        switch (data[0]) {
+          case 'wom' :
+            tournament.gameName = 'World of Mines';
+            tournament.gameImage = Constants.WOM_IMG;
+            break;
+          case 'tosios' :
+            tournament.gameName = 'TOSIOS';
+            tournament.gameImage = Constants.TOSIOS_IMG;
+            break;
+          case 'fp' :
+            tournament.gameName = 'Flappy Bird Open-Source';
+            tournament.gameImage = Constants.FP_IMG;
+        }
+        
         tournament.timeIsUp = isPast(new Date(tournament.endTime));
   
         let results = []
