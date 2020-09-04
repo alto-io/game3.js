@@ -2,14 +2,15 @@ import React, { Component } from 'react';
 import { Modal, Card, Button, Flex, Box, Heading, Text } from "rimble-ui";
 import drizzleConfig from '../drizzleConfig';
 
-class BuyInPromptModal extends Component {
+class BuyInPromptModal extends Component<any, any> {
   constructor(props) {
     super(props);
     this.handleConfirm = this.handleConfirm.bind(this);
   }
 
   confirmTransaction = async () => {
-    const { drizzle, tournamentId, tournamentBuyInAmount, handleJoinClick, address } = this.props;
+    const { drizzle, tournamentId, tournamentBuyInAmount,
+      handleJoinClick, address, maxTries } = this.props;
     const contract = drizzle.contracts.Tournaments;
 
     await contract.methods.payBuyIn(tournamentId, tournamentBuyInAmount).send({ from: address, value: tournamentBuyInAmount })
@@ -25,7 +26,7 @@ class BuyInPromptModal extends Component {
   }
 
   render() {
-    const { isOpen, handleCloseBuyinModal } = this.props;
+    const { isOpen, handleCloseBuyinModal, maxTries } = this.props;
 
     return(
       <>
@@ -46,7 +47,7 @@ class BuyInPromptModal extends Component {
         <Box p={4} mt={4} mb={2}>
           <Heading.h3>Tournament Buy-in Confirmation</Heading.h3>
           <Text mb={3}>Before you join, you must accept the binding Metamask transaction.</Text>
-          <Text>By confirming, your buy-in would be processed and you can play in the tournament up to three times.</Text>
+          <Text>By confirming, your buy-in would be processed and you can play in the tournament up to {maxTries} times.</Text>
         </Box>
 
         <Flex
