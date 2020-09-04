@@ -111,10 +111,13 @@ class TournamentResultsCard extends Component<any, any> {
     // Get tournament results
     // const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
     let sessionsData = await getTournamentResult(tournamentId);
+    console.log("PLAYER ADD: sessionsData", sessionsData);
+
     if (sessionsData.length > 0) {
       for (let resultIdx = 0; resultIdx < (sessionsData.length > 10 ? 10 : sessionsData.length); resultIdx++) {
         let playerAddress = Object.keys(sessionsData[resultIdx].sessionData.playerData)[0];
-        console.log("PLAYER ADD:", playerAddress);
+        console.log("PLAYER ADD: address", playerAddress);
+
         results.push({
           name: sessionsData[resultIdx].sessionData.playerData[playerAddress].name,
           tournamentId: tournamentId,
@@ -233,9 +236,17 @@ class TournamentResultsCard extends Component<any, any> {
     // navigateTo(path);
   }
 
+  setResultBgColor(playerAddress, currentPlayerAddress) {
+    if (playerAddress && playerAddress.toLowerCase() === currentPlayerAddress.toLowerCase()) {
+      return baseColors.lightGrey;
+    } else {
+      return baseColors.white;
+    }
+  }
+
   render() {
     const { results, isLoading, tournament } = this.state;
-    const { tournamentId } = this.props;
+    const { tournamentId, playerAddress } = this.props;
 
     if (isLoading) {
       return (
@@ -248,9 +259,11 @@ class TournamentResultsCard extends Component<any, any> {
     let resultDivs = null
     if (results.length > 0) {
       resultDivs = results.map(result => (result.sessionData && (
-        <div style={resultDivStyle} key={result.sessionId}>
+        <div style={
+          {...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`}
+          } key={result.sessionId}>
           <span style={playerAddressStyle}>
-            {result.sessionData.name}
+            {shortenAddress(result.playerAddress)}
           </span>
           <span style={timeLeftStyle}>
             {result.sessionData.currentHighestNumber}
@@ -354,7 +367,8 @@ const resultDivStyle: CSS.Properties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  margin: '0 0 1rem 0'
+  margin: '0 0 1rem 0',
+  padding: '0.3rem 0.5rem'
 }
 
 const playerAddressStyle: CSS.Properties = {

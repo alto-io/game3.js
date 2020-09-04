@@ -127,15 +127,15 @@ class TournamentCard extends Component<any, any> {
 
   handleJoinClick = () => {
     const { tournament } = this.state
-    const name = window.prompt("Enter your name", "");
-    console.log(`Hi ${name}!`);
+    // const name = window.prompt("Enter your name", "");
+    // console.log(`Hi ${name}!`);
     const options = {
       mode: 'score attack',
       roomMap: 'small',
       roomMaxPlayers: '1',
       roomName: '',
       tournamentId: tournament.id,
-      playerName: name,
+      playerName: "Guest",
       viewOnly: tournament.timeIsUp
     }
     navigate(`/game/new${qs.stringify(options, true)}`);
