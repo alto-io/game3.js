@@ -5,6 +5,8 @@ import styled from "styled-components";
 
 import { GAME_DETAILS } from '../constants';
 
+import ViewResultsModal from './ViewResultsModal';
+
 const PlayerTournamentResultsCard = styled(Card)`
   padding: 1rem 0.5rem;
   margin: 1rem;
@@ -175,7 +177,7 @@ class PayoutEventsView extends Component<any, any> {
   }
   
   render() {
-    const { account, accountValidated, tournaments} = this.props
+    const { address, tournaments, drizzle } = this.props
     const { events } = this.state
 
     // const eventsRendered = events.map(event => 
@@ -214,6 +216,12 @@ class PayoutEventsView extends Component<any, any> {
             <p className="tournamentID">Tournament {noPayout.id}</p>
             <h6 className="gameName">{noPayout.gameName} {noPayout.gameStage !== undefined ? "- " + noPayout.gameStage : ""}</h6>
             <h3 className="prize" mb={3}>You'll win next time!</h3>
+
+            <ViewResultsModal 
+              tournamentId={noPayout.id}
+              playerAddress={address}
+              drizzle={drizzle}
+              />
           </Box>
       </EventsCard>
       );
