@@ -251,7 +251,7 @@ export class OrbitDBManager implements DBManager {
     return { result: sessionId }
   }
 
-  async serverUpdateScore(sessionId, playerAddress, tournamentId) {
+  async serverUpdateScore(didWin, sessionId, playerAddress, tournamentId) {
     if (tournamentId !== undefined) {
       console.log("UPDATE_SCORE: Function Invoked...");
 
@@ -271,22 +271,31 @@ export class OrbitDBManager implements DBManager {
 
         console.log("UPDATE_SCORE: Current High Score", playerData.currentHighestNumber);
         console.log("UPDATE_SCORE: Current Score", playerData.timeLeft);
+        console.log("UPDATE_SCORE: Did win?", didWin);
 
-        if (playerData.timeLeft > playerData.currentHighestNumber) {
-          playerData.currentHighestNumber = playerData.timeLeft;
-          console.log("UPDATE_SCORE: Thew new data", playerData);
-          data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
-          await this.gameSessions.put(data[0]);
-          console.log("UPDATE_SCORE: Updated!");
-          console.log("UPDATE_SCORE: Returning...");
-          return { result: playerData }
+        let playerScore = 0; 
+
+        if (!didWin) {
+          console.log("UPDATE_SCORE: Player did not win");
+          console.log("UPDATE_SCORE: Player score reverts to 0");
         } else {
-          console.log("UPDATE_SCORE: Current score is lower than highscore, no need to update!");
-          console.log("UPDATE_SCORE: Returning...");
-          return { result: playerData }
+          console.log("UPDATE_SCORE: Player did win");
+          playerScore = playerData.timeLeft;
+          
+          if (playerData.timeLeft > playerData.currentHighestNumber) {
+            playerData.currentHighestNumber = playerData.timeLeft;
+            console.log("UPDATE_SCORE: Thew new data", playerData);
+            data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+            await this.gameSessions.put(data[0]);
+            console.log("UPDATE_SCORE: Updated!");
+            console.log("UPDATE_SCORE: Returning...");
+            return { result: playerData }
+          } else {
+            console.log("UPDATE_SCORE: Current score is lower than highscore, no need to update!");
+            console.log("UPDATE_SCORE: Returning...");
+            return { result: playerData }
+          }
         }
-
-
       } else {
         console.log("UPDATE_SCORE: No Data...");
         console.log("UPDATE_SCORE: Returning...");
@@ -310,6 +319,7 @@ export class OrbitDBManager implements DBManager {
       if (data.length > 0) {
         let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
         console.log("UPDATE_GNUMBER: Updating...");
+        console.log("UPDATE_GNUMBER: Playerdata", playerData);
         playerData.gameNo += 1;
         data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
         await this.gameSessions.put(data[0]);
@@ -361,6 +371,9 @@ export class OrbitDBManager implements DBManager {
             currentHighestNumber: 0
           }
 
+          console.log("NEW: Player address", player.address)
+          console.log("NEW: Player", player)
+
           sessionData.playerData[player.address.toLowerCase()] = playerData;
         }
 
@@ -381,10 +394,11 @@ export class OrbitDBManager implements DBManager {
 
         for (const playerId in players) {
           const player = players[playerId]
-
+          console.log("NEW: Before", data[0].sessionData.playerData[player.address.toLowerCase()])
           data[0].sessionData.playerData[player.address.toLowerCase()].name = player.name;
           data[0].sessionData.playerData[player.address.toLowerCase()].kills = player.kills;
           data[0].sessionData.playerData[player.address.toLowerCase()].timeLeft = timeLeft;
+          console.log("NEW: After", data[0].sessionData.playerData[player.address.toLowerCase()])
         }
         await this.gameSessions.put(data[0]);
         console.log("NEW: Updated!");
@@ -459,6 +473,7 @@ export class OrbitDBManager implements DBManager {
   }
 
   async serverCreateSessionId(playerAddress, tournamentId) {
+    console.log("SID: Tournament ID", tournamentId);
     if (tournamentId !== undefined) {
       console.log("CREATE_SID: Initializing...")
       console.log(`CREATE_SID: Params playerAddress: ${playerAddress}, tournamentId: ${tournamentId}`)
@@ -467,7 +482,7 @@ export class OrbitDBManager implements DBManager {
         sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId === tournamentId)
       if (data.length > 0) {
         console.log("SID: DATA FOUND!", data);
-        console.log("SID: Returning...");
+        console.log("SID: Returning...", data[0].id);
         return data[0].id;
       } else {
         console.log("SID: DATA NOT FOUND!", data);

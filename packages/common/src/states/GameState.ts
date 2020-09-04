@@ -164,7 +164,9 @@ export class GameState extends Schema {
     this.propsAdd(Constants.FLASKS_COUNT);
     this.monstersAdd(Constants.MONSTERS_COUNT);
     console.log("START");
-    this.onMessage(new Message('start'));
+    this.onMessage(new Message('start', {
+      endsAt: this.game.gameEndsAt
+    }));
   }
 
   private handleGameEnd = async (message?: Message) => {
@@ -197,13 +199,18 @@ export class GameState extends Schema {
 
     this.players[id] = player;
 
+    console.log("PLAYER ADD: Player", player)
+    console.log("PLAYER ADD: Players", this.players)
+
+    let players = this.players;
+
     // Broadcast message to other players
     console.log("JOINED");
     this.onMessage(new Message('joined', {
       name: this.players[id].name,
       address: this.players[id].address,
-      players: this.players,
-      endsAt: this.game.gameEndsAt
+      players,
+      endTimeScore: Date.now() + Constants.GAME_DURATION + Constants.LOBBY_DURATION
     }));
   }
 

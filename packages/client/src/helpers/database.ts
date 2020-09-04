@@ -125,7 +125,10 @@ export async function createSessionId(playerAddress, tournamentId): Promise<any>
     tournamentId
   }
 
-  const response = await api.post('/gameSessionId/create', { params })
+  console.log("DATABASE: player_add", playerAddress)
+  console.log("DATABASE: tournamentId", tournamentId)
+
+  const response = await api.post('/gameSessionId/create', params)
   return response.data
 }
 
@@ -148,8 +151,10 @@ export async function deleteGameSessionId(gameSessionId): Promise<any> {
   return response.data
 }
 
-export async function updateSessionScore(gameSessionId, playerAddress, tournamentId): Promise<any> {
+export async function updateSessionScore(didWin, gameSessionId, playerAddress, tournamentId): Promise<any> {
+  
   const params = {
+    didWin,
     sessionId: gameSessionId,
     playerAddress,
     tournamentId
@@ -170,10 +175,10 @@ export async function updateGameNo(sessionId, playerAddress, tournamentId) {
   return res.data;
 }
 
-export async function makeNewGameSession(playerAddress, tournamentId, players, endsAt): Promise<any> {
-  let timeLeft = endsAt - Date.now()
+export async function makeNewGameSession(sessionId, tournamentId, players, endsAt): Promise<any> {
+  let timeLeft = endsAt - Date.now();
   const params = {
-    playerAddress,
+    sessionId,
     tournamentId, 
     timeLeft, 
     players
