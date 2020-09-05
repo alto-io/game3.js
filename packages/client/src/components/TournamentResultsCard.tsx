@@ -28,7 +28,8 @@ class TournamentResultsCard extends Component<any, any> {
     this.state = {
       results: [],
       tournament: {},
-      isLoading: false
+      isLoading: false,
+      shares : []
     }
   }
 
@@ -275,9 +276,23 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
+  fetchShares = async (tournamentId) => {
+    const { drizzle } = this.props;
+    
+    try {
+      const contract = drizzle.contracts.Tournaments;
+      const shares = await contract.methods.getShares(tournamentId).call();
+
+      this.setState({ shares });
+    }
+    catch (e) {}
+  }
+
   render() {
-    const { results, isLoading, tournament } = this.state;
+    const { results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
+
+    this.fetchShares(tournamentId);
 
     if (isLoading) {
       return (
@@ -288,19 +303,35 @@ class TournamentResultsCard extends Component<any, any> {
     }
 
     let resultDivs = null
+
     if (results.length > 0) {
-      resultDivs = results.map(result => (result.sessionData && (
-        <div style={
-          {...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`}
-          } key={result.sessionId}>
-          <span style={playerAddressStyle}>
-            {shortenAddress(result.playerAddress)}
-          </span>
-          <span style={timeLeftStyle}>
-            {result.sessionData.currentHighestNumber}
-          </span>
-        </div>
-      )) || null)
+      resultDivs = results.map( (result, idx) => {
+        let sharesText;
+
+        if (idx === 0) {
+          sharesText =  <p>&#x1F947; {(tournament.pool * shares[0]) / 100} ETH</p>
+        } else if (idx === 1 ){
+          sharesText =  <p>&#x1F948; {(tournament.pool * shares[1]) / 100} ETH</p>
+        } else if (idx === 2) {
+          sharesText =  <p>&#x1F949; {(tournament.pool * shares[2]) / 100} ETH</p>
+        }
+
+        if (result.sessionData) {
+          return( 
+          <div 
+            style={{...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`}} 
+            key={result.sessionId}
+          >
+            <span style={playerAddressStyle}>
+              {shortenAddress(result.playerAddress)}
+            </span>
+            {idx === 0 || idx === 1 || idx === 2 ? <span>{sharesText}</span> : ""}
+            <span style={timeLeftStyle}>
+              {result.sessionData.currentHighestNumber}
+            </span>
+          </div>
+        )} 
+      });
     } else {
       if (!tournamentId) {
         resultDivs = (

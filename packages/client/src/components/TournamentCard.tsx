@@ -29,6 +29,7 @@ class TournamentCard extends Component<any, any> {
 
     this.state = {
       tournament: null,
+      gameId: null,
       ownTournament: false,
       isOpen: false,
       isBuyinModalOpen: false,
@@ -81,7 +82,7 @@ class TournamentCard extends Component<any, any> {
       prize: raw['2'],
       state: parseInt(raw['3']),
       balance: raw['4'],
-      gameName: data[0],
+      gameId: data[0],
       gameStage: data[1],
       timeIsUp: false,
       canDeclareWinner: true,
@@ -116,9 +117,10 @@ class TournamentCard extends Component<any, any> {
       ownTournament = tournament.organizer.toLowerCase() === address.toLowerCase()
     }
 
-    this.getGameDetails(tournament.gameName);
+    this.getGameDetails(tournament.gameId);
 
     this.setState({
+      gameId: tournament.gameId,
       tournament,
       ownTournament
     })
@@ -126,19 +128,34 @@ class TournamentCard extends Component<any, any> {
   }
 
   handleJoinClick = () => {
-    const { tournament } = this.state
+    const { tournament, gameId } = this.state
     // const name = window.prompt("Enter your name", "");
     // console.log(`Hi ${name}!`);
-    const options = {
-      mode: 'score attack',
-      roomMap: 'small',
-      roomMaxPlayers: '1',
-      roomName: '',
-      tournamentId: tournament.id,
-      playerName: "Guest",
-      viewOnly: tournament.timeIsUp
+
+    let options = {}
+
+    switch (gameId) 
+    {
+      case Constants.WOM:
+        navigate(`/game/wom${qs.stringify(options, true)}`);
+
+      break;
+      case Constants.TOSIOS:
+        options = {
+          mode: 'score attack',
+          roomMap: 'small',
+          roomMaxPlayers: '1',
+          roomName: '',
+          tournamentId: tournament.id,
+          playerName: "Guest",
+          viewOnly: tournament.timeIsUp
+        }
+        navigate(`/game/new${qs.stringify(options, true)}`);
+        break;
+      case Constants.FP:
+        navigate(`/game/flappybird${qs.stringify(options, true)}`);
+      break; 
     }
-    navigate(`/game/new${qs.stringify(options, true)}`);
   }
 
   handleCloseModal = e => {
@@ -182,8 +199,8 @@ class TournamentCard extends Component<any, any> {
     return data.split(' ').join('').split(",");
   }
 
-  getGameDetails = (gameName) => {
-    switch (gameName) {
+  getGameDetails = (gameId) => {
+    switch (gameId) {
       case Constants.WOM:
         this.setState({
           gameName: 'World of Mines',
@@ -191,13 +208,13 @@ class TournamentCard extends Component<any, any> {
         });
         break;
       case Constants.TOSIOS:
-        this.setState({
+          this.setState({
           gameName: 'TOSIOS',
           gameImage: Constants.TOSIOS_IMG
         });
         break;
       case Constants.FP:
-        this.setState({
+          this.setState({
           gameName: 'Flappy Bird Open-Source',
           gameImage: Constants.FP_IMG
         });
@@ -249,7 +266,7 @@ class TournamentCard extends Component<any, any> {
       'MMM d, yyyy, HH:mm:ss')
 
     const buttonText = tournament.timeIsUp ? 'View' : 'Join';
-    const playBtnText = `Play (${typeof gameNo !== "number" ? 0 : gameNo} out of ${tournament.maxTries})`;
+    const playBtnText = `Play ( ${typeof gameNo !== "number" ? 0 : gameNo} out of ${tournament.maxTries} )`;
 
     const button = () => {
       if (accountBuyIn !== 0 && account && accountValidated) {

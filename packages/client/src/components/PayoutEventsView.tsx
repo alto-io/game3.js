@@ -5,6 +5,8 @@ import styled from "styled-components";
 
 import { GAME_DETAILS } from '../constants';
 
+import ViewResultsModal from './ViewResultsModal';
+
 const PlayerTournamentResultsCard = styled(Card)`
   padding: 1rem 0.5rem;
   margin: 1rem;
@@ -42,7 +44,7 @@ const EventsCard = styled(Card)`
     margin: 0
   }
   
-  @media screen and (min-width: 720px) {
+  @media screen and (min-width: 768px) {
     justify-content: space-between;
     align-items: center;
     flex-direction: row;
@@ -175,7 +177,7 @@ class PayoutEventsView extends Component<any, any> {
   }
   
   render() {
-    const { account, accountValidated, tournaments} = this.props
+    const { address, tournaments, drizzle } = this.props
     const { events } = this.state
 
     // const eventsRendered = events.map(event => 
@@ -190,21 +192,45 @@ class PayoutEventsView extends Component<any, any> {
     // tournamentId
     // resultId
   
+    // If player has winnings
     const eventsRendered = events.map( event => 
       <EventsCard key={event.id}>
         <GameImage src={"images/" + event.gameImage} />
         <Box>
           <p className="tournamentID">Tournament {event.returnValues.tournamentId}</p>
           <h6 className="gameName">{event.gameName} {event.gameStage !== undefined ? "- " + event.gameStage : ""}</h6>
-          <h3 className="prize" mb={3}>You have won {event.returnValues.amount} ETH</h3>
+          <h3 className="prize" mb={"3"}>You have won {event.returnValues.amount} ETH</h3>
         </Box>
       </EventsCard>
     );
+
+    // If none 
+    const noPayouts = tournaments.filter( tournament => {
+      return tournament.results.filter( result => result.isWinner !== true);
+    });
+
+    const noPayoutsRendered = noPayouts.map( noPayout => 
+      <EventsCard key={noPayout.id}>
+        <GameImage src={"images/" + noPayout.gameImage} />
+          <Box>
+            <p className="tournamentID">Tournament {noPayout.id}</p>
+            <h6 className="gameName">{noPayout.gameName} {noPayout.gameStage !== undefined ? "- " + noPayout.gameStage : ""}</h6>
+            <h3 className="prize" mb={3}>You'll win next time!</h3>
+
+            <ViewResultsModal 
+              tournamentId={noPayout.id}
+              playerAddress={address}
+              drizzle={drizzle}
+              />
+          </Box>
+      </EventsCard>
+      );
 
     return (
       <PlayerTournamentResultsCard>
         <Heading as={"h2"} mb={3}>Your Tournament Results</Heading>
         {events.length !== 0 ? eventsRendered : ""}
+        {noPayoutsRendered.length !== 0 ? noPayoutsRendered : ""}
       </PlayerTournamentResultsCard>  
     );
   }

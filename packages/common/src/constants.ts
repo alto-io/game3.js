@@ -9,7 +9,7 @@ export const DEBUG = false;
 // GAME NAMES
 export const TOSIOS = 'tosios';
 export const WOM = 'wom';
-export const FP = 'flappybird';
+export const FP = 'fp';
 
 // GAME IMAGES
 export const TOSIOS_IMG = 'tosios.gif';
