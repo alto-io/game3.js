@@ -184,19 +184,19 @@ class TournamentCard extends Component<any, any> {
 
   getGameDetails = (gameName) => {
     switch (gameName) {
-      case 'wom':
+      case Constants.WOM:
         this.setState({
           gameName: 'World of Mines',
           gameImage: Constants.WOM_IMG
         });
         break;
-      case 'tosios':
+      case Constants.TOSIOS:
         this.setState({
           gameName: 'TOSIOS',
           gameImage: Constants.TOSIOS_IMG
         });
         break;
-      case 'fp':
+      case Constants.FP:
         this.setState({
           gameName: 'Flappy Bird Open-Source',
           gameImage: Constants.FP_IMG
