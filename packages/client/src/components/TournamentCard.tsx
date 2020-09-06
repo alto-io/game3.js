@@ -347,7 +347,8 @@ class TournamentCard extends Component<any, any> {
               </Text>
             </Flex>
 
-            {!isContractOwner ? button() : ""}
+            {/* {!isContractOwner ? button() : ""} */}
+            {button()}
             <ViewResultsModal
               tournamentId={tournament.id}
               playerAddress={address}

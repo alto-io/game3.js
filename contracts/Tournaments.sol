@@ -209,7 +209,7 @@ contract Tournaments is Ownable {
     payable
     tournamentIdIsCorrect(tournamentId)
     tournamentNotEnded(tournamentId)
-    notOrganizer(tournamentId)
+    // notOrganizer(tournamentId)
     correctTournamentState(tournamentId, TournamentState.Active)
     correctPaymentAmount(value)
     correctBuyInAmount(tournamentId)
