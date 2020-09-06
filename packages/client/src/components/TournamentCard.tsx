@@ -7,6 +7,7 @@ import RainbowBox from "./RainbowBox";
 import RainbowImage from "./RainbowImage";
 import JoinPromptModal from "./JoinPromptModal";
 import BuyinPromptModal from './BuyInPromptModal';
+import ViewResultsModal from './ViewResultsModal';
 import styled from 'styled-components';
 
 import { format, isPast } from 'date-fns'
@@ -88,7 +89,7 @@ class TournamentCard extends Component<any, any> {
       canDeclareWinner: true,
       results: [],
       buyInAmount: tournamentBuyIn,
-      maxTries : parseInt(maxTries)
+      maxTries: parseInt(maxTries)
     }
 
     tournament.timeIsUp = isPast(new Date(tournament.endTime))
@@ -97,19 +98,19 @@ class TournamentCard extends Component<any, any> {
     const resultsCount = await contract.methods.getResultsCount(tournamentId).call();
     for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
       const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
-        results.push({
-          tournamentId: tournament.id,
-          resultId: resultIdx,
-          isWinner: resultDetails['0'],
-          playerAdress: resultDetails['1'],
-          sessionData: resultDetails['2']
-        })
+      results.push({
+        tournamentId: tournament.id,
+        resultId: resultIdx,
+        isWinner: resultDetails['0'],
+        playerAdress: resultDetails['1'],
+        sessionData: resultDetails['2']
+      })
     }
 
     tournament.results = results;
 
     const buyIn = await contract.methods.buyIn(tournamentId, address).call();
-    this.setState({accountBuyIn : parseInt(buyIn)});
+    this.setState({ accountBuyIn: parseInt(buyIn) });
     this.fetchGameNo(address, tournamentId);
 
     let ownTournament = false
@@ -134,12 +135,11 @@ class TournamentCard extends Component<any, any> {
 
     let options = {}
 
-    switch (gameId) 
-    {
+    switch (gameId) {
       case Constants.WOM:
         navigate(`/game/wom${qs.stringify(options, true)}`);
 
-      break;
+        break;
       case Constants.TOSIOS:
         options = {
           mode: 'score attack',
@@ -154,25 +154,25 @@ class TournamentCard extends Component<any, any> {
         break;
       case Constants.FP:
         navigate(`/game/flappybird${qs.stringify(options, true)}`);
-      break; 
+        break;
     }
   }
 
   handleCloseModal = e => {
-    this.setState({isOpen: false});
+    this.setState({ isOpen: false });
   }
 
   handleOpenModal = e => {
     e.preventDefault();
-    this.setState({isOpen: true});
+    this.setState({ isOpen: true });
   }
 
   handleCloseBuyinModal = e => {
-    this.setState({isBuyinModalOpen: false})
+    this.setState({ isBuyinModalOpen: false })
   }
 
   handleOpenBuyinModal = e => {
-    this.setState({isBuyinModalOpen: true})
+    this.setState({ isBuyinModalOpen: true })
   }
 
   checkOwner = async () => {
@@ -182,16 +182,16 @@ class TournamentCard extends Component<any, any> {
 
 
     if (owner.toLowerCase() !== address.toLowerCase()) {
-      this.setState({isContractOwner: false})
+      this.setState({ isContractOwner: false })
     } else {
-      this.setState({isContractOwner: true})
+      this.setState({ isContractOwner: true })
     }
   }
 
   fetchGameNo = async (account, tournamentId) => {
     const gameSessionId = await getGameSessionId(account, tournamentId);
     const gameNo = await getGameNo(gameSessionId, account, tournamentId);
-    this.setState({ gameNo : gameNo });
+    this.setState({ gameNo: gameNo });
   }
 
   parseData(data) {
@@ -208,17 +208,17 @@ class TournamentCard extends Component<any, any> {
         });
         break;
       case Constants.TOSIOS:
-          this.setState({
+        this.setState({
           gameName: 'TOSIOS',
           gameImage: Constants.TOSIOS_IMG
         });
         break;
       case Constants.FP:
-          this.setState({
+        this.setState({
           gameName: 'Flappy Bird Open-Source',
           gameImage: Constants.FP_IMG
         });
-      break; 
+        break;
     }
   }
 
@@ -239,7 +239,7 @@ class TournamentCard extends Component<any, any> {
       })
   }
 
-  render () {
+  render() {
     const { tournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner, gameNo, gameName, gameImage } = this.state
     const { connectAndValidateAccount, account, accountValidated, drizzle, address } = this.props
 
@@ -261,7 +261,7 @@ class TournamentCard extends Component<any, any> {
     //   return (null)
     // }
 
-//    const prizeStr = `${drizzle.web3.utils.fromWei(tournament.prize)} ETH`
+    //    const prizeStr = `${drizzle.web3.utils.fromWei(tournament.prize)} ETH`
     const endTimeStr = format(new Date(tournament.endTime),
       'MMM d, yyyy, HH:mm:ss')
 
@@ -276,7 +276,7 @@ class TournamentCard extends Component<any, any> {
             mb={2}
             type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
             name={"recepient"} // set the name to the method's argument key
-            onClick={this.handleJoinClick} 
+            onClick={this.handleJoinClick}
             disabled={gameNo === tournament.maxTries ? "disabled" : ""}
           >
             {playBtnText}
@@ -284,7 +284,7 @@ class TournamentCard extends Component<any, any> {
         )
       } else {
         if (!tournament.timeIsUp) {
-          return(
+          return (
             <StyledButton
               mt={"26px"}
               mb={2}
@@ -296,16 +296,16 @@ class TournamentCard extends Component<any, any> {
             </StyledButton>
           )
         } else {
-          return(
-          <StyledButton
-            mt={"26px"}
-            mb={2}
-            type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
-            name={"recepient"} // set the name to the method's argument key
-            onClick={this.handleJoinClick}
-          >
-            {buttonText}
-          </StyledButton>)
+          return (
+            <StyledButton
+              mt={"26px"}
+              mb={2}
+              type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
+              name={"recepient"} // set the name to the method's argument key
+              onClick={this.handleJoinClick}
+            >
+              {buttonText}
+            </StyledButton>)
         }
       }
     }
@@ -343,14 +343,18 @@ class TournamentCard extends Component<any, any> {
             </Flex>
             <Flex justifyContent={"center"} mt={1} mb={2}>
               <Text fontWeight={300} lineHeight={"0.75em"}>
-                Status: {  TOURNAMENT_STATES[tournament.state] }
+                Status: {TOURNAMENT_STATES[tournament.state]}
               </Text>
             </Flex>
 
             {!isContractOwner ? button() : ""}
-
+            <ViewResultsModal
+              tournamentId={tournament.id}
+              playerAddress={address}
+              drizzle={drizzle}
+            />
             {/* <Button onClick={() => {this.onActivate(tournament)}}>Activate</Button> */}
-            <JoinPromptModal 
+            <JoinPromptModal
               isOpen={isOpen}
               handleCloseModal={this.handleCloseModal}
               connectAndValidateAccount={connectAndValidateAccount}
@@ -359,7 +363,7 @@ class TournamentCard extends Component<any, any> {
               modalText={"You need to be logged in to join a tournament"}
             />
 
-            <BuyinPromptModal 
+            <BuyinPromptModal
               isOpen={isBuyinModalOpen}
               handleCloseBuyinModal={this.handleCloseBuyinModal}
               handleJoinClick={this.handleJoinClick}
