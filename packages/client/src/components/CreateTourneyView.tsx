@@ -213,6 +213,11 @@ class CreateTourneyView extends Component<any, any> {
 
     contractInputs.map((param) => {
       switch (param.type) {
+        // can refactor this to just parse [] and make it an array?
+        case 'address[]':
+          let addressArr = param.value.split(',');
+          contractParams.push(addressArr);
+          break;
         case 'uint256[]':
           let arr = param.value.split(',');
           contractParams.push(arr);
