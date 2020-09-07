@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
 
-import { Box, Card, Flex, Heading } from "rimble-ui"
 
-import { getGameSession, getTournamentResult, getTournaments, getTournament } from '../helpers/database'
-import { navigateTo } from '../helpers/utilities';
+import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
 import { RouteComponentProps } from '@reach/router';
@@ -172,29 +170,18 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   getBlockchainInfo = async (props) => {
-    const { tournamentId } = props
-
-    if (this.props.drizzle.contracts.Tournaments) {
-      const {drizzle} = this.props;
-      // Get the latest tournament
-      const contract = drizzle.contracts.Tournaments;
-  
+    const { tournamentId, playerAddress, drizzle } = props;
+    const contract = drizzle.contracts.Tournaments;
+    
+    // Tournament ID is undefined in Play Tab
+    if (tournamentId === undefined) {
       const tournamentLength = await contract.methods.getTournamentsCount().call();
-      let tI = undefined;
-      if (tournamentLength > 0) {
-        tI = tournamentId ? tournamentId : tournamentLength - 1;
-      }
-      console.log("TOURNAMENT ID = ", tI)
-      await this.getTournamentAndLeaderBoards(tI, true);
+      let tI = tournamentLength - 1;
+
+      playerAddress ? await this.getTournamentAndLeaderBoards(tI, true) : await this.getTournamentAndLeaderBoards(tI, false);
     } else {
-      let ids = await getTournaments();
-      console.log("IDSSSS", ids);
-      let tId = undefined;
-      if (ids.length > 0) {
-        tId = ids[ids.length - 1].id
-      }
-      console.log("THE ID IN DB IS", tId);
-      await this.getTournamentAndLeaderBoards(tId, false);
+      // Tournament ID is present in Tournaments and Dashboard
+      playerAddress ? await this.getTournamentAndLeaderBoards(tournamentId, true) : await this.getTournamentAndLeaderBoards(tournamentId, false);
     }
   }
 
