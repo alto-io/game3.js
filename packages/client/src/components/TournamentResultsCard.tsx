@@ -225,16 +225,13 @@ class TournamentResultsCard extends Component<any, any> {
     const { tournament } = this.state
     let path = '';
 
-    const name = window.prompt("Enter your name", "");
-    console.log(`Hi ${name}!`);
-
     const tosiosOptions = {
       mode: 'score attack',
       roomMap: 'small',
       roomMaxPlayers: '1',
       roomName: '',
       tournamentId: tournament.id,
-      playerName: name,
+      playerName: "Guest",
       viewOnly: tournament.timeIsUp
     }
 

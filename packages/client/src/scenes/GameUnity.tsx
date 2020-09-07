@@ -26,7 +26,8 @@ export class GameUnity extends React.Component<IProps, any> {
       unityShouldBeMounted: true,
       gameReady: false,
       selectedLevel: false,
-      isGameRunning: false
+      isGameRunning: false,
+      progression: 0
     };
 
     this.initializeUnity();
@@ -116,7 +117,7 @@ export class GameUnity extends React.Component<IProps, any> {
     );
 
     this.unityContent.on("progress", progression => {
-      this.setState({isGameRunning: true})
+      this.setState({isGameRunning: true, progression})
       console.log("Unity progress", progression);
     });
 
@@ -191,7 +192,7 @@ export class GameUnity extends React.Component<IProps, any> {
         {
           this.state.gameReady ?
           "Play Game (100 💎)" :
-          "Loading Game ..."
+          `Loading Game ... ${Math.floor(this.state.progression * 100)}%`
         }
         </Button>
 

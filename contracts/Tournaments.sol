@@ -50,6 +50,7 @@ contract Tournaments is Ownable {
   event ResultSubmitted(uint tournamentId, address indexed player,
     uint256 indexed resultId);
   event WinnersDeclared(uint tournamentId, uint256[] resultId);
+  event WinnersDeclaredByAddress(uint tournamentId, address payable[] resultId);
   event PrizeTransfered(uint tournamentId, uint256 resultId, address indexed player, uint256 amount);
   event TournamentStopped(uint tournamentId);
 
@@ -209,7 +210,7 @@ contract Tournaments is Ownable {
     payable
     tournamentIdIsCorrect(tournamentId)
     tournamentNotEnded(tournamentId)
-    notOrganizer(tournamentId)
+    // notOrganizer(tournamentId)
     correctTournamentState(tournamentId, TournamentState.Active)
     correctPaymentAmount(value)
     correctBuyInAmount(tournamentId)
@@ -232,6 +233,44 @@ contract Tournaments is Ownable {
     resultsPlayerMap[tournamentId][msg.sender].push(resultId);
     emit ResultSubmitted(tournamentId, msg.sender, resultId);
   }
+
+  function declareWinnersByPlayerId(uint tournamentId, address payable[] calldata playerIds)
+    external
+    tournamentIdIsCorrect(tournamentId)
+    onlyOrganizer(tournamentId)
+  {
+    require((tournaments[tournamentId].state == TournamentState.Active) || 
+      (tournaments[tournamentId].state == TournamentState.Ended),
+      "Incorrect tournament state");
+
+    uint resultCount = playerIds.length;
+    uint totalSentAmount = 0;
+    for (uint i = 0; i < resultCount; i++) {
+
+      // send result
+      uint amount = calcPrizeShareByIndex(tournamentId, i);
+      playerIds[i].transfer(amount);
+      // need to keep total balance unchanged while calculating prize shares
+      totalSentAmount += amount;
+      // resultid is unused (2nd parameter)
+      emit PrizeTransfered(tournamentId, 0, playerIds[i], amount);
+    }
+    tournaments[tournamentId].balance -= totalSentAmount;
+
+    tournaments[tournamentId].state = TournamentState.WinnersDeclared;
+    emit WinnersDeclaredByAddress(tournamentId, playerIds);
+  }
+
+
+  function calcPrizeShareByIndex(uint tournamentId, uint place)
+    public
+    view
+    returns (uint)
+  {
+    return tournaments[tournamentId].balance *
+      winnerShares[tournamentId][place] / totalShares[tournamentId];
+  }
+
 
   function declareWinners(uint tournamentId, uint[] calldata resultIds)
     external
