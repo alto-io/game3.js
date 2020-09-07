@@ -37,8 +37,10 @@ export class GameUnity extends React.Component<IProps, any> {
   unityContent = null as any;
 
   onPlayGame = async (e) => {
+    let gameServerUrl = "ws://localhost:3001";
 
     const gameId = this.props.path;
+
     switch (gameId)
     {
       case "wom":
@@ -47,12 +49,20 @@ export class GameUnity extends React.Component<IProps, any> {
         this.unityContent.send("OutplayManager", "StartGame", "start");
       break;
       case "flappybird":
+        this.unityContent.send("FlappyColyseusGameServerManager", "Connect", gameServerUrl);
         this.unityContent.send("Game3JsManager", "StartGame", "start");
       break;
 
     }
 
-    this.props.startRecording.call(null, gameId);
+    // TODO: disable recording for now
+    // this.props.startRecording.call(null, gameId);
+
+    this.setState(
+      {
+        isGameRunning: true
+      }
+    );
 
     // const updateUser = this.context.updateUser;
     // const response = await this.nakamaServiceInstance.PlayGame();
@@ -91,13 +101,23 @@ export class GameUnity extends React.Component<IProps, any> {
 
         // TODO: add any relevant game end code
         case 'GameEndFail':
-          this.setState({ isGameRunning: false });
-          this.props.stopRecording.call(null, "wom");
+          this.setState(
+            {
+              isGameRunning: false,
+              gameReady: true
+            }
+            );
+          // this.props.stopRecording.call(null, "wom");
 
       break;
         case 'GameEndSuccess':
-          this.setState({ isGameRunning: false });
-          this.props.stopRecording.call(null, "wom");
+          this.setState(
+            {
+              isGameRunning: false,
+              gameReady: true
+            }
+            );
+          // this.props.stopRecording.call(null, "wom");
       break;
 
     }
@@ -117,7 +137,7 @@ export class GameUnity extends React.Component<IProps, any> {
     );
 
     this.unityContent.on("progress", progression => {
-      this.setState({isGameRunning: true, progression})
+      this.setState({ progression })
       console.log("Unity progress", progression);
     });
 
@@ -127,8 +147,7 @@ export class GameUnity extends React.Component<IProps, any> {
       //// BUG: React doesn't like to render state change on new accounts :(
       this.setState(
         {
-          gameReady: true,
-          isGameRunning: true
+          gameReady: true
         }
       );
     });
@@ -183,16 +202,18 @@ export class GameUnity extends React.Component<IProps, any> {
       <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
         <Button
           block
-          disabled={!this.state.gameReady}
+          disabled={!this.state.gameReady || this.state.isGameRunning}
           className="mb-3"
           color="primary"
           type="button"
           onClick={this.onPlayGame}
         >
         {
-          this.state.gameReady ?
-          "Play Game (100 💎)" :
-          `Loading Game ... ${Math.floor(this.state.progression * 100)}%`
+          this.state.isGameRunning ?
+          "Game In Progress" :
+            this.state.gameReady ?
+              "Play Game (-1 Try)" :
+              `Loading Game ... ${Math.floor(this.state.progression * 100)}%`
         }
         </Button>
 
