@@ -60,6 +60,7 @@ export class GameUnity extends React.Component<IProps, any> {
 
     this.setState(
       {
+        gameReady: false,
         isGameRunning: true
       }
     );
@@ -103,8 +104,7 @@ export class GameUnity extends React.Component<IProps, any> {
         case 'GameEndFail':
           this.setState(
             {
-              isGameRunning: false,
-              gameReady: true
+              isGameRunning: false
             }
             );
           // this.props.stopRecording.call(null, "wom");
@@ -113,8 +113,7 @@ export class GameUnity extends React.Component<IProps, any> {
         case 'GameEndSuccess':
           this.setState(
             {
-              isGameRunning: false,
-              gameReady: true
+              isGameRunning: false
             }
             );
           // this.props.stopRecording.call(null, "wom");
@@ -143,13 +142,6 @@ export class GameUnity extends React.Component<IProps, any> {
 
     this.unityContent.on("loaded", () => {
       console.log("Yay! Unity is loaded!");
-
-      //// BUG: React doesn't like to render state change on new accounts :(
-      this.setState(
-        {
-          gameReady: true
-        }
-      );
     });
 
     this.unityContent.on("SendEvent", outplayEvent => {
@@ -202,7 +194,7 @@ export class GameUnity extends React.Component<IProps, any> {
       <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
         <Button
           block
-          disabled={!this.state.gameReady || this.state.isGameRunning}
+          disabled={!this.state.gameReady}
           className="mb-3"
           color="primary"
           type="button"
@@ -212,8 +204,10 @@ export class GameUnity extends React.Component<IProps, any> {
           this.state.isGameRunning ?
           "Game In Progress" :
             this.state.gameReady ?
-              "Play Game (-1 Try)" :
-              `Loading Game ... ${Math.floor(this.state.progression * 100)}%`
+              "Play Game" :
+              (this.state.progression === 1) ?
+                'Waiting for Game Start' :
+                `Loading Game ... ${Math.floor(this.state.progression * 100)}%`
         }
         </Button>
 
