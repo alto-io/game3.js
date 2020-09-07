@@ -557,6 +557,7 @@ export class OrbitDBManager implements DBManager {
     //   state: string,
     //   pool: number,
     //   data: string,
+    //   shares: string[]
     // }
 
     console.log("CREATE_TOURNEY: Initiating...");
@@ -581,6 +582,37 @@ export class OrbitDBManager implements DBManager {
       console.log("CREATE_TOURNEY: Returning...");
     }
 
+  }
+
+  async updateTournament(tournamentId, updatedData) {
+    console.log("UPDATE_TOURNEY: Intiating...");
+    console.log("UPDATE_TOURNEY: Finding data...");
+
+    let data = await this.tournaments.query(tournament =>
+      tournament.id === tournamentId
+    );
+
+    if (data.length > 0) {
+      console.log("UPDATE_TOURNEY: Data found!:", data[0]);
+
+      let keys = Object.keys(updatedData);
+
+      keys.forEach(key => {
+        if (data[0].hasOwnProperty(key)) {
+          data[0][`${key}`] = updatedData[`${key}`]
+        }
+      });
+
+      console.log("UPDATE_TOURNEY: Updating...");
+      await this.tournaments.put(data[0]);
+      console.log("UPDATE_TOURNEY: Updated!:", data[0]);
+      console.log("UPDATE_TOURNEY: Returning...");
+      return true
+    } else {
+      console.log("UPDATE_TOURNEY: No data found with id:", tournamentId);
+      console.log("UPDATE_TOURNEY: Returning...");
+      return false
+    }
   }
 
   async getTournaments() {

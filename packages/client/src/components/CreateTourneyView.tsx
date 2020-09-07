@@ -14,7 +14,7 @@ import web3 from 'web3';
 import Datetime from 'react-datetime';
 import '../react-datetime.css';
 
-import { newTournament } from '../helpers/database'
+import { newTournament, updateTournament } from '../helpers/database'
 
 class CreateTourneyView extends Component<any, any> {
 
@@ -52,15 +52,43 @@ class CreateTourneyView extends Component<any, any> {
     await drizzle.contracts.Tournaments.events.TournamentCreated().on('data', async (event) => {
       let tId = event.returnValues.tournamentId;
       const raw = await drizzle.contracts.Tournaments.methods.getTournament(tId).call();
+      const shares = await drizzle.contracts.Tournaments.methods.getShares(tId).call();
+
       const tournament = {
         id: tId,
         endTime: raw['1'],
         state: raw['3'],
         pool: raw['4'],
         data: raw['5'],
+        shares
       }
       console.log("TID PUT TO DB", tournament);
       await newTournament(tournament);
+    });
+
+    // Listen when tournament is activated
+    await drizzle.contracts.Tournaments.events.TournamentActivated().on('data', async (event) => {
+      let tId = event.returnValues.tournamentId;
+      const raw = await drizzle.contracts.Tournaments.methods.getTournament(tId).call();
+
+      const updatedTournament = {
+        state: raw['3'],
+        pool: raw['4']
+      }
+      console.log("TID UPDATE TO DB", tId);
+      await updateTournament(tId, updatedTournament);
+    });
+
+    // Listen to a new tournament BuyIn
+    await drizzle.contracts.Tournaments.events.TournamentNewBuyIn().on('data', async (event) => {
+      let tId = event.returnValues.tournamentId;
+      const raw = await drizzle.contracts.Tournaments.methods.getTournament(tId).call();
+
+      const updatedTournament = {
+        pool: raw['4']
+      }
+      console.log("TID UPDATE TO DB", tId);
+      await updateTournament(tId, updatedTournament);
     });
   }
 

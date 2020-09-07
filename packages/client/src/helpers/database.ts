@@ -247,3 +247,15 @@ export async function getTournament(tournamentId):Promise<any> {
   console.log("GET TOURNAMENT FETCHED", result);
   return result.data; 
 }
+
+export async function updateTournament(tournamentId, updatedData): Promise<any> {
+  const params = {
+    tournamentId,
+    updatedData
+  }
+
+  console.log("UPDATE TOURNAMENT CALLED", params);
+  const result = await api.patch('/tournament/update', params);
+  console.log("UPDATE TOURNAMENT FINISHED", result);
+  return result.data
+}

@@ -86,6 +86,7 @@ class TournamentResultsCard extends Component<any, any> {
     let raw = undefined;
     if (loggedIn) {
       raw = await contract.methods.getTournament(tournamentId).call()
+      await this.fetchShares(tournamentId);
       let data = this.parseData(raw['5']);
       const gameName = data[0];
       tournament = {
@@ -117,6 +118,11 @@ class TournamentResultsCard extends Component<any, any> {
         state: parseInt(raw[0].state),
         pool: raw[0].pool
       }
+      console.log("FETCH SHARES NOT LOGGED IN", raw[0].shares);
+      console.log("FETCH POOL NOT LOGGED IN", raw[0].pool);
+      this.setState({
+        shares: raw[0].shares
+      })
     }
 
     switch (tournament.name) {
@@ -274,6 +280,7 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   fetchShares = async (tournamentId) => {
+    console.log("FETCH SHARES");
     const { drizzle } = this.props;
     
     try {
@@ -289,7 +296,8 @@ class TournamentResultsCard extends Component<any, any> {
     const { results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
 
-    this.fetchShares(tournamentId);
+    console.log("SHARES FROM STATE", shares);
+    console.log("POOL FROM STATE", tournament.pool);
 
     if (isLoading) {
       return (
@@ -306,11 +314,11 @@ class TournamentResultsCard extends Component<any, any> {
         let sharesText;
 
         if (idx === 0) {
-          sharesText =  <p>&#x1F947; {(tournament.pool * shares[0]) / 100} ETH</p>
+          sharesText =  <p>&#x1F947; {(tournament.pool * parseInt(shares[0])) / 100} ETH</p>
         } else if (idx === 1 ){
-          sharesText =  <p>&#x1F948; {(tournament.pool * shares[1]) / 100} ETH</p>
+          sharesText =  <p>&#x1F948; {(tournament.pool * parseInt(shares[1])) / 100} ETH</p>
         } else if (idx === 2) {
-          sharesText =  <p>&#x1F949; {(tournament.pool * shares[2]) / 100} ETH</p>
+          sharesText =  <p>&#x1F949; {(tournament.pool * parseInt(shares[2])) / 100} ETH</p>
         }
 
         if (result.sessionData) {

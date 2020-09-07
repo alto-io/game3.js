@@ -222,6 +222,18 @@ app.get('/tourney', async (req: any, res: any) => {
   res.json(result)
 })
 
+app.patch('/tournament/update', async (req: any, res: any) => {
+
+  const tournamentId = req.body.tournamentId;
+  const updatedData = req.body.updatedData;
+
+  console.log("SERVER UPDATE TOURNAMENT: TournamentID: ", tournamentId);
+  console.log("SERVER UPDATE TOURNAMENT: UpdatedData: ", updatedData);
+
+  const result = await GlobalState.ServerState.dbManager.updateTournament(tournamentId, updatedData);
+  res.json(result);
+})
+
 // Serve the frontend client
 app.get('*', (req: any, res: any) => {
   res.sendFile(join(__dirname, 'public', 'index.html'));
