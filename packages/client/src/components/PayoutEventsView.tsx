@@ -219,10 +219,9 @@ class PayoutEventsView extends Component<any, any> {
       </EventsCard>
     );
 
-    // .filter (tournament => tournament.state === 3)
 
     // If none 
-    const doneTournaments = tournaments;
+    const doneTournaments = tournaments.filter (tournament => tournament.state === 3);
     const noPayouts = doneTournaments.filter( tournament => {
       return tournament.results.filter( result => result.isWinner !== true);
     });
