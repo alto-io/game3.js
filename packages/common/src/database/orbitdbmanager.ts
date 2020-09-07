@@ -251,7 +251,11 @@ export class OrbitDBManager implements DBManager {
     return { result: sessionId }
   }
 
-  async serverUpdateScore(didWin, sessionId, playerAddress, tournamentId) {
+  async serverUpdateScore(didWin, sessionId, playerAddress, tournamentId, timeFinished) {
+
+    // As of now, the scoring mechanism depends on the shortest time you win the game.
+    // Sooner, we'll support several scoring mechanism.
+
     if (tournamentId !== undefined) {
       console.log("UPDATE_SCORE: Function Invoked...");
 
@@ -268,22 +272,21 @@ export class OrbitDBManager implements DBManager {
         console.log("UPDATE_SCORE: Session data", data[0].sessionData);
         console.log("UPDATE_SCORE: Player data", playerData);
         console.log("UPDATE_SCORE: Update score...", playerData);
-
-        console.log("UPDATE_SCORE: Current High Score", playerData.currentHighestNumber);
-        console.log("UPDATE_SCORE: Current Score", playerData.timeLeft);
+        let playerScore = Math.abs(playerData.timeLeft - timeFinished);
+        console.log("UPDATE_SCORE: Current High Score (shortest time)", playerData.currentHighestNumber);
+        console.log("UPDATE_SCORE: Current Score", playerScore);
         console.log("UPDATE_SCORE: Did win?", didWin);
-
-        let playerScore = 0;
 
         if (!didWin) {
           console.log("UPDATE_SCORE: Player did not win");
           console.log("UPDATE_SCORE: Player score reverts to 0");
         } else {
           console.log("UPDATE_SCORE: Player did win");
-          playerScore = playerData.timeLeft;
 
-          if (playerData.timeLeft > playerData.currentHighestNumber) {
-            playerData.currentHighestNumber = playerData.timeLeft;
+          playerData.timeLeft = playerScore;
+
+          if (playerScore < (playerData.currentHighestNumber === 0 ? playerScore + 1 : playerData.currentHighestNumber)) {
+            playerData.currentHighestNumber = playerScore;
             console.log("UPDATE_SCORE: Thew new data", playerData);
             data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
             await this.gameSessions.put(data[0]);

@@ -166,7 +166,8 @@ class TournamentResultsCard extends Component<any, any> {
       console.log("RESULTS:", results)
       results = results.filter(result => !!result.sessionData && !!result.name)
       if (results.length > 1) {
-        results.sort((el1, el2) => el2.sessionData.currentHighestNumber - el1.sessionData.currentHighestNumber)
+        // Sorts in ascending order
+        results.sort((el1, el2) => el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber)
       }
     }
     this.setState({

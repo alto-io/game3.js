@@ -151,13 +151,14 @@ export async function deleteGameSessionId(gameSessionId): Promise<any> {
   return response.data
 }
 
-export async function updateSessionScore(didWin, gameSessionId, playerAddress, tournamentId): Promise<any> {
+export async function updateSessionScore(didWin, gameSessionId, playerAddress, tournamentId, timeFinished): Promise<any> {
   
   const params = {
     didWin,
     sessionId: gameSessionId,
     playerAddress,
-    tournamentId
+    tournamentId,
+    timeFinished
   }
 
   const res = await api.post('/gameSession/score', params);
@@ -176,11 +177,10 @@ export async function updateGameNo(sessionId, playerAddress, tournamentId) {
 }
 
 export async function makeNewGameSession(sessionId, tournamentId, players, endsAt): Promise<any> {
-  let timeLeft = endsAt - Date.now();
   const params = {
     sessionId,
     tournamentId, 
-    timeLeft, 
+    timeLeft: Date.now(), 
     players
   }
 

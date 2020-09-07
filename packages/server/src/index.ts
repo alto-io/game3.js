@@ -154,12 +154,13 @@ app.post('/gameSession/score', async (req: any, res: any) => {
   const sessionId = req.body.sessionId;
   const playerAddress = req.body.playerAddress;
   const tournamentId = req.body.tournamentId;
+  const timeFinished = req.body.timeFinished;
 
   console.log("Server POST sessionId is", sessionId);
   console.log("Server POST did win", didWin);
 
   const result = await GlobalState.ServerState.dbManager
-    .serverUpdateScore(didWin, sessionId, playerAddress, tournamentId);
+    .serverUpdateScore(didWin, sessionId, playerAddress, tournamentId, timeFinished);
   
   res.json(result);
 })
