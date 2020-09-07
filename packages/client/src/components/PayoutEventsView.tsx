@@ -205,7 +205,8 @@ class PayoutEventsView extends Component<any, any> {
     );
 
     // If none 
-    const noPayouts = tournaments.filter( tournament => {
+    const doneTournaments = tournaments.filter (tournament => tournament.state === 3);
+    const noPayouts = doneTournaments.filter( tournament => {
       return tournament.results.filter( result => result.isWinner !== true);
     });
 
