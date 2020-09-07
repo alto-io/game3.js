@@ -17,6 +17,8 @@ import { getGameNo, getGameSessionId } from '../helpers/database';
 // import { GAME_DETAILS } from '../constants';
 import { Constants } from "@game3js/common";
 
+import web3 from 'web3';
+
 const StyledButton = styled(Button)`
   font-family: 'Apercu Light';
   font-size: 0.75rem;
@@ -326,8 +328,7 @@ class TournamentCard extends Component<any, any> {
 
             <Flex justifyContent={"center"} mt={3} mb={4}>
               <Text fontWeight={600} lineHeight={"1em"}>
-                {/* Prize: { web3.utils.fromWei(tournament.prize)} ETH */}
-                Prize: {tournament.prize} ETH
+                Prize: { web3.utils.fromWei(tournament.prize) } ETH
               </Text>
             </Flex>
 
