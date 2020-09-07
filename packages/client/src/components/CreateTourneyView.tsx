@@ -193,6 +193,23 @@ class CreateTourneyView extends Component<any, any> {
     this.forceUpdate();
   }
 
+  applyConversions = (param) => {
+    let value = param.value;
+
+    switch (param.name) {
+      case "prize":
+      case "buyInAmount":
+      case "value":
+        value = web3.utils.toWei(param.value.toString(), 'ether');
+      break;
+      default:
+
+      break;
+    }
+
+    return value;
+  }
+
   handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -213,7 +230,7 @@ class CreateTourneyView extends Component<any, any> {
 
     contractInputs.map((param) => {
       switch (param.type) {
-        // can refactor this to just parse [] and make it an array?
+        // TODO: can refactor this to just parse [] and make it an array?
         case 'address[]':
           let addressArr = param.value.split(',');
           contractParams.push(addressArr);
@@ -223,9 +240,14 @@ class CreateTourneyView extends Component<any, any> {
           contractParams.push(arr);
           break;
         default:
-          contractParams.push(param.value);
+          // TODO: refactor to support other contracts aside from Tournament
+          let value = this.applyConversions(param);
+          contractParams.push(value);
           break;
       }
+
+
+
     })
 
     console.log(contractParams);
@@ -235,7 +257,7 @@ class CreateTourneyView extends Component<any, any> {
     }
 
     if (this.state.payable) {
-      sendParams["value"] = this.state.payableAmount.toString(); // web3.utils.toWei(this.state.payableAmount);
+      sendParams["value"] = web3.utils.toWei(this.state.payableAmount.toString(), "ether");
     }
 
     if (this.state.view) {
