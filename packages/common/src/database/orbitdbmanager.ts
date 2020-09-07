@@ -639,4 +639,61 @@ export class OrbitDBManager implements DBManager {
     console.log("GET_TOURNEY: Returning...");
     return tournament
   }
+
+  async getTourneyWinners(tournamentId) {
+    console.log("GET_TOURNEY_WINNERS: Initiating...");
+    console.log("GET_TOURNEY_WINNERS: Fetching tourney");
+
+    let tourney = await this.tournaments.query(tournament =>
+      tournament.id === tournamentId
+    )
+
+    if (tourney.length > 0) {
+      console.log("GET_TOURNEY_WINNERS: Tourney fetched!!", tourney);
+
+      let winnersLength = tourney.shares.length;
+
+      console.log("GET_TOURNEY_WINNERS: Fetching tourney session data");
+      let tourneySession = await this.getTournamentResult(tournamentId);
+
+      if (tourneySession.length > 0) {
+        console.log("GET_TOURNEY_WINNERS: Tourney session fetched!!", tourneySession);
+
+        let players = tourneySession.map(session => {
+          let playerAddress = Object.keys(session.sessionData.playerData);
+          return {
+            address: playerAddress[0],
+            score: session.sessionData.playerData[playerAddress[0]].currentHighestNumber
+          }
+        });
+
+        console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+
+        console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+        // sort in ascending order since shortest time is the winner
+        players.sort((el1, el2) => el1.score - el2.score);
+        console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+
+        console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+        let winners = players.map((player, idx) => {
+          if (idx < winnersLength) {
+            return player.address
+          }
+        });
+        console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+        console.log("GET_TOURNEY_WINNERS: Returning...");
+
+        return winners;
+
+      } else {
+        console.log("GET_TOURNEY_WINNERS: No tourney session fetched with id: ", tournamentId);
+        console.log("GET_TOURNEY_WINNERS: Returning...");
+        return []
+      }
+    } else {
+      console.log("GET_TOURNEY_WINNERS: No tourney fetched with id: ", tournamentId);
+      console.log("GET_TOURNEY_WINNERS: Returning...");
+      return []
+    }
+  }
 }

@@ -259,3 +259,14 @@ export async function updateTournament(tournamentId, updatedData): Promise<any> 
   console.log("UPDATE TOURNAMENT FINISHED", result);
   return result.data
 }
+
+export async function getTourneyWinners(tournamentId): Promise<any> {
+  const params = {
+    tournamentId
+  }
+
+  console.log("GET TOURNAMENT WINNERS", params);
+  const result = await api.get('/tourney/winners', {params});
+  console.log("GET TOURNAMENT WINNERS FINISHED", result);
+  return result.data
+}
