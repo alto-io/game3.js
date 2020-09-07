@@ -7,6 +7,8 @@ import { format } from 'date-fns';
 import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
 import ViewResultsModal from './ViewResultsModal';
 
+import web3 from 'web3';
+
 const OngoingCard = styled(Card)`
   box-shadow: none;
   display: flex;
@@ -82,7 +84,7 @@ class PlayerOngoingTournaments extends Component {
             <p className="lead">End Time</p>
             <Text fontWeight="bold" marginBottom={"0.25rem"}>{ format(new Date(tournament.endTime),'MMM d, yyyy, HH:mm') }</Text>
             <p className="lead">Prize</p>
-            <Text fontWeight="bold" marginBottom={"0.25rem"}>{tournament.prize} ETH</Text>
+            <Text fontWeight="bold" marginBottom={"0.25rem"}>{tournament && web3.utils.fromWei(tournament.prize.toString())} ETH</Text>
             <p className="lead">State</p>
             <Text fontWeight="bold" marginBottom={"1rem"}>Active</Text>
             {results}
