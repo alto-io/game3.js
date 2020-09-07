@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
-import { Box, Card, Heading, Image, Text } from "rimble-ui";
+import { Box, Card, Heading, Image } from "rimble-ui";
 import styled from "styled-components";
 
-import { GAME_DETAILS } from '../constants';
+import { Constants } from '@game3js/common';
 
 import ViewResultsModal from './ViewResultsModal';
 
@@ -134,15 +134,16 @@ class PayoutEventsView extends Component<any, any> {
       // this.addEvent(event)
     })
 
-    // // Mock Data
+    // Mock Data
     // let sampleEvent = {
-    //   id: 0,
-    //   amount: 2,
-    //   tournamentId: 0,
-    //   resultId: 1,
-    // }
+    //   returnValues: {
+    //     id: 0,
+    //     amount: 2,
+    //     tournamentId: 0,
+    //     resultId: 1
+    // }}
 
-    // this.fetchTournamentDetails(sampleEvent.tournamentId)
+    // this.fetchTournamentDetails(sampleEvent.returnValues.tournamentId)
     // .then( tournamentDetails => {
     //   this.addEvent({
     //     ...sampleEvent, 
@@ -165,17 +166,31 @@ class PayoutEventsView extends Component<any, any> {
     const contract = drizzle.contracts.Tournaments;
     const tournamentDetails = await contract.methods.getTournament(tournamentId).call();
     const data = parseData(tournamentDetails['5']);
-    const gameDetails = GAME_DETAILS.find( game => game.name.toLowerCase() === data[0].toLowerCase());
-  
+   
     const tournament = {
-      gameName: gameDetails.name,
+      gameName: '',
       gameStage: data[1],
-      gameImage: gameDetails.image
+      gameImage: ''
     }
 
+    switch (data[0]) {
+      case 'wom' :
+        tournament.gameName = 'World of Mines';
+        tournament.gameImage = Constants.WOM_IMG;
+        break;
+      case 'tosios' :
+        tournament.gameName = 'TOSIOS';
+        tournament.gameImage = Constants.TOSIOS_IMG;
+        break;
+      case 'fp' :
+        tournament.gameName = 'Flappy Bird Open-Source';
+        tournament.gameImage = Constants.FP_IMG;
+        break;
+    }
+  
     return tournament;
   }
-  
+
   render() {
     const { address, tournaments, drizzle } = this.props
     const { events } = this.state
@@ -194,7 +209,7 @@ class PayoutEventsView extends Component<any, any> {
   
     // If player has winnings
     const eventsRendered = events.map( event => 
-      <EventsCard key={event.id}>
+      <EventsCard key={event.id} mb={3}>
         <GameImage src={"images/" + event.gameImage} />
         <Box>
           <p className="tournamentID">Tournament {event.returnValues.tournamentId}</p>
@@ -204,13 +219,16 @@ class PayoutEventsView extends Component<any, any> {
       </EventsCard>
     );
 
+    // .filter (tournament => tournament.state === 3)
+
     // If none 
-    const noPayouts = tournaments.filter( tournament => {
+    const doneTournaments = tournaments;
+    const noPayouts = doneTournaments.filter( tournament => {
       return tournament.results.filter( result => result.isWinner !== true);
     });
 
     const noPayoutsRendered = noPayouts.map( noPayout => 
-      <EventsCard key={noPayout.id}>
+      <EventsCard key={noPayout.id} mb={3}>
         <GameImage src={"images/" + noPayout.gameImage} />
           <Box>
             <p className="tournamentID">Tournament {noPayout.id}</p>

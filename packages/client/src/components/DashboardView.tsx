@@ -124,6 +124,7 @@ class DashboardView extends Component<any, any> {
           case 'fp' :
             tournament.gameName = 'Flappy Bird Open-Source';
             tournament.gameImage = Constants.FP_IMG;
+            break;
         }
         
         tournament.timeIsUp = isPast(new Date(tournament.endTime));

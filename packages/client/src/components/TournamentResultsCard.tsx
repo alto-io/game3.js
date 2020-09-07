@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
 
-import { Box, Card, Flex, Heading } from "rimble-ui"
 
-import { getGameSession, getTournamentResult, getTournaments, getTournament } from '../helpers/database'
-import { navigateTo } from '../helpers/utilities';
+import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
 import { RouteComponentProps } from '@reach/router';

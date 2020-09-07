@@ -73,7 +73,7 @@ class PlayerOngoingTournaments extends Component {
       
       return(
         <>
-        <OngoingCard key={tournament.id}>
+        <OngoingCard key={tournament.id} mb={3}>
           <GameImage src={"images/" + tournament.gameImage}/>
           <Box ml={3}>
             <p className="tournamentID">Tournament {tournament.id}</p>
