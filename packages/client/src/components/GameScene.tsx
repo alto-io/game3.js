@@ -1,12 +1,47 @@
 import React, {Component} from 'react';
+import { Flex, Box } from 'rimble-ui';
+import styled from 'styled-components';
 
 import { Router } from '@reach/router'
 import qs from 'querystringify';
+import { DEFAULT_GAME_DIMENSION } from '../constants'
 
-import TournamentResultsCard from './TournamentResultsCard'
+import TournamentResultsCard from './TournamentResultsCard';
 
-import CSS from 'csstype';
-import { baseColors } from '../styles';
+const GameWindowContainer = styled(Flex)`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 0 auto;
+  padding-top: 1rem;
+  max-width: 1180px;
+
+  .game {
+    width: 100%:
+  }
+
+  .leaderboards {
+    width: 100%;
+  }
+
+  @media screen and (min-width: 950px) {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+
+    .game {
+      width: 70%;
+    }
+
+    .leaderboards {
+      width: 30%;
+    }
+  }
+`
+
+// import CSS from 'csstype';
+// import { baseColors } from '../styles';
 
 export default class GameScene extends Component<any, any> {
 
@@ -33,40 +68,41 @@ export default class GameScene extends Component<any, any> {
 		} = this.state;
 
 		return (
-			<div style={gamescenecontainerStyle}>
-				<div style={gameStyle}>
+			<GameWindowContainer>
+				<Box className="game">
 					{children}
-				</div>
-				<div style={leaderBoardsStyle}>
-					<TournamentResultsCard
-						tournamentId={tournamentId}
-						drizzle={drizzle}
-						playerAddress={playerAddress}
-					/>
-				</div>
-			</div>
+				</Box>
+
+        <Box className="leaderboards">
+          <TournamentResultsCard
+            tournamentId={tournamentId}
+            drizzle={drizzle}
+            playerAddress={playerAddress}
+          />
+        </Box>
+			</GameWindowContainer>
 		)
 	}
 }
 
-const gamescenecontainerStyle: CSS.Properties = {
-  background: `rgb(${baseColors.lightGrey})`,
-  display: 'flex',
-	width: '100%',
-	padding: '2rem 0'
-}
+// const gamescenecontainerStyle: CSS.Properties = {
+//   background: `rgb(${baseColors.lightGrey})`,
+//   display: 'flex',
+// 	width: '100%',
+// 	padding: '2rem 0'
+// }
 
-const gameStyle: CSS.Properties = {
-	flex: 3,
-	display: 'flex',
-	justifyContent: 'center',
-	margin: '5px 0 5px 5px'
-}
+// const gameStyle: CSS.Properties = {
+// 	flex: 3,
+// 	display: 'flex',
+// 	justifyContent: 'center',
+// 	margin: '5px 0 5px 5px'
+// }
 
-const leaderBoardsStyle: CSS.Properties = {
-	flex: 1,
-	display: 'flex',
-	justifyContent: 'center',
-	flexDirection: 'column',
-	margin: '5px 5px 0 5px'
-}
+// const leaderBoardsStyle: CSS.Properties = {
+// 	flex: 1,
+// 	display: 'flex',
+// 	justifyContent: 'center',
+// 	flexDirection: 'column',
+// 	margin: '5px 5px 0 5px'
+// }
