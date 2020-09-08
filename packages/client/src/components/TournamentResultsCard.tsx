@@ -28,6 +28,7 @@ const SharesText = styled.p`
   .place {
     font-family: 'Apercu Bold', sans-serif;
     font-weight: bold;
+    margin-right: 1rem;
   }
 `;
 
@@ -315,6 +316,7 @@ class TournamentResultsCard extends Component<any, any> {
 
     // console.log("SHARES FROM STATE", shares);
     // console.log("POOL FROM STATE", tournament.pool);
+    // console.log(results);
 
     if (isLoading) {
       return (
@@ -327,6 +329,7 @@ class TournamentResultsCard extends Component<any, any> {
     let resultDivs = null;
 
     if (results.length > 0) {
+      console.log("result length > 0")
       resultDivs = results.map( (result, idx) => {
 
         if (result.sessionData) {
@@ -360,7 +363,13 @@ class TournamentResultsCard extends Component<any, any> {
           let trophy = <span className="trophy">{this.setTrophy(idx, shares)}</span>;
           let shareETH = <span className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</span>
           return(
-          <SharesText>{place} {trophy} {shareETH}</SharesText>
+          <SharesText key={idx}>
+            <span>
+              {place} 
+              {trophy} 
+            </span>
+            {shareETH}
+          </SharesText>
           )
         })
       }
