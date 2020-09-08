@@ -3,6 +3,7 @@ import { Card, Heading, Image, Text, Box} from "rimble-ui";
 import styled from "styled-components";
 
 import { format } from 'date-fns';
+import web3 from 'web3';
 
 import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
 
@@ -29,7 +30,7 @@ const OngoingCard = styled(Card)`
   }
 
   @media screen and (min-width: 768px) {
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     flex-direction: row;
   }
@@ -51,8 +52,8 @@ const GameImage = styled(Image)`
   height: 170px;
   
   @media screen and (min-width: 768px) {
-    margin-right: 1rem;
     margin-bottom : 0;
+    margin-right: 2rem;
     width: 185px;
     height: 123px;
   }
@@ -74,14 +75,14 @@ class PlayerOngoingTournaments extends Component {
       return(
         <>
         <OngoingCard key={tournament.id} mb={3}>
-          <GameImage src={"images/" + tournament.gameImage}/>
-          <Box ml={3}>
+          <GameImage src={"images/" + tournament.gameImage} m={0}/>
+          <Box m={0}>
             <p className="tournamentID">Tournament {tournament.id}</p>
             <h6 className="gameName">{tournament.gameName} {tournament.gameStage !== undefined ? "- " + tournament.gameStage : ""}</h6>
             <p className="lead">End Time</p>
             <Text fontWeight="bold" marginBottom={"0.25rem"}>{ format(new Date(tournament.endTime),'MMM d, yyyy, HH:mm') }</Text>
             <p className="lead">Prize</p>
-            <Text fontWeight="bold" marginBottom={"0.25rem"}>{tournament.prize} ETH</Text>
+            <Text fontWeight="bold" marginBottom={"0.25rem"}>{tournament && web3.utils.fromWei(tournament.prize.toString())} ETH</Text>
             <p className="lead">State</p>
             <Text fontWeight="bold" marginBottom={"1rem"}>Active</Text>
             {results}
