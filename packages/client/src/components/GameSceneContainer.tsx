@@ -1,11 +1,26 @@
 import React, { Component } from 'react';
-
-import CSS from 'csstype';
+import { Box } from 'rimble-ui';
+import styled from 'styled-components';
 
 import { RouteComponentProps } from '@reach-router';
 
 // Components
 import LeavingGamePrompt from './LeavingGamePrompt';
+
+const CanvasContainerStyle = styled(Box)`
+  width: 100%;
+  height: 100%;
+
+  div {
+    width: 100%;
+    height: 100%;
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  }
+`
 
 interface IProps extends RouteComponentProps {
 	viewOnly?: boolean,
@@ -23,25 +38,20 @@ export default class GameSceneContainer extends Component<IProps, any> {
 		const { children, viewOnly, when, tournamentId } = this.props;
 
 		return (
-			<div style={canvasContainerStyle}>
+			<CanvasContainerStyle className="canvas-container">
 				<LeavingGamePrompt when={when} tournamentId={tournamentId} viewOnly={viewOnly}/>
 				{viewOnly === undefined ? (
-					<div style={canvasContainerStyle}>
-						{children}	
-					</div>
+          <div>
+            {children}
+          </div>
 				) : (
 					!viewOnly && (
-						<div style={canvasContainerStyle}>
-							{children}	
-						</div>
+            <div>
+              {children}	
+            </div>
 					)
 				)}
-			</div>
+			</CanvasContainerStyle>
 		)
 	}
-}
-
-const canvasContainerStyle: CSS.Properties = {
-  width: '100%',
-  height: '100%'
 }

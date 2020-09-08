@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
-
+import styled from 'styled-components';
 
 import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
 import { RouteComponentProps } from '@reach/router';
 import qs from 'querystringify';
-import { format } from 'date-fns'
+import { format } from 'date-fns';
 
 import CSS from 'csstype';
 import { baseColors, fonts, shadows, } from '../styles';
@@ -19,6 +19,17 @@ import {
 
 import { Constants } from '@game3js/common';
 import web3 from 'web3';
+
+const SharesText = styled.p`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+
+  .place {
+    font-family: 'Apercu Bold', sans-serif;
+    font-weight: bold;
+  }
+`;
 
 class TournamentResultsCard extends Component<any, any> {
   constructor(props) {
@@ -204,207 +215,213 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
-  getStatus(tournament: any) {
-    switch (tournament.state) {
-      case TOURNAMENT_STATE_DRAFT:
-        return 'Draft'
-        break;
-      case TOURNAMENT_STATE_ACTIVE:
-        return 'Active'
-        break;
-      case TOURNAMENT_STATE_ENDED:
-        return 'Done'
-        break;
+getStatus(tournament: any) {
+  switch (tournament.state) {
+    case TOURNAMENT_STATE_DRAFT:
+      return 'Draft'
+      break;
+    case TOURNAMENT_STATE_ACTIVE:
+      return 'Active'
+      break;
+    case TOURNAMENT_STATE_ENDED:
+      return 'Done'
+      break;
+    default:
+      return 'None'
+      break;
+  }
+}
+
+formatTourneyTimeInfo(tournament: any) {
+  const {
+    startDate,
+    endTime,
+    startTime,
+    timeZone
+  } = tournament;
+  let info =
+    `Ends on ${endTime} ${timeZone}`;
+
+  return info;
+}
+
+// Formats the title of the tournament along with its ID 
+formatTourneyTitle(tournament: any) {
+  return `${tournament.name} #${tournament.id}`;
+}
+
+handleJoinClick = () => {
+  const { tournament } = this.state
+  let path = '';
+
+  const tosiosOptions = {
+    mode: 'score attack',
+    roomMap: 'small',
+    roomMaxPlayers: '1',
+    roomName: '',
+    tournamentId: tournament.id,
+    playerName: "Guest",
+    viewOnly: tournament.timeIsUp
+  }
+
+  switch (tournament.name) {
+    case Constants.WOM:
+      path = '' //Join tourney for wom
+      break;
+    case Constants.TOSIOS:
+      path = `/game/new${qs.stringify(tosiosOptions, true)}`
+      break;
+    case Constants.FP:
+      path = '' //Join tourney for flappy bird
+      break;
+    default:
+      break;
+  }
+  window.history.replaceState(null, '', path);
+  // navigateTo(path);
+}
+
+setResultBgColor(playerAddress, currentPlayerAddress) {
+  if (playerAddress && playerAddress.toLowerCase() === currentPlayerAddress.toLowerCase()) {
+    return baseColors.lightGrey;
+  } else {
+    return baseColors.white;
+  }
+}
+
+fetchShares = async (tournamentId) => {
+  console.log("FETCH SHARES");
+  const { drizzle } = this.props;
+
+  try {
+    const contract = drizzle.contracts.Tournaments;
+    const shares = await contract.methods.getShares(tournamentId).call();
+
+    this.setState({ shares });
+  }
+  catch (e) { }
+}
+
+setTrophy(idx, shares) {
+  if (idx < shares.length) {
+    switch (idx) {
+      case 0:
+        return <span>&#x1F947;</span>
+      case 1:
+        return <span>&#x1F948;</span>
       default:
-        return 'None'
-        break;
+        return <span>&#x1F949;</span>
     }
   }
+}
 
+formatTime = (time, isLeaderBoards) => {
+  if (time) {
+    const seconds = (parseInt(time) / 1000).toFixed(2);
+    const minutes = Math.floor(parseInt(seconds) / 60);
+    let totalTime = '';
+    if (parseInt(seconds) > 60) {
+      let sec = (parseInt(seconds) % 60).toFixed(2);
 
-  formatTourneyTimeInfo(tournament: any) {
-    const {
-      startDate,
-      endTime,
-      startTime,
-      timeZone
-    } = tournament;
-    let info =
-      `Ends on ${endTime} ${timeZone}`;
-
-    return info;
-  }
-
-  // Formats the title of the tournament along with its ID 
-  formatTourneyTitle(tournament: any) {
-    return `${tournament.name} #${tournament.id}`;
-  }
-
-  handleJoinClick = () => {
-    const { tournament } = this.state
-    let path = '';
-
-    const tosiosOptions = {
-      mode: 'score attack',
-      roomMap: 'small',
-      roomMaxPlayers: '1',
-      roomName: '',
-      tournamentId: tournament.id,
-      playerName: "Guest",
-      viewOnly: tournament.timeIsUp
-    }
-
-    switch (tournament.name) {
-      case Constants.WOM:
-        path = '' //Join tourney for wom
-        break;
-      case Constants.TOSIOS:
-        path = `/game/new${qs.stringify(tosiosOptions, true)}`
-        break;
-      case Constants.FP:
-        path = '' //Join tourney for flappy bird
-        break;
-      default:
-        break;
-    }
-    window.history.replaceState(null, '', path);
-    // navigateTo(path);
-  }
-
-  setResultBgColor(playerAddress, currentPlayerAddress) {
-    if (playerAddress && playerAddress.toLowerCase() === currentPlayerAddress.toLowerCase()) {
-      return baseColors.lightGrey;
+      totalTime += isLeaderBoards ? (minutes + ":" + sec).toString() : (minutes + "min" + " " + sec + "sec").toString()
     } else {
-      return baseColors.white;
+      totalTime += isLeaderBoards ? ("0:" + seconds).toString() : (seconds + "sec").toString()
     }
+    return totalTime
   }
+}
 
-  fetchShares = async (tournamentId) => {
-    console.log("FETCH SHARES");
-    const { drizzle } = this.props;
+render() {
+  const { results, isLoading, tournament, shares } = this.state;
+  const { tournamentId, playerAddress } = this.props;
 
-    try {
-      const contract = drizzle.contracts.Tournaments;
-      const shares = await contract.methods.getShares(tournamentId).call();
-
-      this.setState({ shares });
-    }
-    catch (e) { }
-  }
-
-  setTrophy(idx, shares) {
-    if (idx < shares.length) {
-      switch (idx) {
-        case 0:
-          return <span>&#x1F947;</span>
-        case 1:
-          return <span>&#x1F948;</span>
-        default:
-          return <span>&#x1F949;</span>
-      }
-    }
-  }
-
-  formatTime = (time, isLeaderBoards) => {
-    if (time) {
-      const seconds = (parseInt(time) / 1000).toFixed(2);
-      const minutes = Math.floor(parseInt(seconds) / 60);
-      let totalTime = '';
-      if (parseInt(seconds) > 60) {
-        let sec = (parseInt(seconds) % 60).toFixed(2);
-    
-        totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min"+" "+sec+"sec").toString()
-      } else {
-        totalTime += isLeaderBoards ? ("0:"+seconds).toString() : (seconds+"sec").toString()
-      }
-      return totalTime
-    }
-  }
-
-  render() {
-    const { results, isLoading, tournament, shares } = this.state;
-    const { tournamentId, playerAddress } = this.props;
-
-    if (isLoading) {
-      return (
-        <div style={divLoadingStyle}>
-          Loading...
-        </div>
-      )
-    }
-
-    let resultDivs = null
-
-    if (results.length > 0) {
-      resultDivs = results.map((result, idx) => {
-      
-        if (result.sessionData) {
-          return (
-            <div
-              style={{ ...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})` }}
-              key={result.sessionId}
-            >
-              <span style={playerAddressStyle}>
-                {shortenAddress(result.playerAddress)}
-              </span>
-              {idx < shares.length ? <span>{
-                <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
-              }</span> : ""}
-              <span style={timeLeftStyle}>
-                {result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}
-              </span>
-            </div>
-          )
-        }
-      });
-    } else {
-      if (!tournamentId) {
-        resultDivs = (
-          <div style={resultDivStyle}>
-            Join Tournament to be in leaderboards!
-          </div>
-        )
-      } else {
-        resultDivs = null
-      }
-    }
-
+  if (isLoading) {
     return (
-      <div style={widgetStyle}>
-        {!!tournament ? (
-          <>
-            <div style={tournamentInfoStyle}>
-              {tournament.gameStage ? (
-                <span style={tourneyTitleStyle}>{tournament.gameStage}</span>
-              ) : (
-                  <span style={tourneyTitleStyle}>{this.formatTourneyTitle(tournament)}</span>
-                )
-              }
-              <span style={tourneyTitleInfo}>{this.formatTourneyTimeInfo(tournament)}</span>
-              <span style={tourneyTitleInfo}>Status: {this.getStatus(tournament)}</span>
-            </div>
-            <div style={leaderBoardStyle}>
-              <h1 style={titleHeader}>Leaderboard</h1>
-              <div style={resultDivsStyle}>
-                {resultDivs}
-              </div>
-            </div>
-            {tournamentId === undefined ? (
-              <button style={joinTourneyBtn} onClick={this.handleJoinClick}>JOIN TOURNAMENT</button>
-            ) : (
-                <div style={totalBuyIn} >
-                  <span>Total Buy-in Pool</span>
-                  <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tournament.pool && web3.utils.fromWei((tournament.pool).toString())} ETH</span>
-                </div>
-              )}
-          </>
-        ) : (
-            <div style={tournamentInfoStyle}>
-              <span style={tourneyTitleStyle}>No Tournaments</span>
-            </div>
-          )}
+      <div style={divLoadingStyle}>
+        Loading...
       </div>
     )
+  }
+
+  let resultDivs = null;
+
+  if (results.length > 0) {
+    resultDivs = results.map((result, idx) => {
+
+      if (result.sessionData) {
+        return (
+          <div
+            style={{ ...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})` }}
+            key={result.sessionId}
+          >
+            <span style={playerAddressStyle}>
+              {shortenAddress(result.playerAddress)}
+            </span>
+            {idx < shares.length ? <span>{
+              <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
+            }</span> : ""}
+        <span style={timeLeftStyle}>
+          {result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}
+        </span>
+            </div >
+          )
+  }
+});
+    } else {
+  if (!tournamentId) {
+    resultDivs = (
+      <div style={resultDivStyle}>
+        Join Tournament to be in leaderboards!
+      </div>
+    )
+  } else {
+    resultDivs = shares.map((share, idx) => {
+      let place = <span className="place">{idx + 1}</span>;
+      let trophy = <span className="trophy">{this.setTrophy(idx, shares)}</span>;
+      let shareETH = <span className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</span>
+      return (
+        <SharesText>{place} {trophy} {shareETH}</SharesText>
+      )
+    })
+  }
+}
+
+return (
+  <div style={widgetStyle}>
+    {!!tournament ? (
+      <>
+        <div style={tournamentInfoStyle}>
+          {tournament.gameStage ? (
+            <span style={tourneyTitleStyle}>{tournament.gameStage}</span>
+          ) : (
+              <span style={tourneyTitleStyle}>{this.formatTourneyTitle(tournament)}</span>
+            )
+          }
+          <span style={tourneyTitleInfo}>{this.formatTourneyTimeInfo(tournament)}</span>
+          <span style={tourneyTitleInfo}>Status: {this.getStatus(tournament)}</span>
+        </div>
+        <div style={leaderBoardStyle}>
+          <h1 style={titleHeader}>Leaderboard</h1>
+          <div style={resultDivsStyle}>
+            {resultDivs}
+          </div>
+        </div>
+        {tournamentId === undefined ? (
+          <button style={joinTourneyBtn} onClick={this.handleJoinClick}>JOIN TOURNAMENT</button>
+        ) : (
+            <div style={totalBuyIn} >
+              <span>Total Buy-in Pool</span>
+              <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tournament.pool && web3.utils.fromWei((tournament.pool).toString())} ETH</span>
+            </div>
+          )}
+      </>
+    ) : (
+        <div style={tournamentInfoStyle}>
+          <span style={tourneyTitleStyle}>No Tournaments</span>
+        </div>
+      )}
+  </div>
+)
   }
 }
 
