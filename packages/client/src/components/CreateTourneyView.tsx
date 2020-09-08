@@ -14,7 +14,7 @@ import web3 from 'web3';
 import Datetime from 'react-datetime';
 import '../react-datetime.css';
 
-import { newTournament, updateTournament } from '../helpers/database'
+import { newTournament, updateTournament, getTourneyWinners } from '../helpers/database'
 
 class CreateTourneyView extends Component<any, any> {
 
@@ -229,10 +229,10 @@ class CreateTourneyView extends Component<any, any> {
       case "buyInAmount":
       case "value":
         value = web3.utils.toWei(param.value.toString(), 'ether');
-      break;
+        break;
       default:
 
-      break;
+        break;
     }
 
     return value;
@@ -260,7 +260,8 @@ class CreateTourneyView extends Component<any, any> {
       switch (param.type) {
         // TODO: can refactor this to just parse [] and make it an array?
         case 'address[]':
-          let addressArr = param.value.split(',');
+          console.log("VALUE", param.value);
+          let addressArr = param.value;
           contractParams.push(addressArr);
           break;
         case 'uint256[]':
@@ -440,6 +441,32 @@ class CreateTourneyView extends Component<any, any> {
     });
   }
 
+  populatePlayerIds = async(e) => {
+    e.preventDefault();
+    const {contractInputs} = this.state;
+
+    let winners = await getTourneyWinners(parseInt(contractInputs[0].value));
+
+    console.log("WINNERS ARRAY", winners);
+
+    contractInputs.forEach((input, idx) => {
+      switch(input.name) {
+        case "playerIds":
+          contractInputs[idx].value = winners;
+          break;
+        default:
+          break;
+      }
+
+    console.log("CONTRACT INPUT", contractInputs);
+
+
+      this.setState({
+        contractInputs
+      })
+    })
+  }
+
   render() {
 
     const { drizzle } = this.props
@@ -538,6 +565,34 @@ class CreateTourneyView extends Component<any, any> {
                             }
                           </Field>
                         );
+                        break;
+                      case "playerIds":
+                        return (
+                          <>
+                            <Field
+                              size={"medium"}
+                              mt={3} mr={3} mb={3}
+                              label={input.name + " (" + input.type + ")"}>
+                              {
+                                <Input id={index + "." + input.name + " (" + input.type + ")"}
+                                  name={input.name}
+                                  onChange={this.handleInputChange}
+                                  value={this.state.contractInputs[index].value}
+                                />
+                              }
+                            </Field>
+                            <Field
+                              size={"medium"}
+                              mt={3} mr={3} mb={3}
+                            >
+                              {
+                                <Button size={"medium"} mr={3} mb={3} onClick={this.populatePlayerIds}>
+                                  Get Winners From DB
+                                </Button>
+                              }
+                            </Field>
+                          </>
+                        )
                         break;
 
                       default:

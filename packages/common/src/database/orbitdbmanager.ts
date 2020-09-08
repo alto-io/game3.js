@@ -651,7 +651,7 @@ export class OrbitDBManager implements DBManager {
     if (tourney.length > 0) {
       console.log("GET_TOURNEY_WINNERS: Tourney fetched!!", tourney);
 
-      let winnersLength = tourney.shares.length;
+      let winnersLength = tourney[0].shares.length;
 
       console.log("GET_TOURNEY_WINNERS: Fetching tourney session data");
       let tourneySession = await this.getTournamentResult(tournamentId);
@@ -675,11 +675,13 @@ export class OrbitDBManager implements DBManager {
         console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
 
         console.log("GET_TOURNEY_WINNERS: Mapping winners...");
-        let winners = players.map((player, idx) => {
-          if (idx < winnersLength) {
-            return player.address
-          }
-        });
+
+        let winners = []
+
+        for (let i = 0; i < winnersLength; i++) {
+          winners.push(players[i].address);
+        }
+
         console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
         console.log("GET_TOURNEY_WINNERS: Returning...");
 
