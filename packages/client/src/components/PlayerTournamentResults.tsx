@@ -3,6 +3,8 @@ import { Card, Heading, Flex, Box, Button, Text } from "rimble-ui";
 import RainbowImage from "./RainbowImage";
 import styled from "styled-components";
 
+import web3 from 'web3';
+
 import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
 
 const StyledFlex = styled(Flex)`
@@ -43,7 +45,7 @@ class PlayerTournamentResults extends Component {
       const result = tournament.results.find( result => result.isWinner === true);
       return(
         <>
-          <Heading as={"h3"}>You have won {tournament.prize} ETH</Heading>
+          <Heading as={"h3"}>You have won {tournament && web3.utils.fromWei(tournament.prize.toString())} ETH</Heading>
           <Text> Your Score: {result.sessionData.currentHighestNumber}</Text>
           <StyledButton mt={3}>Claim Now</StyledButton>
         </>

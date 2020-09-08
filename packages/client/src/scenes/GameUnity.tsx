@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import { Card } from "rimble-ui";
 import { DEFAULT_GAME_DIMENSION } from '../constants'
 
+import { getGameNo, getGameSessionId } from '../helpers/database';
+
 const StyledBox= styled(Box)`
   height: 100%;
   width: 100%;
@@ -36,16 +38,71 @@ export class GameUnity extends React.Component<IProps, any> {
       rotation: 0,
       unityShouldBeMounted: true,
       gameReady: false,
+      sessionId: '0',
+      playerAddress: '',
+      tournamentId: '',
       selectedLevel: false,
       isGameRunning: false,
-      progression: 0
+      progression: 0,
+      gameNo: 0,
+      tournament: null,
+      playBtnText: "Play"
     };
 
     this.initializeUnity();
+    this.initializeGame();
   }
 
   speed = 30;
   unityContent = null as any;
+
+  initializeGame = async () => {
+    await this.getBlockchainInfo(this.props);
+    await this.fetchGameNo(this.props.address, this.props.tournamentId);
+  }
+
+  
+
+  getBlockchainInfo = async (props) => {
+    try {
+    const { tournamentId, drizzle } = props
+
+    const contract = drizzle.contracts.Tournaments;
+    console.log(contract);
+    const maxTries = await contract.methods.getMaxTries(tournamentId).call();
+    console.log(maxTries);
+
+    const tournament = {
+      maxTries: parseInt(maxTries)
+    }
+
+    this.setState({
+      tournament
+    })
+
+    } catch (e) {
+      console.log("GameUnity: No tourney contract loaded");
+    }
+  }
+
+
+  fetchGameNo = async (account, tournamentId) => {
+    const gameSessionId = await getGameSessionId(account, tournamentId);
+    const gameNo = await getGameNo(gameSessionId, account, tournamentId);
+    const playBtnText = this.state.tournament != null ?
+    `Play ( ${typeof gameNo !== "number" ? 0 : gameNo} out of ${this.state.tournament.maxTries} )` : 
+    'Play';
+
+    console.log(playBtnText)
+
+    this.setState(
+      { 
+        playBtnText,
+        gameNo: gameNo,
+        sessionId: gameSessionId
+      });
+
+  }
 
   onPlayGame = async (e) => {
     let gameServerUrl = "ws://localhost:3001";
@@ -199,26 +256,27 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   render() {
-    const { isGameRunning } = this.state;
+    const { isGameRunning, gameReady, playBtnText, progression } = this.state;
     const { tournamentId } = this.props;
+
     return (
       <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
         <Button
           block
-          disabled={!this.state.gameReady}
+          disabled={!gameReady}
           className="mb-3"
           color="primary"
           type="button"
           onClick={this.onPlayGame}
         >
         {
-          this.state.isGameRunning ?
+         isGameRunning ?
           "Game In Progress" :
-            this.state.gameReady ?
-              "Play Game" :
-              (this.state.progression === 1) ?
+           gameReady ?
+              playBtnText  :
+              (progression === 1) ?
                 'Waiting for Game Start' :
-                `Loading Game ... ${Math.floor(this.state.progression * 100)}%`
+                `Loading Game ... ${Math.floor(progression * 100)}%`
         }
         </Button>
 

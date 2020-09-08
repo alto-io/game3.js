@@ -51,8 +51,8 @@ class TournamentCard extends Component<any, any> {
     this.handleOpenBuyinModal = this.handleOpenBuyinModal.bind(this);
   }
 
-  componentDidMount() {
-    this.getBlockchainInfo(this.props);
+  async componentDidMount() {
+    await this.getBlockchainInfo(this.props);
   }
 
   componentDidUpdate() {
@@ -157,6 +157,10 @@ class TournamentCard extends Component<any, any> {
         navigate(`/game/new${qs.stringify(options, true)}`);
         break;
       case Constants.FP:
+        options = {
+          tournamentId: tournament.id,
+          viewOnly: tournament.timeIsUp
+        }
         navigate(`/game/flappybird${qs.stringify(options, true)}`);
         break;
     }
@@ -247,10 +251,10 @@ class TournamentCard extends Component<any, any> {
     if (drizzle && tournament) {
       const contract = drizzle.contracts.Tournaments;
       const shares = await contract.methods.getShares(tournament.id).call();
-  
+
       let prizeString = '';
-  
-      for(let i = 0; i < shares.length; i++) {
+
+      for (let i = 0; i < shares.length; i++) {
         if (i === 0) {
           prizeString += `${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}st)`
         } else if (i === 1) {
@@ -259,7 +263,7 @@ class TournamentCard extends Component<any, any> {
           prizeString += `, ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}rd)`
         } else {
           prizeString += `, ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}th)`
-        } 
+        }
       }
 
       console.log("PRIZE STRING:", prizeString)
@@ -354,20 +358,27 @@ class TournamentCard extends Component<any, any> {
               <RainbowImage src={"images/" + gameImage} />
             </Flex>
 
-            <Flex justifyContent={"center"} mt={3} mb={4}>
-              <Text fontWeight={600} lineHeight={"1em"}>
-                Prize: { prizeString && prizeString }
-              </Text>
-            </Flex>
+            {tournament.state && tournament.state === 1 && (
+              <Flex justifyContent={"center"} mt={3} mb={4}>
+                <Text fontWeight={600} lineHeight={"1em"}>
+                  Prize: {prizeString && prizeString}
+                </Text>
+              </Flex>
+            )}
 
             <Flex justifyContent={"center"} mt={3} mb={4}>
               <Text fontWeight={600} lineHeight={"1em"}>
                 {gameName} {tournament.gameStage !== undefined ? "- " + tournament.gameStage : ""}
               </Text>
             </Flex>
+
             <Flex justifyContent={"center"} mt={1} mb={2}>
               <Text fontWeight={300} lineHeight={"0.75em"}>
-                Ending: {endTimeStr}
+                {tournament.state && tournament.state === 1 ? (
+                  `Ending: ${endTimeStr}`
+                ) : (
+                  "Ended"
+                )}
               </Text>
             </Flex>
             <Flex justifyContent={"center"} mt={1} mb={2}>
@@ -377,11 +388,11 @@ class TournamentCard extends Component<any, any> {
             </Flex>
 
             {/* {!isContractOwner ? button() : ""} */}
-            {button()}
+            {tournament.state && tournament.state === 1 && button()}
             <ViewResultsModal
-              tournamentId={tournament.id}
-              playerAddress={address}
-              drizzle={drizzle}
+              tournamentId={tournament && tournament.id}
+              playerAddress={address && address}
+              drizzle={drizzle && drizzle}
             />
             {/* <Button onClick={() => {this.onActivate(tournament)}}>Activate</Button> */}
             <JoinPromptModal
