@@ -34,7 +34,7 @@ class ViewResultsModal extends Component {
   };
 
   render() {
-    const { tournamentId, playerAddress, drizzle } = this.props;
+    const { tournamentId, playerAddress, drizzle, setRoute } = this.props;
     
     return (
       <>
@@ -60,6 +60,7 @@ class ViewResultsModal extends Component {
                   tournamentId={tournamentId}
                   playerAddress={playerAddress}
                   drizzle={drizzle}
+                  setRoute={setRoute}
                 />
               </Box>
 

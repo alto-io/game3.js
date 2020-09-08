@@ -394,7 +394,7 @@ class TournamentCard extends Component<any, any> {
               playerAddress={address && address}
               drizzle={drizzle && drizzle}
             />
-            {/* <Button onClick={() => {this.onActivate(tournament)}}>Activate</Button> */}
+            {/* {tournament.state === 0 && <Button onClick={() => {this.onActivate(tournament)}} mt={3}>Activate</Button>} */}
             <JoinPromptModal
               isOpen={isOpen}
               handleCloseModal={this.handleCloseModal}

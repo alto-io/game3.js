@@ -20,7 +20,7 @@ import {
 import { Constants } from '@game3js/common';
 import web3 from 'web3';
 
-const SharesText = styled.p`
+const SharesText = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -28,7 +28,17 @@ const SharesText = styled.p`
   .place {
     font-family: 'Apercu Bold', sans-serif;
     font-weight: bold;
-    margin-right: 1rem;
+    width: 33%;
+  }
+
+  .trophy {
+    width: 33%;
+    text-align: center;
+  }
+  
+  .share {
+    width: 33%;
+    text-align: right;
   }
 `;
 
@@ -335,7 +345,7 @@ class TournamentResultsCard extends Component<any, any> {
           return <span>&#x1F947;</span>
         case 1:
           return <span>&#x1F948;</span>
-        default:
+        case 2:
           return <span>&#x1F949;</span>
       }
     }
@@ -359,7 +369,7 @@ class TournamentResultsCard extends Component<any, any> {
 
   render() {
     const { results, isLoading, tournament, shares } = this.state;
-    const { tournamentId, playerAddress } = this.props;
+    const { tournamentId, playerAddress, setRoute } = this.props;
 
     // console.log("SHARES FROM STATE", shares);
     // console.log("POOL FROM STATE", tournament.pool);
@@ -406,11 +416,11 @@ class TournamentResultsCard extends Component<any, any> {
         )
       } else {
         resultDivs = shares.map( (share, idx) => {
-          let place = <span className="place">{idx + 1}</span>;
-          let trophy = <span className="trophy">{this.setTrophy(idx, shares)}</span>;
-          let shareETH = <span className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</span>
+          let place = <p className="place">{idx + 1}</p>;
+          let trophy = <p className="trophy">{this.setTrophy(idx, shares)}</p>;
+          let shareETH = <p className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</p>
           return(
-            <SharesText> {place} <span>{trophy} {shareETH}</span></SharesText>
+            <SharesText>{place}{trophy}{shareETH}</SharesText>
           )
         })
       }
@@ -437,7 +447,12 @@ class TournamentResultsCard extends Component<any, any> {
               </div>
             </div>
             {tournamentId === undefined ? (
-              <button style={joinTourneyBtn} onClick={this.handleJoinClick}>JOIN TOURNAMENT</button>
+              <button 
+                style={joinTourneyBtn} 
+                onClick={e => {
+                  e.preventDefault();
+                  setRoute("TournamentView");
+              }}>Join Tournament</button>
             ) : (
                 <div style={totalBuyIn} >
                   <span>Total Buy-in Pool</span>
@@ -554,7 +569,8 @@ const joinTourneyBtn: CSS.Properties = {
   cursor: 'pointer',
   outline: 'none',
   border: 'none',
-  borderRadius: '7px'
+  borderRadius: '7px',
+  textTransform: 'uppercase',
 }
 
 const totalBuyIn: CSS.Properties = {
@@ -564,7 +580,6 @@ const totalBuyIn: CSS.Properties = {
   background: `#06df9b`,
   padding: '1rem 0.9rem',
   width: '100%',
-  cursor: 'pointer',
   outline: 'none',
   border: 'none',
   borderRadius: '7px',
