@@ -33,6 +33,7 @@ const BUTTON_ICON: CSSProperties = {
 
 export function Button(props: {
   type?: 'button' | 'submit';
+  disabled?: boolean;
   text?: string;
   children?: ReactNode;
   style?: CSSProperties;
@@ -49,6 +50,7 @@ export function Button(props: {
     icon,
     title,
     reversed = false,
+    disabled = false,
     onClick,
   } = props;
   const [hovered, setHovered] = React.useState(false);
@@ -56,6 +58,7 @@ export function Button(props: {
   return (
     <button
       type={type}
+      disabled={disabled}
       style={{
         ...BUTTON,
         ...(hovered && BUTTON_HOVERED),
