@@ -189,6 +189,8 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   getBlockchainInfo = async (props) => {
+    try {
+
     const { tournamentId, playerAddress, drizzle } = props;
     const contract = drizzle.contracts.Tournaments;
 
@@ -201,6 +203,9 @@ class TournamentResultsCard extends Component<any, any> {
     } else {
       // Tournament ID is present in Tournaments and Dashboard
       playerAddress ? await this.getTournamentAndLeaderBoards(tournamentId, true) : await this.getTournamentAndLeaderBoards(tournamentId, false);
+    }
+  } catch (e) {
+      console.log("No tourney retrieved");
     }
   }
 
@@ -308,8 +313,8 @@ class TournamentResultsCard extends Component<any, any> {
     const { results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
 
-    console.log("SHARES FROM STATE", shares);
-    console.log("POOL FROM STATE", tournament.pool);
+    // console.log("SHARES FROM STATE", shares);
+    // console.log("POOL FROM STATE", tournament.pool);
 
     if (isLoading) {
       return (
