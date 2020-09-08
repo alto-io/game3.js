@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
+import styled from 'styled-components';
 
-
-import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
+import { getTournamentResult, getTournament } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
 import { RouteComponentProps } from '@reach/router';
 import qs from 'querystringify';
-import { format } from 'date-fns'
+import { format } from 'date-fns';
 
 import CSS from 'csstype';
 import { baseColors, fonts, shadows, } from '../styles';
@@ -18,6 +18,18 @@ import {
 } from '../constants'
 
 import { Constants } from '@game3js/common';
+import web3 from 'web3';
+
+const SharesText = styled.p`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+
+  .place {
+    font-family: 'Apercu Bold', sans-serif;
+    font-weight: bold;
+  }
+`;
 
 class TournamentResultsCard extends Component<any, any> {
   constructor(props) {
@@ -27,7 +39,7 @@ class TournamentResultsCard extends Component<any, any> {
       results: [],
       tournament: {},
       isLoading: false,
-      shares : []
+      shares: []
     }
   }
 
@@ -202,7 +214,6 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
-
   formatTourneyTimeInfo(tournament: any) {
     const {
       startDate,
@@ -272,6 +283,19 @@ class TournamentResultsCard extends Component<any, any> {
     catch (e) {}
   }
 
+  setTrophy(idx, shares) {
+    if (idx < shares.length) {
+      switch (idx) {
+        case 0:
+          return <span>&#x1F947;</span>
+        case 1:
+          return <span>&#x1F948;</span>
+        case 2:
+          return <span>&#x1F949;</span>
+      }
+    }
+  }
+
   render() {
     const { results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
@@ -286,19 +310,10 @@ class TournamentResultsCard extends Component<any, any> {
       )
     }
 
-    let resultDivs = null
+    let resultDivs = null;
 
     if (results.length > 0) {
       resultDivs = results.map( (result, idx) => {
-        let sharesText;
-
-        if (idx === 0) {
-          sharesText =  <p>&#x1F947; {(tournament.pool * shares[0]) / 100} ETH</p>
-        } else if (idx === 1 ){
-          sharesText =  <p>&#x1F948; {(tournament.pool * shares[1]) / 100} ETH</p>
-        } else if (idx === 2) {
-          sharesText =  <p>&#x1F949; {(tournament.pool * shares[2]) / 100} ETH</p>
-        }
 
         if (result.sessionData) {
           return( 
@@ -309,7 +324,9 @@ class TournamentResultsCard extends Component<any, any> {
             <span style={playerAddressStyle}>
               {shortenAddress(result.playerAddress)}
             </span>
-            {idx === 0 || idx === 1 || idx === 2 ? <span>{sharesText}</span> : ""}
+              {idx < shares.length ? <span>{
+               <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
+              }</span> : ""}
             <span style={timeLeftStyle}>
               {result.sessionData.currentHighestNumber}
             </span>
@@ -324,7 +341,14 @@ class TournamentResultsCard extends Component<any, any> {
           </div>
         )
       } else {
-        resultDivs = null
+        resultDivs = shares.map( (share, idx) => {
+          let place = <span className="place">{idx + 1}</span>;
+          let trophy = <span className="trophy">{this.setTrophy(idx, shares)}</span>;
+          let shareETH = <span className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</span>
+          return(
+          <SharesText>{place} {trophy} {shareETH}</SharesText>
+          )
+        })
       }
     }
 
@@ -353,7 +377,7 @@ class TournamentResultsCard extends Component<any, any> {
             ) : (
                 <div style={totalBuyIn} >
                   <span>Total Buy-in Pool</span>
-                  <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tournament.pool} ETH</span>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tournament.pool && web3.utils.fromWei((tournament.pool.toString()))} ETH</span>
                 </div>
               )}
           </>
