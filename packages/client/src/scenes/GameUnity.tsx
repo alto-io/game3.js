@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { Card } from "rimble-ui";
 import { DEFAULT_GAME_DIMENSION } from '../constants'
 
-import { getGameNo, getGameSessionId } from '../helpers/database';
+import { getGameNo, getGameSessionId, updateSessionHighScore, updateGameNo, createSessionId } from '../helpers/database';
 
 const StyledBox= styled(Box)`
   height: 100%;
@@ -39,14 +39,15 @@ export class GameUnity extends React.Component<IProps, any> {
       unityShouldBeMounted: true,
       gameReady: false,
       sessionId: '0',
-      playerAddress: '',
-      tournamentId: '',
+      playerAddress: props.address,
+      tournamentId: props.tournamentId,
       selectedLevel: false,
       isGameRunning: false,
       progression: 0,
       gameNo: 0,
       tournament: null,
-      playBtnText: "Play"
+      playBtnText: "Play",
+      score: 1
     };
 
     this.initializeUnity();
@@ -59,6 +60,13 @@ export class GameUnity extends React.Component<IProps, any> {
   initializeGame = async () => {
     await this.getBlockchainInfo(this.props);
     await this.fetchGameNo(this.props.address, this.props.tournamentId);
+ 
+    const { playerAddress, tournamentId } = this.state;
+    
+    let sessionId = await createSessionId(playerAddress, tournamentId);
+    this.setState({
+      sessionId
+    })
   }
 
   
@@ -105,9 +113,13 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   onPlayGame = async (e) => {
+    const {sessionId, playerAddress, tournamentId } = this.state;
+    const gameId = this.props.path;
     let gameServerUrl = "ws://localhost:3001";
 
-    const gameId = this.props.path;
+
+    await updateGameNo(sessionId, playerAddress, tournamentId);
+    
 
     switch (gameId)
     {
@@ -158,6 +170,7 @@ export class GameUnity extends React.Component<IProps, any> {
 
 
   processOutplayEvent = (outplayEvent) => {
+    const {sessionId, playerAddress, tournamentId, score } = this.state;
 
     switch (outplayEvent) {
       case 'GameReady':
@@ -175,6 +188,10 @@ export class GameUnity extends React.Component<IProps, any> {
               isGameRunning: false
             }
             );
+
+            this.fetchGameNo(this.props.address, this.props.tournamentId);
+            updateSessionHighScore(true, sessionId, playerAddress, tournamentId, score);
+            
           // this.props.stopRecording.call(null, "wom");
 
       break;
@@ -184,6 +201,10 @@ export class GameUnity extends React.Component<IProps, any> {
               isGameRunning: false
             }
             );
+
+            this.fetchGameNo(this.props.address, this.props.tournamentId);
+            updateSessionHighScore(true, sessionId, playerAddress, tournamentId, score);
+             
           // this.props.stopRecording.call(null, "wom");
       break;
 
@@ -224,6 +245,11 @@ export class GameUnity extends React.Component<IProps, any> {
     this.unityContent.on("SendNumber", rotation => {
       this.setState({ rotation: Math.round(rotation) });
     });
+
+    this.unityContent.on("SendScore", score => {
+      this.setState({ score });
+    });
+
 
     this.unityContent.on("quitted", () => {
       this.setState({isGameRunning: false})
