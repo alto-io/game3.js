@@ -99,7 +99,7 @@ export default class GameResult extends React.Component<any, any> {
     
         totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min"+" "+sec+"sec").toString()
       } else {
-        totalTime += isLeaderBoards ? ("00:"+seconds).toString() : (seconds+"sec").toString()
+        totalTime += isLeaderBoards ? ("0:"+seconds).toString() : (seconds+"sec").toString()
       }
       return totalTime
     }
