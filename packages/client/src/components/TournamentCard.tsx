@@ -157,6 +157,10 @@ class TournamentCard extends Component<any, any> {
         navigate(`/game/new${qs.stringify(options, true)}`);
         break;
       case Constants.FP:
+        options = {
+          tournamentId: tournament.id,
+          viewOnly: tournament.timeIsUp
+        }
         navigate(`/game/flappybird${qs.stringify(options, true)}`);
         break;
     }

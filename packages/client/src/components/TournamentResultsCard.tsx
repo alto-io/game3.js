@@ -28,6 +28,7 @@ const SharesText = styled.p`
   .place {
     font-family: 'Apercu Bold', sans-serif;
     font-weight: bold;
+    margin-right: 1rem;
   }
 `;
 
@@ -308,56 +309,67 @@ render() {
   const { results, isLoading, tournament, shares } = this.state;
   const { tournamentId, playerAddress } = this.props;
 
-  if (isLoading) {
-    return (
-      <div style={divLoadingStyle}>
-        Loading...
-      </div>
-    )
-  }
+    // console.log("SHARES FROM STATE", shares);
+    // console.log("POOL FROM STATE", tournament.pool);
+    // console.log(results);
+
+    if (isLoading) {
+      return (
+        <div style={divLoadingStyle}>
+          Loading...
+        </div>
+      )
+    }
 
   let resultDivs = null;
 
-  if (results.length > 0) {
-    resultDivs = results.map((result, idx) => {
+    if (results.length > 0) {
+      console.log("result length > 0")
+      resultDivs = results.map( (result, idx) => {
 
-      if (result.sessionData) {
-        return (
-          <div
-            style={{ ...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})` }}
+        if (result.sessionData) {
+          return( 
+          <div 
+            style={{...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`}} 
             key={result.sessionId}
           >
             <span style={playerAddressStyle}>
               {shortenAddress(result.playerAddress)}
             </span>
-            {idx < shares.length ? <span>{
-              <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
-            }</span> : ""}
-        <span style={timeLeftStyle}>
-          {result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}
-        </span>
-            </div >
+              {idx < shares.length ? <span>{
+               <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
+              }</span> : ""}
+              <span style={timeLeftStyle}>
+                {result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}
+              </span>
+            </div>
           )
-  }
-});
+        }
+      });
     } else {
-  if (!tournamentId) {
-    resultDivs = (
-      <div style={resultDivStyle}>
-        Join Tournament to be in leaderboards!
-      </div>
-    )
-  } else {
-    resultDivs = shares.map((share, idx) => {
-      let place = <span className="place">{idx + 1}</span>;
-      let trophy = <span className="trophy">{this.setTrophy(idx, shares)}</span>;
-      let shareETH = <span className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</span>
-      return (
-        <SharesText>{place} {trophy} {shareETH}</SharesText>
-      )
-    })
-  }
-}
+      if (!tournamentId) {
+        resultDivs = (
+          <div style={resultDivStyle}>
+            Join Tournament to be in leaderboards!
+          </div>
+        )
+      } else {
+        resultDivs = shares.map( (share, idx) => {
+          let place = <span className="place">{idx + 1}</span>;
+          let trophy = <span className="trophy">{this.setTrophy(idx, shares)}</span>;
+          let shareETH = <span className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</span>
+          return(
+          <SharesText key={idx}>
+            <span>
+              {place} 
+              {trophy} 
+            </span>
+            {shareETH}
+          </SharesText>
+          )
+        })
+      }
+    }
 
 return (
   <div style={widgetStyle}>

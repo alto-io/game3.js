@@ -192,6 +192,7 @@ export default class GameContainer extends Component<IProps, any> {
                     drizzleState={drizzleState}
                     contractMethodSendWrapper={contractMethodSendWrapper}
                     tournamentId={tournamentId}
+                    address={address}
                   />
 
                   <GameUnity
@@ -202,6 +203,7 @@ export default class GameContainer extends Component<IProps, any> {
                     drizzleState={drizzleState}
                     contractMethodSendWrapper={contractMethodSendWrapper}
                     tournamentId={tournamentId}
+                    address={address}
                   />
                 </Router>
               </GameScene>
