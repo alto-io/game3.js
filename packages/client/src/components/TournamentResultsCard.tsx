@@ -185,12 +185,12 @@ class TournamentResultsCard extends Component<any, any> {
       // Get the latest tournament
       const contract = drizzle.contracts.Tournaments;
 
+      console.log("TOURNAMENT ID = ", tournamentId)
       const tournamentLength = await contract.methods.getTournamentsCount().call();
       let tI = undefined;
       if (tournamentLength > 0) {
-        tI = tournamentId ? tournamentId : tournamentLength - 1;
+        tI = tournamentId || tournamentId === 0 ? tournamentId : tournamentLength - 1;
       }
-      console.log("TOURNAMENT ID = ", tI)
       await this.getTournamentAndLeaderBoards(tI, true);
     } else {
       let ids = await getTournaments();
@@ -305,12 +305,25 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
+  formatTime = (time, isLeaderBoards) => {
+    if (time) {
+      const seconds = (parseInt(time) / 1000).toFixed(2);
+      const minutes = Math.floor(parseInt(seconds) / 60);
+      let totalTime = '';
+      if (parseInt(seconds) > 60) {
+        let sec = (parseInt(seconds) % 60).toFixed(2);
+    
+        totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min"+" "+sec+"sec").toString()
+      } else {
+        totalTime += isLeaderBoards ? ("00:"+seconds).toString() : (seconds+"sec").toString()
+      }
+      return totalTime
+    }
+  }
+
   render() {
     const { results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
-
-    console.log("SHARES FROM STATE", shares);
-    console.log("POOL FROM STATE", tournament.pool);
 
     if (isLoading) {
       return (
@@ -325,7 +338,6 @@ class TournamentResultsCard extends Component<any, any> {
     if (results.length > 0) {
       resultDivs = results.map((result, idx) => {
       
-        console.log("Trophy TEXT")
         if (result.sessionData) {
           return (
             <div
@@ -339,7 +351,7 @@ class TournamentResultsCard extends Component<any, any> {
                 <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
               }</span> : ""}
               <span style={timeLeftStyle}>
-                {result.sessionData.currentHighestNumber}
+                {result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}
               </span>
             </div>
           )
@@ -449,13 +461,15 @@ const resultDivStyle: CSS.Properties = {
 const playerAddressStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
   color: `rgb(${baseColors.dark})`,
-  fontFamily: fonts.family.ApercuBold
+  fontFamily: fonts.family.ApercuBold,
+  marginRight: '0.2rem'
 }
 
 const timeLeftStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
   color: `#0093d5`,
-  fontFamily: fonts.family.ApercuBold
+  fontFamily: fonts.family.ApercuBold,
+  marginLeft: '0.2rem'
 }
 
 const tournamentInfoStyle: CSS.Properties = {

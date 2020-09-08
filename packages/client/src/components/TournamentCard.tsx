@@ -51,8 +51,8 @@ class TournamentCard extends Component<any, any> {
     this.handleOpenBuyinModal = this.handleOpenBuyinModal.bind(this);
   }
 
-  componentDidMount() {
-    this.getBlockchainInfo(this.props);
+  async componentDidMount() {
+    await this.getBlockchainInfo(this.props);
   }
 
   componentDidUpdate() {
@@ -379,9 +379,9 @@ class TournamentCard extends Component<any, any> {
             {/* {!isContractOwner ? button() : ""} */}
             {button()}
             <ViewResultsModal
-              tournamentId={tournament.id}
-              playerAddress={address}
-              drizzle={drizzle}
+              tournamentId={tournament && tournament.id}
+              playerAddress={address && address}
+              drizzle={drizzle && drizzle}
             />
             {/* <Button onClick={() => {this.onActivate(tournament)}}>Activate</Button> */}
             <JoinPromptModal

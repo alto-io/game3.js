@@ -89,6 +89,22 @@ export default class GameResult extends React.Component<any, any> {
     })
   }
 
+  formatTime = (time, isLeaderBoards) => {
+    if (time) {
+      const seconds = (parseInt(time) / 1000).toFixed(2);
+      const minutes = Math.floor(parseInt(seconds) / 60);
+      let totalTime = '';
+      if (parseInt(seconds) > 60) {
+        let sec = (parseInt(seconds) % 60).toFixed(2);
+    
+        totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min"+" "+sec+"sec").toString()
+      } else {
+        totalTime += isLeaderBoards ? ("00:"+seconds).toString() : (seconds+"sec").toString()
+      }
+      return totalTime
+    }
+  }
+
   render() {
     const { show, onToggle, didWin, gameSessionId, playerAddress, tournamentId } = this.props
     const { sessionData, tourneyMaxTries } = this.state
@@ -111,7 +127,7 @@ export default class GameResult extends React.Component<any, any> {
     return (
       <Modal show={show} toggleModal={onToggle}>
         <View style={{ margin: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Game {gameNo} of {tourneyMaxTries}</View>
-        <View style={{ margin: '20px', fontSize: '1.8rem' }}>{score}</View>
+        <View style={{ margin: '20px', fontSize: '1.8rem' }}>{score && this.formatTime(score, false)}</View>
         {canTryAgain ? (
           <View style={{ margin: '20px', fontSize: '1.5rem' }}>{scoreMsg}</View>
         ) : (
