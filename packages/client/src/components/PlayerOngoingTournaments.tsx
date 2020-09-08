@@ -5,6 +5,9 @@ import styled from "styled-components";
 import { format } from 'date-fns';
 
 import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
+import ViewResultsModal from './ViewResultsModal';
+
+import web3 from 'web3';
 
 const OngoingCard = styled(Card)`
   box-shadow: none;
@@ -60,7 +63,7 @@ const GameImage = styled(Image)`
 
 class PlayerOngoingTournaments extends Component {
   render() {
-    const { tournaments, setRoute } = this.props;
+    const { tournaments, setRoute, account, drizzle } = this.props;
 
     const activeTournaments = tournaments.filter( tournament => tournament.state === 1);
 
@@ -81,10 +84,15 @@ class PlayerOngoingTournaments extends Component {
             <p className="lead">End Time</p>
             <Text fontWeight="bold" marginBottom={"0.25rem"}>{ format(new Date(tournament.endTime),'MMM d, yyyy, HH:mm') }</Text>
             <p className="lead">Prize</p>
-            <Text fontWeight="bold" marginBottom={"0.25rem"}>{tournament.prize} ETH</Text>
+            <Text fontWeight="bold" marginBottom={"0.25rem"}>{tournament && web3.utils.fromWei(tournament.prize.toString())} ETH</Text>
             <p className="lead">State</p>
             <Text fontWeight="bold" marginBottom={"1rem"}>Active</Text>
             {results}
+            <ViewResultsModal
+              tournamentId={tournament.id}
+              playerAddress={account}
+              drizzle={drizzle}
+            />
           </Box>
         </OngoingCard>
         </>

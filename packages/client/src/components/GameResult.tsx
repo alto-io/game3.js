@@ -99,11 +99,13 @@ export default class GameResult extends React.Component<any, any> {
 
     console.log('Your current game no is', gameNo);
     console.log('Do you win?', didWin);
+    console.log('Your score?', score);
+    console.log('Your highScore?', highScore);
     
     let shouldSubmit = didWin || gameNo === tourneyMaxTries;
     let canTryAgain = gameNo < tourneyMaxTries;
 
-    let scoreMsg = score > highScore ? `New high score!!` : ``;
+    let scoreMsg = score === highScore ? `New high score!!` : ``;
     let finalScore = `Final score ${highScore}`
 
     return (

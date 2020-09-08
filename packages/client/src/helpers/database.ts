@@ -151,13 +151,14 @@ export async function deleteGameSessionId(gameSessionId): Promise<any> {
   return response.data
 }
 
-export async function updateSessionScore(didWin, gameSessionId, playerAddress, tournamentId): Promise<any> {
+export async function updateSessionScore(didWin, gameSessionId, playerAddress, tournamentId, timeFinished): Promise<any> {
   
   const params = {
     didWin,
     sessionId: gameSessionId,
     playerAddress,
-    tournamentId
+    tournamentId,
+    timeFinished
   }
 
   const res = await api.post('/gameSession/score', params);
@@ -176,11 +177,10 @@ export async function updateGameNo(sessionId, playerAddress, tournamentId) {
 }
 
 export async function makeNewGameSession(sessionId, tournamentId, players, endsAt): Promise<any> {
-  let timeLeft = endsAt - Date.now();
   const params = {
     sessionId,
     tournamentId, 
-    timeLeft, 
+    timeLeft: Date.now(), 
     players
   }
 
@@ -246,4 +246,27 @@ export async function getTournament(tournamentId):Promise<any> {
   const result = await api.get('/tourney', {params});
   console.log("GET TOURNAMENT FETCHED", result);
   return result.data; 
+}
+
+export async function updateTournament(tournamentId, updatedData): Promise<any> {
+  const params = {
+    tournamentId,
+    updatedData
+  }
+
+  console.log("UPDATE TOURNAMENT CALLED", params);
+  const result = await api.patch('/tournament/update', params);
+  console.log("UPDATE TOURNAMENT FINISHED", result);
+  return result.data
+}
+
+export async function getTourneyWinners(tournamentId): Promise<any> {
+  const params = {
+    tournamentId
+  }
+
+  console.log("GET TOURNAMENT WINNERS", params);
+  const result = await api.get('/tourney/winners', {params});
+  console.log("GET TOURNAMENT WINNERS FINISHED", result);
+  return result.data
 }

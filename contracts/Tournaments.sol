@@ -47,6 +47,7 @@ contract Tournaments is Ownable {
   */
   event TournamentCreated(uint tournamentId);
   event TournamentActivated(uint tournamentId);
+  event TournamentNewBuyIn(uint tournamentId);
   event ResultSubmitted(uint tournamentId, address indexed player,
     uint256 indexed resultId);
   event WinnersDeclared(uint tournamentId, uint256[] resultId);
@@ -217,6 +218,7 @@ contract Tournaments is Ownable {
   {
     buyIn[tournamentId][msg.sender] += value;
     tournaments[tournamentId].balance += value;
+    emit TournamentNewBuyIn(tournamentId);
   }
 
   function submitResult(uint tournamentId, string calldata data)

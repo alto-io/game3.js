@@ -251,7 +251,11 @@ export class OrbitDBManager implements DBManager {
     return { result: sessionId }
   }
 
-  async serverUpdateScore(didWin, sessionId, playerAddress, tournamentId) {
+  async serverUpdateScore(didWin, sessionId, playerAddress, tournamentId, timeFinished) {
+
+    // As of now, the scoring mechanism depends on the shortest time you win the game.
+    // Sooner, we'll support several scoring mechanism.
+
     if (tournamentId !== undefined) {
       console.log("UPDATE_SCORE: Function Invoked...");
 
@@ -268,22 +272,21 @@ export class OrbitDBManager implements DBManager {
         console.log("UPDATE_SCORE: Session data", data[0].sessionData);
         console.log("UPDATE_SCORE: Player data", playerData);
         console.log("UPDATE_SCORE: Update score...", playerData);
-
-        console.log("UPDATE_SCORE: Current High Score", playerData.currentHighestNumber);
-        console.log("UPDATE_SCORE: Current Score", playerData.timeLeft);
+        let playerScore = Math.abs(playerData.timeLeft - timeFinished);
+        console.log("UPDATE_SCORE: Current High Score (shortest time)", playerData.currentHighestNumber);
+        console.log("UPDATE_SCORE: Current Score", playerScore);
         console.log("UPDATE_SCORE: Did win?", didWin);
-
-        let playerScore = 0;
 
         if (!didWin) {
           console.log("UPDATE_SCORE: Player did not win");
           console.log("UPDATE_SCORE: Player score reverts to 0");
         } else {
           console.log("UPDATE_SCORE: Player did win");
-          playerScore = playerData.timeLeft;
 
-          if (playerData.timeLeft > playerData.currentHighestNumber) {
-            playerData.currentHighestNumber = playerData.timeLeft;
+          playerData.timeLeft = playerScore;
+
+          if (playerScore < (playerData.currentHighestNumber === 0 ? playerScore + 1 : playerData.currentHighestNumber)) {
+            playerData.currentHighestNumber = playerScore;
             console.log("UPDATE_SCORE: Thew new data", playerData);
             data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
             await this.gameSessions.put(data[0]);
@@ -557,6 +560,7 @@ export class OrbitDBManager implements DBManager {
     //   state: string,
     //   pool: number,
     //   data: string,
+    //   shares: string[]
     // }
 
     console.log("CREATE_TOURNEY: Initiating...");
@@ -583,6 +587,37 @@ export class OrbitDBManager implements DBManager {
 
   }
 
+  async updateTournament(tournamentId, updatedData) {
+    console.log("UPDATE_TOURNEY: Intiating...");
+    console.log("UPDATE_TOURNEY: Finding data...");
+
+    let data = await this.tournaments.query(tournament =>
+      tournament.id === tournamentId
+    );
+
+    if (data.length > 0) {
+      console.log("UPDATE_TOURNEY: Data found!:", data[0]);
+
+      let keys = Object.keys(updatedData);
+
+      keys.forEach(key => {
+        if (data[0].hasOwnProperty(key)) {
+          data[0][`${key}`] = updatedData[`${key}`]
+        }
+      });
+
+      console.log("UPDATE_TOURNEY: Updating...");
+      await this.tournaments.put(data[0]);
+      console.log("UPDATE_TOURNEY: Updated!:", data[0]);
+      console.log("UPDATE_TOURNEY: Returning...");
+      return true
+    } else {
+      console.log("UPDATE_TOURNEY: No data found with id:", tournamentId);
+      console.log("UPDATE_TOURNEY: Returning...");
+      return false
+    }
+  }
+
   async getTournaments() {
     console.log("GET_TOURNEYS: Initiating...");
     console.log("GET_TOURNEYS: Fetching all tourneys");
@@ -603,5 +638,62 @@ export class OrbitDBManager implements DBManager {
     console.log("GET_TOURNEY: Fetched!", tournament);
     console.log("GET_TOURNEY: Returning...");
     return tournament
+  }
+
+  async getTourneyWinners(tournamentId) {
+    console.log("GET_TOURNEY_WINNERS: Initiating...");
+    console.log("GET_TOURNEY_WINNERS: Fetching tourney");
+
+    let tourney = await this.tournaments.query(tournament =>
+      tournament.id === tournamentId
+    )
+
+    if (tourney.length > 0) {
+      console.log("GET_TOURNEY_WINNERS: Tourney fetched!!", tourney);
+
+      let winnersLength = tourney.shares.length;
+
+      console.log("GET_TOURNEY_WINNERS: Fetching tourney session data");
+      let tourneySession = await this.getTournamentResult(tournamentId);
+
+      if (tourneySession.length > 0) {
+        console.log("GET_TOURNEY_WINNERS: Tourney session fetched!!", tourneySession);
+
+        let players = tourneySession.map(session => {
+          let playerAddress = Object.keys(session.sessionData.playerData);
+          return {
+            address: playerAddress[0],
+            score: session.sessionData.playerData[playerAddress[0]].currentHighestNumber
+          }
+        });
+
+        console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+
+        console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+        // sort in ascending order since shortest time is the winner
+        players.sort((el1, el2) => el1.score - el2.score);
+        console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+
+        console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+        let winners = players.map((player, idx) => {
+          if (idx < winnersLength) {
+            return player.address
+          }
+        });
+        console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+        console.log("GET_TOURNEY_WINNERS: Returning...");
+
+        return winners;
+
+      } else {
+        console.log("GET_TOURNEY_WINNERS: No tourney session fetched with id: ", tournamentId);
+        console.log("GET_TOURNEY_WINNERS: Returning...");
+        return []
+      }
+    } else {
+      console.log("GET_TOURNEY_WINNERS: No tourney fetched with id: ", tournamentId);
+      console.log("GET_TOURNEY_WINNERS: Returning...");
+      return []
+    }
   }
 }
