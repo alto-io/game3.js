@@ -252,7 +252,7 @@ formatTourneyTitle(tournament: any) {
 }
 
 handleJoinClick = () => {
-  navigate('/')
+  navigate('tournaments')
 }
 
 setResultBgColor(playerAddress, currentPlayerAddress) {

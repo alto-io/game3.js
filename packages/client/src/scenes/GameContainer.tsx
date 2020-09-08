@@ -164,7 +164,10 @@ export default class GameContainer extends Component<IProps, any> {
     return (
       <>
         <OutplayGameNavigation />
-        <GameJavascript>
+        <GameJavascript
+          startRecording={this.startRecording}
+          stopRecording={this.stopRecording}
+        >
           <GameJavascriptContext.Consumer>{context => {
 
             return (
@@ -176,8 +179,6 @@ export default class GameContainer extends Component<IProps, any> {
                 <Router>
                   <Game
                     path=":roomId"
-                    startRecording={this.startRecording}
-                    stopRecording={this.stopRecording}
                     drizzle={drizzle}
                     drizzleState={drizzleState}
                     contractMethodSendWrapper={contractMethodSendWrapper}

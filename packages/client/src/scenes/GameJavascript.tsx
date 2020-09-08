@@ -1,5 +1,5 @@
-import React, {Component, createContext} from 'react';
-import {updateSessionScore, updateGameNo, createSessionId, makeNewGameSession} from '../helpers/database';
+import React, { Component, createContext } from 'react';
+import { updateSessionScore, updateGameNo, createSessionId, makeNewGameSession } from '../helpers/database';
 import { navigateTo } from '../helpers/utilities'
 
 export const GameJavascriptContext = createContext({});
@@ -21,10 +21,11 @@ export default class GameJavascript extends Component<any, any> {
     this.setSessionId = this.setSessionId.bind(this);
     this.initiateGame = this.initiateGame.bind(this);
     this.updateSessionHighScore = this.updateSessionHighScore.bind(this);
+    this.endGame = this.endGame.bind(this);
   }
 
   async updateSessionHighScore() {
-    const { isPlayerDead, sessionId, playerAddress, tournamentId} = this.state;
+    const { isPlayerDead, sessionId, playerAddress, tournamentId } = this.state;
     const timeFinished = Date.now();
 
     let updatedData = await updateSessionScore(!isPlayerDead, sessionId, playerAddress, tournamentId, timeFinished);
@@ -60,10 +61,26 @@ export default class GameJavascript extends Component<any, any> {
     })
   }
 
+  async endGame(died: boolean) {
+    const { stopRecording } = this.props;
+    const { tournamentId } = this.state;
+
+    await this.updateSessionHighScore();
+    this.gameIsRunning(false);
+    this.playerIsDead(died);
+
+    console.log("GAME JAVASCRIPT-endGame: Tourney ID", tournamentId)
+    if (tournamentId || tournamentId === 0) {
+      stopRecording.call();
+      console.log("GAME JAVASCRIPT-endGame: Recording stopped")
+    }
+  }
+
   async initiateGame(params: any) {
     console.log("GAME JAVASCRIPT: Initiate Game")
-    const { playerAddress, tournamentId, isDead, isGameRunning, players, endsAt} = params;
-    
+    const { playerAddress, tournamentId, isDead, isGameRunning, players, endsAt } = params;
+    const { startRecording } = this.props;
+
     this.setState({
       playerAddress,
       tournamentId
@@ -77,6 +94,11 @@ export default class GameJavascript extends Component<any, any> {
     await this.updateGameNumber(this.state.sessionId, playerAddress, tournamentId);
     this.gameIsRunning(isGameRunning);
     this.playerIsDead(isDead);
+
+    if (tournamentId || tournamentId === 0) {
+      startRecording.call()
+      console.log("GAME JAVASCRIPT: Recording started...")
+    }
   }
 
   render() {
@@ -88,7 +110,8 @@ export default class GameJavascript extends Component<any, any> {
           updateGameNumber: this.updateGameNumber,
           playerIsDead: this.playerIsDead,
           gameIsRunning: this.gameIsRunning,
-          initiateGame: this.initiateGame
+          initiateGame: this.initiateGame,
+          endGame: this.endGame
         }
       }>
         {this.props.children}
