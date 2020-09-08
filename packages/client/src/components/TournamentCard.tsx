@@ -43,6 +43,7 @@ class TournamentCard extends Component<any, any> {
         name: '',
         image: ''
       },
+      prizeString: ''
     }
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -121,6 +122,7 @@ class TournamentCard extends Component<any, any> {
     }
 
     this.getGameDetails(tournament.gameId);
+    await this.showWinnings(drizzle, tournament);
 
     this.setState({
       gameId: tournament.gameId,
@@ -241,8 +243,34 @@ class TournamentCard extends Component<any, any> {
       })
   }
 
+  showWinnings = async (drizzle, tournament) => {
+    if (drizzle && tournament) {
+      const contract = drizzle.contracts.Tournaments;
+      const shares = await contract.methods.getShares(tournament.id).call();
+  
+      let prizeString = '';
+  
+      for(let i = 0; i < shares.length; i++) {
+        if (i === 0) {
+          prizeString += `${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}st)`
+        } else if (i === 1) {
+          prizeString += `, ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}nd)`
+        } else if (i === 2) {
+          prizeString += `, ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}rd)`
+        } else {
+          prizeString += `, ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}th)`
+        } 
+      }
+
+      console.log("PRIZE STRING:", prizeString)
+      this.setState({
+        prizeString
+      })
+    }
+  }
+
   render() {
-    const { tournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner, gameNo, gameName, gameImage } = this.state
+    const { tournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner, gameNo, gameName, gameImage, prizeString } = this.state
     const { connectAndValidateAccount, account, accountValidated, drizzle, address } = this.props
 
     const hasTournament = !!tournament
@@ -267,7 +295,7 @@ class TournamentCard extends Component<any, any> {
     const endTimeStr = format(new Date(tournament.endTime),
       'MMM d, yyyy, HH:mm:ss')
 
-    const buttonText = tournament.timeIsUp ? 'View' : 'Join';
+    const buttonText = tournament.timeIsUp ? 'View' : `Join (${tournament.buyInAmount && web3.utils.fromWei(tournament.buyInAmount.toString())} ETH)`;
     const playBtnText = `Play ( ${typeof gameNo !== "number" ? 0 : gameNo} out of ${tournament.maxTries} )`;
 
     const button = () => {
@@ -328,7 +356,7 @@ class TournamentCard extends Component<any, any> {
 
             <Flex justifyContent={"center"} mt={3} mb={4}>
               <Text fontWeight={600} lineHeight={"1em"}>
-                Prize: { web3.utils.fromWei(tournament.prize) } ETH
+                Prize: { prizeString && prizeString }
               </Text>
             </Flex>
 

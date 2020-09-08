@@ -154,12 +154,13 @@ app.post('/gameSession/score', async (req: any, res: any) => {
   const sessionId = req.body.sessionId;
   const playerAddress = req.body.playerAddress;
   const tournamentId = req.body.tournamentId;
+  const timeFinished = req.body.timeFinished;
 
   console.log("Server POST sessionId is", sessionId);
   console.log("Server POST did win", didWin);
 
   const result = await GlobalState.ServerState.dbManager
-    .serverUpdateScore(didWin, sessionId, playerAddress, tournamentId);
+    .serverUpdateScore(didWin, sessionId, playerAddress, tournamentId, timeFinished);
   
   res.json(result);
 })
@@ -220,6 +221,26 @@ app.get('/tourney', async (req: any, res: any) => {
   const result = await GlobalState.ServerState.dbManager.getTournament(tournamentId);
   
   res.json(result)
+})
+
+app.patch('/tournament/update', async (req: any, res: any) => {
+
+  const tournamentId = req.body.tournamentId;
+  const updatedData = req.body.updatedData;
+
+  console.log("SERVER UPDATE TOURNAMENT: TournamentID: ", tournamentId);
+  console.log("SERVER UPDATE TOURNAMENT: UpdatedData: ", updatedData);
+
+  const result = await GlobalState.ServerState.dbManager.updateTournament(tournamentId, updatedData);
+  res.json(result);
+})
+
+app.get('/tourney/winners', async(req: any, res: any) => {
+
+  const tournamentId = req.query.tournamentId;
+
+  const result = await GlobalState.ServerState.dbManager.getTourneyWinners(tournamentId);
+  res.json(result);
 })
 
 // Serve the frontend client

@@ -271,6 +271,7 @@ export default class Game extends Component<IProps, IState> {
         }
         break;
       case 'stop':
+        await gameJavascriptContext.updateSessionHighScore()
         gameJavascriptContext.gameIsRunning(false);
         this.gameManager.hudLogAdd(`Game ends...`);
         await this.props.stopRecording.call();
@@ -282,7 +283,6 @@ export default class Game extends Component<IProps, IState> {
         this.setState({
           showResult: true
         })
-        gameJavascriptContext.updateSessionHighScore()
         break;
       case 'restart':
         break;
@@ -304,6 +304,7 @@ export default class Game extends Component<IProps, IState> {
         break;
       case 'killed':
         this.gameManager.hudLogAdd(`"${message.params.killerName}" kills "${message.params.killedName}".`);
+        await gameJavascriptContext.updateSessionHighScore()
         gameJavascriptContext.gameIsRunning(false);
         gameJavascriptContext.playerIsDead(true);
         this.stop();
@@ -314,7 +315,6 @@ export default class Game extends Component<IProps, IState> {
           navigate('/');
         }
         toast.info("Game finished!");
-        gameJavascriptContext.updateSessionHighScore()
         break;
       case 'won':
         this.gameManager.hudLogAdd(`"${message.params.name}" wins!`);

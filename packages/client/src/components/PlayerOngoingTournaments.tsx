@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import web3 from 'web3';
 
 import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
+import ViewResultsModal from './ViewResultsModal';
 
 const OngoingCard = styled(Card)`
   box-shadow: none;
@@ -61,7 +62,7 @@ const GameImage = styled(Image)`
 
 class PlayerOngoingTournaments extends Component {
   render() {
-    const { tournaments, setRoute } = this.props;
+    const { tournaments, setRoute, account, drizzle } = this.props;
 
     const activeTournaments = tournaments.filter( tournament => tournament.state === 1);
 
@@ -86,6 +87,11 @@ class PlayerOngoingTournaments extends Component {
             <p className="lead">State</p>
             <Text fontWeight="bold" marginBottom={"1rem"}>Active</Text>
             {results}
+            <ViewResultsModal
+              tournamentId={tournament.id}
+              playerAddress={account}
+              drizzle={drizzle}
+            />
           </Box>
         </OngoingCard>
         </>

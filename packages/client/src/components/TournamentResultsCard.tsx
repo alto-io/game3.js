@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components';
 
-import { getTournamentResult, getTournament } from '../helpers/database'
+import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
 import { RouteComponentProps } from '@reach/router';
@@ -96,6 +96,7 @@ class TournamentResultsCard extends Component<any, any> {
     let raw = undefined;
     if (loggedIn) {
       raw = await contract.methods.getTournament(tournamentId).call()
+      await this.fetchShares(tournamentId);
       let data = this.parseData(raw['5']);
       const gameName = data[0];
       tournament = {
@@ -127,6 +128,11 @@ class TournamentResultsCard extends Component<any, any> {
         state: parseInt(raw[0].state),
         pool: raw[0].pool
       }
+      console.log("FETCH SHARES NOT LOGGED IN", raw[0].shares);
+      console.log("FETCH POOL NOT LOGGED IN", raw[0].pool);
+      this.setState({
+        shares: raw[0].shares
+      })
     }
 
     switch (tournament.name) {
@@ -171,7 +177,8 @@ class TournamentResultsCard extends Component<any, any> {
       console.log("RESULTS:", results)
       results = results.filter(result => !!result.sessionData && !!result.name)
       if (results.length > 1) {
-        results.sort((el1, el2) => el2.sessionData.currentHighestNumber - el1.sessionData.currentHighestNumber)
+        // Sorts in ascending order
+        results.sort((el1, el2) => el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber)
       }
     }
     this.setState({
@@ -184,11 +191,11 @@ class TournamentResultsCard extends Component<any, any> {
   getBlockchainInfo = async (props) => {
     const { tournamentId, playerAddress, drizzle } = props;
     const contract = drizzle.contracts.Tournaments;
-    
+
     // Tournament ID is undefined in Play Tab
-    if (tournamentId === undefined) {
+    if (tournamentId === undefined && drizzle.contracts.Tournaments) {
       const tournamentLength = await contract.methods.getTournamentsCount().call();
-      let tI = tournamentLength - 1;
+      let tI = tournamentLength -1;
 
       playerAddress ? await this.getTournamentAndLeaderBoards(tI, true) : await this.getTournamentAndLeaderBoards(tI, false);
     } else {
@@ -272,15 +279,16 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   fetchShares = async (tournamentId) => {
+    console.log("FETCH SHARES");
     const { drizzle } = this.props;
-    
+
     try {
       const contract = drizzle.contracts.Tournaments;
       const shares = await contract.methods.getShares(tournamentId).call();
 
       this.setState({ shares });
     }
-    catch (e) {}
+    catch (e) { }
   }
 
   setTrophy(idx, shares) {
@@ -290,7 +298,7 @@ class TournamentResultsCard extends Component<any, any> {
           return <span>&#x1F947;</span>
         case 1:
           return <span>&#x1F948;</span>
-        case 2:
+        default:
           return <span>&#x1F949;</span>
       }
     }
@@ -300,7 +308,8 @@ class TournamentResultsCard extends Component<any, any> {
     const { results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
 
-    this.fetchShares(tournamentId);
+    console.log("SHARES FROM STATE", shares);
+    console.log("POOL FROM STATE", tournament.pool);
 
     if (isLoading) {
       return (
@@ -377,7 +386,7 @@ class TournamentResultsCard extends Component<any, any> {
             ) : (
                 <div style={totalBuyIn} >
                   <span>Total Buy-in Pool</span>
-                  <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tournament.pool && web3.utils.fromWei((tournament.pool.toString()))} ETH</span>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tournament.pool && web3.utils.fromWei((tournament.pool).toString())} ETH</span>
                 </div>
               )}
           </>

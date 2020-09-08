@@ -25,8 +25,9 @@ export default class GameJavascript extends Component<any, any> {
 
   async updateSessionHighScore() {
     const { isPlayerDead, sessionId, playerAddress, tournamentId} = this.state;
+    const timeFinished = Date.now();
 
-    let updatedData = await updateSessionScore(!isPlayerDead, sessionId, playerAddress, tournamentId);
+    let updatedData = await updateSessionScore(!isPlayerDead, sessionId, playerAddress, tournamentId, timeFinished);
     console.log("Data updated with", updatedData);
   }
 
