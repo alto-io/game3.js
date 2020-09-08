@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
-import { RouteComponentProps } from '@reach/router';
+import { RouteComponentProps, navigate } from '@reach/router';
 import qs from 'querystringify';
 import { format } from 'date-fns';
 
@@ -251,34 +251,7 @@ formatTourneyTitle(tournament: any) {
 }
 
 handleJoinClick = () => {
-  const { tournament } = this.state
-  let path = '';
-
-  const tosiosOptions = {
-    mode: 'score attack',
-    roomMap: 'small',
-    roomMaxPlayers: '1',
-    roomName: '',
-    tournamentId: tournament.id,
-    playerName: "Guest",
-    viewOnly: tournament.timeIsUp
-  }
-
-  switch (tournament.name) {
-    case Constants.WOM:
-      path = '' //Join tourney for wom
-      break;
-    case Constants.TOSIOS:
-      path = `/game/new${qs.stringify(tosiosOptions, true)}`
-      break;
-    case Constants.FP:
-      path = '' //Join tourney for flappy bird
-      break;
-    default:
-      break;
-  }
-  window.history.replaceState(null, '', path);
-  // navigateTo(path);
+  navigate('/')
 }
 
 setResultBgColor(playerAddress, currentPlayerAddress) {

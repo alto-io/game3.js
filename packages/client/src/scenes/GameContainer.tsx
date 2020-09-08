@@ -44,7 +44,7 @@ function functionExample(someVar) {
 
 }
 
-export default class GameContainer extends Component<IProps, IState> {
+export default class GameContainer extends Component<IProps, any> {
 
   private mediaRecorder: any;
   private recordedBlobs: any;
