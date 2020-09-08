@@ -261,7 +261,8 @@ class CreateTourneyView extends Component<any, any> {
         // TODO: can refactor this to just parse [] and make it an array?
         case 'address[]':
           console.log("VALUE", param.value);
-          let addressArr = param.value;
+          console.log("TYPE OF VALUE", typeof param.value);
+          let addressArr = typeof param.value === 'object' ? param.value : param.value.split(',');
           contractParams.push(addressArr);
           break;
         case 'uint256[]':

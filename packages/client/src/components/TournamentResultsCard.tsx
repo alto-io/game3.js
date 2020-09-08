@@ -197,10 +197,15 @@ class TournamentResultsCard extends Component<any, any> {
 
     // Tournament ID is undefined in Play Tab
     if (tournamentId === undefined && drizzle.contracts.Tournaments) {
-      const tournamentLength = await contract.methods.getTournamentsCount().call();
-      let tI = tournamentLength -1;
 
-      playerAddress ? await this.getTournamentAndLeaderBoards(tI, true) : await this.getTournamentAndLeaderBoards(tI, false);
+      console.log("TOURNAMENT ID = ", tournamentId)
+      const tournamentLength = await contract.methods.getTournamentsCount().call();
+      let tI = undefined;
+      if (tournamentLength > 0) {
+        tI = tournamentId || tournamentId === 0 ? tournamentId : tournamentLength - 1;
+      }
+      await this.getTournamentAndLeaderBoards(tI, true);
+
     } else {
       // Tournament ID is present in Tournaments and Dashboard
       playerAddress ? await this.getTournamentAndLeaderBoards(tournamentId, true) : await this.getTournamentAndLeaderBoards(tournamentId, false);
@@ -310,6 +315,22 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
+  formatTime = (time, isLeaderBoards) => {
+    if (time) {
+      const seconds = (parseInt(time) / 1000).toFixed(2);
+      const minutes = Math.floor(parseInt(seconds) / 60);
+      let totalTime = '';
+      if (parseInt(seconds) > 60) {
+        let sec = (parseInt(seconds) % 60).toFixed(2);
+    
+        totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min"+" "+sec+"sec").toString()
+      } else {
+        totalTime += isLeaderBoards ? ("0:"+seconds).toString() : (seconds+"sec").toString()
+      }
+      return totalTime
+    }
+  }
+
   render() {
     const { results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
@@ -344,11 +365,12 @@ class TournamentResultsCard extends Component<any, any> {
               {idx < shares.length ? <span>{
                <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
               }</span> : ""}
-            <span style={timeLeftStyle}>
-              {result.sessionData.currentHighestNumber}
-            </span>
-          </div>
-        )} 
+              <span style={timeLeftStyle}>
+                {result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}
+              </span>
+            </div>
+          )
+        }
       });
     } else {
       if (!tournamentId) {
@@ -467,13 +489,15 @@ const resultDivStyle: CSS.Properties = {
 const playerAddressStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
   color: `rgb(${baseColors.dark})`,
-  fontFamily: fonts.family.ApercuBold
+  fontFamily: fonts.family.ApercuBold,
+  marginRight: '0.2rem'
 }
 
 const timeLeftStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
   color: `#0093d5`,
-  fontFamily: fonts.family.ApercuBold
+  fontFamily: fonts.family.ApercuBold,
+  marginLeft: '0.2rem'
 }
 
 const tournamentInfoStyle: CSS.Properties = {

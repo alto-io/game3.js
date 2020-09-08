@@ -256,7 +256,7 @@ export class OrbitDBManager implements DBManager {
     // As of now, the scoring mechanism depends on the shortest time you win the game.
     // Sooner, we'll support several scoring mechanism.
 
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       console.log("UPDATE_SCORE: Function Invoked...");
 
       const data = await this.gameSessions.query(data =>
@@ -313,7 +313,7 @@ export class OrbitDBManager implements DBManager {
 
   async updateGameNumber(sessionId, playerAddress, tournamentId) {
     console.log("UPDATE_GNUMBER: Initializing...");
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
 
       // Get session first
       const data = await this.gameSessions.query(data =>
@@ -343,7 +343,7 @@ export class OrbitDBManager implements DBManager {
 
   // called from colyseus game state
   async makeNewGameSession(sessionId, tournamentId, timeLeft, players) {
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       console.log("NEW: Function Invoked...");
       const sessionData = {
         sessionId,
@@ -415,7 +415,7 @@ export class OrbitDBManager implements DBManager {
   }
 
   async serverGetGameSession(sessionId, playerAddress, tournamentId) {
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       console.log("GET_GSESSION: Function Invoked...");
       console.log(`GET_GSESSION: sessionId: ${sessionId}`)
       console.log(`GET_GSESSION: playerAddress: ${playerAddress}`)
@@ -456,7 +456,7 @@ export class OrbitDBManager implements DBManager {
   }
 
   async getGameNo(gameSessionId, playerAddress, tournamentId) {
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       // get game session first
 
       const data = await this.gameSessions.query(data =>
@@ -477,7 +477,7 @@ export class OrbitDBManager implements DBManager {
 
   async serverCreateSessionId(playerAddress, tournamentId) {
     console.log("SID: Tournament ID", tournamentId);
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       console.log("CREATE_SID: Initializing...")
       console.log(`CREATE_SID: Params playerAddress: ${playerAddress}, tournamentId: ${tournamentId}`)
       // Check if this player already have a sessionId
@@ -511,7 +511,7 @@ export class OrbitDBManager implements DBManager {
   }
 
   async getGameSessionId(playerAddress, tournamentId) {
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       let data = await this.gameSessionIds.query(sessionId =>
         sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId === tournamentId)
       if (data.length > 0) {
