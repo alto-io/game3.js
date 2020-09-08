@@ -22,7 +22,7 @@ import web3 from 'web3';
 
 const SharesText = styled.p`
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   align-items: center;
 
   .place {
@@ -31,6 +31,32 @@ const SharesText = styled.p`
     margin-right: 1rem;
   }
 `;
+
+const ResultDivStyle = styled.div`
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ font-size: 0.825rem;
+ letter-spacing: 0.1px;
+ padding: 0.5rem;
+
+ .address {
+   font-weight: bold;
+   margin: 0;
+ }
+
+ .shares {
+   margin: 0;
+ }
+
+ .score {
+   color: #0093d5;
+   font-family: 'Apercu Bold';
+   margin: 0;
+   text-align: right;
+   width: 33%;
+ }
+ `
 
 class TournamentResultsCard extends Component<any, any> {
   constructor(props) {
@@ -324,25 +350,25 @@ class TournamentResultsCard extends Component<any, any> {
     let resultDivs = null;
 
     if (results.length > 0) {
-      console.log("result length > 0")
+
       resultDivs = results.map( (result, idx) => {
 
         if (result.sessionData) {
           return( 
-          <div 
-            style={{...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`}} 
+          <ResultDivStyle 
+            style={{ 
+              background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`
+            }}
             key={result.sessionId}
           >
-            <span style={playerAddressStyle}>
+            <p className="address" style={{width: shares !== undefined ? '33%' : '50%'}}>
               {shortenAddress(result.playerAddress)}
-            </span>
-              {idx < shares.length ? <span>{
-               <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
-              }</span> : ""}
-            <span style={timeLeftStyle}>
-              {result.sessionData.currentHighestNumber}
-            </span>
-          </div>
+            </p>
+            {shares !== undefined && idx < shares.length ? (
+              <p className="shares">{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
+            ) : ""}
+            <p className="score" style={{width: shares !== undefined ? '33%' : '50%'}}>{result.sessionData.currentHighestNumber}</p>
+          </ResultDivStyle>
         )} 
       });
     } else {
@@ -358,13 +384,7 @@ class TournamentResultsCard extends Component<any, any> {
           let trophy = <span className="trophy">{this.setTrophy(idx, shares)}</span>;
           let shareETH = <span className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</span>
           return(
-          <SharesText key={idx}>
-            <span>
-              {place} 
-              {trophy} 
-            </span>
-            {shareETH}
-          </SharesText>
+            <SharesText> {place} <span>{trophy} {shareETH}</span></SharesText>
           )
         })
       }
@@ -421,7 +441,7 @@ const leaderBoardStyle: CSS.Properties = {
   padding: '0.8rem 1rem',
   display: 'flex',
   flexDirection: 'column',
-  margin: '0 0 0.5rem 0',
+  margin: '0 0 0.512rem 0',
   background: `rgb(${baseColors.white})`,
   boxShadow: shadows.soft,
   justifyContent: 'center',
@@ -445,7 +465,7 @@ const titleHeader: CSS.Properties = {
 
 const resultDivsStyle: CSS.Properties = {
   width: '100%',
-  padding: '1rem',
+  padding: '0',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center'
