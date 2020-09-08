@@ -2,8 +2,19 @@ import React from "react";
 import Unity, { UnityContent } from "react-unity-webgl";
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
 import GameSceneContainer from '../components/GameSceneContainer';
+import styled from 'styled-components';
 import { Card } from "rimble-ui";
 import { DEFAULT_GAME_DIMENSION } from '../constants'
+
+const StyledBox= styled(Box)`
+  height: 100%;
+  width: 100%;
+
+  .web-gl canvas#canvas {
+    height: 100%;
+    width: 100%;
+  }
+`
 
 interface IProps extends RouteComponentProps {
   path: string;
@@ -212,17 +223,13 @@ export class GameUnity extends React.Component<IProps, any> {
         </Button>
 
         <Space size="xxs" />
-        <div style={
-          {
-            width:`${DEFAULT_GAME_DIMENSION.width}px`,
-            height:`${DEFAULT_GAME_DIMENSION.height}px`
-          }}>
+        <StyledBox>
           {
             this.state.unityShouldBeMounted === true && (
-              <Unity width="100%" height="100%" unityContent={this.unityContent} />
+              <Unity width="100%" height="100%" unityContent={this.unityContent} className="web-gl"/>
             )
           } 
-        </div>
+        </StyledBox>
       </GameSceneContainer>
     );
   }
