@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import JoinPromptModal from './JoinPromptModal';
 import BuyinPromptModal from './BuyInPromptModal';
 
-import { getTournamentResult, getTournament, getGameNo, getGameSessionId } from '../helpers/database'
+import { getTournamentResult, getTournament, getGameNo, getGameSessionId, getTournaments } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress";
 import { Constants } from '@game3js/common';
 import web3 from 'web3';
@@ -70,7 +70,7 @@ const ResultDivStyle = styled.div`
  }
  `
 
- const JoinTourneyBtn = styled(Button)`
+const JoinTourneyBtn = styled(Button)`
   color: #101010;
   font-family: 'Apercu Light';
   font-size: 0.825rem;
@@ -162,10 +162,10 @@ class TournamentResultsCard extends Component<any, any> {
       const gameStage = data[1] ? data[1] : undefined;
       const maxTries = await contract.methods.getMaxTries(tournamentId).call();
       const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
-      
+
       if (playerAddress && accountValidated) {
         const accountBuyIn = await contract.methods.buyIn(tournamentId, playerAddress).call();
-        this.setState({accountBuyIn});
+        this.setState({ accountBuyIn });
       }
 
       tournament = {
@@ -228,7 +228,7 @@ class TournamentResultsCard extends Component<any, any> {
         console.log("PLAYER ADD: address", playerAddress);
 
         results.push({
-          gameName: sessionsData[resultIdx].sessionData.gameName,   
+          gameName: sessionsData[resultIdx].sessionData.gameName,
           tournamentId: tournamentId,
           timeIsUp: false,
           playerAddress,
@@ -252,7 +252,7 @@ class TournamentResultsCard extends Component<any, any> {
       if (results.length > 1) {
         // Sorts in ascending order
         results.sort((el1, el2) => {
-          switch (el1.gameName) {  
+          switch (el1.gameName) {
             case Constants.FP:
               return el2.sessionData.highScore - el1.sessionData.highScore
             case Constants.TOSIOS:
@@ -299,36 +299,36 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
-getStatus(tournament: any) {
-  switch (tournament.state) {
-    case TOURNAMENT_STATE_DRAFT:
-      return 'Draft'
-    case TOURNAMENT_STATE_ACTIVE:
-      return 'Active'
-    case TOURNAMENT_STATE_ENDED:
-      return 'Done'
-    default:
-      return 'None'
+  getStatus(tournament: any) {
+    switch (tournament.state) {
+      case TOURNAMENT_STATE_DRAFT:
+        return 'Draft'
+      case TOURNAMENT_STATE_ACTIVE:
+        return 'Active'
+      case TOURNAMENT_STATE_ENDED:
+        return 'Done'
+      default:
+        return 'None'
+    }
   }
-}
 
-formatTourneyTimeInfo(tournament: any) {
-  const {
-    startDate,
-    endTime,
-    startTime,
-    timeZone
-  } = tournament;
-  let info =
-    `Ends on ${endTime} ${timeZone}`;
+  formatTourneyTimeInfo(tournament: any) {
+    const {
+      startDate,
+      endTime,
+      startTime,
+      timeZone
+    } = tournament;
+    let info =
+      `Ends on ${endTime} ${timeZone}`;
 
-  return info;
-}
+    return info;
+  }
 
-// Formats the title of the tournament along with its ID 
-formatTourneyTitle(tournament: any) {
-  return `${tournament.name} #${tournament.id}`;
-}
+  // Formats the title of the tournament along with its ID 
+  formatTourneyTitle(tournament: any) {
+    return `${tournament.name} #${tournament.id}`;
+  }
 
   handleJoinClick = () => {
     const { tournament } = this.state;
@@ -370,41 +370,28 @@ formatTourneyTitle(tournament: any) {
       default:
         break;
     }
-}
-
-setResultBgColor(playerAddress, currentPlayerAddress) {
-  if (playerAddress && playerAddress.toLowerCase() === currentPlayerAddress.toLowerCase()) {
-    return baseColors.lightGrey;
-  } else {
-    return baseColors.white;
   }
-}
 
-fetchShares = async (tournamentId) => {
-  console.log("FETCH SHARES");
-  const { drizzle } = this.props;
-
-  try {
-    const contract = drizzle.contracts.Tournaments;
-    const shares = await contract.methods.getShares(tournamentId).call();
-
-    this.setState({ shares });
-  }
-  catch (e) { }
-}
-
-setTrophy(idx, shares) {
-  if (idx < shares.length) {
-    switch (idx) {
-      case 0:
-        return <span>&#x1F947;</span>
-      case 1:
-        return <span>&#x1F948;</span>
-      default:
-        return <span>&#x1F949;</span>
+  setResultBgColor(playerAddress, currentPlayerAddress) {
+    if (playerAddress && playerAddress.toLowerCase() === currentPlayerAddress.toLowerCase()) {
+      return baseColors.lightGrey;
+    } else {
+      return baseColors.white;
     }
   }
-}
+
+  fetchShares = async (tournamentId) => {
+    console.log("FETCH SHARES");
+    const { drizzle } = this.props;
+
+    try {
+      const contract = drizzle.contracts.Tournaments;
+      const shares = await contract.methods.getShares(tournamentId).call();
+
+      this.setState({ shares });
+    }
+    catch (e) { }
+  }
 
   setTrophy(idx, shares) {
     if (idx < shares.length) {
@@ -420,46 +407,46 @@ setTrophy(idx, shares) {
   }
 
   setDisplayScore(result) {
-  switch (result.gameName) {
-    case Constants.FP:
-      return result.sessionData.highScore
-    case Constants.TOSIOS:
-      return this.formatTime(result.sessionData.currentHighestNumber, true)
-    default:
-      return ''
-  }
-}
-
-formatTime = (time, isLeaderBoards) => {
-  if (time) {
-    const seconds = (parseInt(time) / 1000).toFixed(2);
-    const minutes = Math.floor(parseInt(seconds) / 60);
-    let totalTime = '';
-    if (parseInt(seconds) > 60) {
-      let sec = (parseInt(seconds) % 60).toFixed(2);
-
-      totalTime += isLeaderBoards ? (minutes + ":" + sec).toString() : (minutes + "min" + " " + sec + "sec").toString()
-    } else {
-      totalTime += isLeaderBoards ? ("0:" + seconds).toString() : (seconds + "sec").toString()
+    switch (result.gameName) {
+      case Constants.FP:
+        return result.sessionData.highScore
+      case Constants.TOSIOS:
+        return this.formatTime(result.sessionData.currentHighestNumber, true)
+      default:
+        return ''
     }
-    return totalTime
   }
-}
+
+  formatTime = (time, isLeaderBoards) => {
+    if (time) {
+      const seconds = (parseInt(time) / 1000).toFixed(2);
+      const minutes = Math.floor(parseInt(seconds) / 60);
+      let totalTime = '';
+      if (parseInt(seconds) > 60) {
+        let sec = (parseInt(seconds) % 60).toFixed(2);
+
+        totalTime += isLeaderBoards ? (minutes + ":" + sec).toString() : (minutes + "min" + " " + sec + "sec").toString()
+      } else {
+        totalTime += isLeaderBoards ? ("0:" + seconds).toString() : (seconds + "sec").toString()
+      }
+      return totalTime
+    }
+  }
 
   handleCloseJoinModal = e => {
     this.setState({ isJoinModalOpen: false });
   }
 
-  handleOpenJoinModal = e =>{
+  handleOpenJoinModal = e => {
     this.setState({ isJoinModalOpen: true });
   }
 
   handleCloseBuyinModal = e => {
-    this.setState({ isBuyinModalOpen: false});
+    this.setState({ isBuyinModalOpen: false });
   }
 
   handleOpenBuyinModal = e => {
-    this.setState({ isBuyinModalOpen: true});
+    this.setState({ isBuyinModalOpen: true });
   }
 
   fetchGameNo = async (account, tournamentId) => {
@@ -480,29 +467,30 @@ formatTime = (time, isLeaderBoards) => {
       )
     }
 
-  let resultDivs = null;
+    let resultDivs = null;
 
     if (results.length > 0) {
 
-      resultDivs = results.map( (result, idx) => {
+      resultDivs = results.map((result, idx) => {
 
         if (result.sessionData) {
-          return( 
-          <ResultDivStyle 
-            style={{ 
-              background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`
-            }}
-            key={result.sessionId}
-          >
-            <p className="address" style={{width: shares !== undefined ? '33%' : '50%'}}>
-              {shortenAddress(result.playerAddress)}
-            </p>
-            {shares !== undefined && idx < shares.length ? (
-              <p className="shares">{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
-            ) : ""}
-            <p className="score" style={{width: shares !== undefined ? '33%' : '50%'}}>{result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}</p>
-          </ResultDivStyle>
-        )} 
+          return (
+            <ResultDivStyle
+              style={{
+                background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`
+              }}
+              key={result.sessionId}
+            >
+              <p className="address" style={{ width: shares !== undefined ? '33%' : '50%' }}>
+                {shortenAddress(result.playerAddress)}
+              </p>
+              {shares !== undefined && idx < shares.length ? (
+                <p className="shares">{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
+              ) : ""}
+              <p className="score" style={{ width: shares !== undefined ? '33%' : '50%' }}>{result.sessionData && this.setDisplayScore(result)}</p>
+            </ResultDivStyle>
+          )
+        }
       });
     } else {
       if (!tournamentId) {
@@ -512,11 +500,11 @@ formatTime = (time, isLeaderBoards) => {
           </div>
         )
       } else {
-        resultDivs = shares.map( (share, idx) => {
+        resultDivs = shares.map((share, idx) => {
           let place = <p className="place">{idx + 1}</p>;
           let trophy = <p className="trophy">{this.setTrophy(idx, shares)}</p>;
           let shareETH = <p className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</p>
-          return(
+          return (
             <SharesText>{place}{trophy}{shareETH}</SharesText>
           )
         })
@@ -526,8 +514,8 @@ formatTime = (time, isLeaderBoards) => {
     console.log(accountBuyIn)
     const button = () => {
       if (accountBuyIn > 0 && playerAddress && accountValidated) {
-        return(
-          <JoinTourneyBtn 
+        return (
+          <JoinTourneyBtn
             onClick={this.handleJoinClick}
             mainColor={"#06df9b"}
             disabled={gameNo === tournament.maxTries ? "disabled" : ""}
@@ -536,12 +524,12 @@ formatTime = (time, isLeaderBoards) => {
           </JoinTourneyBtn>
         )
       } else {
-        return (<JoinTourneyBtn 
-        onClick={playerAddress && accountValidated ? this.handleOpenBuyinModal : this.handleOpenJoinModal}
-        mainColor={"#06df9b"}
-      >
-        {`Join ( ${tournament.buyInAmount && web3.utils.fromWei(tournament.buyInAmount.toString())} ETH )`}
-      </JoinTourneyBtn>)
+        return (<JoinTourneyBtn
+          onClick={playerAddress && accountValidated ? this.handleOpenBuyinModal : this.handleOpenJoinModal}
+          mainColor={"#06df9b"}
+        >
+          {`Join ( ${tournament.buyInAmount && web3.utils.fromWei(tournament.buyInAmount.toString())} ETH )`}
+        </JoinTourneyBtn>)
       }
     }
 
@@ -566,24 +554,24 @@ formatTime = (time, isLeaderBoards) => {
                   {resultDivs}
                 </div>
               </div>
-              <JoinPromptModal 
-                  isOpen={isJoinModalOpen}
-                  handleCloseModal={this.handleCloseJoinModal}
-                  connectAndValidateAccount={connectAndValidateAccount}
-                  account={playerAddress}
-                  accountValidated={accountValidated}
-                  modalText={"You must be logged in to join a tournament"}
-                />
-                <BuyinPromptModal 
-                  isOpen={isBuyinModalOpen}
-                  handleCloseBuyinModal={this.handleCloseBuyinModal}
-                  handleJoinClick={this.handleJoinClick}
-                  drizzle={drizzle}
-                  tournamentId={tournament.id}
-                  tournamentBuyInAmount={tournament.buyInAmount}
-                  maxTries={tournament.maxTries}
-                  address={playerAddress}
-                />
+              <JoinPromptModal
+                isOpen={isJoinModalOpen}
+                handleCloseModal={this.handleCloseJoinModal}
+                connectAndValidateAccount={connectAndValidateAccount}
+                account={playerAddress}
+                accountValidated={accountValidated}
+                modalText={"You must be logged in to join a tournament"}
+              />
+              <BuyinPromptModal
+                isOpen={isBuyinModalOpen}
+                handleCloseBuyinModal={this.handleCloseBuyinModal}
+                handleJoinClick={this.handleJoinClick}
+                drizzle={drizzle}
+                tournamentId={tournament.id}
+                tournamentBuyInAmount={tournament.buyInAmount}
+                maxTries={tournament.maxTries}
+                address={playerAddress}
+              />
               {tournamentId === undefined ? (
                 button()
               ) : (
