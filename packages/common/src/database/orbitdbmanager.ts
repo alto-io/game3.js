@@ -271,6 +271,8 @@ export class OrbitDBManager implements DBManager {
             return await this.tosiosHighScoreHandler(playerAddress, data, gamePayload);
           case FP:
             return await this.fpHighScoreHandler(playerAddress, data, gamePayload);
+          case WOM:
+            return await this.womHighScoreHandler(playerAddress, data, gamePayload);
           default:
             return false;
         }
@@ -343,7 +345,9 @@ export class OrbitDBManager implements DBManager {
       case TOSIOS:
         return await this.handleCreatePlayerDataTOSIOS(sessionData, data, sessionId, gamePayload);
       case FP:
-        return await this.handleCreatePlayerDataFP(sessionData, data, sessionId, gamePayload)
+        return await this.handleCreatePlayerDataScoreType(sessionData, data, sessionId, gamePayload)
+      case WOM:
+        return await this.handleCreatePlayerDataScoreType(sessionData, data, sessionId, gamePayload)
       default:
         return false;
     }
@@ -664,6 +668,36 @@ export class OrbitDBManager implements DBManager {
             console.log("GET_TOURNEY_WINNERS: Returning...");
 
             return winners;
+          case WOM:
+            players = tourneySession.map(session => {
+              let playerAddress = Object.keys(session.sessionData.playerData);
+              return {
+                address: playerAddress[0],
+                score: session.sessionData.playerData[playerAddress[0]].highScore
+              }
+            });
+
+            console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+
+            // sort in ascending order
+            players.sort((el1, el2) => el1.score - el2.score);
+
+            console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+
+            winners = []
+
+            for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
+              winners.push(players[i].address);
+            }
+
+            console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+            console.log("GET_TOURNEY_WINNERS: Returning...");
+
+            return winners;
           default:
             break;
         }
@@ -682,6 +716,36 @@ export class OrbitDBManager implements DBManager {
   // ============================================================= //
 
   // GAME SESSION PLAYER DATA HANDLERS
+
+  private async handleCreatePlayerDataScoreType(sessionData, data, sessionId, gamePayload) {
+    const { playerAddress } = gamePayload;
+    console.log("NEW-score_type: payload", gamePayload);
+    console.log("NEW-score_type: fetched session data", data);
+    if (data.length <= 0) {
+      console.log("NEW-score_type: NO SESSION DATA EXIST");
+      console.log("NEW-score_type: Adding player in session...");
+
+      const playerData = {
+        gameNo: 0,
+        score: 0,
+        highScore: 0
+      }
+
+      sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+      console.log("NEW-score_type: Added!", playerData);
+
+      console.log("NEW-score_type: Adding new session data to db...", sessionData);
+      await this.serverPutGameSession(sessionId, sessionData);
+      console.log("NEW-score_type: Session Data created!!!");
+      console.log("NEW-score_type: Function Finished...");
+      return true
+    } else {
+      console.log("NEW-score_type: Session Exist!!");
+      console.log("NEW-score_type: No need to create new one...")
+      console.log("NEW-score_type: Returning...")
+      return true;
+    }
+  }
 
   private async handleCreatePlayerDataTOSIOS(sessionData, data, sessionId, gamePayload) {
     const { timeLeft, players } = gamePayload;
@@ -737,36 +801,6 @@ export class OrbitDBManager implements DBManager {
     }
   }
 
-  private async handleCreatePlayerDataFP(sessionData, data, sessionId, gamePayload) {
-    const { playerAddress } = gamePayload;
-    console.log("NEW-fp: payload", gamePayload);
-    console.log("NEW-fp: fetched session data", data);
-    if (data.length <= 0) {
-      console.log("NEW-fp: NO SESSION DATA EXIST");
-      console.log("NEW-fp: Adding player in session...");
-
-      const playerData = {
-        gameNo: 0,
-        score: 0,
-        highScore: 0
-      }
-
-      sessionData.playerData[playerAddress.toLowerCase()] = playerData;
-      console.log("NEW-fp: Added!", playerData);
-
-      console.log("NEW-fp: Adding new session data to db...", sessionData);
-      await this.serverPutGameSession(sessionId, sessionData);
-      console.log("NEW-fp: Session Data created!!!");
-      console.log("NEW-fp: Function Finished...");
-      return true
-    } else {
-      console.log("NEW-fp: Session Exist!!");
-      console.log("NEW-fp: No need to create new one...")
-      console.log("NEW-fp: Returning...")
-      return true;
-    }
-  }
-
   // HIGH SCORE UPDATER HANDLERS
 
   private async tosiosHighScoreHandler(playerAddress, data, gamePayload) {
@@ -786,7 +820,7 @@ export class OrbitDBManager implements DBManager {
     if (!didWin) {
       console.log("UPDATE_SCORE-tosios: Player did not win");
       console.log("UPDATE_SCORE-tosios: Player score reverts to 0");
-      return true;
+      return { result: false, newHighScore: false }
     } else {
       console.log("UPDATE_SCORE-tosios: Player did win");
 
@@ -829,6 +863,38 @@ export class OrbitDBManager implements DBManager {
     } else {
       console.log("UPDATE_SCORE-fp: Current score is lower than highscore, no need to update!");
       console.log("UPDATE_SCORE-fp: Returning...");
+      return { result: playerData, newHighScore: false }
+    }
+  }
+
+  private async womHighScoreHandler(playerAddress, data, gamePayload) {
+    let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
+    console.log("UPDATE_SCORE-wom: payload", gamePayload);
+    const { score, didWin } = gamePayload;
+    let highScore = playerData.highScore;
+
+    console.log("UPDATE_SCORE-wom: Current High Score", highScore);
+    console.log("UPDATE_SCORE-wom: Current Score", score);
+    console.log("UPDATE_SCORE-wom: Did win?", didWin);
+
+    if (!didWin) {
+      console.log("UPDATE_SCORE-wom: Did not win, score will be nullified");
+      console.log("UPDATE_SCORE-wom: Returning...");
+      return { result: false, newHighScore: false };
+    }
+
+    if (score < highScore) {
+      playerData.highScore = score;
+      console.log("UPDATE_SCORE-wom: Thew new data", playerData);
+      data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+      console.log("UPDATE_SCORE-wom: Saving data");
+      await this.gameSessions.put(data[0]);
+      console.log("UPDATE_SCORE-wom: Updated!");
+      console.log("UPDATE_SCORE-wom: Returning...");
+      return { result: playerData, newHighScore: true }
+    } else {
+      console.log("UPDATE_SCORE-wom: Current score is slower than highscore, no need to update!");
+      console.log("UPDATE_SCORE-wom: Returning...");
       return { result: playerData, newHighScore: false }
     }
   }

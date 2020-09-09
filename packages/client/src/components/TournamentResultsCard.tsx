@@ -180,12 +180,13 @@ class TournamentResultsCard extends Component<any, any> {
       if (results.length > 1) {
         // Sorts in ascending order
         results.sort((el1, el2) => {
-          switch (el1.gameName) {
-            // el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber)   
+          switch (el1.gameName) {  
             case Constants.FP:
               return el2.sessionData.highScore - el1.sessionData.highScore
             case Constants.TOSIOS:
               return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
+            case Constants.WOM:
+              return el2.sessionData.currentHighestNumber - el1.sessionData.currentHighestNumber
             default:
               break;
           }

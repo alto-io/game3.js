@@ -169,13 +169,16 @@ export class GameUnity extends React.Component<IProps, any> {
   //     )
   //   }
 
-  produceGamePayload = (type) => {
+  produceGamePayload = (type:string, didWin ?: boolean) => {
     const { gameName, score, playerAddress } = this.state
 
     if (type === 'score') {
       switch (gameName) {
         case Constants.WOM:
-          return {}
+          return {
+            score,
+            didWin
+          }
 
         case Constants.FP:
           return {
@@ -187,7 +190,9 @@ export class GameUnity extends React.Component<IProps, any> {
     } else if (type === 'session') {
       switch (gameName) {
         case Constants.WOM:
-          return {}
+          return {
+            playerAddress
+          }
         case Constants.FP:
           return {
             playerAddress
@@ -219,7 +224,7 @@ export class GameUnity extends React.Component<IProps, any> {
         );
 
         this.fetchGameNo(this.props.address, this.props.tournamentId);
-        payLoad = this.produceGamePayload('score'); // gets appropriate payload
+        payLoad = this.produceGamePayload('score', false); // gets appropriate payload
         console.log("GAME UNITY PAYLOAD IN FAIL", payLoad)
         await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
@@ -234,7 +239,7 @@ export class GameUnity extends React.Component<IProps, any> {
         );
 
         this.fetchGameNo(this.props.address, this.props.tournamentId);
-        payLoad = this.produceGamePayload('score'); // gets appropriate payload
+        payLoad = this.produceGamePayload('score', true); // gets appropriate payload
         console.log("GAME UNITY PAYLOAD IN SUCCESS", payLoad)
         await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
