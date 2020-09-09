@@ -597,49 +597,76 @@ export class OrbitDBManager implements DBManager {
       console.log("GET_TOURNEY_WINNERS: Fetching tourney session data");
       let tourneySession = await this.getTournamentResult(tournamentId);
 
+      let players = []
+      let winners = []
+
       if (tourneySession.length > 0) {
         console.log("GET_TOURNEY_WINNERS: Tourney session fetched!!", tourneySession);
 
-        let players = tourneySession.map(session => {
-          let playerAddress = Object.keys(session.sessionData.playerData);
-          return {
-            address: playerAddress[0],
-            score: session.sessionData.playerData[playerAddress[0]].currentHighestNumber
-          }
-        });
-
-        console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
-
-        console.log("GET_TOURNEY_WINNERS: Sorting player scores");
-        
-        switch (tourneySession[0].gameName) {
+        switch (tourneySession[0].sessionData.gameName) {
           case TOSIOS:
+            players = tourneySession.map(session => {
+              let playerAddress = Object.keys(session.sessionData.playerData);
+              return {
+                address: playerAddress[0],
+                score: session.sessionData.playerData[playerAddress[0]].currentHighestNumber
+              }
+            });
+
+            console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+
             // sort in ascending order since shortest time is the winner
             players.sort((el1, el2) => el1.score - el2.score);
-            break;
+
+            console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+
+            winners = []
+
+            for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
+              winners.push(players[i].address);
+            }
+
+            console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+            console.log("GET_TOURNEY_WINNERS: Returning...");
+
+            return winners;
           case FP:
+            players = tourneySession.map(session => {
+              let playerAddress = Object.keys(session.sessionData.playerData);
+              return {
+                address: playerAddress[0],
+                score: session.sessionData.playerData[playerAddress[0]].highScore
+              }
+            });
+
+            console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+
             // sort in descending order
             players.sort((el1, el2) => el2.score - el1.score);
-            break;
+
+            console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+
+            winners = []
+
+            for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
+              winners.push(players[i].address);
+            }
+
+            console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+            console.log("GET_TOURNEY_WINNERS: Returning...");
+
+            return winners;
           default:
             break;
         }
-
-        console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
-
-        console.log("GET_TOURNEY_WINNERS: Mapping winners...");
-
-        let winners = []
-
-        for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
-          winners.push(players[i].address);
-        }
-
-        console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
-        console.log("GET_TOURNEY_WINNERS: Returning...");
-
-        return winners;
-
       } else {
         console.log("GET_TOURNEY_WINNERS: No tourney session fetched with id: ", tournamentId);
         console.log("GET_TOURNEY_WINNERS: Returning...");
@@ -786,7 +813,7 @@ export class OrbitDBManager implements DBManager {
     console.log("UPDATE_SCORE-fp: payload", gamePayload);
     const { score } = gamePayload;
     let highScore = playerData.highScore;
-    
+
     console.log("UPDATE_SCORE-fp: Current High Score", highScore);
     console.log("UPDATE_SCORE-fp: Current Score", score);
 
