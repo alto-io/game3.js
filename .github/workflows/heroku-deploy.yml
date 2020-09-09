@@ -26,10 +26,6 @@ jobs:
         uses: sjdonado/heroku@master
         with:
           args: container:push -a game3-js web
-          usedocker: true
-          docker_build_args: |
-            TESTNET_MNEMONIC
-            INFURA_API_KEY
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           GANACHE_MNEMONIC: ${{ secrets.GANACHE_MNEMONIC }}

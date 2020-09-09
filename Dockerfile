@@ -22,11 +22,6 @@ RUN apk --no-cache --virtual build-dependencies add \
 # Files
 COPY . .
 
-ARG TESTNET_MNEMONIC
-ARG INFURA_API_KEY
-
-ENV TESTNET_MNEMONIC=$TESTNET_MNEMONIC
-ENV INFURA_API_KEY=$INFURA_API_KEY
 ENV REACT_APP_NETWORK_ID=4
 
 # Deploy smart contracts
