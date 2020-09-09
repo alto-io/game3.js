@@ -150,37 +150,17 @@ app.get('/gameSession/gameNo', async (req: any, res: any) => {
 })
 
 app.post('/gameSession/score', async (req: any, res: any) => {
-  const didWin = req.body.didWin;
-  const sessionId = req.body.sessionId;
-  const playerAddress = req.body.playerAddress;
-  const tournamentId = req.body.tournamentId;
-  const timeFinished = req.body.timeFinished;
+  const {sessionId, playerAddress, tournamentId, gamePayload} = req.body;
 
   console.log("Server POST sessionId is", sessionId);
-  console.log("Server POST did win", didWin);
+  console.log("Server POST tournamentId is", tournamentId);
+  console.log("Server POST playerAddress is", playerAddress);
+  console.log("Server POST gamePayload is", gamePayload);
 
   let result;
 
   result = await GlobalState.ServerState.dbManager
-      .serverUpdateScore(didWin, sessionId, playerAddress, tournamentId, timeFinished);
-  res.json(result);
-})
-
-app.post('/gameSession/highscore', async (req: any, res: any) => {
-  const didWin = req.body.didWin;
-  const sessionId = req.body.sessionId;
-  const playerAddress = req.body.playerAddress;
-  const tournamentId = req.body.tournamentId;
-  const score = req.body.score;
-
-  console.log("Server POST sessionId is", sessionId);
-  console.log("Server POST did win", didWin);
-
-  let result;
-
-    result = await GlobalState.ServerState.dbManager
-      .serverUpdateHighScore(didWin, sessionId, playerAddress, tournamentId, score);
-
+      .serverUpdateScore(sessionId, playerAddress, tournamentId, gamePayload);
   res.json(result);
 })
 
@@ -200,13 +180,10 @@ app.post('/gameSession/gameNo', async (req: any, res: any) => {
 })
 
 app.post('/gameSession/new', async (req: any, res: any) => {
-  const sessionId = req.body.sessionId;
-  const tournamentId = req.body.tournamentId;
-  const timeLeft = req.body.timeLeft;
-  const players = req.body.players;
+  const {gameName, sessionId, tournamentId, gamePayload} = req.body;
 
   const result = await GlobalState.ServerState.dbManager
-    .makeNewGameSession(sessionId, tournamentId, timeLeft, players);
+    .makeNewGameSession(gameName, sessionId, tournamentId, gamePayload);
   
   res.json(result);
 })

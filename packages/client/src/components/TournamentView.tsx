@@ -81,7 +81,7 @@ class TournamentView extends React.Component<any, any> {
   }
 
   render() {
-    const { drizzleState, address, store, drizzle, account, accountValidated, connectAndValidateAccount } = this.props;
+    const { drizzleState, address, store, drizzle, account, accountValidated, connectAndValidateAccount, setRoute } = this.props;
     const { currentNetwork, tournamentsCount } = this.state;
 
     const tournaments = [];
@@ -96,6 +96,7 @@ class TournamentView extends React.Component<any, any> {
           account={account}
           accountValidated={accountValidated}
           connectAndValidateAccount={connectAndValidateAccount}
+          setRoute={setRoute}
         />
       );
     }
