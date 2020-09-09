@@ -6,14 +6,9 @@ import TournamentResultsCard from './TournamentResultsCard';
 
 const StyledButton = styled(Button)`
   font-family: 'Apercu Light';
-  font-size: 1rem;
-  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
-
-  @media screen and (min-width: 1024px) {
-    font-size: 0.75rem;
-    letter-spacing: 0.4px;
-  }
 `
 class ViewResultsModal extends Component {
   constructor(props) {
