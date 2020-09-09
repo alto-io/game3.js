@@ -48,7 +48,8 @@ export class GameUnity extends React.Component<IProps, any> {
       tournament: null,
       playBtnText: "Play",
       score: 1,
-      gameName: ''
+      gameName: '',
+      doubleTime: null
     };
 
     this.initializeUnity();
@@ -246,6 +247,10 @@ export class GameUnity extends React.Component<IProps, any> {
         // this.props.stopRecording.call(null, "wom");
         break;
 
+      case 'GameEndSuccessTime':
+
+      break;
+
     }
 
     console.log(outplayEvent);
@@ -289,6 +294,13 @@ export class GameUnity extends React.Component<IProps, any> {
 
       console.log(score)
     });
+
+    this.unityContent.on("SendDoubleTime", doubleTime => {
+      this.setState({ doubleTime });
+
+      console.log(doubleTime)
+    });
+
 
 
     this.unityContent.on("quitted", () => {
