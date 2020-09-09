@@ -156,7 +156,7 @@ class TournamentResultsCard extends Component<any, any> {
         console.log("PLAYER ADD: address", playerAddress);
 
         results.push({
-          name: sessionsData[resultIdx].sessionData.playerData[playerAddress].name,
+          gameName: sessionsData[resultIdx].gameName,   
           tournamentId: tournamentId,
           timeIsUp: false,
           playerAddress,
@@ -179,7 +179,17 @@ class TournamentResultsCard extends Component<any, any> {
       results = results.filter(result => !!result.sessionData && !!result.name)
       if (results.length > 1) {
         // Sorts in ascending order
-        results.sort((el1, el2) => el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber)
+        results.sort((el1, el2) => {
+          switch (el1.gameName) {
+            // el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber)   
+            case Constants.FP:
+              return el2.sessionData.highScore - el1.sessionData.highScore
+            case Constants.TOSIOS:
+              return el1.sessionData.highScore - el2.sessionData.highScore
+            default:
+              break;
+          }
+        })
       }
     }
     this.setState({
@@ -220,16 +230,12 @@ getStatus(tournament: any) {
   switch (tournament.state) {
     case TOURNAMENT_STATE_DRAFT:
       return 'Draft'
-      break;
     case TOURNAMENT_STATE_ACTIVE:
       return 'Active'
-      break;
     case TOURNAMENT_STATE_ENDED:
       return 'Done'
-      break;
     default:
       return 'None'
-      break;
   }
 }
 
@@ -289,6 +295,17 @@ setTrophy(idx, shares) {
   }
 }
 
+setDisplayScore(result) {
+  switch (result.gameName) {
+    case Constants.FP:
+      return result.sessionData.highScore
+    case Constants.TOSIOS:
+      return this.formatTime(result.sessionData.currentHighestNumber, true)
+    default:
+      return ''
+  }
+}
+
 formatTime = (time, isLeaderBoards) => {
   if (time) {
     const seconds = (parseInt(time) / 1000).toFixed(2);
@@ -340,7 +357,7 @@ render() {
                <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
               }</span> : ""}
               <span style={timeLeftStyle}>
-                {result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}
+                {result.sessionData && this.setDisplayScore(result)}
               </span>
             </div>
           )
