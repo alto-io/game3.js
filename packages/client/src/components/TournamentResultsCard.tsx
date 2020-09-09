@@ -393,19 +393,6 @@ fetchShares = async (tournamentId) => {
   catch (e) { }
 }
 
-setTrophy(idx, shares) {
-  if (idx < shares.length) {
-    switch (idx) {
-      case 0:
-        return <span>&#x1F947;</span>
-      case 1:
-        return <span>&#x1F948;</span>
-      default:
-        return <span>&#x1F949;</span>
-    }
-  }
-}
-
   setTrophy(idx, shares) {
     if (idx < shares.length) {
       switch (idx) {
