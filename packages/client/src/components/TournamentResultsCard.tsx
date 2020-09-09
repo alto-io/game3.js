@@ -564,6 +564,8 @@ formatTime = (time, isLeaderBoards) => {
                 <h1 style={titleHeader}>Leaderboard</h1>
                 <div style={resultDivsStyle}>
                   {resultDivs}
+                </div>
+              </div>
               <JoinPromptModal 
                   isOpen={isJoinModalOpen}
                   handleCloseModal={this.handleCloseJoinModal}
