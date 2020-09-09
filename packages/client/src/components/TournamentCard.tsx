@@ -8,6 +8,7 @@ import RainbowImage from "./RainbowImage";
 import JoinPromptModal from "./JoinPromptModal";
 import BuyinPromptModal from './BuyInPromptModal';
 import ViewResultsModal from './ViewResultsModal';
+import SkeletonTournamentLoader from './SkeletonTournamentLoader';
 import styled from 'styled-components';
 
 import { format, isPast } from 'date-fns'
@@ -34,18 +35,19 @@ const PrizeBadge = styled.p`
   font-size: 0.825rem;
   padding: 0.5rem 1rem;
   margin: 0 0.25rem 0.5rem 0.25rem;
+  text-align: center;
   text-transform: uppercase;
 `
 
 const PrizeContainer = styled(Box)`
   display: flex;
   justify-content: flex-start;
-  align-items; center;
   align-self: flex-start;
   flex-direction: column;
   flex-wrap: wrap;
   margin-bottom: 1rem;
   height: 150px;
+  width: 100%;
 `
 
 class TournamentCard extends Component<any, any> {
@@ -304,9 +306,7 @@ class TournamentCard extends Component<any, any> {
     if (!hasTournament) {
       return (
         <Box width={[1, 1 / 2, 1 / 3]} p={3}>
-          <Card p={0} borderColor={"#d6d6d6"}>
-            Loading...
-          </Card>
+          <SkeletonTournamentLoader />
         </Box>
       )
     }
