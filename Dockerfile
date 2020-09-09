@@ -22,6 +22,9 @@ RUN apk --no-cache --virtual build-dependencies add \
 # Files
 COPY . .
 
+#deploy smart contracts
+RUN yarn sol:deploy-rinkeby
+
 # Build
 RUN yarn build
 
