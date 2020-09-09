@@ -134,21 +134,21 @@ class PayoutEventsView extends Component<any, any> {
     })
 
     // Mock Data
-    let sampleEvent = {
-      returnValues: {
-        id: 0,
-        amount: 2,
-        tournamentId: 0,
-        resultId: 1
-    }}
+    // let sampleEvent = {
+    //   returnValues: {
+    //     id: 0,
+    //     amount: 2,
+    //     tournamentId: 0,
+    //     resultId: 1
+    // }}
 
-    this.fetchTournamentDetails(sampleEvent.returnValues.tournamentId)
-    .then( tournamentDetails => {
-      this.addEvent({
-        ...sampleEvent, 
-        ...tournamentDetails
-      });
-    })
+    // this.fetchTournamentDetails(sampleEvent.returnValues.tournamentId)
+    // .then( tournamentDetails => {
+    //   this.addEvent({
+    //     ...sampleEvent, 
+    //     ...tournamentDetails
+    //   });
+    // })
   }
 
   addEvent = (event) => {
