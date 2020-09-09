@@ -267,14 +267,11 @@ export default class Game extends Component<IProps, IState> {
         else {
           this.gameManager.hudLogAdd(`Game starts!`);
           this.gameManager.hudAnnounceAdd(`Game starts!`);
-          this.props.startRecording.call();
         }
         break;
       case 'stop':
-        await gameJavascriptContext.updateSessionHighScore()
-        gameJavascriptContext.gameIsRunning(false);
         this.gameManager.hudLogAdd(`Game ends...`);
-        await this.props.stopRecording.call();
+        await gameJavascriptContext.endGame(false);
         this.stop();
         if (tournamentId === undefined) {
           navigate('/');
@@ -304,9 +301,7 @@ export default class Game extends Component<IProps, IState> {
         break;
       case 'killed':
         this.gameManager.hudLogAdd(`"${message.params.killerName}" kills "${message.params.killedName}".`);
-        await gameJavascriptContext.updateSessionHighScore()
-        gameJavascriptContext.gameIsRunning(false);
-        gameJavascriptContext.playerIsDead(true);
+        await gameJavascriptContext.endGame(true);
         this.stop();
         this.setState({
           showResult: true

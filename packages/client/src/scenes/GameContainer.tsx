@@ -5,7 +5,7 @@ import qs from 'querystringify';
 import { RouteComponentProps } from '@reach/router';
 import { Database } from '@game3js/common';
 
-import { localSaveReplay, clientSaveTournamentReplay } from "../helpers/database";
+import { localSaveReplay, clientSaveTournamentReplay, putGameReplay, getGameSessionId } from "../helpers/database";
 
 import GameScene from '../components/GameScene';
 import Game from './Game';
@@ -44,7 +44,7 @@ function functionExample(someVar) {
 
 }
 
-export default class GameContainer extends Component<IProps, IState> {
+export default class GameContainer extends Component<IProps, any> {
 
   private mediaRecorder: any;
   private recordedBlobs: any;
@@ -118,16 +118,18 @@ export default class GameContainer extends Component<IProps, IState> {
   }
 
 
-  stopRecording = async () => {
+  stopRecording = async (shouldUpdateDB?: boolean) => {
     this.mediaRecorder.stop();
 
 
     // TODO: playerId = roomId? change to something more meaningful
     const playerId = this.state.playerId || 'player';
+    const address = this.props.address;
     const tournamentId = this.state.tournamentId || 'demo';
     const time = Date.now(); // this.gameManager.gameEndsAt - Date.now();
 
     console.log('Recorded Blobs: ', this.recordedBlobs);
+    console.log('Player ID: ', playerId);
 
     const replayDate = new Date();
     const filename = "replay_" + playerId + "_" + replayDate.valueOf() + ".webm";
@@ -146,9 +148,16 @@ export default class GameContainer extends Component<IProps, IState> {
       this.setState({
         recordFileHash
       })
-      //const resultId = 1
-      //const result = await putTournamentResult(tournamentId, resultId, fileHash);
-      //console.log(result)
+
+      // const resultId = 1
+      // const result = await putTournamentResult(tournamentId, resultId, fileHash);
+      // console.log(result)
+
+      if (shouldUpdateDB !== undefined && shouldUpdateDB) {
+        console.log("SHOULD UPDATE DB TO SERVER")
+        const sessionId = await getGameSessionId(address, tournamentId);
+        await putGameReplay(sessionId, address, recordFileHash);
+      }
     }
   }
   // METHODS
@@ -164,7 +173,10 @@ export default class GameContainer extends Component<IProps, IState> {
     return (
       <>
         <OutplayGameNavigation />
-        <GameJavascript>
+        <GameJavascript
+          startRecording={this.startRecording}
+          stopRecording={this.stopRecording}
+        >
           <GameJavascriptContext.Consumer>{context => {
 
             return (
@@ -178,8 +190,6 @@ export default class GameContainer extends Component<IProps, IState> {
                 <Router>
                   <Game
                     path=":roomId"
-                    startRecording={this.startRecording}
-                    stopRecording={this.stopRecording}
                     drizzle={drizzle}
                     drizzleState={drizzleState}
                     contractMethodSendWrapper={contractMethodSendWrapper}
