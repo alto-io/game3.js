@@ -22,11 +22,14 @@ RUN apk --no-cache --virtual build-dependencies add \
 # Files
 COPY . .
 
-#deploy smart contracts
+ENV TESTNET_MNEMONIC=$TESTNET_MNEMONIC
+ENV INFURA_API_KEY=$INFURA_API_KEY
+ENV REACT_APP_NETWORK_ID=4
+
+# Deploy smart contracts
 RUN yarn sol:deploy-rinkeby
 
 # Build
-ARG REACT_APP_NETWORK_ID=4
 RUN yarn build
 
 # Port
