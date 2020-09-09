@@ -71,8 +71,7 @@ class PayoutEventsView extends Component<any, any> {
     this.state = {
       currentNetwork: null,
       address: null,
-      events:[],
-      tournamentEvents: []
+      events:[]
     }
   }
 
@@ -135,21 +134,21 @@ class PayoutEventsView extends Component<any, any> {
     })
 
     // Mock Data
-    // let sampleEvent = {
-    //   returnValues: {
-    //     id: 0,
-    //     amount: 2,
-    //     tournamentId: 0,
-    //     resultId: 1
-    // }}
+    let sampleEvent = {
+      returnValues: {
+        id: 0,
+        amount: 2,
+        tournamentId: 0,
+        resultId: 1
+    }}
 
-    // this.fetchTournamentDetails(sampleEvent.returnValues.tournamentId)
-    // .then( tournamentDetails => {
-    //   this.addEvent({
-    //     ...sampleEvent, 
-    //     ...tournamentDetails
-    //   });
-    // })
+    this.fetchTournamentDetails(sampleEvent.returnValues.tournamentId)
+    .then( tournamentDetails => {
+      this.addEvent({
+        ...sampleEvent, 
+        ...tournamentDetails
+      });
+    })
   }
 
   addEvent = (event) => {
@@ -194,6 +193,8 @@ class PayoutEventsView extends Component<any, any> {
   render() {
     const { address, tournaments, drizzle } = this.props
     const { events } = this.state
+    const eventTournamentIds = [];
+    let noEventsTournaments = [];
 
     // const eventsRendered = events.map(event => 
     //   <Flex key={event.id}>
@@ -206,9 +207,9 @@ class PayoutEventsView extends Component<any, any> {
     // event.returnValues.amount
     // tournamentId
     // resultId
-  
+
     // If player has winnings
-    const eventsRendered = events.map( event => 
+    const eventsRendered = events.map( event =>
       <EventsCard key={event.id} mb={3}>
         <GameImage src={"images/" + event.gameImage} />
         <Box>
@@ -222,7 +223,11 @@ class PayoutEventsView extends Component<any, any> {
 
     // If none 
     const doneTournaments = tournaments.filter (tournament => tournament.state === 3);
-    const noPayouts = doneTournaments.filter( tournament => {
+    events.forEach( event => {
+      eventTournamentIds.push(event.returnValues.tournamentId);
+      noEventsTournaments = doneTournaments.filter( tournament => tournament.id !== event.returnValues.tournamentId);
+    })
+    const noPayouts = noEventsTournaments.filter( tournament => {
       return tournament.results.filter( result => result.isWinner !== true);
     });
 
