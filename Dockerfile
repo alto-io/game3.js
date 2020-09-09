@@ -26,6 +26,7 @@ COPY . .
 RUN yarn sol:deploy-rinkeby
 
 # Build
+ARG REACT_APP_NETWORK_ID=4
 RUN yarn build
 
 # Port
