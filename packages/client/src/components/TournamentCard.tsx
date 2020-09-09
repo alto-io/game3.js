@@ -26,6 +26,28 @@ const StyledButton = styled(Button)`
   text-transform: uppercase;
 `
 
+const PrizeBadge = styled.p`
+  background-color: #ffb600;
+  border-radius: 25px;
+  color: #804d00;
+  font-family: 'Apercu Bold';
+  font-size: 0.825rem;
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem 0.5rem 0.25rem;
+  text-transform: uppercase;
+`
+
+const PrizeContainer = styled(Box)`
+  display: flex;
+  justify-content: flex-start;
+  align-items; center;
+  align-self: flex-start;
+  flex-direction: column;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  height: 150px;
+`
+
 class TournamentCard extends Component<any, any> {
   constructor(props) {
     super(props)
@@ -43,7 +65,7 @@ class TournamentCard extends Component<any, any> {
         name: '',
         image: ''
       },
-      prizeString: ''
+      prizeString: []
     }
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -252,21 +274,21 @@ class TournamentCard extends Component<any, any> {
       const contract = drizzle.contracts.Tournaments;
       const shares = await contract.methods.getShares(tournament.id).call();
 
-      let prizeString = '';
+      let prizeString = [];
 
       for (let i = 0; i < shares.length; i++) {
         if (i === 0) {
-          prizeString += `${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}st)`
+          prizeString.push(`${i + 1}st: ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH`);
+          
         } else if (i === 1) {
-          prizeString += `, ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}nd)`
+          prizeString.push(`${i + 1}nd: ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH`);
         } else if (i === 2) {
-          prizeString += `, ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}rd)`
+          prizeString.push(`${i + 1}rd: ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH`);
         } else {
-          prizeString += `, ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH (${i + 1}th)`
+          prizeString.push(`${i + 1}th: ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH`);
         }
       }
 
-      console.log("PRIZE STRING:", prizeString)
       this.setState({
         prizeString
       })
@@ -344,6 +366,12 @@ class TournamentCard extends Component<any, any> {
       }
     }
 
+    const prizeRender = prizeString.map( (prize, idx) => {
+      return(
+        <PrizeBadge key={idx}>{prize}</PrizeBadge>
+      )
+    })
+
     return (
       <Box width={[1, 1 / 2, 1 / 3]} p={3}>
         <Card p={0} borderColor={"#d6d6d6"}>
@@ -354,16 +382,14 @@ class TournamentCard extends Component<any, any> {
             flexDirection={"column"}
             p={3}
           >
-            <Flex justifyContent={"center"} mt={3} mb={4}>
+            <Flex justifyContent={"center"} mt={3} mb={3}>
               <RainbowImage src={"images/" + gameImage} />
             </Flex>
 
             {tournament.state && tournament.state === 1 && (
-              <Flex justifyContent={"center"} mt={3} mb={4}>
-                <Text fontWeight={600} lineHeight={"1em"}>
-                  Prize: {prizeString && prizeString}
-                </Text>
-              </Flex>
+              <PrizeContainer>
+                {prizeString.length > 0 && prizeRender}
+              </PrizeContainer>
             )}
 
             <Flex justifyContent={"center"} mt={3} mb={4}>
@@ -394,7 +420,7 @@ class TournamentCard extends Component<any, any> {
               playerAddress={address && address}
               drizzle={drizzle && drizzle}
             />
-            {/* {tournament.state === 0 && <Button onClick={() => {this.onActivate(tournament)}} mt={3}>Activate</Button>} */}
+            {tournament.state === 0 && <Button onClick={() => {this.onActivate(tournament)}} mt={3}>Activate</Button>}
             <JoinPromptModal
               isOpen={isOpen}
               handleCloseModal={this.handleCloseModal}
