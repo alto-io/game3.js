@@ -611,15 +611,27 @@ export class OrbitDBManager implements DBManager {
         console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
 
         console.log("GET_TOURNEY_WINNERS: Sorting player scores");
-        // sort in ascending order since shortest time is the winner
-        players.sort((el1, el2) => el1.score - el2.score);
+        
+        switch (tourneySession[0].gameName) {
+          case TOSIOS:
+            // sort in ascending order since shortest time is the winner
+            players.sort((el1, el2) => el1.score - el2.score);
+            break;
+          case FP:
+            // sort in descending order
+            players.sort((el1, el2) => el2.score - el1.score);
+            break;
+          default:
+            break;
+        }
+
         console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
 
         console.log("GET_TOURNEY_WINNERS: Mapping winners...");
 
         let winners = []
 
-        for (let i = 0; i < winnersLength; i++) {
+        for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
           winners.push(players[i].address);
         }
 
