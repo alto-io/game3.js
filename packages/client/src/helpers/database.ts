@@ -95,8 +95,7 @@ export async function putGameReplay(sessionId, playerAddress, fileHash): Promise
   }
   const response = await api.post('/gameReplay', body);
   console.log(response)
-  const { result } = response.data;
-  return result;
+  return response.data;
 }
 
 export async function getGameSession(gameSessionId, playerAddress, tournamentId): Promise<any> {

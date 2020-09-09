@@ -30,6 +30,7 @@ export default class GameJavascript extends Component<any, any> {
 
     let updatedData = await updateSessionScore(!isPlayerDead, sessionId, playerAddress, tournamentId, timeFinished);
     console.log("Data updated with", updatedData);
+    return updatedData;
   }
 
   async updateGameNumber(sessionId: any, playerAddress: any, tournamentId: any) {
@@ -51,6 +52,10 @@ export default class GameJavascript extends Component<any, any> {
     })
   }
 
+  async replaySaveToServer() {
+    
+  }
+
   async setSessionId(playerAddress, tournamentId) {
     console.log("GAME JAVASCRIPT: setSessionId")
     console.log("GAME JAVASCRIPT-setSessionId: Player_add", playerAddress)
@@ -65,13 +70,14 @@ export default class GameJavascript extends Component<any, any> {
     const { stopRecording } = this.props;
     const { tournamentId } = this.state;
 
-    await this.updateSessionHighScore();
+    const data = await this.updateSessionHighScore();
     this.gameIsRunning(false);
     this.playerIsDead(died);
 
     console.log("GAME JAVASCRIPT-endGame: Tourney ID", tournamentId)
     if (tournamentId || tournamentId === 0) {
-      stopRecording.call();
+      console.log("GAME JAVASCRIPT-endGame: New Highscore?", data.newHighScore);
+      stopRecording(data.newHighScore);
       console.log("GAME JAVASCRIPT-endGame: Recording stopped")
     }
   }

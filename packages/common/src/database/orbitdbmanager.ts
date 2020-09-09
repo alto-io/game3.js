@@ -292,11 +292,11 @@ export class OrbitDBManager implements DBManager {
             await this.gameSessions.put(data[0]);
             console.log("UPDATE_SCORE: Updated!");
             console.log("UPDATE_SCORE: Returning...");
-            return { result: playerData }
+            return { result: playerData, newHighScore: true }
           } else {
             console.log("UPDATE_SCORE: Current score is lower than highscore, no need to update!");
             console.log("UPDATE_SCORE: Returning...");
-            return { result: playerData }
+            return { result: playerData, newHighScore: false }
           }
         }
       } else {
