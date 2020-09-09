@@ -202,6 +202,8 @@ export class GameUnity extends React.Component<IProps, any> {
             }
             );
 
+            console.log(score)
+
             this.fetchGameNo(this.props.address, this.props.tournamentId);
             updateSessionHighScore(true, sessionId, playerAddress, tournamentId, score);
              
@@ -248,6 +250,8 @@ export class GameUnity extends React.Component<IProps, any> {
 
     this.unityContent.on("SendScore", score => {
       this.setState({ score });
+
+      console.log(score)
     });
 
 
