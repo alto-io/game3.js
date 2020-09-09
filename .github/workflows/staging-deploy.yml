@@ -12,6 +12,15 @@ jobs:
       - name: Checkout Staging
         uses: actions/checkout@master
 
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1
+        with:
+          envkey_HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          envkey_GANACHE_MNEMONIC: ${{ secrets.GANACHE_MNEMONIC }}
+          envkey_TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
+          envkey_INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+          file_name: .env
+
       - name: Log in Heroku
         uses: sjdonado/heroku@master
         with:
@@ -25,7 +34,7 @@ jobs:
       - name: Push to Heroku
         uses: sjdonado/heroku@master
         with:
-          args: -e TESTNET_MNEMONIC="test" container:push -a game3-js web 
+          args: container:push -a game3-js web 
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           GANACHE_MNEMONIC: ${{ secrets.GANACHE_MNEMONIC }}
