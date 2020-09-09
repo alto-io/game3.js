@@ -311,6 +311,38 @@ export class OrbitDBManager implements DBManager {
     }
   }
 
+  async serverUpdateHighScore(didWin, sessionId, playerAddress, tournamentId, score) {
+
+    if (tournamentId || tournamentId === 0) {
+      console.log("UPDATE_SCORE: Function Invoked...");
+
+      const data = await this.gameSessions.query(data =>
+        data.id === sessionId && data.sessionData.tournamentId === tournamentId
+      );
+      console.log("UPDATE_SCORE: Fetched data", data);
+      let playerData = null
+      if (data.length > 0) {
+        console.log("UPDATE_SCORE: Session Exist!");
+        console.log(data);
+        data[0].sessionData.score = score;
+        await this.gameSessions.put(data[0]);
+        console.log("UPDATE_SCORE: Updated!");
+        console.log("UPDATE_SCORE: Returning...");
+        return { result: playerData }
+
+      } else {
+        console.log("UPDATE_SCORE: No Data...");
+        console.log("UPDATE_SCORE: Returning...");
+        return { result: 'none' }
+      }
+    } else {
+      console.log("UPDATE_SCORE: You're not in a tournament");
+      console.log("UPDATE_SCORE: Returning...");
+      return false;
+    }
+  }
+
+
   async updateGameNumber(sessionId, playerAddress, tournamentId) {
     console.log("UPDATE_GNUMBER: Initializing...");
     if (tournamentId || tournamentId === 0) {
@@ -320,19 +352,39 @@ export class OrbitDBManager implements DBManager {
         data.id === sessionId && data.sessionData.tournamentId === tournamentId
       );
       if (data.length > 0) {
-        let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
-        console.log("UPDATE_GNUMBER: Updating...");
-        console.log("UPDATE_GNUMBER: Playerdata", playerData);
-        playerData.gameNo += 1;
-        data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
-        await this.gameSessions.put(data[0]);
+
+        let playerData;
+      try {
+      
+      playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
+      console.log("UPDATE_GNUMBER: Updating...");
+      console.log("UPDATE_GNUMBER: Playerdata", playerData);
+      playerData.gameNo += 1;
+      data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+      } catch (e) {
+      // player data not saved, check for gameNo on sessionData itself
+      playerData = data[0].sessionData.gameNo;
+      data[0].sessionData.gameNo = (playerData === undefined ? 0 : playerData + 1);
+      }
+
+      await this.gameSessions.put(data[0]);
+        console.log(data[0]);
         console.log("UPDATE_GNUMBER: Updated!!");
         console.log("UPDATE_GNUMBER: Returning...");
         return { result: playerData }
+        
       } else {
-        console.log("UPDATE_GNUMBER: No data");
+        // no data, create new
+        const newData =
+        {
+        sessionId,
+        tournamentId,
+        gameNo: 1
+        }
+        await this.serverPutGameSession(sessionId, newData);      
+        console.log("UPDATE_GNUMBER: No data, creating new");
         console.log("UPDATE_GNUMBER: Returning...");
-        return { result: 'none' }
+        return { result: newData}
       }
     } else {
       console.log("UPDATE_GNUMBER: You're not in a tournament");
@@ -463,8 +515,14 @@ export class OrbitDBManager implements DBManager {
         data.id === gameSessionId && data.sessionData.tournamentId === tournamentId
       );
       if (data.length > 0) {
+        try {      
         let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
         return playerData.gameNo;
+        } catch (e) {
+          // player data not saved, check for gameNo on sessionData itself
+          let gameNo = data[0].sessionData.gameNo;
+          return gameNo;
+        }
       } else {
         return { result: 'none' }
       }

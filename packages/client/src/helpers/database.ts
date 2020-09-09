@@ -165,6 +165,20 @@ export async function updateSessionScore(didWin, gameSessionId, playerAddress, t
   return res.data;
 }
 
+export async function updateSessionHighScore(didWin, gameSessionId, playerAddress, tournamentId, score): Promise<any> {
+  
+  const params = {
+    didWin,
+    sessionId: gameSessionId,
+    playerAddress,
+    tournamentId,
+    score
+  }
+
+  const res = await api.post('/gameSession/highscore', params);
+  return res.data;
+}
+
 export async function updateGameNo(sessionId, playerAddress, tournamentId) {
   const params = {
     sessionId,
