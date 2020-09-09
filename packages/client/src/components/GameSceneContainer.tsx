@@ -11,7 +11,7 @@ const CanvasContainerStyle = styled(Box)`
   width: 100%;
   height: 100%;
 
-  div {
+  .container {
     width: 100%;
     height: 100%;
 
@@ -41,12 +41,12 @@ export default class GameSceneContainer extends Component<IProps, any> {
 			<CanvasContainerStyle className="canvas-container">
 				<LeavingGamePrompt when={when} tournamentId={tournamentId} viewOnly={viewOnly}/>
 				{viewOnly === undefined ? (
-          <div>
+          <div className="container">
             {children}
           </div>
 				) : (
 					!viewOnly && (
-            <div>
+            <div className="container">
               {children}	
             </div>
 					)

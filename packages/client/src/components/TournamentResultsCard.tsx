@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
-import { RouteComponentProps } from '@reach/router';
+import { RouteComponentProps, navigate } from '@reach/router';
 import qs from 'querystringify';
 import { format } from 'date-fns';
 
@@ -20,17 +20,53 @@ import {
 import { Constants } from '@game3js/common';
 import web3 from 'web3';
 
-const SharesText = styled.p`
+const SharesText = styled.div`
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   align-items: center;
 
   .place {
     font-family: 'Apercu Bold', sans-serif;
     font-weight: bold;
-    margin-right: 1rem;
+    width: 33%;
+  }
+
+  .trophy {
+    width: 33%;
+    text-align: center;
+  }
+  
+  .share {
+    width: 33%;
+    text-align: right;
   }
 `;
+
+const ResultDivStyle = styled.div`
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ font-size: 0.825rem;
+ letter-spacing: 0.1px;
+ padding: 0.5rem;
+
+ .address {
+   font-weight: bold;
+   margin: 0;
+ }
+
+ .shares {
+   margin: 0;
+ }
+
+ .score {
+   color: #0093d5;
+   font-family: 'Apercu Bold';
+   margin: 0;
+   text-align: right;
+   width: 33%;
+ }
+ `
 
 class TournamentResultsCard extends Component<any, any> {
   constructor(props) {
@@ -251,8 +287,8 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   handleJoinClick = () => {
-    const { tournament } = this.state
-    let path = '';
+    const { tournament } = this.state;
+    let options = {};
 
     const tosiosOptions = {
       mode: 'score attack',
@@ -266,19 +302,30 @@ class TournamentResultsCard extends Component<any, any> {
 
     switch (tournament.name) {
       case Constants.WOM:
-        path = '' //Join tourney for wom
+        navigate(`/game/wom${qs.stringify(options, true)}`); //Join tourney for wom
         break;
       case Constants.TOSIOS:
-        path = `/game/new${qs.stringify(tosiosOptions, true)}`
+        options = {
+          mode: 'score attack',
+          roomMap: 'small',
+          roomMaxPlayers: '1',
+          roomName: '',
+          tournamentId: tournament.id,
+          playerName: "Guest",
+          viewOnly: tournament.timeIsUp
+        }
+        navigate(`/game/new${qs.stringify(options, true)}`);
         break;
       case Constants.FP:
-        path = '' //Join tourney for flappy bird
+        options = {
+          tournamentId: tournament.id,
+          viewOnly: tournament.timeIsUp
+        }
+        navigate(`/game/flappybird${qs.stringify(options, true)}`); //Join tourney for flappy bird
         break;
       default:
         break;
     }
-    window.history.replaceState(null, '', path);
-    // navigateTo(path);
   }
 
   setResultBgColor(playerAddress, currentPlayerAddress) {
@@ -309,7 +356,7 @@ class TournamentResultsCard extends Component<any, any> {
           return <span>&#x1F947;</span>
         case 1:
           return <span>&#x1F948;</span>
-        default:
+        case 2:
           return <span>&#x1F949;</span>
       }
     }
@@ -335,10 +382,6 @@ class TournamentResultsCard extends Component<any, any> {
     const { results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
 
-    // console.log("SHARES FROM STATE", shares);
-    // console.log("POOL FROM STATE", tournament.pool);
-    // console.log(results);
-
     if (isLoading) {
       return (
         <div style={divLoadingStyle}>
@@ -350,27 +393,26 @@ class TournamentResultsCard extends Component<any, any> {
     let resultDivs = null;
 
     if (results.length > 0) {
-      console.log("result length > 0")
+
       resultDivs = results.map( (result, idx) => {
 
         if (result.sessionData) {
           return( 
-          <div 
-            style={{...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`}} 
+          <ResultDivStyle 
+            style={{ 
+              background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`
+            }}
             key={result.sessionId}
           >
-            <span style={playerAddressStyle}>
+            <p className="address" style={{width: shares !== undefined ? '33%' : '50%'}}>
               {shortenAddress(result.playerAddress)}
-            </span>
-              {idx < shares.length ? <span>{
-               <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
-              }</span> : ""}
-              <span style={timeLeftStyle}>
-                {result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}
-              </span>
-            </div>
-          )
-        }
+            </p>
+            {shares !== undefined && idx < shares.length ? (
+              <p className="shares">{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
+            ) : ""}
+            <p className="score" style={{width: shares !== undefined ? '33%' : '50%'}}>{result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}</p>
+          </ResultDivStyle>
+        )} 
       });
     } else {
       if (!tournamentId) {
@@ -381,17 +423,11 @@ class TournamentResultsCard extends Component<any, any> {
         )
       } else {
         resultDivs = shares.map( (share, idx) => {
-          let place = <span className="place">{idx + 1}</span>;
-          let trophy = <span className="trophy">{this.setTrophy(idx, shares)}</span>;
-          let shareETH = <span className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</span>
+          let place = <p className="place">{idx + 1}</p>;
+          let trophy = <p className="trophy">{this.setTrophy(idx, shares)}</p>;
+          let shareETH = <p className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</p>
           return(
-          <SharesText key={idx}>
-            <span>
-              {place} 
-              {trophy} 
-            </span>
-            {shareETH}
-          </SharesText>
+            <SharesText>{place}{trophy}{shareETH}</SharesText>
           )
         })
       }
@@ -418,7 +454,9 @@ class TournamentResultsCard extends Component<any, any> {
               </div>
             </div>
             {tournamentId === undefined ? (
-              <button style={joinTourneyBtn} onClick={this.handleJoinClick}>JOIN TOURNAMENT</button>
+              <button 
+                style={joinTourneyBtn} 
+                onClick={this.handleJoinClick}>Join Tournament</button>
             ) : (
                 <div style={totalBuyIn} >
                   <span>Total Buy-in Pool</span>
@@ -448,7 +486,7 @@ const leaderBoardStyle: CSS.Properties = {
   padding: '0.8rem 1rem',
   display: 'flex',
   flexDirection: 'column',
-  margin: '0 0 0.5rem 0',
+  margin: '0 0 0.512rem 0',
   background: `rgb(${baseColors.white})`,
   boxShadow: shadows.soft,
   justifyContent: 'center',
@@ -472,7 +510,7 @@ const titleHeader: CSS.Properties = {
 
 const resultDivsStyle: CSS.Properties = {
   width: '100%',
-  padding: '1rem',
+  padding: '0',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center'
@@ -535,7 +573,8 @@ const joinTourneyBtn: CSS.Properties = {
   cursor: 'pointer',
   outline: 'none',
   border: 'none',
-  borderRadius: '7px'
+  borderRadius: '7px',
+  textTransform: 'uppercase',
 }
 
 const totalBuyIn: CSS.Properties = {
@@ -545,7 +584,6 @@ const totalBuyIn: CSS.Properties = {
   background: `#06df9b`,
   padding: '1rem 0.9rem',
   width: '100%',
-  cursor: 'pointer',
   outline: 'none',
   border: 'none',
   borderRadius: '7px',
