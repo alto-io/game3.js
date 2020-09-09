@@ -256,7 +256,7 @@ export class OrbitDBManager implements DBManager {
     // As of now, the scoring mechanism depends on the shortest time you win the game.
     // Sooner, we'll support several scoring mechanism.
 
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       console.log("UPDATE_SCORE: Function Invoked...");
 
       const data = await this.gameSessions.query(data =>
@@ -311,28 +311,80 @@ export class OrbitDBManager implements DBManager {
     }
   }
 
+  async serverUpdateHighScore(didWin, sessionId, playerAddress, tournamentId, score) {
+
+    if (tournamentId || tournamentId === 0) {
+      console.log("UPDATE_SCORE: Function Invoked...");
+
+      const data = await this.gameSessions.query(data =>
+        data.id === sessionId && data.sessionData.tournamentId === tournamentId
+      );
+      console.log("UPDATE_SCORE: Fetched data", data);
+      let playerData = null
+      if (data.length > 0) {
+        console.log("UPDATE_SCORE: Session Exist!");
+        console.log(data);
+        data[0].sessionData.score = score;
+        await this.gameSessions.put(data[0]);
+        console.log("UPDATE_SCORE: Updated!");
+        console.log("UPDATE_SCORE: Returning...");
+        return { result: playerData }
+
+      } else {
+        console.log("UPDATE_SCORE: No Data...");
+        console.log("UPDATE_SCORE: Returning...");
+        return { result: 'none' }
+      }
+    } else {
+      console.log("UPDATE_SCORE: You're not in a tournament");
+      console.log("UPDATE_SCORE: Returning...");
+      return false;
+    }
+  }
+
+
   async updateGameNumber(sessionId, playerAddress, tournamentId) {
     console.log("UPDATE_GNUMBER: Initializing...");
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
 
       // Get session first
       const data = await this.gameSessions.query(data =>
         data.id === sessionId && data.sessionData.tournamentId === tournamentId
       );
       if (data.length > 0) {
-        let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
-        console.log("UPDATE_GNUMBER: Updating...");
-        console.log("UPDATE_GNUMBER: Playerdata", playerData);
-        playerData.gameNo += 1;
-        data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
-        await this.gameSessions.put(data[0]);
+
+        let playerData;
+      try {
+      
+      playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
+      console.log("UPDATE_GNUMBER: Updating...");
+      console.log("UPDATE_GNUMBER: Playerdata", playerData);
+      playerData.gameNo += 1;
+      data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+      } catch (e) {
+      // player data not saved, check for gameNo on sessionData itself
+      playerData = data[0].sessionData.gameNo;
+      data[0].sessionData.gameNo = (playerData === undefined ? 0 : playerData + 1);
+      }
+
+      await this.gameSessions.put(data[0]);
+        console.log(data[0]);
         console.log("UPDATE_GNUMBER: Updated!!");
         console.log("UPDATE_GNUMBER: Returning...");
         return { result: playerData }
+        
       } else {
-        console.log("UPDATE_GNUMBER: No data");
+        // no data, create new
+        const newData =
+        {
+        sessionId,
+        tournamentId,
+        gameNo: 1
+        }
+        await this.serverPutGameSession(sessionId, newData);      
+        console.log("UPDATE_GNUMBER: No data, creating new");
         console.log("UPDATE_GNUMBER: Returning...");
-        return { result: 'none' }
+        return { result: newData}
       }
     } else {
       console.log("UPDATE_GNUMBER: You're not in a tournament");
@@ -343,7 +395,7 @@ export class OrbitDBManager implements DBManager {
 
   // called from colyseus game state
   async makeNewGameSession(sessionId, tournamentId, timeLeft, players) {
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       console.log("NEW: Function Invoked...");
       const sessionData = {
         sessionId,
@@ -415,7 +467,7 @@ export class OrbitDBManager implements DBManager {
   }
 
   async serverGetGameSession(sessionId, playerAddress, tournamentId) {
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       console.log("GET_GSESSION: Function Invoked...");
       console.log(`GET_GSESSION: sessionId: ${sessionId}`)
       console.log(`GET_GSESSION: playerAddress: ${playerAddress}`)
@@ -456,15 +508,21 @@ export class OrbitDBManager implements DBManager {
   }
 
   async getGameNo(gameSessionId, playerAddress, tournamentId) {
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       // get game session first
 
       const data = await this.gameSessions.query(data =>
         data.id === gameSessionId && data.sessionData.tournamentId === tournamentId
       );
       if (data.length > 0) {
+        try {      
         let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
         return playerData.gameNo;
+        } catch (e) {
+          // player data not saved, check for gameNo on sessionData itself
+          let gameNo = data[0].sessionData.gameNo;
+          return gameNo;
+        }
       } else {
         return { result: 'none' }
       }
@@ -477,7 +535,7 @@ export class OrbitDBManager implements DBManager {
 
   async serverCreateSessionId(playerAddress, tournamentId) {
     console.log("SID: Tournament ID", tournamentId);
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       console.log("CREATE_SID: Initializing...")
       console.log(`CREATE_SID: Params playerAddress: ${playerAddress}, tournamentId: ${tournamentId}`)
       // Check if this player already have a sessionId
@@ -511,7 +569,7 @@ export class OrbitDBManager implements DBManager {
   }
 
   async getGameSessionId(playerAddress, tournamentId) {
-    if (tournamentId !== undefined) {
+    if (tournamentId || tournamentId === 0) {
       let data = await this.gameSessionIds.query(sessionId =>
         sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId === tournamentId)
       if (data.length > 0) {
@@ -651,7 +709,7 @@ export class OrbitDBManager implements DBManager {
     if (tourney.length > 0) {
       console.log("GET_TOURNEY_WINNERS: Tourney fetched!!", tourney);
 
-      let winnersLength = tourney.shares.length;
+      let winnersLength = tourney[0].shares.length;
 
       console.log("GET_TOURNEY_WINNERS: Fetching tourney session data");
       let tourneySession = await this.getTournamentResult(tournamentId);
@@ -675,11 +733,13 @@ export class OrbitDBManager implements DBManager {
         console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
 
         console.log("GET_TOURNEY_WINNERS: Mapping winners...");
-        let winners = players.map((player, idx) => {
-          if (idx < winnersLength) {
-            return player.address
-          }
-        });
+
+        let winners = []
+
+        for (let i = 0; i < winnersLength; i++) {
+          winners.push(players[i].address);
+        }
+
         console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
         console.log("GET_TOURNEY_WINNERS: Returning...");
 

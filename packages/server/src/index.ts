@@ -129,7 +129,7 @@ app.get('/gameSession', async (req: any, res: any) => {
   const playerAddress = req.query.playerAddress
   const tournamentId = req.query.tournamentId
 
-  console.log("Server GET sessionId is", sessionId);
+  console.log("Server GET tournamentId: " + tournamentId +" : -- sessionId is", sessionId);
 
   const result = await GlobalState.ServerState.dbManager
     .serverGetGameSession(sessionId, playerAddress, tournamentId);
@@ -141,7 +141,7 @@ app.get('/gameSession/gameNo', async (req: any, res: any) => {
   const playerAddress = req.query.playerAddress
   const tournamentId = req.query.tournamentId
 
-  console.log("Server GET sessionId is", sessionId);
+  console.log("Server GET tournamentId: " + tournamentId +" : -- sessionId is", sessionId);
 
   const result = await GlobalState.ServerState.dbManager
     .getGameNo(sessionId, playerAddress, tournamentId);
@@ -159,9 +159,28 @@ app.post('/gameSession/score', async (req: any, res: any) => {
   console.log("Server POST sessionId is", sessionId);
   console.log("Server POST did win", didWin);
 
-  const result = await GlobalState.ServerState.dbManager
-    .serverUpdateScore(didWin, sessionId, playerAddress, tournamentId, timeFinished);
-  
+  let result;
+
+  result = await GlobalState.ServerState.dbManager
+      .serverUpdateScore(didWin, sessionId, playerAddress, tournamentId, timeFinished);
+  res.json(result);
+})
+
+app.post('/gameSession/highscore', async (req: any, res: any) => {
+  const didWin = req.body.didWin;
+  const sessionId = req.body.sessionId;
+  const playerAddress = req.body.playerAddress;
+  const tournamentId = req.body.tournamentId;
+  const score = req.body.score;
+
+  console.log("Server POST sessionId is", sessionId);
+  console.log("Server POST did win", didWin);
+
+  let result;
+
+    result = await GlobalState.ServerState.dbManager
+      .serverUpdateHighScore(didWin, sessionId, playerAddress, tournamentId, score);
+
   res.json(result);
 })
 

@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
-
+import styled from 'styled-components';
 
 import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
 import { RouteComponentProps } from '@reach/router';
 import qs from 'querystringify';
-import { format } from 'date-fns'
+import { format } from 'date-fns';
 
 import CSS from 'csstype';
 import { baseColors, fonts, shadows, } from '../styles';
@@ -19,6 +19,18 @@ import {
 
 import { Constants } from '@game3js/common';
 import web3 from 'web3';
+
+const SharesText = styled.p`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+
+  .place {
+    font-family: 'Apercu Bold', sans-serif;
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+`;
 
 class TournamentResultsCard extends Component<any, any> {
   constructor(props) {
@@ -178,29 +190,28 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   getBlockchainInfo = async (props) => {
-    const { tournamentId } = props
+    try {
 
-    if (this.props.drizzle.contracts.Tournaments) {
-      const { drizzle } = this.props;
-      // Get the latest tournament
-      const contract = drizzle.contracts.Tournaments;
+    const { tournamentId, playerAddress, drizzle } = props;
+    const contract = drizzle.contracts.Tournaments;
 
+    // Tournament ID is undefined in Play Tab
+    if (tournamentId === undefined && drizzle.contracts.Tournaments) {
+
+      console.log("TOURNAMENT ID = ", tournamentId)
       const tournamentLength = await contract.methods.getTournamentsCount().call();
       let tI = undefined;
       if (tournamentLength > 0) {
-        tI = tournamentId ? tournamentId : tournamentLength - 1;
+        tI = tournamentId || tournamentId === 0 ? tournamentId : tournamentLength - 1;
       }
-      console.log("TOURNAMENT ID = ", tI)
       await this.getTournamentAndLeaderBoards(tI, true);
+
     } else {
-      let ids = await getTournaments();
-      console.log("IDSSSS", ids);
-      let tId = undefined;
-      if (ids.length > 0) {
-        tId = ids[ids.length - 1].id
-      }
-      console.log("THE ID IN DB IS", tId);
-      await this.getTournamentAndLeaderBoards(tId, false);
+      // Tournament ID is present in Tournaments and Dashboard
+      playerAddress ? await this.getTournamentAndLeaderBoards(tournamentId, true) : await this.getTournamentAndLeaderBoards(tournamentId, false);
+    }
+  } catch (e) {
+      console.log("No tourney retrieved");
     }
   }
 
@@ -220,7 +231,6 @@ class TournamentResultsCard extends Component<any, any> {
         break;
     }
   }
-
 
   formatTourneyTimeInfo(tournament: any) {
     const {
@@ -305,12 +315,29 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
+  formatTime = (time, isLeaderBoards) => {
+    if (time) {
+      const seconds = (parseInt(time) / 1000).toFixed(2);
+      const minutes = Math.floor(parseInt(seconds) / 60);
+      let totalTime = '';
+      if (parseInt(seconds) > 60) {
+        let sec = (parseInt(seconds) % 60).toFixed(2);
+    
+        totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min"+" "+sec+"sec").toString()
+      } else {
+        totalTime += isLeaderBoards ? ("0:"+seconds).toString() : (seconds+"sec").toString()
+      }
+      return totalTime
+    }
+  }
+
   render() {
     const { results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
 
-    console.log("SHARES FROM STATE", shares);
-    console.log("POOL FROM STATE", tournament.pool);
+    // console.log("SHARES FROM STATE", shares);
+    // console.log("POOL FROM STATE", tournament.pool);
+    // console.log(results);
 
     if (isLoading) {
       return (
@@ -320,26 +347,26 @@ class TournamentResultsCard extends Component<any, any> {
       )
     }
 
-    let resultDivs = null
+    let resultDivs = null;
 
     if (results.length > 0) {
-      resultDivs = results.map((result, idx) => {
-      
-        console.log("Trophy TEXT")
+      console.log("result length > 0")
+      resultDivs = results.map( (result, idx) => {
+
         if (result.sessionData) {
-          return (
-            <div
-              style={{ ...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})` }}
-              key={result.sessionId}
-            >
-              <span style={playerAddressStyle}>
-                {shortenAddress(result.playerAddress)}
-              </span>
+          return( 
+          <div 
+            style={{...resultDivStyle, background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`}} 
+            key={result.sessionId}
+          >
+            <span style={playerAddressStyle}>
+              {shortenAddress(result.playerAddress)}
+            </span>
               {idx < shares.length ? <span>{
-                <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
+               <p>{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
               }</span> : ""}
               <span style={timeLeftStyle}>
-                {result.sessionData.currentHighestNumber}
+                {result.sessionData.currentHighestNumber && this.formatTime(result.sessionData.currentHighestNumber, true)}
               </span>
             </div>
           )
@@ -353,7 +380,20 @@ class TournamentResultsCard extends Component<any, any> {
           </div>
         )
       } else {
-        resultDivs = null
+        resultDivs = shares.map( (share, idx) => {
+          let place = <span className="place">{idx + 1}</span>;
+          let trophy = <span className="trophy">{this.setTrophy(idx, shares)}</span>;
+          let shareETH = <span className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</span>
+          return(
+          <SharesText key={idx}>
+            <span>
+              {place} 
+              {trophy} 
+            </span>
+            {shareETH}
+          </SharesText>
+          )
+        })
       }
     }
 
@@ -449,13 +489,15 @@ const resultDivStyle: CSS.Properties = {
 const playerAddressStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
   color: `rgb(${baseColors.dark})`,
-  fontFamily: fonts.family.ApercuBold
+  fontFamily: fonts.family.ApercuBold,
+  marginRight: '0.2rem'
 }
 
 const timeLeftStyle: CSS.Properties = {
   fontSize: fonts.size.medium,
   color: `#0093d5`,
-  fontFamily: fonts.family.ApercuBold
+  fontFamily: fonts.family.ApercuBold,
+  marginLeft: '0.2rem'
 }
 
 const tournamentInfoStyle: CSS.Properties = {

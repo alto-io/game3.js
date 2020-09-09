@@ -3,11 +3,10 @@ import { Card, Heading, Image, Text, Box} from "rimble-ui";
 import styled from "styled-components";
 
 import { format } from 'date-fns';
+import web3 from 'web3';
 
 import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
 import ViewResultsModal from './ViewResultsModal';
-
-import web3 from 'web3';
 
 const OngoingCard = styled(Card)`
   box-shadow: none;
@@ -32,7 +31,7 @@ const OngoingCard = styled(Card)`
   }
 
   @media screen and (min-width: 768px) {
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     flex-direction: row;
   }
@@ -54,8 +53,8 @@ const GameImage = styled(Image)`
   height: 170px;
   
   @media screen and (min-width: 768px) {
-    margin-right: 1rem;
     margin-bottom : 0;
+    margin-right: 2rem;
     width: 185px;
     height: 123px;
   }
@@ -77,8 +76,8 @@ class PlayerOngoingTournaments extends Component {
       return(
         <>
         <OngoingCard key={tournament.id} mb={3}>
-          <GameImage src={"images/" + tournament.gameImage}/>
-          <Box ml={3}>
+          <GameImage src={"images/" + tournament.gameImage} m={0}/>
+          <Box m={0}>
             <p className="tournamentID">Tournament {tournament.id}</p>
             <h6 className="gameName">{tournament.gameName} {tournament.gameStage !== undefined ? "- " + tournament.gameStage : ""}</h6>
             <p className="lead">End Time</p>

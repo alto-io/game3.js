@@ -9,12 +9,13 @@ import { DEFAULT_GAME_DIMENSION } from '../constants'
 import TournamentResultsCard from './TournamentResultsCard';
 
 const GameWindowContainer = styled(Flex)`
+  background: #d3d3d3;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   margin: 0 auto;
-  padding-top: 1rem;
+  padding: 3rem 0;
   max-width: 1180px;
 
   .game {
@@ -31,7 +32,7 @@ const GameWindowContainer = styled(Flex)`
     align-items: flex-start;
 
     .game {
-      width: 70%;
+      width: 65%;
     }
 
     .leaderboards {

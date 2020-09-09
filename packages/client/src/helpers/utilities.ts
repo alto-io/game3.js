@@ -295,22 +295,38 @@ let myFunc: Function = null;
 let beforePathChange: CustomEvent;
 
 function createEventOnce(func: Function, params: any) {
-  if(!myFunc) {
+  if (!myFunc) {
     myFunc = func
 
     beforePathChange = new CustomEvent("onpathchange", {
-    cancelable: true,
-    detail: {
-      continue: () => myFunc(params.path, params.options)
-    }
-  });
+      cancelable: true,
+      detail: {
+        continue: () => myFunc(params.path, params.options)
+      }
+    });
   }
-} 
+}
 
 export async function navigateTo(path: string, options?: NavigateOptions<{}>) {
-  createEventOnce(navigate, {path, options});
+  createEventOnce(navigate, { path, options });
 
-  if(dispatchEvent(beforePathChange)) {
+  if (dispatchEvent(beforePathChange)) {
     await navigate(path, options);
+  }
+}
+
+export async function formatTime(time: any, isLeaderBoards: boolean) {
+  if (time) {
+    const seconds = (parseInt(time) / 1000).toFixed(2);
+    const minutes = Math.floor(parseInt(seconds) / 60);
+    let totalTime = '';
+    if (parseInt(seconds) > 60) {
+      let sec = (parseInt(seconds) % 60).toFixed(2);
+  
+      totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min"+" "+sec+"sec").toString()
+    } else {
+      totalTime += isLeaderBoards ? ("00:"+seconds).toString() : (seconds+"sec").toString()
+    }
+    return typeof totalTime
   }
 }
