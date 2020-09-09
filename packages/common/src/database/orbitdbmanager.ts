@@ -7,6 +7,8 @@ import { LeaderboardEntry } from './leaderboardentry'
 import { TournamentData } from './tournamentdata'
 import { v4 as uuidv4 } from 'uuid'
 
+import { TOSIOS, WOM, FP } from '../constants'
+
 const all = require('it-all')
 const { Buffer } = IPFS
 
@@ -251,53 +253,28 @@ export class OrbitDBManager implements DBManager {
     return { result: sessionId }
   }
 
-  async serverUpdateScore(didWin, sessionId, playerAddress, tournamentId, timeFinished) {
-
-    // As of now, the scoring mechanism depends on the shortest time you win the game.
-    // Sooner, we'll support several scoring mechanism.
+  async serverUpdateScore(sessionId, playerAddress, tournamentId, gamePayload) {
 
     if (tournamentId || tournamentId === 0) {
       console.log("UPDATE_SCORE: Function Invoked...");
+      console.log("UPDATE_SCORE: Session ID", sessionId);
 
       const data = await this.gameSessions.query(data =>
         data.id === sessionId && data.sessionData.tournamentId === tournamentId
       );
       console.log("UPDATE_SCORE: Fetched data", data);
-      let playerData = null
+
       if (data.length > 0) {
-        console.log("UPDATE_SCORE: Session Exist!");
-        playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
-        console.log("UPDATE_SCORE: Session id", sessionId);
-        console.log("UPDATE_SCORE: Session", data[0]);
-        console.log("UPDATE_SCORE: Session data", data[0].sessionData);
-        console.log("UPDATE_SCORE: Player data", playerData);
-        console.log("UPDATE_SCORE: Update score...", playerData);
-        let playerScore = Math.abs(playerData.timeLeft - timeFinished);
-        console.log("UPDATE_SCORE: Current High Score (shortest time)", playerData.currentHighestNumber);
-        console.log("UPDATE_SCORE: Current Score", playerScore);
-        console.log("UPDATE_SCORE: Did win?", didWin);
-
-        if (!didWin) {
-          console.log("UPDATE_SCORE: Player did not win");
-          console.log("UPDATE_SCORE: Player score reverts to 0");
-        } else {
-          console.log("UPDATE_SCORE: Player did win");
-
-          playerData.timeLeft = playerScore;
-
-          if (playerScore < (playerData.currentHighestNumber === 0 ? playerScore + 1 : playerData.currentHighestNumber)) {
-            playerData.currentHighestNumber = playerScore;
-            console.log("UPDATE_SCORE: Thew new data", playerData);
-            data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
-            await this.gameSessions.put(data[0]);
-            console.log("UPDATE_SCORE: Updated!");
-            console.log("UPDATE_SCORE: Returning...");
-            return { result: playerData }
-          } else {
-            console.log("UPDATE_SCORE: Current score is lower than highscore, no need to update!");
-            console.log("UPDATE_SCORE: Returning...");
-            return { result: playerData }
-          }
+        console.log("UPDATE_SCORE: Game name", data[0].sessionData.gameName);
+        switch (data[0].sessionData.gameName) {
+          case TOSIOS:
+            return await this.tosiosHighScoreHandler(playerAddress, data, gamePayload);
+          case FP:
+            return await this.fpHighScoreHandler(playerAddress, data, gamePayload);
+          case WOM:
+            return await this.womHighScoreHandler(playerAddress, data, gamePayload);
+          default:
+            return false;
         }
       } else {
         console.log("UPDATE_SCORE: No Data...");
@@ -310,38 +287,6 @@ export class OrbitDBManager implements DBManager {
       return false;
     }
   }
-
-  async serverUpdateHighScore(didWin, sessionId, playerAddress, tournamentId, score) {
-
-    if (tournamentId || tournamentId === 0) {
-      console.log("UPDATE_SCORE: Function Invoked...");
-
-      const data = await this.gameSessions.query(data =>
-        data.id === sessionId && data.sessionData.tournamentId === tournamentId
-      );
-      console.log("UPDATE_SCORE: Fetched data", data);
-      let playerData = null
-      if (data.length > 0) {
-        console.log("UPDATE_SCORE: Session Exist!");
-        console.log(data);
-        data[0].sessionData.score = score;
-        await this.gameSessions.put(data[0]);
-        console.log("UPDATE_SCORE: Updated!");
-        console.log("UPDATE_SCORE: Returning...");
-        return { result: playerData }
-
-      } else {
-        console.log("UPDATE_SCORE: No Data...");
-        console.log("UPDATE_SCORE: Returning...");
-        return { result: 'none' }
-      }
-    } else {
-      console.log("UPDATE_SCORE: You're not in a tournament");
-      console.log("UPDATE_SCORE: Returning...");
-      return false;
-    }
-  }
-
 
   async updateGameNumber(sessionId, playerAddress, tournamentId) {
     console.log("UPDATE_GNUMBER: Initializing...");
@@ -352,39 +297,19 @@ export class OrbitDBManager implements DBManager {
         data.id === sessionId && data.sessionData.tournamentId === tournamentId
       );
       if (data.length > 0) {
-
-        let playerData;
-      try {
-      
-      playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
-      console.log("UPDATE_GNUMBER: Updating...");
-      console.log("UPDATE_GNUMBER: Playerdata", playerData);
-      playerData.gameNo += 1;
-      data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
-      } catch (e) {
-      // player data not saved, check for gameNo on sessionData itself
-      playerData = data[0].sessionData.gameNo;
-      data[0].sessionData.gameNo = (playerData === undefined ? 0 : playerData + 1);
-      }
-
-      await this.gameSessions.put(data[0]);
-        console.log(data[0]);
+        let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
+        console.log("UPDATE_GNUMBER: Updating...");
+        console.log("UPDATE_GNUMBER: Playerdata", playerData);
+        playerData.gameNo += 1;
+        data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+        await this.gameSessions.put(data[0]);
         console.log("UPDATE_GNUMBER: Updated!!");
         console.log("UPDATE_GNUMBER: Returning...");
         return { result: playerData }
-        
       } else {
-        // no data, create new
-        const newData =
-        {
-        sessionId,
-        tournamentId,
-        gameNo: 1
-        }
-        await this.serverPutGameSession(sessionId, newData);      
-        console.log("UPDATE_GNUMBER: No data, creating new");
+        console.log("UPDATE_GNUMBER: No data");
         console.log("UPDATE_GNUMBER: Returning...");
-        return { result: newData}
+        return { result: 'none' }
       }
     } else {
       console.log("UPDATE_GNUMBER: You're not in a tournament");
@@ -394,75 +319,37 @@ export class OrbitDBManager implements DBManager {
   }
 
   // called from colyseus game state
-  async makeNewGameSession(sessionId, tournamentId, timeLeft, players) {
-    if (tournamentId || tournamentId === 0) {
-      console.log("NEW: Function Invoked...");
-      const sessionData = {
-        sessionId,
-        tournamentId,
-        playerData: {}
-      }
+  async makeNewGameSession(gameName, sessionId, tournamentId, gamePayload) {
 
-      // Check if this user already have a session available
-      const data = await this.gameSessions.query(data =>
-        data.id === sessionId && data.sessionData.tournamentId === tournamentId
-      );
-      console.log("NEW: fetched session data", data);
-      if (data.length <= 0) {
-        // No data create new
-        console.log("NEW: NO SESSION DATA EXIST");
-        console.log("NEW: Adding player in session...");
-
-        for (const playerId in players) {
-          const player = players[playerId]
-
-          console.log("NEW: Player name", player.name)
-
-          const playerData = {
-            name: player.name,
-            kills: player.kills,
-            timeLeft: timeLeft,
-            gameNo: 0,
-            currentHighestNumber: 0
-          }
-
-          console.log("NEW: Player address", player.address)
-          console.log("NEW: Player", player)
-
-          sessionData.playerData[player.address.toLowerCase()] = playerData;
-        }
-
-        console.log("NEW: Players added!!");
-
-        console.log("NEW: Adding new session data to db...", sessionData);
-        await this.serverPutGameSession(sessionId, sessionData);
-        console.log("NEW: Session Data created!!!");
-        console.log("NEW: Function Finished...");
-      } else {
-        console.log("NEW: Session Exist!!");
-        console.log("NEW: Updating playerData...")
-
-        // if (tournamentId !== data[0].tournamentId) {
-        //   console.log("NEW: No tournament record");
-        //   console.log("NEW: Making new one...");
-        // }
-
-        for (const playerId in players) {
-          const player = players[playerId]
-          console.log("NEW: Before", data[0].sessionData.playerData[player.address.toLowerCase()])
-          data[0].sessionData.playerData[player.address.toLowerCase()].name = player.name;
-          data[0].sessionData.playerData[player.address.toLowerCase()].kills = player.kills;
-          data[0].sessionData.playerData[player.address.toLowerCase()].timeLeft = timeLeft;
-          console.log("NEW: After", data[0].sessionData.playerData[player.address.toLowerCase()])
-        }
-        await this.gameSessions.put(data[0]);
-        console.log("NEW: Updated!");
-        console.log("NEW: Finished...");
-      }
-    } else {
+    if (!tournamentId && tournamentId !== 0) {
       console.log("NEW: You're not in a tournament");
       console.log("NEW: Returning...");
       return false;
+    }
+
+    const sessionData = {
+      sessionId,
+      tournamentId,
+      gameName,
+      playerData: {}
+    }
+
+    console.log("NEW: Function Invoked...");
+
+    // Check if this user already have a session available
+    const data = await this.gameSessions.query(data =>
+      data.id === sessionId && data.sessionData.tournamentId === tournamentId
+    );
+
+    switch (gameName) {
+      case TOSIOS:
+        return await this.handleCreatePlayerDataTOSIOS(sessionData, data, sessionId, gamePayload);
+      case FP:
+        return await this.handleCreatePlayerDataScoreType(sessionData, data, sessionId, gamePayload)
+      case WOM:
+        return await this.handleCreatePlayerDataScoreType(sessionData, data, sessionId, gamePayload)
+      default:
+        return false;
     }
   }
 
@@ -515,9 +402,9 @@ export class OrbitDBManager implements DBManager {
         data.id === gameSessionId && data.sessionData.tournamentId === tournamentId
       );
       if (data.length > 0) {
-        try {      
-        let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
-        return playerData.gameNo;
+        try {
+          let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
+          return playerData.gameNo;
         } catch (e) {
           // player data not saved, check for gameNo on sessionData itself
           let gameNo = data[0].sessionData.gameNo;
@@ -714,37 +601,106 @@ export class OrbitDBManager implements DBManager {
       console.log("GET_TOURNEY_WINNERS: Fetching tourney session data");
       let tourneySession = await this.getTournamentResult(tournamentId);
 
+      let players = []
+      let winners = []
+
       if (tourneySession.length > 0) {
         console.log("GET_TOURNEY_WINNERS: Tourney session fetched!!", tourneySession);
 
-        let players = tourneySession.map(session => {
-          let playerAddress = Object.keys(session.sessionData.playerData);
-          return {
-            address: playerAddress[0],
-            score: session.sessionData.playerData[playerAddress[0]].currentHighestNumber
-          }
-        });
+        switch (tourneySession[0].sessionData.gameName) {
+          case TOSIOS:
+            players = tourneySession.map(session => {
+              let playerAddress = Object.keys(session.sessionData.playerData);
+              return {
+                address: playerAddress[0],
+                score: session.sessionData.playerData[playerAddress[0]].currentHighestNumber
+              }
+            });
 
-        console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+            console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
 
-        console.log("GET_TOURNEY_WINNERS: Sorting player scores");
-        // sort in ascending order since shortest time is the winner
-        players.sort((el1, el2) => el1.score - el2.score);
-        console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+            console.log("GET_TOURNEY_WINNERS: Sorting player scores");
 
-        console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+            // sort in ascending order since shortest time is the winner
+            players.sort((el1, el2) => el1.score - el2.score);
 
-        let winners = []
+            console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
 
-        for (let i = 0; i < winnersLength; i++) {
-          winners.push(players[i].address);
+            console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+
+            winners = []
+
+            for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
+              winners.push(players[i].address);
+            }
+
+            console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+            console.log("GET_TOURNEY_WINNERS: Returning...");
+
+            return winners;
+          case FP:
+            players = tourneySession.map(session => {
+              let playerAddress = Object.keys(session.sessionData.playerData);
+              return {
+                address: playerAddress[0],
+                score: session.sessionData.playerData[playerAddress[0]].highScore
+              }
+            });
+
+            console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+
+            // sort in descending order
+            players.sort((el1, el2) => el2.score - el1.score);
+
+            console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+
+            winners = []
+
+            for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
+              winners.push(players[i].address);
+            }
+
+            console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+            console.log("GET_TOURNEY_WINNERS: Returning...");
+
+            return winners;
+          case WOM:
+            players = tourneySession.map(session => {
+              let playerAddress = Object.keys(session.sessionData.playerData);
+              return {
+                address: playerAddress[0],
+                score: session.sessionData.playerData[playerAddress[0]].highScore
+              }
+            });
+
+            console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+
+            // sort in ascending order
+            players.sort((el1, el2) => el1.score - el2.score);
+
+            console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+
+            console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+
+            winners = []
+
+            for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
+              winners.push(players[i].address);
+            }
+
+            console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+            console.log("GET_TOURNEY_WINNERS: Returning...");
+
+            return winners;
+          default:
+            break;
         }
-
-        console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
-        console.log("GET_TOURNEY_WINNERS: Returning...");
-
-        return winners;
-
       } else {
         console.log("GET_TOURNEY_WINNERS: No tourney session fetched with id: ", tournamentId);
         console.log("GET_TOURNEY_WINNERS: Returning...");
@@ -754,6 +710,192 @@ export class OrbitDBManager implements DBManager {
       console.log("GET_TOURNEY_WINNERS: No tourney fetched with id: ", tournamentId);
       console.log("GET_TOURNEY_WINNERS: Returning...");
       return []
+    }
+  }
+
+  // ============================================================= //
+
+  // GAME SESSION PLAYER DATA HANDLERS
+
+  private async handleCreatePlayerDataScoreType(sessionData, data, sessionId, gamePayload) {
+    const { playerAddress } = gamePayload;
+    console.log("NEW-score_type: payload", gamePayload);
+    console.log("NEW-score_type: fetched session data", data);
+    if (data.length <= 0) {
+      console.log("NEW-score_type: NO SESSION DATA EXIST");
+      console.log("NEW-score_type: Adding player in session...");
+
+      const playerData = {
+        gameNo: 0,
+        score: 0,
+        highScore: 0
+      }
+
+      sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+      console.log("NEW-score_type: Added!", playerData);
+
+      console.log("NEW-score_type: Adding new session data to db...", sessionData);
+      await this.serverPutGameSession(sessionId, sessionData);
+      console.log("NEW-score_type: Session Data created!!!");
+      console.log("NEW-score_type: Function Finished...");
+      return true
+    } else {
+      console.log("NEW-score_type: Session Exist!!");
+      console.log("NEW-score_type: No need to create new one...")
+      console.log("NEW-score_type: Returning...")
+      return true;
+    }
+  }
+
+  private async handleCreatePlayerDataTOSIOS(sessionData, data, sessionId, gamePayload) {
+    const { timeLeft, players } = gamePayload;
+
+    console.log("NEW-tosios: payload", gamePayload);
+    console.log("NEW-tosios: fetched session data", data);
+    if (data.length <= 0) {
+      console.log("NEW-tosios: NO SESSION DATA EXIST");
+      console.log("NEW-tosios: Adding player in session...");
+
+      for (const playerId in players) {
+        const player = players[playerId]
+
+        console.log("NEW-tosios: Player name", player.name)
+
+        const playerData = {
+          name: player.name,
+          kills: player.kills,
+          timeLeft: timeLeft,
+          gameNo: 0,
+          currentHighestNumber: 0
+        }
+
+        console.log("NEW-tosios: Player address", player.address)
+        console.log("NEW-tosios: Player", player)
+
+        sessionData.playerData[player.address.toLowerCase()] = playerData;
+      }
+
+      console.log("NEW-tosios: Players added!!");
+
+      console.log("NEW-tosios: Adding new session data to db...", sessionData);
+      await this.serverPutGameSession(sessionId, sessionData);
+      console.log("NEW-tosios: Session Data created!!!");
+      console.log("NEW-tosios: Function Finished...");
+      return true;
+    } else {
+      console.log("NEW-tosios: Session Exist!!");
+      console.log("NEW-tosios: Updating playerData...")
+
+      for (const playerId in players) {
+        const player = players[playerId]
+        console.log("NEW-tosios: Before", data[0].sessionData.playerData[player.address.toLowerCase()])
+        data[0].sessionData.playerData[player.address.toLowerCase()].name = player.name;
+        data[0].sessionData.playerData[player.address.toLowerCase()].kills = player.kills;
+        data[0].sessionData.playerData[player.address.toLowerCase()].timeLeft = timeLeft;
+        console.log("NEW-tosios: After", data[0].sessionData.playerData[player.address.toLowerCase()])
+      }
+      await this.gameSessions.put(data[0]);
+      console.log("NEW-tosios: Updated!");
+      console.log("NEW-tosios: Finished...");
+      return true;
+    }
+  }
+
+  // HIGH SCORE UPDATER HANDLERS
+
+  private async tosiosHighScoreHandler(playerAddress, data, gamePayload) {
+    const { timeFinished, didWin } = gamePayload;
+    console.log("UPDATE_SCORE-tosios: payload", gamePayload);
+    console.log("UPDATE_SCORE-tosios: Session Exist!");
+    let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
+    console.log("UPDATE_SCORE-tosios: Session", data[0]);
+    console.log("UPDATE_SCORE-tosios: Session data", data[0].sessionData);
+    console.log("UPDATE_SCORE-tosios: Player data", playerData);
+    console.log("UPDATE_SCORE-tosios: Updating score...");
+    let playerScore = Math.abs(playerData.timeLeft - timeFinished);
+    console.log("UPDATE_SCORE-tosios: Current High Score (shortest time)", playerData.currentHighestNumber);
+    console.log("UPDATE_SCORE-tosios: Current Score", playerScore);
+    console.log("UPDATE_SCORE-tosios: Did win?", didWin);
+
+    if (!didWin) {
+      console.log("UPDATE_SCORE-tosios: Player did not win");
+      console.log("UPDATE_SCORE-tosios: Player score reverts to 0");
+      return { result: false, newHighScore: false }
+    } else {
+      console.log("UPDATE_SCORE-tosios: Player did win");
+
+      playerData.timeLeft = playerScore;
+
+      if (playerScore < (playerData.currentHighestNumber === 0 ? playerScore + 1 : playerData.currentHighestNumber)) {
+        playerData.currentHighestNumber = playerScore;
+        console.log("UPDATE_SCORE-tosios: Thew new data", playerData);
+        data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+        await this.gameSessions.put(data[0]);
+        console.log("UPDATE_SCORE-tosios: Updated!");
+        console.log("UPDATE_SCORE-tosios: Returning...");
+        return { result: playerData, newHighScore: true }
+      } else {
+        console.log("UPDATE_SCORE-tosios: Current score is lower than highscore, no need to update!");
+        console.log("UPDATE_SCORE-tosios: Returning...");
+        return { result: playerData, newHighScore: false }
+      }
+    }
+  }
+
+  private async fpHighScoreHandler(playerAddress, data, gamePayload) {
+    let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
+    console.log("UPDATE_SCORE-fp: payload", gamePayload);
+    const { score } = gamePayload;
+    let highScore = playerData.highScore;
+
+    console.log("UPDATE_SCORE-fp: Current High Score", highScore);
+    console.log("UPDATE_SCORE-fp: Current Score", score);
+
+    if (score > highScore) {
+      playerData.highScore = score;
+      console.log("UPDATE_SCORE-fp: Thew new data", playerData);
+      data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+      console.log("UPDATE_SCORE-fp: Saving data");
+      await this.gameSessions.put(data[0]);
+      console.log("UPDATE_SCORE-fp: Updated!");
+      console.log("UPDATE_SCORE-fp: Returning...");
+      return { result: playerData, newHighScore: true }
+    } else {
+      console.log("UPDATE_SCORE-fp: Current score is lower than highscore, no need to update!");
+      console.log("UPDATE_SCORE-fp: Returning...");
+      return { result: playerData, newHighScore: false }
+    }
+  }
+
+  private async womHighScoreHandler(playerAddress, data, gamePayload) {
+    let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
+    console.log("UPDATE_SCORE-wom: payload", gamePayload);
+    const { score, didWin } = gamePayload;
+    let highScore = playerData.highScore;
+
+    console.log("UPDATE_SCORE-wom: Current High Score", highScore);
+    console.log("UPDATE_SCORE-wom: Current Score", score);
+    console.log("UPDATE_SCORE-wom: Did win?", didWin);
+
+    if (!didWin) {
+      console.log("UPDATE_SCORE-wom: Did not win, score will be nullified");
+      console.log("UPDATE_SCORE-wom: Returning...");
+      return { result: false, newHighScore: false };
+    }
+
+    if (score < highScore) {
+      playerData.highScore = score;
+      console.log("UPDATE_SCORE-wom: Thew new data", playerData);
+      data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
+      console.log("UPDATE_SCORE-wom: Saving data");
+      await this.gameSessions.put(data[0]);
+      console.log("UPDATE_SCORE-wom: Updated!");
+      console.log("UPDATE_SCORE-wom: Returning...");
+      return { result: playerData, newHighScore: true }
+    } else {
+      console.log("UPDATE_SCORE-wom: Current score is slower than highscore, no need to update!");
+      console.log("UPDATE_SCORE-wom: Returning...");
+      return { result: playerData, newHighScore: false }
     }
   }
 }

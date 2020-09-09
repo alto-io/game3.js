@@ -95,8 +95,7 @@ export async function putGameReplay(sessionId, playerAddress, fileHash): Promise
   }
   const response = await api.post('/gameReplay', body);
   console.log(response)
-  const { result } = response.data;
-  return result;
+  return response.data;
 }
 
 export async function getGameSession(gameSessionId, playerAddress, tournamentId): Promise<any> {
@@ -151,31 +150,10 @@ export async function deleteGameSessionId(gameSessionId): Promise<any> {
   return response.data
 }
 
-export async function updateSessionScore(didWin, gameSessionId, playerAddress, tournamentId, timeFinished): Promise<any> {
-  
-  const params = {
-    didWin,
-    sessionId: gameSessionId,
-    playerAddress,
-    tournamentId,
-    timeFinished
-  }
+export async function updateSessionScore(sessionId, playerAddress, tournamentId, gamePayload): Promise<any> {
+  const params = {sessionId, playerAddress, tournamentId, gamePayload}
 
   const res = await api.post('/gameSession/score', params);
-  return res.data;
-}
-
-export async function updateSessionHighScore(didWin, gameSessionId, playerAddress, tournamentId, score): Promise<any> {
-  
-  const params = {
-    didWin,
-    sessionId: gameSessionId,
-    playerAddress,
-    tournamentId,
-    score
-  }
-
-  const res = await api.post('/gameSession/highscore', params);
   return res.data;
 }
 
@@ -190,13 +168,8 @@ export async function updateGameNo(sessionId, playerAddress, tournamentId) {
   return res.data;
 }
 
-export async function makeNewGameSession(sessionId, tournamentId, players, endsAt): Promise<any> {
-  const params = {
-    sessionId,
-    tournamentId, 
-    timeLeft: Date.now(), 
-    players
-  }
+export async function makeNewGameSession(gameName, sessionId, tournamentId, gamePayload): Promise<any> {
+  const params = {gameName, sessionId, tournamentId, gamePayload}
 
   const res = await api.post('/gameSession/new', params);
   return res.data

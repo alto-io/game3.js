@@ -192,7 +192,7 @@ class TournamentResultsCard extends Component<any, any> {
         console.log("PLAYER ADD: address", playerAddress);
 
         results.push({
-          name: sessionsData[resultIdx].sessionData.playerData[playerAddress].name,
+          gameName: sessionsData[resultIdx].sessionData.gameName,   
           tournamentId: tournamentId,
           timeIsUp: false,
           playerAddress,
@@ -212,10 +212,21 @@ class TournamentResultsCard extends Component<any, any> {
 
       // results.forEach((result, idx) => result.sessionData = sessions[idx])
       console.log("RESULTS:", results)
-      results = results.filter(result => !!result.sessionData && !!result.name)
+      results = results.filter(result => !!result.sessionData)
       if (results.length > 1) {
         // Sorts in ascending order
-        results.sort((el1, el2) => el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber)
+        results.sort((el1, el2) => {
+          switch (el1.gameName) {  
+            case Constants.FP:
+              return el2.sessionData.highScore - el1.sessionData.highScore
+            case Constants.TOSIOS:
+              return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
+            case Constants.WOM:
+              return el2.sessionData.currentHighestNumber - el1.sessionData.currentHighestNumber
+            default:
+              break;
+          }
+        })
       }
     }
     this.setState({
@@ -226,13 +237,12 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   getBlockchainInfo = async (props) => {
-    try {
+    const { tournamentId } = props
 
-    const { tournamentId, playerAddress, drizzle } = props;
-    const contract = drizzle.contracts.Tournaments;
-
-    // Tournament ID is undefined in Play Tab
-    if (tournamentId === undefined && drizzle.contracts.Tournaments) {
+    if (this.props.drizzle.contracts.Tournaments) {
+      const { drizzle } = this.props;
+      // Get the latest tournament
+      const contract = drizzle.contracts.Tournaments;
 
       console.log("TOURNAMENT ID = ", tournamentId)
       const tournamentLength = await contract.methods.getTournamentsCount().call();
@@ -241,50 +251,48 @@ class TournamentResultsCard extends Component<any, any> {
         tI = tournamentId || tournamentId === 0 ? tournamentId : tournamentLength - 1;
       }
       await this.getTournamentAndLeaderBoards(tI, true);
-
     } else {
-      // Tournament ID is present in Tournaments and Dashboard
-      playerAddress ? await this.getTournamentAndLeaderBoards(tournamentId, true) : await this.getTournamentAndLeaderBoards(tournamentId, false);
-    }
-  } catch (e) {
-      console.log("No tourney retrieved");
-    }
-  }
-
-  getStatus(tournament: any) {
-    switch (tournament.state) {
-      case TOURNAMENT_STATE_DRAFT:
-        return 'Draft'
-        break;
-      case TOURNAMENT_STATE_ACTIVE:
-        return 'Active'
-        break;
-      case TOURNAMENT_STATE_ENDED:
-        return 'Done'
-        break;
-      default:
-        return 'None'
-        break;
+      let ids = await getTournaments();
+      console.log("IDSSSS", ids);
+      let tId = undefined;
+      if (ids.length > 0) {
+        tId = ids[ids.length - 1].id
+      }
+      console.log("THE ID IN DB IS", tId);
+      await this.getTournamentAndLeaderBoards(tId, false);
     }
   }
 
-  formatTourneyTimeInfo(tournament: any) {
-    const {
-      startDate,
-      endTime,
-      startTime,
-      timeZone
-    } = tournament;
-    let info =
-      `Ends on ${endTime} ${timeZone}`;
-
-    return info;
+getStatus(tournament: any) {
+  switch (tournament.state) {
+    case TOURNAMENT_STATE_DRAFT:
+      return 'Draft'
+    case TOURNAMENT_STATE_ACTIVE:
+      return 'Active'
+    case TOURNAMENT_STATE_ENDED:
+      return 'Done'
+    default:
+      return 'None'
   }
+}
 
-  // Formats the title of the tournament along with its ID 
-  formatTourneyTitle(tournament: any) {
-    return `${tournament.name} #${tournament.id}`;
-  }
+formatTourneyTimeInfo(tournament: any) {
+  const {
+    startDate,
+    endTime,
+    startTime,
+    timeZone
+  } = tournament;
+  let info =
+    `Ends on ${endTime} ${timeZone}`;
+
+  return info;
+}
+
+// Formats the title of the tournament along with its ID 
+formatTourneyTitle(tournament: any) {
+  return `${tournament.name} #${tournament.id}`;
+}
 
   handleJoinClick = () => {
     const { tournament } = this.state;
@@ -326,28 +334,41 @@ class TournamentResultsCard extends Component<any, any> {
       default:
         break;
     }
-  }
+}
 
-  setResultBgColor(playerAddress, currentPlayerAddress) {
-    if (playerAddress && playerAddress.toLowerCase() === currentPlayerAddress.toLowerCase()) {
-      return baseColors.lightGrey;
-    } else {
-      return baseColors.white;
+setResultBgColor(playerAddress, currentPlayerAddress) {
+  if (playerAddress && playerAddress.toLowerCase() === currentPlayerAddress.toLowerCase()) {
+    return baseColors.lightGrey;
+  } else {
+    return baseColors.white;
+  }
+}
+
+fetchShares = async (tournamentId) => {
+  console.log("FETCH SHARES");
+  const { drizzle } = this.props;
+
+  try {
+    const contract = drizzle.contracts.Tournaments;
+    const shares = await contract.methods.getShares(tournamentId).call();
+
+    this.setState({ shares });
+  }
+  catch (e) { }
+}
+
+setTrophy(idx, shares) {
+  if (idx < shares.length) {
+    switch (idx) {
+      case 0:
+        return <span>&#x1F947;</span>
+      case 1:
+        return <span>&#x1F948;</span>
+      default:
+        return <span>&#x1F949;</span>
     }
   }
-
-  fetchShares = async (tournamentId) => {
-    console.log("FETCH SHARES");
-    const { drizzle } = this.props;
-
-    try {
-      const contract = drizzle.contracts.Tournaments;
-      const shares = await contract.methods.getShares(tournamentId).call();
-
-      this.setState({ shares });
-    }
-    catch (e) { }
-  }
+}
 
   setTrophy(idx, shares) {
     if (idx < shares.length) {
@@ -362,25 +383,36 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
-  formatTime = (time, isLeaderBoards) => {
-    if (time) {
-      const seconds = (parseInt(time) / 1000).toFixed(2);
-      const minutes = Math.floor(parseInt(seconds) / 60);
-      let totalTime = '';
-      if (parseInt(seconds) > 60) {
-        let sec = (parseInt(seconds) % 60).toFixed(2);
-    
-        totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min"+" "+sec+"sec").toString()
-      } else {
-        totalTime += isLeaderBoards ? ("0:"+seconds).toString() : (seconds+"sec").toString()
-      }
-      return totalTime
-    }
+  setDisplayScore(result) {
+  switch (result.gameName) {
+    case Constants.FP:
+      return result.sessionData.highScore
+    case Constants.TOSIOS:
+      return this.formatTime(result.sessionData.currentHighestNumber, true)
+    default:
+      return ''
   }
+}
 
-  render() {
-    const { results, isLoading, tournament, shares } = this.state;
-    const { tournamentId, playerAddress } = this.props;
+formatTime = (time, isLeaderBoards) => {
+  if (time) {
+    const seconds = (parseInt(time) / 1000).toFixed(2);
+    const minutes = Math.floor(parseInt(seconds) / 60);
+    let totalTime = '';
+    if (parseInt(seconds) > 60) {
+      let sec = (parseInt(seconds) % 60).toFixed(2);
+
+      totalTime += isLeaderBoards ? (minutes + ":" + sec).toString() : (minutes + "min" + " " + sec + "sec").toString()
+    } else {
+      totalTime += isLeaderBoards ? ("0:" + seconds).toString() : (seconds + "sec").toString()
+    }
+    return totalTime
+  }
+}
+
+render() {
+  const { results, isLoading, tournament, shares } = this.state;
+  const { tournamentId, playerAddress } = this.props;
 
     if (isLoading) {
       return (
@@ -390,7 +422,7 @@ class TournamentResultsCard extends Component<any, any> {
       )
     }
 
-    let resultDivs = null;
+  let resultDivs = null;
 
     if (results.length > 0) {
 
@@ -464,13 +496,14 @@ class TournamentResultsCard extends Component<any, any> {
                 </div>
               )}
           </>
-        ) : (
-            <div style={tournamentInfoStyle}>
-              <span style={tourneyTitleStyle}>No Tournaments</span>
-            </div>
-          )}
-      </div>
-    )
+
+    ) : (
+        <div style={tournamentInfoStyle}>
+          <span style={tourneyTitleStyle}>No Tournaments</span>
+        </div>
+      )}
+  </div>
+)
   }
 }
 
