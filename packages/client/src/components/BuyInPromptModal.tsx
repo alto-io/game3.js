@@ -10,13 +10,14 @@ class BuyInPromptModal extends Component<any, any> {
 
   confirmTransaction = async () => {
     const { drizzle, tournamentId, tournamentBuyInAmount,
-      handleJoinClick, address, maxTries } = this.props;
+      handleJoinClick, address, maxTries, handleCloseBuyinModal } = this.props;
     const contract = drizzle.contracts.Tournaments;
 
     await contract.methods.payBuyIn(tournamentId, tournamentBuyInAmount).send({ from: address, value: tournamentBuyInAmount })
       .then( result => {
         if (result) {
           handleJoinClick();
+          handleCloseBuyinModal();
         }
       })
   }

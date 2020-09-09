@@ -167,7 +167,7 @@ export default class GameContainer extends Component<IProps, any> {
 
   // RENDER
   render() {
-    const { drizzle, drizzleState, contractMethodSendWrapper, address } = this.props
+    const { drizzle, drizzleState, contractMethodSendWrapper, address, accountValidated, connectAndValidateAccount } = this.props
     const { tournamentId } = this.state;
 
     return (
@@ -184,6 +184,8 @@ export default class GameContainer extends Component<IProps, any> {
                 drizzle={drizzle}
                 tournamentId={tournamentId}
                 playerAddress={address}
+                accountValidated={accountValidated}
+                connectAndValidateAccount={connectAndValidateAccount}
               >
                 <Router>
                   <Game

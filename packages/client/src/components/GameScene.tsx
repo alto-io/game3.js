@@ -61,7 +61,9 @@ export default class GameScene extends Component<any, any> {
 		const {
 			children,
 			drizzle,
-			playerAddress
+      playerAddress,
+      accountValidated,
+      connectAndValidateAccount
 		} = this.props;
 
 		const {
@@ -79,6 +81,8 @@ export default class GameScene extends Component<any, any> {
             tournamentId={tournamentId}
             drizzle={drizzle}
             playerAddress={playerAddress}
+            accountValidated={accountValidated}
+            connectAndValidateAccount={connectAndValidateAccount}
           />
         </Box>
 			</GameWindowContainer>

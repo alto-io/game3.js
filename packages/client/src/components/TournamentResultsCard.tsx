@@ -1,10 +1,15 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import { RouteComponentProps, navigate } from '@reach/router';
+import { Button } from 'rimble-ui';
 import styled from 'styled-components';
 
-import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
-import shortenAddress from "../core/utilities/shortenAddress"
+import JoinPromptModal from './JoinPromptModal';
+import BuyinPromptModal from './BuyInPromptModal';
 
-import { RouteComponentProps, navigate } from '@reach/router';
+import { getTournamentResult, getTournament, getGameNo, getGameSessionId } from '../helpers/database'
+import shortenAddress from "../core/utilities/shortenAddress";
+import { Constants } from '@game3js/common';
+import web3 from 'web3';
 import qs from 'querystringify';
 import { format } from 'date-fns';
 
@@ -16,9 +21,6 @@ import {
   TOURNAMENT_STATE_ENDED,
   TOURNAMENT_STATE_DRAFT
 } from '../constants'
-
-import { Constants } from '@game3js/common';
-import web3 from 'web3';
 
 const SharesText = styled.div`
   display: flex;
@@ -68,6 +70,15 @@ const ResultDivStyle = styled.div`
  }
  `
 
+ const JoinTourneyBtn = styled(Button)`
+  color: #101010;
+  font-family: 'Apercu Light';
+  font-size: 0.825rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  width: 100%;
+ `
+
 class TournamentResultsCard extends Component<any, any> {
   constructor(props) {
     super(props)
@@ -76,8 +87,17 @@ class TournamentResultsCard extends Component<any, any> {
       results: [],
       tournament: {},
       isLoading: false,
-      shares: []
+      shares: [],
+      isJoinModalOpen: false,
+      isBuyinModalOpen: false,
+      accountBuyIn: 0,
+      gameNo: 0
     }
+
+    this.handleCloseJoinModal = this.handleCloseJoinModal.bind(this);
+    this.handleOpenJoinModal = this.handleOpenJoinModal.bind(this);
+    this.handleCloseBuyinModal = this.handleCloseBuyinModal.bind(this);
+    this.handleOpenBuyinModal = this.handleOpenBuyinModal.bind(this);
   }
 
   componentDidMount() {
@@ -99,7 +119,7 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   async getTournamentAndLeaderBoards(tournamentId: any, loggedIn: boolean) {
-    const { drizzle } = this.props;
+    const { drizzle, address, playerAddress, accountValidated } = this.props;
 
     this.setState({ isLoading: true })
 
@@ -116,7 +136,9 @@ class TournamentResultsCard extends Component<any, any> {
       startDate: '',
       endDate: '',
       state: 0,
-      pool: ''
+      pool: '',
+      maxTries: 0,
+      buyInAmount: 0
     }
 
     // Get tournament info
@@ -130,24 +152,38 @@ class TournamentResultsCard extends Component<any, any> {
         isLoading: false
       })
     }
+
     let raw = undefined;
     if (loggedIn) {
       raw = await contract.methods.getTournament(tournamentId).call()
       await this.fetchShares(tournamentId);
       let data = this.parseData(raw['5']);
       const gameName = data[0];
+      const gameStage = data[1] ? data[1] : undefined;
+      const maxTries = await contract.methods.getMaxTries(tournamentId).call();
+      const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
+      
+      if (playerAddress && accountValidated) {
+        const accountBuyIn = await contract.methods.buyIn(tournamentId, playerAddress).call();
+        this.setState({accountBuyIn});
+      }
+
       tournament = {
         id: tournamentId,
         name: gameName,
-        gameStage: undefined,
+        gameStage: gameStage,
         timeZone: 'GMT+8',
         startTime: '12:00',
         endTime: format(new Date(parseInt(raw['1'])), 'MMM d, yyyy'),
         startDate: '8/16',
         endDate: '9/4',
         state: parseInt(raw['3']),
-        pool: raw['4']
+        pool: raw['4'],
+        maxTries: parseInt(maxTries),
+        buyInAmount: tournamentBuyIn
       }
+
+      this.fetchGameNo(playerAddress, tournamentId);
     } else {
       raw = await getTournament(tournamentId);
       console.log("TOURNAMENT DATA FROM DB", raw);
@@ -410,9 +446,31 @@ formatTime = (time, isLeaderBoards) => {
   }
 }
 
-render() {
-  const { results, isLoading, tournament, shares } = this.state;
-  const { tournamentId, playerAddress } = this.props;
+  handleCloseJoinModal = e => {
+    this.setState({ isJoinModalOpen: false });
+  }
+
+  handleOpenJoinModal = e =>{
+    this.setState({ isJoinModalOpen: true });
+  }
+
+  handleCloseBuyinModal = e => {
+    this.setState({ isBuyinModalOpen: false});
+  }
+
+  handleOpenBuyinModal = e => {
+    this.setState({ isBuyinModalOpen: true});
+  }
+
+  fetchGameNo = async (account, tournamentId) => {
+    const gameSessionId = await getGameSessionId(account, tournamentId);
+    const gameNo = await getGameNo(gameSessionId, account, tournamentId);
+    this.setState({ gameNo: gameNo });
+  }
+
+  render() {
+    const { results, isLoading, tournament, shares, isJoinModalOpen, isBuyinModalOpen, gameNo, accountBuyIn } = this.state;
+    const { tournamentId, playerAddress, accountValidated, connectAndValidateAccount, drizzle } = this.props;
 
     if (isLoading) {
       return (
@@ -465,45 +523,82 @@ render() {
       }
     }
 
-    return (
-      <div style={widgetStyle}>
-        {!!tournament ? (
-          <>
-            <div style={tournamentInfoStyle}>
-              {tournament.gameStage ? (
-                <span style={tourneyTitleStyle}>{tournament.gameStage}</span>
-              ) : (
-                  <span style={tourneyTitleStyle}>{this.formatTourneyTitle(tournament)}</span>
-                )
-              }
-              <span style={tourneyTitleInfo}>{this.formatTourneyTimeInfo(tournament)}</span>
-              <span style={tourneyTitleInfo}>Status: {this.getStatus(tournament)}</span>
-            </div>
-            <div style={leaderBoardStyle}>
-              <h1 style={titleHeader}>Leaderboard</h1>
-              <div style={resultDivsStyle}>
-                {resultDivs}
-              </div>
-            </div>
-            {tournamentId === undefined ? (
-              <button 
-                style={joinTourneyBtn} 
-                onClick={this.handleJoinClick}>Join Tournament</button>
-            ) : (
-                <div style={totalBuyIn} >
-                  <span>Total Buy-in Pool</span>
-                  <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tournament.pool && web3.utils.fromWei((tournament.pool).toString())} ETH</span>
-                </div>
-              )}
-          </>
+    console.log(accountBuyIn)
+    const button = () => {
+      if (accountBuyIn > 0 && playerAddress && accountValidated) {
+        return(
+          <JoinTourneyBtn 
+            onClick={this.handleJoinClick}
+            mainColor={"#06df9b"}
+            disabled={gameNo === tournament.maxTries ? "disabled" : ""}
+          >
+            {`Play ( ${typeof gameNo !== "number" ? 0 : gameNo} out of ${tournament.maxTries} )`}
+          </JoinTourneyBtn>
+        )
+      } else {
+        return (<JoinTourneyBtn 
+        onClick={playerAddress && accountValidated ? this.handleOpenBuyinModal : this.handleOpenJoinModal}
+        mainColor={"#06df9b"}
+      >
+        {`Join ( ${tournament.buyInAmount && web3.utils.fromWei(tournament.buyInAmount.toString())} ETH )`}
+      </JoinTourneyBtn>)
+      }
+    }
 
-    ) : (
-        <div style={tournamentInfoStyle}>
-          <span style={tourneyTitleStyle}>No Tournaments</span>
+    return (
+      <>
+        <div style={widgetStyle}>
+          {!!tournament ? (
+            <>
+              <div style={tournamentInfoStyle}>
+                {tournament.gameStage ? (
+                  <span style={tourneyTitleStyle}>{tournament.gameStage}</span>
+                ) : (
+                    <span style={tourneyTitleStyle}>{this.formatTourneyTitle(tournament)}</span>
+                  )
+                }
+                <span style={tourneyTitleInfo}>{this.formatTourneyTimeInfo(tournament)}</span>
+                <span style={tourneyTitleInfo}>Status: {this.getStatus(tournament)}</span>
+              </div>
+              <div style={leaderBoardStyle}>
+                <h1 style={titleHeader}>Leaderboard</h1>
+                <div style={resultDivsStyle}>
+                  {resultDivs}
+              <JoinPromptModal 
+                  isOpen={isJoinModalOpen}
+                  handleCloseModal={this.handleCloseJoinModal}
+                  connectAndValidateAccount={connectAndValidateAccount}
+                  account={playerAddress}
+                  accountValidated={accountValidated}
+                  modalText={"You must be logged in to join a tournament"}
+                />
+                <BuyinPromptModal 
+                  isOpen={isBuyinModalOpen}
+                  handleCloseBuyinModal={this.handleCloseBuyinModal}
+                  handleJoinClick={this.handleJoinClick}
+                  drizzle={drizzle}
+                  tournamentId={tournament.id}
+                  tournamentBuyInAmount={tournament.buyInAmount}
+                  maxTries={tournament.maxTries}
+                  address={playerAddress}
+                />
+              {tournamentId === undefined ? (
+                button()
+              ) : (
+                  <div style={totalBuyIn} >
+                    <span>Total Buy-in Pool</span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tournament.pool && web3.utils.fromWei((tournament.pool).toString())} ETH</span>
+                  </div>
+                )}
+            </>
+          ) : (
+              <div style={tournamentInfoStyle}>
+                <span style={tourneyTitleStyle}>No Tournaments</span>
+              </div>
+            )}
         </div>
-      )}
-  </div>
-)
+      </>
+    )
   }
 }
 
