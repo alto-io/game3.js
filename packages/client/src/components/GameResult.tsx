@@ -1,9 +1,10 @@
-import * as React from 'react'
+import * as React from 'react';
+import styled from 'styled-components';
 
 import { RouteComponentProps } from '@reach/router'
 
 import Modal from './Modal';
-import { View, Button } from '../components';
+import { Button } from '../components';
 import GameJavascript, { GameJavascriptContext } from '../scenes/GameJavascript';
 import { navigateTo } from '../helpers/utilities';
 
@@ -14,6 +15,52 @@ import {
   putGameReplay,
   updateSessionScore
 } from '../helpers/database'
+
+const StyledContainer = styled.div`
+  margin-top: 1.25rem;
+  padding: 0;
+
+  h6 {
+    font-weight: bold;
+    font-size: 1.25rem;
+    letter-spacing: 0.15px;
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+
+  .score {
+    font-family: 'Apercu Bold';
+    font-size: 1.8rem;
+    letter-spacing: 0.25px;
+    margin-bottom: 1.25rem;
+  }
+
+  .score-msg {
+    font-size: 1.6rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .thanks-msg {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-top: 1.5rem
+  } 
+
+  .highscore-submitted {
+    font-size: 0.825rem;
+    letter-spacing: 0.1px;
+    margin-bottom: 1.25rem;
+  }
+
+  .btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+`
 
 export default class GameResult extends React.Component<any, any> {
   constructor(props) {
@@ -126,31 +173,26 @@ export default class GameResult extends React.Component<any, any> {
 
     return (
       <Modal show={show} toggleModal={onToggle}>
-        <View style={{ margin: '20px', fontSize: '1.2rem', fontWeight: 'bold' }}>Game {gameNo} of {tourneyMaxTries}</View>
-        <View style={{ margin: '20px', fontSize: '1.8rem' }}>{score && this.formatTime(score, false)}</View>
-        {canTryAgain ? (
-          <View style={{ margin: '20px', fontSize: '1.5rem' }}>{scoreMsg}</View>
-        ) : (
-            <View style={{ margin: '20px' }}>{finalScore}</View>
-          )}
-        {/* { (shouldSubmit) && ( */}
-        {/* <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto 1rem auto' }}> */}
-        <View style={{ margin: '20px', fontSize: '0.9rem' }}>High score is automatically submitted</View>
-        {/* </View> */}
-        {/* )} */}
+        <StyledContainer>
+          <h6>Game {gameNo} of {tourneyMaxTries}</h6>
+          {canTryAgain ? (
+            <p className="score">{score && this.formatTime(score, false)}</p>
+          ) : (
+            <p className="score-msg">{scoreMsg}</p>
+          )} 
 
-        {((!didWin && canTryAgain) || canTryAgain) ? (
-          <View style={{ display: 'flex', flexDirection: 'row', width: '100%', margin: '0px auto' }}>
-            <Button
-              onClick={async () => {
-                navigateTo('/');
-              }}>
-              Try Again
-                  </Button>
-          </View>
-        ) : (
-            <View style={{ margin: '20px', fontSize: '1.5rem', fontWeight: 'bold' }}>Thanks For Playing!</View>
+          <p className="highscore-submitted">High score is automatically submitted</p>
+
+          {( (!didWin && canTryAgain) || canTryAgain ) ? (
+            <div className="btn-container">
+              <Button onClick={ async () => {
+                  navigateTo('/');
+              }}>Try Again</Button>
+            </div>
+          ) : (
+            <p className="thanks-msg">Thanks for Playing!</p>
           )}
+        </StyledContainer>
       </Modal>
     )
   }
