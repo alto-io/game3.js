@@ -647,15 +647,16 @@ export class OrbitDBManager implements DBManager {
   private async handleCreatePlayerDataTOSIOS(sessionData, data, sessionId, gamePayload) {
     const { timeLeft, players } = gamePayload;
 
-    console.log("NEW: fetched session data", data);
+    console.log("NEW-tosios: payload", gamePayload);
+    console.log("NEW-tosios: fetched session data", data);
     if (data.length <= 0) {
-      console.log("NEW: NO SESSION DATA EXIST");
-      console.log("NEW: Adding player in session...");
+      console.log("NEW-tosios: NO SESSION DATA EXIST");
+      console.log("NEW-tosios: Adding player in session...");
 
       for (const playerId in players) {
         const player = players[playerId]
 
-        console.log("NEW: Player name", player.name)
+        console.log("NEW-tosios: Player name", player.name)
 
         const playerData = {
           name: player.name,
@@ -665,45 +666,45 @@ export class OrbitDBManager implements DBManager {
           currentHighestNumber: 0
         }
 
-        console.log("NEW: Player address", player.address)
-        console.log("NEW: Player", player)
+        console.log("NEW-tosios: Player address", player.address)
+        console.log("NEW-tosios: Player", player)
 
         sessionData.playerData[player.address.toLowerCase()] = playerData;
       }
 
-      console.log("NEW: Players added!!");
+      console.log("NEW-tosios: Players added!!");
 
-      console.log("NEW: Adding new session data to db...", sessionData);
+      console.log("NEW-tosios: Adding new session data to db...", sessionData);
       await this.serverPutGameSession(sessionId, sessionData);
-      console.log("NEW: Session Data created!!!");
-      console.log("NEW: Function Finished...");
+      console.log("NEW-tosios: Session Data created!!!");
+      console.log("NEW-tosios: Function Finished...");
       return true;
     } else {
-      console.log("NEW: Session Exist!!");
-      console.log("NEW: Updating playerData...")
+      console.log("NEW-tosios: Session Exist!!");
+      console.log("NEW-tosios: Updating playerData...")
 
       for (const playerId in players) {
         const player = players[playerId]
-        console.log("NEW: Before", data[0].sessionData.playerData[player.address.toLowerCase()])
+        console.log("NEW-tosios: Before", data[0].sessionData.playerData[player.address.toLowerCase()])
         data[0].sessionData.playerData[player.address.toLowerCase()].name = player.name;
         data[0].sessionData.playerData[player.address.toLowerCase()].kills = player.kills;
         data[0].sessionData.playerData[player.address.toLowerCase()].timeLeft = timeLeft;
-        console.log("NEW: After", data[0].sessionData.playerData[player.address.toLowerCase()])
+        console.log("NEW-tosios: After", data[0].sessionData.playerData[player.address.toLowerCase()])
       }
       await this.gameSessions.put(data[0]);
-      console.log("NEW: Updated!");
-      console.log("NEW: Finished...");
+      console.log("NEW-tosios: Updated!");
+      console.log("NEW-tosios: Finished...");
       return true;
     }
   }
 
   private async handleCreatePlayerDataFP(sessionData, data, sessionId, gamePayload) {
     const { playerAddress } = gamePayload;
-
-    console.log("NEW: fetched session data", data);
+    console.log("NEW-fp: payload", gamePayload);
+    console.log("NEW-fp: fetched session data", data);
     if (data.length <= 0) {
-      console.log("NEW: NO SESSION DATA EXIST");
-      console.log("NEW: Adding player in session...");
+      console.log("NEW-fp: NO SESSION DATA EXIST");
+      console.log("NEW-fp: Adding player in session...");
 
       const playerData = {
         gameNo: 0,
@@ -712,17 +713,17 @@ export class OrbitDBManager implements DBManager {
       }
 
       sessionData.playerData[playerAddress.toLowerCase()] = playerData;
-      console.log("NEW: Added!", playerData);
+      console.log("NEW-fp: Added!", playerData);
 
-      console.log("NEW: Adding new session data to db...", sessionData);
+      console.log("NEW-fp: Adding new session data to db...", sessionData);
       await this.serverPutGameSession(sessionId, sessionData);
-      console.log("NEW: Session Data created!!!");
-      console.log("NEW: Function Finished...");
+      console.log("NEW-fp: Session Data created!!!");
+      console.log("NEW-fp: Function Finished...");
       return true
     } else {
-      console.log("NEW: Session Exist!!");
-      console.log("NEW: No need to create new one...")
-      console.log("NEW: Returning...")
+      console.log("NEW-fp: Session Exist!!");
+      console.log("NEW-fp: No need to create new one...")
+      console.log("NEW-fp: Returning...")
       return true;
     }
   }
@@ -731,37 +732,38 @@ export class OrbitDBManager implements DBManager {
 
   private async tosiosHighScoreHandler(playerAddress, data, gamePayload) {
     const { timeFinished, didWin } = gamePayload;
-    console.log("UPDATE_SCORE: Session Exist!");
+    console.log("UPDATE_SCORE-tosios: payload", gamePayload);
+    console.log("UPDATE_SCORE-tosios: Session Exist!");
     let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
-    console.log("UPDATE_SCORE: Session", data[0]);
-    console.log("UPDATE_SCORE: Session data", data[0].sessionData);
-    console.log("UPDATE_SCORE: Player data", playerData);
-    console.log("UPDATE_SCORE: Updating score...");
+    console.log("UPDATE_SCORE-tosios: Session", data[0]);
+    console.log("UPDATE_SCORE-tosios: Session data", data[0].sessionData);
+    console.log("UPDATE_SCORE-tosios: Player data", playerData);
+    console.log("UPDATE_SCORE-tosios: Updating score...");
     let playerScore = Math.abs(playerData.timeLeft - timeFinished);
-    console.log("UPDATE_SCORE: Current High Score (shortest time)", playerData.currentHighestNumber);
-    console.log("UPDATE_SCORE: Current Score", playerScore);
-    console.log("UPDATE_SCORE: Did win?", didWin);
+    console.log("UPDATE_SCORE-tosios: Current High Score (shortest time)", playerData.currentHighestNumber);
+    console.log("UPDATE_SCORE-tosios: Current Score", playerScore);
+    console.log("UPDATE_SCORE-tosios: Did win?", didWin);
 
     if (!didWin) {
-      console.log("UPDATE_SCORE: Player did not win");
-      console.log("UPDATE_SCORE: Player score reverts to 0");
+      console.log("UPDATE_SCORE-tosios: Player did not win");
+      console.log("UPDATE_SCORE-tosios: Player score reverts to 0");
       return true;
     } else {
-      console.log("UPDATE_SCORE: Player did win");
+      console.log("UPDATE_SCORE-tosios: Player did win");
 
       playerData.timeLeft = playerScore;
 
       if (playerScore < (playerData.currentHighestNumber === 0 ? playerScore + 1 : playerData.currentHighestNumber)) {
         playerData.currentHighestNumber = playerScore;
-        console.log("UPDATE_SCORE: Thew new data", playerData);
+        console.log("UPDATE_SCORE-tosios: Thew new data", playerData);
         data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
         await this.gameSessions.put(data[0]);
-        console.log("UPDATE_SCORE: Updated!");
-        console.log("UPDATE_SCORE: Returning...");
+        console.log("UPDATE_SCORE-tosios: Updated!");
+        console.log("UPDATE_SCORE-tosios: Returning...");
         return { result: playerData, newHighScore: true }
       } else {
-        console.log("UPDATE_SCORE: Current score is lower than highscore, no need to update!");
-        console.log("UPDATE_SCORE: Returning...");
+        console.log("UPDATE_SCORE-tosios: Current score is lower than highscore, no need to update!");
+        console.log("UPDATE_SCORE-tosios: Returning...");
         return { result: playerData, newHighScore: false }
       }
     }
@@ -769,25 +771,25 @@ export class OrbitDBManager implements DBManager {
 
   private async fpHighScoreHandler(playerAddress, data, gamePayload) {
     let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
-
+    console.log("UPDATE_SCORE-fp: payload", gamePayload);
     const { score } = gamePayload;
     let highScore = playerData.highScore;
-
-    console.log("UPDATE_SCORE: Current High Score", highScore);
-    console.log("UPDATE_SCORE: Current Score", score);
+    
+    console.log("UPDATE_SCORE-fp: Current High Score", highScore);
+    console.log("UPDATE_SCORE-fp: Current Score", score);
 
     if (score > highScore) {
       playerData.highScore = score;
-      console.log("UPDATE_SCORE: Thew new data", playerData);
+      console.log("UPDATE_SCORE-fp: Thew new data", playerData);
       data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
-      console.log("UPDATE_SCORE: Saving data");
+      console.log("UPDATE_SCORE-fp: Saving data");
       await this.gameSessions.put(data[0]);
-      console.log("UPDATE_SCORE: Updated!");
-      console.log("UPDATE_SCORE: Returning...");
+      console.log("UPDATE_SCORE-fp: Updated!");
+      console.log("UPDATE_SCORE-fp: Returning...");
       return { result: playerData, newHighScore: true }
     } else {
-      console.log("UPDATE_SCORE: Current score is lower than highscore, no need to update!");
-      console.log("UPDATE_SCORE: Returning...");
+      console.log("UPDATE_SCORE-fp: Current score is lower than highscore, no need to update!");
+      console.log("UPDATE_SCORE-fp: Returning...");
       return { result: playerData, newHighScore: false }
     }
   }

@@ -57,19 +57,18 @@ export class GameUnity extends React.Component<IProps, any> {
   speed = 30;
   unityContent = null as any;
 
-  initializeGame = async () => {
-    const { playerAddress, tournamentId, gameName } = this.state;
-
+  initializeGame = async (playerAddress, tournamentId) => {
     let sessionId = await createSessionId(playerAddress, tournamentId);
     this.setState({
       sessionId
     })
     let payload = this.produceGamePayload('session');
+    await makeNewGameSession(this.state.gameName, sessionId, tournamentId, payload);
     await this.getBlockchainInfo(this.props);
     await this.fetchGameNo(playerAddress, this.props.tournamentId);
     await updateGameNo(sessionId, playerAddress, tournamentId);
 
-    console.log("GAME NAME FROM STATE", gameName)
+    console.log("GAME NAME FROM STATE", this.state.gameName)
 
   }
 
@@ -117,7 +116,7 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   onPlayGame = async (e) => {
-    const { sessionId, playerAddress, tournamentId } = this.state;
+    const { playerAddress, tournamentId } = this.state;
     const gameId = this.props.path;
     let gameServerUrl = "ws://localhost:3001";
 
@@ -135,7 +134,7 @@ export class GameUnity extends React.Component<IProps, any> {
         break;
     }
 
-    await this.initializeGame(); // should be called here
+    await this.initializeGame(playerAddress, tournamentId); // should be called here
 
     // TODO: disable recording for now
     // this.props.startRecording.call(null, gameId);
@@ -173,15 +172,13 @@ export class GameUnity extends React.Component<IProps, any> {
   produceGamePayload = (type) => {
     const { gameName, score, playerAddress } = this.state
 
-    let gamePayload = {}
-
     if (type === 'score') {
       switch (gameName) {
         case Constants.WOM:
-          gamePayload = {}
-          break;
+          return {}
+
         case Constants.FP:
-          gamePayload = {
+          return {
             score
           }
         default:
@@ -190,17 +187,14 @@ export class GameUnity extends React.Component<IProps, any> {
     } else if (type === 'session') {
       switch (gameName) {
         case Constants.WOM:
-          gamePayload = {}
-          break;
+          return {}
         case Constants.FP:
-          gamePayload = {
+          return {
             playerAddress
           }
         default:
           break;
       }
-
-      return gamePayload;
     }
   }
 
@@ -226,6 +220,7 @@ export class GameUnity extends React.Component<IProps, any> {
 
         this.fetchGameNo(this.props.address, this.props.tournamentId);
         payLoad = this.produceGamePayload('score'); // gets appropriate payload
+        console.log("GAME UNITY PAYLOAD IN FAIL", payLoad)
         await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
         // this.props.stopRecording.call(null, "wom");
@@ -240,6 +235,7 @@ export class GameUnity extends React.Component<IProps, any> {
 
         this.fetchGameNo(this.props.address, this.props.tournamentId);
         payLoad = this.produceGamePayload('score'); // gets appropriate payload
+        console.log("GAME UNITY PAYLOAD IN SUCCESS", payLoad)
         await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
         // this.props.stopRecording.call(null, "wom");

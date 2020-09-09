@@ -16,7 +16,7 @@ export default class GameJavascript extends Component<any, any> {
       sessionId: '0',
       playerAddress: '',
       tournamentId: '',
-      gameName: ''
+      gameName: Constants.TOSIOS
     }
     this.playerIsDead = this.playerIsDead.bind(this);
     this.gameIsRunning = this.gameIsRunning.bind(this);

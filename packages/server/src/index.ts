@@ -153,6 +153,9 @@ app.post('/gameSession/score', async (req: any, res: any) => {
   const {sessionId, playerAddress, tournamentId, gamePayload} = req.body;
 
   console.log("Server POST sessionId is", sessionId);
+  console.log("Server POST tournamentId is", tournamentId);
+  console.log("Server POST playerAddress is", playerAddress);
+  console.log("Server POST gamePayload is", gamePayload);
 
   let result;
 

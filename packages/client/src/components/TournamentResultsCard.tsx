@@ -156,7 +156,7 @@ class TournamentResultsCard extends Component<any, any> {
         console.log("PLAYER ADD: address", playerAddress);
 
         results.push({
-          gameName: sessionsData[resultIdx].gameName,   
+          gameName: sessionsData[resultIdx].sessionData.gameName,   
           tournamentId: tournamentId,
           timeIsUp: false,
           playerAddress,
@@ -176,7 +176,7 @@ class TournamentResultsCard extends Component<any, any> {
 
       // results.forEach((result, idx) => result.sessionData = sessions[idx])
       console.log("RESULTS:", results)
-      results = results.filter(result => !!result.sessionData && !!result.name)
+      results = results.filter(result => !!result.sessionData)
       if (results.length > 1) {
         // Sorts in ascending order
         results.sort((el1, el2) => {
@@ -185,7 +185,7 @@ class TournamentResultsCard extends Component<any, any> {
             case Constants.FP:
               return el2.sessionData.highScore - el1.sessionData.highScore
             case Constants.TOSIOS:
-              return el1.sessionData.highScore - el2.sessionData.highScore
+              return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
             default:
               break;
           }
