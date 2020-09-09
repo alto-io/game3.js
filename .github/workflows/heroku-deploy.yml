@@ -26,7 +26,6 @@ jobs:
         uses: sjdonado/heroku@master
         with:
           args: container:push -a game3-js web
-          docker_build_args: TESTNET_MNEMONIC
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           GANACHE_MNEMONIC: ${{ secrets.GANACHE_MNEMONIC }}
