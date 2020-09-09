@@ -281,6 +281,8 @@ export class GameUnity extends React.Component<IProps, any> {
 
     this.unityContent.on("SendScore", score => {
       this.setState({ score });
+
+      console.log(score)
     });
 
 
