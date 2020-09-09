@@ -1,6 +1,7 @@
 import React, { Component, createContext } from 'react';
 import { updateSessionScore, updateGameNo, createSessionId, makeNewGameSession } from '../helpers/database';
 import { navigateTo } from '../helpers/utilities'
+import { Constants } from '@game3js/common';
 
 export const GameJavascriptContext = createContext({});
 
@@ -14,7 +15,8 @@ export default class GameJavascript extends Component<any, any> {
       isGameRunning: true,
       sessionId: '0',
       playerAddress: '',
-      tournamentId: ''
+      tournamentId: '',
+      gameName: ''
     }
     this.playerIsDead = this.playerIsDead.bind(this);
     this.gameIsRunning = this.gameIsRunning.bind(this);
@@ -27,8 +29,20 @@ export default class GameJavascript extends Component<any, any> {
   async updateSessionHighScore() {
     const { isPlayerDead, sessionId, playerAddress, tournamentId } = this.state;
     const timeFinished = Date.now();
+    let gamePayload = {}
 
-    let updatedData = await updateSessionScore(!isPlayerDead, sessionId, playerAddress, tournamentId, timeFinished);
+    switch (this.state.gameName) {
+      case Constants.TOSIOS:
+        gamePayload = {
+          timeFinished,
+          didWin: !isPlayerDead
+        }
+        break;
+      default:
+        break;
+    }
+
+    let updatedData = await updateSessionScore(sessionId, playerAddress, tournamentId, gamePayload);
     console.log("Data updated with", updatedData);
     return updatedData;
   }
@@ -53,7 +67,7 @@ export default class GameJavascript extends Component<any, any> {
   }
 
   async replaySaveToServer() {
-    
+
   }
 
   async setSessionId(playerAddress, tournamentId) {

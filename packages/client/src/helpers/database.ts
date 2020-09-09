@@ -150,31 +150,10 @@ export async function deleteGameSessionId(gameSessionId): Promise<any> {
   return response.data
 }
 
-export async function updateSessionScore(didWin, gameSessionId, playerAddress, tournamentId, timeFinished): Promise<any> {
-  
-  const params = {
-    didWin,
-    sessionId: gameSessionId,
-    playerAddress,
-    tournamentId,
-    timeFinished
-  }
+export async function updateSessionScore(sessionId, playerAddress, tournamentId, gamePayload): Promise<any> {
+  const params = {sessionId, playerAddress, tournamentId, gamePayload}
 
   const res = await api.post('/gameSession/score', params);
-  return res.data;
-}
-
-export async function updateSessionHighScore(didWin, gameSessionId, playerAddress, tournamentId, score): Promise<any> {
-  
-  const params = {
-    didWin,
-    sessionId: gameSessionId,
-    playerAddress,
-    tournamentId,
-    score
-  }
-
-  const res = await api.post('/gameSession/highscore', params);
   return res.data;
 }
 

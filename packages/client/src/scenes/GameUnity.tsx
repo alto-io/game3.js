@@ -5,10 +5,10 @@ import GameSceneContainer from '../components/GameSceneContainer';
 import styled from 'styled-components';
 import { Card } from "rimble-ui";
 import { DEFAULT_GAME_DIMENSION } from '../constants'
+import { Constants } from '@game3js/common';
+import { getGameNo, getGameSessionId, updateSessionScore, updateGameNo, createSessionId } from '../helpers/database';
 
-import { getGameNo, getGameSessionId, updateSessionHighScore, updateGameNo, createSessionId } from '../helpers/database';
-
-const StyledBox= styled(Box)`
+const StyledBox = styled(Box)`
   height: 100%;
   width: 100%;
 
@@ -47,11 +47,11 @@ export class GameUnity extends React.Component<IProps, any> {
       gameNo: 0,
       tournament: null,
       playBtnText: "Play",
-      score: 1
+      score: 1,
+      gameName: ''
     };
 
     this.initializeUnity();
-    this.initializeGame();
   }
 
   speed = 30;
@@ -60,33 +60,35 @@ export class GameUnity extends React.Component<IProps, any> {
   initializeGame = async () => {
     await this.getBlockchainInfo(this.props);
     await this.fetchGameNo(this.props.address, this.props.tournamentId);
- 
-    const { playerAddress, tournamentId } = this.state;
-    
+
+    const { playerAddress, tournamentId, gameName } = this.state;
+
+    console.log("GAME NAME FROM STATE", gameName)
+
     let sessionId = await createSessionId(playerAddress, tournamentId);
     this.setState({
       sessionId
     })
   }
 
-  
+
 
   getBlockchainInfo = async (props) => {
     try {
-    const { tournamentId, drizzle } = props
+      const { tournamentId, drizzle } = props
 
-    const contract = drizzle.contracts.Tournaments;
-    console.log(contract);
-    const maxTries = await contract.methods.getMaxTries(tournamentId).call();
-    console.log(maxTries);
+      const contract = drizzle.contracts.Tournaments;
+      console.log(contract);
+      const maxTries = await contract.methods.getMaxTries(tournamentId).call();
+      console.log(maxTries);
 
-    const tournament = {
-      maxTries: parseInt(maxTries)
-    }
+      const tournament = {
+        maxTries: parseInt(maxTries)
+      }
 
-    this.setState({
-      tournament
-    })
+      this.setState({
+        tournament
+      })
 
     } catch (e) {
       console.log("GameUnity: No tourney contract loaded");
@@ -98,13 +100,13 @@ export class GameUnity extends React.Component<IProps, any> {
     const gameSessionId = await getGameSessionId(account, tournamentId);
     const gameNo = await getGameNo(gameSessionId, account, tournamentId);
     const playBtnText = this.state.tournament != null ?
-    `Play ( ${typeof gameNo !== "number" ? 0 : gameNo} out of ${this.state.tournament.maxTries} )` : 
-    'Play';
+      `Play ( ${typeof gameNo !== "number" ? 0 : gameNo} out of ${this.state.tournament.maxTries} )` :
+      'Play';
 
     console.log(playBtnText)
 
     this.setState(
-      { 
+      {
         playBtnText,
         gameNo: gameNo,
         sessionId: gameSessionId
@@ -113,27 +115,29 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   onPlayGame = async (e) => {
-    const {sessionId, playerAddress, tournamentId } = this.state;
+    const { sessionId, playerAddress, tournamentId } = this.state;
     const gameId = this.props.path;
     let gameServerUrl = "ws://localhost:3001";
 
 
     await updateGameNo(sessionId, playerAddress, tournamentId);
-    
 
-    switch (gameId)
-    {
+
+    switch (gameId) {
       case "wom":
         this.unityContent.send("OutplayManager", "SetLevel",
-        this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
+          this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
         this.unityContent.send("OutplayManager", "StartGame", "start");
-      break;
+        this.setState({ gameName: Constants.WOM });
+        break;
       case "flappybird":
         this.unityContent.send("FlappyColyseusGameServerManager", "Connect", gameServerUrl);
         this.unityContent.send("Game3JsManager", "StartGame", "start");
-      break;
-
+        this.setState({ gameName: Constants.FP });
+        break;
     }
+
+    await this.initializeGame(); // should be called here
 
     // TODO: disable recording for now
     // this.props.startRecording.call(null, gameId);
@@ -160,53 +164,74 @@ export class GameUnity extends React.Component<IProps, any> {
     // }
   }
 
-//   onChangeLevel = async (e) => {
-//     this.setState(
-//       {
-//         selectedLevel: e.target.innerText
-//       }
-//     )
-//   }
+  //   onChangeLevel = async (e) => {
+  //     this.setState(
+  //       {
+  //         selectedLevel: e.target.innerText
+  //       }
+  //     )
+  //   }
 
+  produceGamePayload = () => {
+    const { gameName, score } = this.state
 
-  processOutplayEvent = (outplayEvent) => {
-    const {sessionId, playerAddress, tournamentId, score } = this.state;
+    let gamePayload = {}
 
-    switch (outplayEvent) {
+    switch (gameName) {
+      case Constants.WOM:
+        gamePayload = {}
+        break;
+      case Constants.FP:
+        gamePayload = {
+          score
+        }
+      default:
+        break;
+    }
+    
+    return gamePayload;
+  }
+
+  processOutplayEvent = async (outplayEvent) => {
+    const { sessionId, playerAddress, tournamentId, score } = this.state;
+    let payLoad = {}
+    switch (outplayEvent) { 
       case 'GameReady':
         this.setState(
           {
             gameReady: true
           }
         );
-      break;
+        break;
 
-        // TODO: add any relevant game end code
-        case 'GameEndFail':
-          this.setState(
-            {
-              isGameRunning: false
-            }
-            );
+      // TODO: add any relevant game end code
+      case 'GameEndFail':
+        this.setState(
+          {
+            isGameRunning: false
+          }
+        );
 
-            this.fetchGameNo(this.props.address, this.props.tournamentId);
-            updateSessionHighScore(true, sessionId, playerAddress, tournamentId, score);
-            
-          // this.props.stopRecording.call(null, "wom");
+        this.fetchGameNo(this.props.address, this.props.tournamentId);
+        payLoad = this.produceGamePayload(); // gets appropriate payload
+        await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
-      break;
-        case 'GameEndSuccess':
-          this.setState(
-            {
-              isGameRunning: false
-            }
-            );
+        // this.props.stopRecording.call(null, "wom");
 
-            this.fetchGameNo(this.props.address, this.props.tournamentId);
-            updateSessionHighScore(true, sessionId, playerAddress, tournamentId, score);
-             
-          // this.props.stopRecording.call(null, "wom");
-      break;
+        break;
+      case 'GameEndSuccess':
+        this.setState(
+          {
+            isGameRunning: false
+          }
+        );
+
+        this.fetchGameNo(this.props.address, this.props.tournamentId);
+        payLoad = this.produceGamePayload(); // gets appropriate payload
+        await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
+
+        // this.props.stopRecording.call(null, "wom");
+        break;
 
     }
 
@@ -252,11 +277,11 @@ export class GameUnity extends React.Component<IProps, any> {
 
 
     this.unityContent.on("quitted", () => {
-      this.setState({isGameRunning: false})
+      this.setState({ isGameRunning: false })
     });
 
     this.unityContent.on("error", () => {
-      this.setState({isGameRunning: false})
+      this.setState({ isGameRunning: false })
     })
   }
 
@@ -295,24 +320,24 @@ export class GameUnity extends React.Component<IProps, any> {
           type="button"
           onClick={this.onPlayGame}
         >
-        {
-         isGameRunning ?
-          "Game In Progress" :
-           gameReady ?
-              playBtnText  :
-              (progression === 1) ?
-                'Waiting for Game Start' :
-                `Loading Game ... ${Math.floor(progression * 100)}%`
-        }
+          {
+            isGameRunning ?
+              "Game In Progress" :
+              gameReady ?
+                playBtnText :
+                (progression === 1) ?
+                  'Waiting for Game Start' :
+                  `Loading Game ... ${Math.floor(progression * 100)}%`
+          }
         </Button>
 
         <Space size="xxs" />
         <StyledBox>
           {
             this.state.unityShouldBeMounted === true && (
-              <Unity width="100%" height="100%" unityContent={this.unityContent} className="web-gl"/>
+              <Unity width="100%" height="100%" unityContent={this.unityContent} className="web-gl" />
             )
-          } 
+          }
         </StyledBox>
       </GameSceneContainer>
     );
