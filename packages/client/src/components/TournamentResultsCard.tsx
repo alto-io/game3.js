@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { getTournamentResult, getTournaments, getTournament } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress"
 
-import { RouteComponentProps } from '@reach/router';
+import { RouteComponentProps, navigate } from '@reach/router';
 import qs from 'querystringify';
 import { format } from 'date-fns';
 
@@ -287,8 +287,8 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   handleJoinClick = () => {
-    const { tournament } = this.state
-    let path = '';
+    const { tournament } = this.state;
+    let options = {};
 
     const tosiosOptions = {
       mode: 'score attack',
@@ -302,19 +302,30 @@ class TournamentResultsCard extends Component<any, any> {
 
     switch (tournament.name) {
       case Constants.WOM:
-        path = '' //Join tourney for wom
+        navigate(`/game/wom${qs.stringify(options, true)}`); //Join tourney for wom
         break;
       case Constants.TOSIOS:
-        path = `/game/new${qs.stringify(tosiosOptions, true)}`
+        options = {
+          mode: 'score attack',
+          roomMap: 'small',
+          roomMaxPlayers: '1',
+          roomName: '',
+          tournamentId: tournament.id,
+          playerName: "Guest",
+          viewOnly: tournament.timeIsUp
+        }
+        navigate(`/game/new${qs.stringify(options, true)}`);
         break;
       case Constants.FP:
-        path = '' //Join tourney for flappy bird
+        options = {
+          tournamentId: tournament.id,
+          viewOnly: tournament.timeIsUp
+        }
+        navigate(`/game/flappybird${qs.stringify(options, true)}`); //Join tourney for flappy bird
         break;
       default:
         break;
     }
-    window.history.replaceState(null, '', path);
-    // navigateTo(path);
   }
 
   setResultBgColor(playerAddress, currentPlayerAddress) {
@@ -369,11 +380,7 @@ class TournamentResultsCard extends Component<any, any> {
 
   render() {
     const { results, isLoading, tournament, shares } = this.state;
-    const { tournamentId, playerAddress, setRoute } = this.props;
-
-    // console.log("SHARES FROM STATE", shares);
-    // console.log("POOL FROM STATE", tournament.pool);
-    // console.log(results);
+    const { tournamentId, playerAddress } = this.props;
 
     if (isLoading) {
       return (
@@ -449,10 +456,7 @@ class TournamentResultsCard extends Component<any, any> {
             {tournamentId === undefined ? (
               <button 
                 style={joinTourneyBtn} 
-                onClick={e => {
-                  e.preventDefault();
-                  setRoute("TournamentView");
-              }}>Join Tournament</button>
+                onClick={this.handleJoinClick}>Join Tournament</button>
             ) : (
                 <div style={totalBuyIn} >
                   <span>Total Buy-in Pool</span>

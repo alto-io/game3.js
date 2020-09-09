@@ -15,7 +15,6 @@ import { format, isPast } from 'date-fns'
 import qs from 'querystringify';
 import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
 import { getGameNo, getGameSessionId } from '../helpers/database';
-// import { GAME_DETAILS } from '../constants';
 import { Constants } from "@game3js/common";
 
 import web3 from 'web3';
@@ -157,7 +156,7 @@ class TournamentCard extends Component<any, any> {
   }
 
   handleJoinClick = () => {
-    const { tournament, gameId } = this.state
+    const { tournament, gameId } = this.state;
     // const name = window.prompt("Enter your name", "");
     // console.log(`Hi ${name}!`);
 
