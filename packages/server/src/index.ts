@@ -177,13 +177,10 @@ app.post('/gameSession/gameNo', async (req: any, res: any) => {
 })
 
 app.post('/gameSession/new', async (req: any, res: any) => {
-  const sessionId = req.body.sessionId;
-  const tournamentId = req.body.tournamentId;
-  const timeLeft = req.body.timeLeft;
-  const players = req.body.players;
+  const {gameName, sessionId, tournamentId, gamePayload} = req.body;
 
   const result = await GlobalState.ServerState.dbManager
-    .makeNewGameSession(sessionId, tournamentId, timeLeft, players);
+    .makeNewGameSession(gameName, sessionId, tournamentId, gamePayload);
   
   res.json(result);
 })

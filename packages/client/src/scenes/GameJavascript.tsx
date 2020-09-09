@@ -110,7 +110,14 @@ export default class GameJavascript extends Component<any, any> {
     console.log("GAME JAVASCRIPT: Tourney ID", tournamentId)
     await this.setSessionId(playerAddress, tournamentId);
     console.log("GAME JAVASCRIPT: Session ID", this.state.sessionId)
-    await makeNewGameSession(this.state.sessionId, tournamentId, players, endsAt)
+
+    // gameName, sessionId, tournamentId, gamePayload
+    let gamePayload = {
+      timeLeft: Date.now(),
+      players
+    }
+
+    await makeNewGameSession(Constants.TOSIOS, this.state.sessionId, tournamentId, gamePayload)
     await this.updateGameNumber(this.state.sessionId, playerAddress, tournamentId);
     this.gameIsRunning(isGameRunning);
     this.playerIsDead(isDead);
