@@ -883,8 +883,9 @@ export class OrbitDBManager implements DBManager {
       return { result: false, newHighScore: false };
     }
 
-    if (score < highScore) {
+    if (highScore === 0 || score < highScore) {
       playerData.highScore = score;
+      playerData.score = score;
       console.log("UPDATE_SCORE-wom: Thew new data", playerData);
       data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
       console.log("UPDATE_SCORE-wom: Saving data");
