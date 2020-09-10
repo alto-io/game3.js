@@ -48,7 +48,8 @@ export class GameUnity extends React.Component<IProps, any> {
       tournament: null,
       playBtnText: "Play",
       score: 1,
-      gameName: ''
+      gameName: '',
+      doubleTime: null
     };
 
     this.initializeUnity();
@@ -124,8 +125,8 @@ export class GameUnity extends React.Component<IProps, any> {
       case "wom":
         this.unityContent.send("OutplayManager", "SetLevel",
           this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
-        this.unityContent.send("OutplayManager", "StartGame", "start");
-        this.setState({ gameName: Constants.WOM });
+          this.unityContent.send("Game3JsManager", "StartGame", "start");
+          this.setState({ gameName: Constants.WOM });
         break;
       case "flappybird":
         this.unityContent.send("FlappyColyseusGameServerManager", "Connect", gameServerUrl);
@@ -170,7 +171,7 @@ export class GameUnity extends React.Component<IProps, any> {
   //   }
 
   produceGamePayload = (type:string, didWin ?: boolean) => {
-    const { gameName, score, playerAddress } = this.state
+    const { gameName, score, playerAddress, doubleTime } = this.state
 
     if (type === 'score') {
       switch (gameName) {
@@ -191,6 +192,7 @@ export class GameUnity extends React.Component<IProps, any> {
       switch (gameName) {
         case Constants.WOM:
           return {
+            doubleTime,
             playerAddress
           }
         case Constants.FP:
@@ -246,6 +248,20 @@ export class GameUnity extends React.Component<IProps, any> {
         // this.props.stopRecording.call(null, "wom");
         break;
 
+      case 'GameEndSuccessTime':
+        this.setState(
+          {
+            isGameRunning: false
+          }
+        );
+
+        this.fetchGameNo(this.props.address, this.props.tournamentId);
+        payLoad = this.produceGamePayload('session', true); // gets appropriate payload
+        console.log("GAME UNITY PAYLOAD IN SUCCESS", payLoad)
+        await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
+
+      break;
+
     }
 
     console.log(outplayEvent);
@@ -289,6 +305,13 @@ export class GameUnity extends React.Component<IProps, any> {
 
       console.log(score)
     });
+
+    this.unityContent.on("SendDoubleTime", doubleTime => {
+      this.setState({ doubleTime });
+
+      console.log(doubleTime)
+    });
+
 
 
     this.unityContent.on("quitted", () => {
