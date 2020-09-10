@@ -503,7 +503,7 @@ class TournamentResultsCard extends Component<any, any> {
           let trophy = <p className="trophy">{this.setTrophy(idx, shares)}</p>;
           let shareETH = <p className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</p>
           return (
-            <SharesText>{place}{trophy}{shareETH}</SharesText>
+            <SharesText key={idx}>{place}{trophy}{shareETH}</SharesText>
           )
         })
       }
