@@ -71,10 +71,11 @@ function Play({ drizzle, drizzleStatus, account, accountValidated, networkId, ha
         <Box maxWidth={"1180px"} p={3} mx={"auto"}>
             <Text my={4} />
             <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
-                {GAME_DETAILS.map(game => {
+                {GAME_DETAILS.map((game, idx) => {
                 return (
                     <GameCard
                     game={game}
+                    key={idx}
                     />
                 );
                 })}

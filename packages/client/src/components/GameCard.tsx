@@ -9,15 +9,28 @@ function GameCard({
   game
 }) {
 
+  const StyledGameCard = styled(Card)`
+    background: ${game.color};
+    border-radius: 10px;
+    box-shadow: 4px 6px 12px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    margin: 0;
+    padding: 1rem 1.5rem;
+  `
+
   const StyledButton = styled(Button)`
     font-family: 'Apercu Light';
     font-size: 1rem;
     letter-spacing: 0.5px;
+    margin: 1.625rem 0;
     text-transform: uppercase;
 
     @media screen and (min-width: 1024px) {
-      font-size: 0.75rem;
-      letter-spacing: 0.4px;
+      font-size: 0.825rem;
+      letter-spacing: 1.25px;
     }
   `
 
@@ -39,34 +52,25 @@ function GameCard({
 
   return (
     <Box width={[1, 1/2, 1/2, 1/3 ]} p={3}>
-      <Card p={0} bg={game.color}>
-        <Flex
-          alignItems={"center"}
-          justifyContent={"space-between"}
-          flexDirection={"column"}
-          p={3}
-        >
-          <Flex justifyContent={"center"} mt={3} mb={4}>
-            <RainbowImage src={"images/" + game.image} />
-          </Flex>
-
-          <Flex justifyContent={"center"} mt={3} mb={4}>
-              <Text fontWeight={600} lineHeight={"1em"} fontSize={[4, 3, 3]}>
-                  {game.name}
-              </Text>
-          </Flex>
-
-          <StyledButton
-              mt={"26px"}
-              mb={2}
-              type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
-              name={"recepient"} // set the name to the method's argument key
-              onClick={handleCreateRoomClick}
-            >
-              {game.button}
-          </StyledButton>
+      <StyledGameCard>
+        <Flex justifyContent={"center"} mt={3} mb={4}>
+          <RainbowImage src={"images/" + game.image} />
         </Flex>
-      </Card>
+
+        <Flex justifyContent={"center"} mt={3} mb={4}>
+            <Text fontWeight={600} lineHeight={"1em"} fontSize={[4, 3, 3]}>
+                {game.name}
+            </Text>
+        </Flex>
+
+        <StyledButton
+          type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
+          name={"recepient"} // set the name to the method's argument key
+          onClick={handleCreateRoomClick}
+        >
+            {game.button}
+        </StyledButton>
+      </StyledGameCard>
     </Box>
   );
 }
