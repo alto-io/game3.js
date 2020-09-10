@@ -193,7 +193,7 @@ class TournamentResultsCard extends Component<any, any> {
       tournament = {
         id: tournamentId,
         name: gameName,
-        gameStage: undefined,
+        gameStage: data[1] ? data[1] : undefined,
         timeZone: 'GMT+8',
         startTime: '12:00',
         endTime: format(new Date(parseInt(raw[0].endTime)), 'MMM d, yyyy'),
@@ -209,14 +209,14 @@ class TournamentResultsCard extends Component<any, any> {
       })
     }
 
-    switch (tournament.name) {
-      case Constants.WOM:
-        tournament.gameStage = "United Kingdom";
-        break;
-      default:
-        tournament.gameStage = undefined;
-        break;
-    }
+    // switch (tournament.name) {
+    //   case Constants.WOM:
+    //     tournament.gameStage = "United Kingdom";
+    //     break;
+    //   default:
+    //     tournament.gameStage = undefined;
+    //     break;
+    // }
 
     // Get tournament results
     // const resultsCount = await contract.methods.getResultsCount(tournamentId).call()

@@ -50,7 +50,7 @@ class ViewResultsModal extends Component {
                 onClick={this.closeModal}
               />
 
-              <Box p={4} mt={3}>
+              <Box p={4} mt={4}>
                 <TournamentResultsCard 
                   tournamentId={tournamentId}
                   playerAddress={playerAddress}
