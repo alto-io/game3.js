@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { drizzleConnect } from "@drizzle/react-plugin";
-import { Flex, Flash, Box } from "rimble-ui";
+import { Flex, Flash } from "rimble-ui";
 import styled from "styled-components";
 
 import { isPast } from 'date-fns';
@@ -16,6 +16,7 @@ const StyledFlex = styled(Flex)`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  flex-wrap: wrap;
   margin: 0;
   max-width: 1180px;
 
@@ -37,7 +38,8 @@ class DashboardView extends Component<any, any> {
       currentNetwork: null,
       address: null,
       tournamentsCount : 0,
-      tournaments: []
+      tournaments: [],
+      isLoading: false
     }
   }
 
@@ -88,11 +90,20 @@ class DashboardView extends Component<any, any> {
   fetchPlayerTournaments = async () => {
     const { drizzle, address } = this.props;
 
+      this.setState({ isLoading: true })
+
       const contract = drizzle.contracts.Tournaments;
       const tournamentsCount = await contract.methods.getTournamentsCount().call();
   
       let tournaments = [];
-  
+
+      if (!tournamentsCount) {
+        this.setState({
+          tournaments: [],
+          isLoading: false
+        })
+      }
+
       for (let tournamentId = 0; tournamentId < tournamentsCount; tournamentId++) {
         const tournamentDetails = await contract.methods.getTournament(tournamentId).call()
         const data = this.parseData(tournamentDetails['5']);
@@ -161,7 +172,8 @@ class DashboardView extends Component<any, any> {
       }
 
       this.setState({
-        tournaments
+        tournaments,
+        isLoading: false
       })
   }
 
@@ -173,7 +185,7 @@ class DashboardView extends Component<any, any> {
     render() {
       const { account, accountValidated, drizzle, 
         setRoute, store } = this.props;
-      const { tournaments } = this.state;
+      const { tournaments, isLoading } = this.state;
 
       return (
         <StyledFlex>
@@ -186,6 +198,7 @@ class DashboardView extends Component<any, any> {
               drizzle={drizzle}
               tournaments={tournaments}
               parseData={this.parseData}
+              isLoading={isLoading}
             />
 
             <PlayerOngoingTournaments 
@@ -193,6 +206,7 @@ class DashboardView extends Component<any, any> {
               account={account} 
               setRoute={setRoute}
               tournaments={tournaments}
+              isLoading={isLoading}
             />
             </>
           ) : (

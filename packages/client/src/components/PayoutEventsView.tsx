@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { Constants } from '@game3js/common';
 
 import ViewResultsModal from './ViewResultsModal';
+import SkeletonResultsLoader from './SkeletonResultsLoader';
 
 const PlayerTournamentResultsCard = styled(Card)`
   padding: 1rem 0.5rem;
@@ -191,10 +192,16 @@ class PayoutEventsView extends Component<any, any> {
   }
 
   render() {
-    const { address, tournaments, drizzle } = this.props
+    const { address, tournaments, drizzle, isLoading } = this.props
     const { events } = this.state
     const eventTournamentIds = [];
     let noEventsTournaments = [];
+
+    if (isLoading) {
+      return(
+        <SkeletonResultsLoader />
+      )
+    }
 
     // const eventsRendered = events.map(event => 
     //   <Flex key={event.id}>

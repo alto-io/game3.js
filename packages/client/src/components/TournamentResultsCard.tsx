@@ -509,7 +509,6 @@ formatTime = (time, isLeaderBoards) => {
       }
     }
 
-    console.log(accountBuyIn)
     const button = () => {
       if (accountBuyIn > 0 && playerAddress && accountValidated) {
         return(

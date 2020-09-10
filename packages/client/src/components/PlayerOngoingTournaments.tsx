@@ -7,6 +7,7 @@ import web3 from 'web3';
 
 import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
 import ViewResultsModal from './ViewResultsModal';
+import SkeletonResultsLoader from './SkeletonResultsLoader';
 
 const OngoingCard = styled(Card)`
   box-shadow: none;
@@ -62,7 +63,13 @@ const GameImage = styled(Image)`
 
 class PlayerOngoingTournaments extends Component {
   render() {
-    const { tournaments, setRoute, account, drizzle } = this.props;
+    const { tournaments, setRoute, account, drizzle, isLoading } = this.props;
+
+    if (isLoading) {
+      return (
+        <SkeletonResultsLoader />
+      )
+    }
 
     const activeTournaments = tournaments.filter( tournament => tournament.state === 1);
 
