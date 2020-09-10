@@ -288,7 +288,7 @@ class TournamentResultsCard extends Component<any, any> {
       }
       await this.getTournamentAndLeaderBoards(tI, true);
     } else {
-      let ids = await getTournaments();
+      let ids = await getTournament();
       console.log("IDSSSS", ids);
       let tId = undefined;
       if (ids.length > 0) {
@@ -594,7 +594,7 @@ formatTime = (time, isLeaderBoards) => {
 const widgetStyle: CSS.Properties = {
   width: '100%',
   height: '100%',
-  padding: '0.8rem 1rem',
+  // padding: '0.8rem 1rem',
   justifyContent: 'center',
 }
 

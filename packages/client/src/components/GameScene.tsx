@@ -9,7 +9,6 @@ import { DEFAULT_GAME_DIMENSION } from '../constants'
 import TournamentResultsCard from './TournamentResultsCard';
 
 const GameWindowContainer = styled(Flex)`
-  background: #d3d3d3;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -23,13 +22,15 @@ const GameWindowContainer = styled(Flex)`
   }
 
   .leaderboards {
-    width: 100%;
+    margin-top: 1.5rem;
+    width: 80%;
   }
 
   @media screen and (min-width: 950px) {
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-around;
     align-items: flex-start;
+    padding: 4rem 0;
 
     .game {
       width: 65%;
@@ -37,6 +38,7 @@ const GameWindowContainer = styled(Flex)`
 
     .leaderboards {
       width: 30%;
+      margin-top: 0;
     }
   }
 `
@@ -89,25 +91,3 @@ export default class GameScene extends Component<any, any> {
 		)
 	}
 }
-
-// const gamescenecontainerStyle: CSS.Properties = {
-//   background: `rgb(${baseColors.lightGrey})`,
-//   display: 'flex',
-// 	width: '100%',
-// 	padding: '2rem 0'
-// }
-
-// const gameStyle: CSS.Properties = {
-// 	flex: 3,
-// 	display: 'flex',
-// 	justifyContent: 'center',
-// 	margin: '5px 0 5px 5px'
-// }
-
-// const leaderBoardsStyle: CSS.Properties = {
-// 	flex: 1,
-// 	display: 'flex',
-// 	justifyContent: 'center',
-// 	flexDirection: 'column',
-// 	margin: '5px 5px 0 5px'
-// }

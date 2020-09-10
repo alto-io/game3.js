@@ -8,9 +8,14 @@ import { DEFAULT_GAME_DIMENSION } from '../constants'
 import { Constants } from '@game3js/common';
 import { makeNewGameSession, getGameNo, getGameSessionId, updateSessionScore, updateGameNo, createSessionId } from '../helpers/database';
 
-const StyledBox = styled(Box)`
+const StyledBox = styled.div` 
+  background: #fcfcfc;
+  border-radius: 10px;
+  box-shadow: 4px 8px 16px rgba(0,0,0,0.25);
   height: 100%;
   width: 100%;
+  overflow: hidden;
+  margin-top: 1.5rem;
 
   .web-gl canvas#canvas {
     height: 100%;
@@ -369,8 +374,7 @@ export class GameUnity extends React.Component<IProps, any> {
           }
         </Button>
 
-        <Space size="xxs" />
-        <StyledBox>
+        <StyledBox p={0}>
           {
             this.state.unityShouldBeMounted === true && (
               <Unity width="100%" height="100%" unityContent={this.unityContent} className="web-gl" />
