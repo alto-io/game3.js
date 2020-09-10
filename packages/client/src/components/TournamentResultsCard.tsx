@@ -258,7 +258,7 @@ class TournamentResultsCard extends Component<any, any> {
             case Constants.TOSIOS:
               return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
             case Constants.WOM:
-              return el2.sessionData.highScore - el1.sessionData.highScore
+              return el1.sessionData.highScore - el2.sessionData.highScore
             default:
               break;
           }
