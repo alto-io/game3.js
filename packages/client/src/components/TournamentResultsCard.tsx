@@ -259,7 +259,7 @@ class TournamentResultsCard extends Component<any, any> {
             case Constants.TOSIOS:
               return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
             case Constants.WOM:
-              return el2.sessionData.currentHighestNumber - el1.sessionData.currentHighestNumber
+              return el1.sessionData.highScore - el2.sessionData.highScore
             default:
               break;
           }
@@ -411,25 +411,36 @@ class TournamentResultsCard extends Component<any, any> {
       case Constants.FP:
         return result.sessionData.highScore
       case Constants.TOSIOS:
-        return this.formatTime(result.sessionData.currentHighestNumber, true)
+        return this.formatTime(result.gameName, result.sessionData.currentHighestNumber, true)
+      case Constants.WOM:
+        return this.formatTime(result.gameName, result.sessionData.highScore, true);
       default:
         return ''
     }
   }
 
-  formatTime = (time, isLeaderBoards) => {
+  formatTime = (gameName, time, isLeaderBoards ?: boolean) => {
     if (time) {
-      const seconds = (parseInt(time) / 1000).toFixed(2);
-      const minutes = Math.floor(parseInt(seconds) / 60);
-      let totalTime = '';
-      if (parseInt(seconds) > 60) {
-        let sec = (parseInt(seconds) % 60).toFixed(2);
-
-        totalTime += isLeaderBoards ? (minutes + ":" + sec).toString() : (minutes + "min" + " " + sec + "sec").toString()
-      } else {
-        totalTime += isLeaderBoards ? ("0:" + seconds).toString() : (seconds + "sec").toString()
+      let minutes: any;
+      let seconds: any;
+      switch(gameName) {
+        case Constants.TOSIOS:
+          seconds = (parseInt(time) / 1000).toFixed(2);
+          minutes = Math.floor(parseInt(seconds) / 60);
+          let totalTime = '';
+          if (parseInt(seconds) > 60) {
+            let sec = (parseInt(seconds) % 60).toFixed(2);
+    
+            totalTime += isLeaderBoards ? (minutes + ":" + sec).toString() : (minutes + "min" + " " + sec + "sec").toString()
+          } else {
+            totalTime += isLeaderBoards ? ("0:" + seconds).toString() : (seconds + "sec").toString()
+          }
+          return totalTime
+        case Constants.WOM:
+          minutes = time >= 60 ? Math.floor(time / 60) : 0;
+          seconds = time >= 60 ? (time % 60).toFixed(2) : time.toFixed(2);
+          return `${minutes}:${seconds}`;
       }
-      return totalTime
     }
   }
 
