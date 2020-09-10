@@ -16,8 +16,8 @@ class BuyInPromptModal extends Component<any, any> {
     await contract.methods.payBuyIn(tournamentId, tournamentBuyInAmount).send({ from: address, value: tournamentBuyInAmount })
       .then( result => {
         if (result) {
-          handleJoinClick();
           handleCloseBuyinModal();
+          handleJoinClick();
         }
       })
   }

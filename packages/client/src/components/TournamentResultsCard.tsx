@@ -5,6 +5,7 @@ import styled from 'styled-components';
 
 import JoinPromptModal from './JoinPromptModal';
 import BuyinPromptModal from './BuyInPromptModal';
+import SkeletonLeaderboardLoader from './SkeletonLeaderboardLoader';
 
 import { getTournamentResult, getTournament, getGameNo, getGameSessionId } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress";
@@ -461,9 +462,7 @@ formatTime = (time, isLeaderBoards) => {
 
     if (isLoading) {
       return (
-        <div style={divLoadingStyle}>
-          Loading...
-        </div>
+        <SkeletonLeaderboardLoader />
       )
     }
 

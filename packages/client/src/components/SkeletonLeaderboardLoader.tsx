@@ -7,32 +7,42 @@ const SkeletonCard = styled(Card)`
   display: flex;
   align-items: center;
   flex-direction: column;
-  padding: 1.75rem 1.5rem;
+  padding: 0;
 
   .skeleton-img,
-  .skeleton-prize,
-  .skeleton-btn {
+  .skeleton-text,
+  .skeleton-btn,
+  .skeleton-results {
     background: #eee;
     width: 100%;
     overflow: hidden;
   }
   
   .skeleton-img {
-    border-radius: 15px;
-    height: 170px;
+    border-radius: 15px 15px 0 0;
+    height: 70px;
     margin-bottom: 2rem;
   }
 
-  .skeleton-prize {
+  .skeleton-text {
+    border-radius: 10px;
     height: 50px;
+    width: 80%;
+    margin-bottom: 2rem;
+  }
+
+  .skeleton-results {
+    border-radius: 10px;
+    height: 150px;
+    width: 80%;
     margin-bottom: 2rem;
   }
 
   .skeleton-btn {
     border-radius: 10px;
-    width: 130px;
-    height: 50px;
-    margin-bottom: 0.825rem;
+    width: 100%;
+    height: 60px;
+    margin-top: 1rem;
   }
 
   .skeleton {
@@ -58,21 +68,22 @@ const SkeletonCard = styled(Card)`
   }
 `
 
-class SkeletonTournamentLoader extends Component {
+class SkeletonLeaderboardLoader extends Component {
   render(){
     return(
+      <>
       <SkeletonCard>
         <div className="skeleton-img">
           <div className="skeleton">
             <div className="skeleton-loader"></div>
           </div>
         </div>
-        <div className="skeleton-prize">
+        <div className="skeleton-text">
           <div className="skeleton">
             <div className="skeleton-loader"></div>
           </div>
         </div>
-        <div className="skeleton-btn">
+        <div className="skeleton-results">
           <div className="skeleton">
             <div className="skeleton-loader"></div>
           </div>
@@ -83,8 +94,9 @@ class SkeletonTournamentLoader extends Component {
           </div>
         </div>
       </SkeletonCard>
+      </>
     )
   }
 }
 
-export default SkeletonTournamentLoader;
+export default SkeletonLeaderboardLoader;
