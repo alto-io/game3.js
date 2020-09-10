@@ -44,8 +44,7 @@ const PrizeContainer = styled(Box)`
   align-self: flex-start;
   flex-direction: column;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
-  height: 150px;
+  height: 225px;
   width: 100%;
 `
 
