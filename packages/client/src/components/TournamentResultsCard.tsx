@@ -388,15 +388,11 @@ class TournamentResultsCard extends Component<any, any> {
     try {
       const contract = drizzle.contracts.Tournaments;
       const shares = await contract.methods.getShares(tournamentId).call();
-
-<<<<<<< HEAD
-=======
       this.setState({ shares });
     }
     catch (e) { }
   }
 
->>>>>>> e8eb276515b81b276c5f8124846f4567ab961b90
   setTrophy(idx, shares) {
     if (idx < shares.length) {
       switch (idx) {
@@ -506,13 +502,8 @@ class TournamentResultsCard extends Component<any, any> {
           let place = <p className="place">{idx + 1}</p>;
           let trophy = <p className="trophy">{this.setTrophy(idx, shares)}</p>;
           let shareETH = <p className="share">{(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(share) / 100)} ETH</p>
-<<<<<<< HEAD
-          return(
-            <SharesText key={idx}>{place}{trophy}{shareETH}</SharesText>
-=======
           return (
             <SharesText>{place}{trophy}{shareETH}</SharesText>
->>>>>>> e8eb276515b81b276c5f8124846f4567ab961b90
           )
         })
       }
