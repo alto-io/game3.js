@@ -164,6 +164,11 @@ class TournamentCard extends Component<any, any> {
 
     switch (gameId) {
       case Constants.WOM:
+        options = {
+          tournamentId: tournament.id,
+          viewOnly: tournament.timeIsUp
+        }
+        
         navigate(`/game/wom${qs.stringify(options, true)}`);
 
         break;

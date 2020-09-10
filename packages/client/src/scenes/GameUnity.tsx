@@ -177,7 +177,7 @@ export class GameUnity extends React.Component<IProps, any> {
       switch (gameName) {
         case Constants.WOM:
           return {
-            score,
+            score: doubleTime,
             didWin
           }
 
@@ -192,7 +192,6 @@ export class GameUnity extends React.Component<IProps, any> {
       switch (gameName) {
         case Constants.WOM:
           return {
-            doubleTime,
             playerAddress
           }
         case Constants.FP:
@@ -256,7 +255,7 @@ export class GameUnity extends React.Component<IProps, any> {
         );
 
         this.fetchGameNo(this.props.address, this.props.tournamentId);
-        payLoad = this.produceGamePayload('session', true); // gets appropriate payload
+        payLoad = this.produceGamePayload('score', true); // gets appropriate payload
         console.log("GAME UNITY PAYLOAD IN SUCCESS", payLoad)
         await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
