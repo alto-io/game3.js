@@ -125,8 +125,8 @@ export class GameUnity extends React.Component<IProps, any> {
       case "wom":
         this.unityContent.send("OutplayManager", "SetLevel",
           this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
-          this.unityContent.send("Game3JsManager", "StartGame", "start");
-          this.setState({ gameName: Constants.WOM });
+        this.unityContent.send("Game3JsManager", "StartGame", "start");
+        this.setState({ gameName: Constants.WOM });
         break;
       case "flappybird":
         this.unityContent.send("FlappyColyseusGameServerManager", "Connect", gameServerUrl);
@@ -170,7 +170,7 @@ export class GameUnity extends React.Component<IProps, any> {
   //     )
   //   }
 
-  produceGamePayload = (type:string, didWin ?: boolean) => {
+  produceGamePayload = (type: string, didWin?: boolean) => {
     const { gameName, score, playerAddress, doubleTime } = this.state
 
     if (type === 'score') {
@@ -207,6 +207,7 @@ export class GameUnity extends React.Component<IProps, any> {
   processOutplayEvent = async (outplayEvent) => {
     const { sessionId, playerAddress, tournamentId, score } = this.state;
     let payLoad = {}
+    const gameEnded = new Event('gameend');
     switch (outplayEvent) {
       case 'GameReady':
         this.setState(
@@ -229,6 +230,8 @@ export class GameUnity extends React.Component<IProps, any> {
         console.log("GAME UNITY PAYLOAD IN FAIL", payLoad)
         await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
+        dispatchEvent(gameEnded);
+
         // this.props.stopRecording.call(null, "wom");
 
         break;
@@ -243,6 +246,8 @@ export class GameUnity extends React.Component<IProps, any> {
         payLoad = this.produceGamePayload('score', true); // gets appropriate payload
         console.log("GAME UNITY PAYLOAD IN SUCCESS", payLoad)
         await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
+
+        dispatchEvent(gameEnded);
 
         // this.props.stopRecording.call(null, "wom");
         break;
@@ -259,7 +264,9 @@ export class GameUnity extends React.Component<IProps, any> {
         console.log("GAME UNITY PAYLOAD IN SUCCESS", payLoad)
         await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
-      break;
+        dispatchEvent(gameEnded);
+
+        break;
 
     }
 

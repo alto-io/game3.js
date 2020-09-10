@@ -94,6 +94,9 @@ export default class GameJavascript extends Component<any, any> {
       stopRecording(data.newHighScore);
       console.log("GAME JAVASCRIPT-endGame: Recording stopped")
     }
+
+    const gameEnded = new Event('gameend');
+    dispatchEvent(gameEnded);
   }
 
   async initiateGame(params: any) {
