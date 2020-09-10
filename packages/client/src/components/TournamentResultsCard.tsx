@@ -92,7 +92,9 @@ class TournamentResultsCard extends Component<any, any> {
       isJoinModalOpen: false,
       isBuyinModalOpen: false,
       accountBuyIn: 0,
-      gameNo: 0
+      gameNo: 0,
+      tournamentId: '',
+      loggedIn: ''
     }
 
     this.handleCloseJoinModal = this.handleCloseJoinModal.bind(this);
@@ -101,16 +103,22 @@ class TournamentResultsCard extends Component<any, any> {
     this.handleOpenBuyinModal = this.handleOpenBuyinModal.bind(this);
   }
 
-  componentDidMount() {
-    this.getBlockchainInfo(this.props)
+  async componentDidMount() {
+    await this.getBlockchainInfo(this.props)
+
+    window.addEventListener('gameend', await this.refreshResults)
   }
 
-  componentWillReceiveProps(newProps) {
+  async componentWillUnmount() {
+    window.removeEventListener('gameend', await this.refreshResults)
+  }
+
+  async componentWillReceiveProps(newProps) {
     const { tournamentId, address } = this.props
     const { tournamentId: newId, address: newAddress } = newProps
 
     if (tournamentId !== newId || address !== newAddress) {
-      this.getBlockchainInfo(newProps)
+      await this.getBlockchainInfo(newProps)
     }
   }
 
@@ -119,8 +127,53 @@ class TournamentResultsCard extends Component<any, any> {
     return data.split(' ').join('').split(",");
   }
 
-  async getTournamentAndLeaderBoards(tournamentId: any, loggedIn: boolean) {
+  refreshResults = async() => {
+    const { tournamentId } = this.state;
+    let results = [];
+    let sessionsData = await getTournamentResult(tournamentId);
+    console.log("PLAYER ADD: sessionsData", sessionsData);
+
+    if (sessionsData.length > 0) {
+      for (let resultIdx = 0; resultIdx < (sessionsData.length > 10 ? 10 : sessionsData.length); resultIdx++) {
+        let playerAddress = Object.keys(sessionsData[resultIdx].sessionData.playerData)[0];
+        console.log("PLAYER ADD: address", playerAddress);
+
+        results.push({
+          gameName: sessionsData[resultIdx].sessionData.gameName,
+          tournamentId: tournamentId,
+          timeIsUp: false,
+          playerAddress,
+          sessionId: sessionsData[resultIdx].id,
+          sessionData: sessionsData[resultIdx].sessionData.playerData[playerAddress]
+        })
+      }
+
+      console.log("RESULTS:", results)
+      results = results.filter(result => !!result.sessionData)
+      if (results.length > 1) {
+        // Sorts in ascending order
+        results.sort((el1, el2) => {
+          switch (el1.gameName) {
+            case Constants.FP:
+              return el2.sessionData.highScore - el1.sessionData.highScore
+            case Constants.TOSIOS:
+              return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
+            case Constants.WOM:
+              return el1.sessionData.highScore - el2.sessionData.highScore
+            default:
+              break;
+          }
+        })
+      }
+    }
+    this.setState({
+      results
+    })
+  }
+
+  getTournamentAndLeaderBoards = async () => {
     const { drizzle, address, playerAddress, accountValidated } = this.props;
+    const { tournamentId, loggedIn } = this.state;
 
     this.setState({ isLoading: true })
 
@@ -287,7 +340,13 @@ class TournamentResultsCard extends Component<any, any> {
       if (tournamentLength > 0) {
         tI = tournamentId || tournamentId === 0 ? tournamentId : tournamentLength - 1;
       }
-      await this.getTournamentAndLeaderBoards(tI, true);
+
+      this.setState({
+        tournamentId: tI,
+        loggedIn: true
+      })
+
+      await this.getTournamentAndLeaderBoards();
     } else {
       let ids = await getTournament();
       console.log("IDSSSS", ids);
@@ -296,7 +355,13 @@ class TournamentResultsCard extends Component<any, any> {
         tId = ids[ids.length - 1].id
       }
       console.log("THE ID IN DB IS", tId);
-      await this.getTournamentAndLeaderBoards(tId, false);
+
+      this.setState({
+        tournamentId: tId,
+        LoggedIn: false
+      })
+
+      await this.getTournamentAndLeaderBoards();
     }
   }
 
@@ -409,7 +474,7 @@ class TournamentResultsCard extends Component<any, any> {
   setDisplayScore(result) {
     switch (result.gameName) {
       case Constants.FP:
-        return result.sessionData.highScore
+        return result.sessionData.highScore || 0
       case Constants.TOSIOS:
         return this.formatTime(result.gameName, result.sessionData.currentHighestNumber, true)
       case Constants.WOM:
@@ -419,18 +484,18 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
-  formatTime = (gameName, time, isLeaderBoards ?: boolean) => {
+  formatTime = (gameName, time, isLeaderBoards?: boolean) => {
     if (time) {
       let minutes: any;
       let seconds: any;
-      switch(gameName) {
+      switch (gameName) {
         case Constants.TOSIOS:
           seconds = (parseInt(time) / 1000).toFixed(2);
           minutes = Math.floor(parseInt(seconds) / 60);
           let totalTime = '';
           if (parseInt(seconds) > 60) {
             let sec = (parseInt(seconds) % 60).toFixed(2);
-    
+
             totalTime += isLeaderBoards ? (minutes + ":" + sec).toString() : (minutes + "min" + " " + sec + "sec").toString()
           } else {
             totalTime += isLeaderBoards ? ("0:" + seconds).toString() : (seconds + "sec").toString()
@@ -441,6 +506,8 @@ class TournamentResultsCard extends Component<any, any> {
           seconds = time >= 60 ? (time % 60).toFixed(2) : time.toFixed(2);
           return `${minutes}:${seconds}`;
       }
+    } else {
+      return 0
     }
   }
 
