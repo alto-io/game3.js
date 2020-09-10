@@ -4,7 +4,6 @@ import ConnectionBanner from "@rimble/connection-banner";
 import { Box, Flex, Text } from "rimble-ui";
 
 import TournamentCard from '../components/TournamentCard';
-import { getTournamentContract } from '../helpers/web3';
 
 const TEMP_TOURNEY = [{
   name: "Tourney 1",
@@ -15,9 +14,9 @@ const TEMP_TOURNEY = [{
 // Optional parameters to pass into RimbleWeb3
 const RIMBLE_CONFIG = {
   // accountBalanceMinimum: 0.001,
-   requiredNetwork: 5777, // ganache
-  // requiredNetwork: 4 // rinkeby
+  requiredNetwork: parseInt(process.env.REACT_APP_NETWORK_ID),
 };
+
 
 class TournamentView extends React.Component<any, any> {
 

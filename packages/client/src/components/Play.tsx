@@ -10,12 +10,6 @@ function Play({ drizzle, drizzleStatus, account, accountValidated, networkId, ha
   const [currentNetwork, setCurrentNetwork] = useState(null);
   const [address, setAddress] = useState(null);
 
-    // Optional parameters to pass into RimbleWeb3
-    const RIMBLE_CONFIG = {
-    // accountBalanceMinimum: 0.001,
-    requiredNetwork: 5777 // ganache
-    };
-
   // Set account
   useEffect(() => {
     if (account) {

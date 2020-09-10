@@ -1,11 +1,12 @@
 // Drizzle contracts
-import CryptoPizza from "./contracts/CryptoPizza.json";
-import Token from "./contracts/Token.json";
+//import CryptoPizza from "./contracts/CryptoPizza.json";
+//import Token from "./contracts/Token.json";
 import Tournaments from "./contracts/Tournaments.json";
-import Counter from './contracts/Counter.json';
+//import Counter from './contracts/Counter.json';
 
 const drizzleOptions = {
-  contracts: [Counter, CryptoPizza, Token, Tournaments],
+  //contracts: [Counter, CryptoPizza, Token, Tournaments],
+  contracts: [Tournaments],
   /*
   web3: {
     fallback: {

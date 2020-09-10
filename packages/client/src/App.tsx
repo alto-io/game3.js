@@ -72,8 +72,6 @@ import 'react-toastify/dist/ReactToastify.css'
 
 import WorkerProxy from './utils/worker-proxy'
 
-require('dotenv').config()
-
 // app settings
 const CREATE_WALLET_ON_GUEST_ACCOUNT = false;
 
@@ -118,8 +116,7 @@ const DEFAULT_ADDRESS = CREATE_WALLET_ON_GUEST_ACCOUNT
 // Optional parameters to pass into RimbleWeb3
 const RIMBLE_CONFIG = {
   // accountBalanceMinimum: 0.001,
-  requiredNetwork: 5777, // ganache
-  //requiredNetwork: 4, // rinkeby
+  requiredNetwork: parseInt(process.env.REACT_APP_NETWORK_ID),
 };
 
 const INITIAL_STATE: IAppState = {
