@@ -1,19 +1,45 @@
 import React, { Component } from 'react';
-import { Modal, Card, Button, Flex, Box, Heading, Text, Loader } from "rimble-ui";
+import { Modal, Card, Button, Box, Heading, Text, Loader } from "rimble-ui";
 import styled from 'styled-components';
 
-const StyledButton = styled(Button)`
-  font-family: 'Apercu Light';
-  font-size: 0.75rem;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-`
+const ResponsiveCard = styled(Card)`
+  padding: 0;
+  width: 90%;
 
-const StyledOutline = styled(Button.Outline)`
-  font-family: 'Apercu Light';
-  font-size: 0.75rem;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  .btn-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    flex-direction: column;
+    margin: 1rem auto 2rem auto;
+
+    button {
+      width: 80%;
+    }
+
+    .btn-one {
+      margin-bottom: 1rem;
+    }
+  }
+
+  @media screen and (min-width: 768px) {
+    width: 500px;
+
+    .btn-container {
+      width: 80%;
+      justify-content: center;
+      flex-direction: row;
+
+      button {
+        width: 50%;
+      }
+
+      .btn-one {
+        margin-bottom: 0;
+        margin-right: 2rem;
+      }
+    }
+  }
 `
 
 class BuyInPromptModal extends Component<any, any> {
@@ -52,7 +78,7 @@ class BuyInPromptModal extends Component<any, any> {
     return(
       <>
       <Modal isOpen={isOpen}>
-        <Card width={"420px"} p={0}>
+        <ResponsiveCard>
         <Button.Text
           icononly
           icon={"Close"}
@@ -65,23 +91,20 @@ class BuyInPromptModal extends Component<any, any> {
           onClick={handleCloseBuyinModal}
         />
 
-        <Box p={4} mt={3} mb={2}>
-          <Heading.h3>Tournament Buy-in Confirmation</Heading.h3>
+        <Box p={4} mt={4}>
+          <Heading.h3 mb={4}>Tournament Buy-in Confirmation</Heading.h3>
           <Text mb={3}>Before you join, you must accept the binding Metamask transaction.</Text>
           <Text>By confirming, your buy-in would be processed and you can play in the tournament up to {maxTries} times.</Text>
         </Box>
 
-        <Flex
-          px={4}
-          py={3}
-          justifyContent={"center"}
+        <Box className="btn-container"
         >
-          <StyledOutline onClick={handleCloseBuyinModal}>Cancel</StyledOutline>
-          <StyledButton ml={3} onClick={this.handleConfirm} disabled={isLoading ? "disabled" : ""}>
+          <Button.Outline onClick={handleCloseBuyinModal} className="btn-custom btn-one">Cancel</Button.Outline>
+          <Button onClick={this.handleConfirm} className="btn-custom" disabled={isLoading ? "disabled" : ""}>
             {isLoading ? <Loader color="white" size="1rem"/> : "Confirm Transaction"}
-          </StyledButton>
-        </Flex>
-      </Card>
+          </Button>
+        </Box>
+      </ResponsiveCard>
     </Modal>
     </>
     )

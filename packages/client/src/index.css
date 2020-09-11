@@ -3,7 +3,7 @@
   font-family: 'Apercu Bold';
   src: url('./assets/fonts/apercu_bold-webfont.woff2') format('woff2'),
        url('./assets/fonts/apercu_bold-webfont.woff') format('woff');
-  font-weight: normal;
+  font-weight: bold;
   font-style: normal;
 }
 
@@ -15,25 +15,16 @@
   font-style: normal;
 }
 
-
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html, body {
   height: 100%;
   font-family: 'Apercu Light', sans-serif;
   background-color: #fff;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-}
-
-h1, p, input, select, button {
-  margin: 0;
-  font-family: 'Apercu Light', sans-serif;
 }
 
 a {
@@ -43,4 +34,21 @@ a {
 
 a:hover {
   text-decoration: none;
+}
+
+button {
+  text-transform: uppercase;
+}
+
+.btn-custom {
+  font-size: 0.9375rem;
+  letter-spacing: 0.5px;
+  min-width: 150px;
+}
+
+@media screen and (min-width: 768px) {
+  .btn-custom {
+    font-size: 0.825rem;
+    letter-spacing: 0.4px;
+  }
 }

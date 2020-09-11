@@ -19,13 +19,6 @@ import { Constants } from "@game3js/common";
 
 import web3 from 'web3';
 
-const StyledButton = styled(Button)`
-  font-family: 'Apercu Light';
-  font-size: 0.75rem;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-`
-
 const PrizeBadge = styled.p`
   background-color: #ffb600;
   border-radius: 25px;
@@ -330,41 +323,44 @@ class TournamentCard extends Component<any, any> {
     const button = () => {
       if (accountBuyIn !== 0 && account && accountValidated) {
         return (
-          <StyledButton
+          <Button
             mt={"26px"}
             mb={2}
             type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
             name={"recepient"} // set the name to the method's argument key
             onClick={this.handleJoinClick}
             disabled={gameNo === tournament.maxTries ? "disabled" : ""}
+            className="btn-custom"
           >
             {playBtnText}
-          </StyledButton>
+          </Button>
         )
       } else {
         if (!tournament.timeIsUp) {
           return (
-            <StyledButton
+            <Button
               mt={"26px"}
               mb={2}
               type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
               name={"recepient"} // set the name to the method's argument key
               onClick={account && accountValidated ? this.handleOpenBuyinModal : this.handleOpenModal}
+              className="btn-custom"
             >
               {buttonText}
-            </StyledButton>
+            </Button>
           )
         } else {
           return (
-            <StyledButton
+            <Button
               mt={"26px"}
               mb={2}
               type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
               name={"recepient"} // set the name to the method's argument key
               onClick={this.handleJoinClick}
+              className="btn-custom"
             >
               {buttonText}
-            </StyledButton>)
+            </Button>)
         }
       }
     }

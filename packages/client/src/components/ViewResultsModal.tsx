@@ -1,15 +1,9 @@
 import React, { Component } from 'react';
-import { Box, Flex, Modal, Button, Text, Card } from 'rimble-ui';
+import { Box, Modal, Button, Card } from 'rimble-ui';
 import styled from 'styled-components';
 
 import TournamentResultsCard from './TournamentResultsCard';
 
-const StyledButton = styled(Button)`
-  font-family: 'Apercu Light';
-  font-size: 0.75rem;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-`
 class ViewResultsModal extends Component {
   constructor(props) {
     super(props);
@@ -34,7 +28,7 @@ class ViewResultsModal extends Component {
     return (
       <>
         <Box>
-          <StyledButton onClick={this.openModal}>View Results</StyledButton>
+          <Button onClick={this.openModal} className="btn-custom">View Results</Button>
 
           <Modal isOpen={this.state.isOpen}>
             <Card width={"420px"} p={0}>

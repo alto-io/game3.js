@@ -22,14 +22,6 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 
 import { Database } from '@game3js/common';
 
-import { View } from './components';
-
-import Header from "./components/Header";
-
-import PrimaryCard from "./components/PrimaryCard";
-import WalletBlock from './components/WalletBlock';
-import HeaderNav from "./components/HeaderNav";
-
 import RimbleContainer from './components/RimbleContainer';
 
 import {
@@ -174,7 +166,6 @@ function initWeb3(provider: any) {
 
   return web3;
 }
-
 
 const preflightCheck = () => {
   if (window.ethereum) {
@@ -710,40 +701,6 @@ class App extends React.Component<any, any> {
                         connectAndValidateAccount={connectAndValidateAccount}      
                   />
 
-                  {/*
-                    <HeaderNav
-                      drizzle={this.props.drizzle}
-                      drizzleState={drizzleState}
-                      preflightCheck={preflightCheck}/>
-                  
-                    <View flex={true} center={true} column={true}>
-                        <Header
-                          drizzle={this.props.drizzle}
-                          drizzleState={drizzleState}
-                          playerProfile={playerProfile}
-                          connected={connected}
-                          address={address}
-                          chainId={chainId}
-                          killSession={this.resetApp}
-                          connectSession={this.onConnect}/>
-                    </View>
-
-                    <View flex={true} center={true} column={true}>
-
-                    <WalletBlock
-                        account={account}
-                        accountBalance={accountBalance}
-                        accountBalanceLow={accountBalanceLow}
-                        accountValidated={accountValidated}
-                        connectAndValidateAccount={connectAndValidateAccount}
-                      />
-
-                    </View>
-
-                  <PrimaryCard />
-                  */}
-
-
                     <Router>
                       <Home
                         default={true}
@@ -797,89 +754,3 @@ class App extends React.Component<any, any> {
 }
 
 export default App;
-
-
-// <SLayout>
-//   <Column maxWidth={1000} spanHeight>
-//     <Web3ModalHeader
-//       connected={connected}
-//       address={address}
-//       chainId={chainId}
-//       killSession={this.resetApp}
-//     />
-//     <SContent>
-//       {fetching ? (
-//         <Column center>
-//           <SContainer>
-//             <Loader />
-//           </SContainer>
-//         </Column>
-//       ) : !!assets && !!assets.length ? (
-//         <SBalances>
-//           <h3>Actions</h3>
-//           <Column center>
-//             <STestButtonContainer>
-//               <STestButton left onClick={this.testSendTransaction}>
-//                 {ETH_SEND_TRANSACTION}
-//               </STestButton>
-//
-//               <STestButton left onClick={this.testSignMessage}>
-//                 {ETH_SIGN}
-//               </STestButton>
-//
-//               <STestButton left onClick={this.testSignPersonalMessage}>
-//                 {PERSONAL_SIGN}
-//               </STestButton>
-//               <STestButton
-//                 left
-//                 onClick={() => this.testContractCall(DAI_BALANCE_OF)}
-//               >
-//                 {DAI_BALANCE_OF}
-//               </STestButton>
-//
-//               <STestButton
-//                 left
-//                 onClick={() => this.testContractCall(DAI_TRANSFER)}
-//               >
-//                 {DAI_TRANSFER}
-//               </STestButton>
-//
-//               <STestButton left onClick={this.testOpenBox}>
-//                 {BOX_GET_PROFILE}
-//               </STestButton>
-//             </STestButtonContainer>
-//           </Column>
-//           <h3>Balances</h3>
-//           <AccountAssets chainId={chainId} assets={assets} />{" "}
-//         </SBalances>
-//       ) : (
-//         <SLanding center>
-//           <h3>{`Test Web3Modal`}</h3>
-//           <ConnectButton onClick={this.onConnect} />
-//         </SLanding>
-//       )}
-//     </SContent>
-//   </Column>
-//   <Modal show={showModal} toggleModal={this.toggleModal}>
-//     {pendingRequest ? (
-//       <SModalContainer>
-//         <SModalTitle>{"Pending Call Request"}</SModalTitle>
-//         <SContainer>
-//           <Loader />
-//           <SModalParagraph>
-//             {"Approve or reject request using your wallet"}
-//           </SModalParagraph>
-//         </SContainer>
-//       </SModalContainer>
-//     ) : result ? (
-//       <SModalContainer>
-//         <SModalTitle>{"Call Request Approved"}</SModalTitle>
-//         <ModalResult>{result}</ModalResult>
-//       </SModalContainer>
-//     ) : (
-//       <SModalContainer>
-//         <SModalTitle>{"Call Request Rejected"}</SModalTitle>
-//       </SModalContainer>
-//     )}
-//   </Modal>
-// </SLayout>
