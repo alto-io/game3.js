@@ -14,6 +14,8 @@ import web3 from 'web3';
 import Datetime from 'react-datetime';
 import '../react-datetime.css';
 
+import { Constants } from '@game3js/common';
+
 import { newTournament, updateTournament, getTourneyWinners } from '../helpers/database'
 
 class CreateTourneyView extends Component<any, any> {
@@ -36,7 +38,9 @@ class CreateTourneyView extends Component<any, any> {
       currentNetwork: null,
       address: null,
       tournamentsCount: 0,
-      updater: false
+      updater: false,
+      selectedGame: "",
+      selectedStage: "Tourney"
     }
   }
 
@@ -324,8 +328,29 @@ class CreateTourneyView extends Component<any, any> {
 
   handleInputChange = (e) => {
     const index = e.target.id.split('.')[0];
+    const name = e.target.id.split('.')[1];
+
     let currentInputs = this.state.contractInputs;
-    currentInputs[index].value = e.target.value;
+    let value = e.target.value;
+
+    // special case for data
+    if (name === "selectedGame" || name === "selectedStage")
+    {
+      let bufferedValue = value;
+      if (name === "selectedGame")
+      {
+        this.setState({selectedGame: value})
+        value = bufferedValue + "," + this.state.selectedStage;
+      }
+      else 
+      {
+        this.setState({selectedStage: value})
+        value = this.state.selectedGame + "," + bufferedValue;
+      }
+    }
+
+    currentInputs[index].value = value;
+
 
     this.setState({
       contractInputs: currentInputs
@@ -531,6 +556,37 @@ class CreateTourneyView extends Component<any, any> {
                     switch (input.name) {
 
                       // Tourney special cases
+                      case "data":
+                        return (
+                          <>
+                            <Field
+                              size={"medium"}
+                              mt={3} mr={3} mb={3}
+                              label={"Select Game"}>
+                              {
+                                <Select required id={index + "." + "selectedGame"}
+                                  name={"selectedGame"}
+                                  onChange={this.handleInputChange}
+                                  options={Constants.GAME_ID_ARRAY}
+                                />
+                              }
+                            </Field>
+                            <Field
+                              size={"medium"}
+                              mt={3} mr={3} mb={3}
+                              label={"Select Stage"}>
+                              {
+                                <Select required id={index + "." + "selectedStage"}
+                                  name={"selectedStage"}
+                                  onChange={this.handleInputChange}
+                                  options={Constants.WOM_COUNTRIES_ARRAY}
+                                />
+                              }
+                            </Field>
+                          </>
+                        )
+                        break;
+                        
                       case "endTime":
                         return (
                           <Field
