@@ -54,14 +54,28 @@ export class GameUnity extends React.Component<IProps, any> {
       playBtnText: "Play",
       score: 1,
       gameName: '',
-      doubleTime: null
+      doubleTime: null,
+      gameId: ''
     };
 
     this.initializeUnity();
+    this.preparePlayButton();
   }
 
   speed = 30;
   unityContent = null as any;
+
+  preparePlayButton = async () => {
+    try {
+    await this.getBlockchainInfo(this.props);
+    await this.fetchGameNo(this.props.address, this.props.tournamentId);
+    } catch (e)
+    {
+      console.log(e)
+
+    }
+
+  }
 
   initializeGame = async (playerAddress, tournamentId) => {
     let sessionId = await createSessionId(playerAddress, tournamentId);
@@ -70,38 +84,39 @@ export class GameUnity extends React.Component<IProps, any> {
     })
     let payload = this.produceGamePayload('session');
     await makeNewGameSession(this.state.gameName, sessionId, tournamentId, payload);
-    await this.getBlockchainInfo(this.props);
-    await this.fetchGameNo(playerAddress, this.props.tournamentId);
     await updateGameNo(sessionId, playerAddress, tournamentId);
 
     console.log("GAME NAME FROM STATE", this.state.gameName)
 
   }
 
-
-
   getBlockchainInfo = async (props) => {
     try {
       const { tournamentId, drizzle } = props
 
       const contract = drizzle.contracts.Tournaments;
-      console.log(contract);
+      const raw = await contract.methods.getTournament(tournamentId).call();
+      const data = raw['5'].split(' ').join('').split(",");
+      const gameId = data[0];
+      const selectedLevel = data[1];
       const maxTries = await contract.methods.getMaxTries(tournamentId).call();
-      console.log(maxTries);
+
 
       const tournament = {
         maxTries: parseInt(maxTries)
       }
 
       this.setState({
+        gameId,
+        selectedLevel,
         tournament
+
       })
 
     } catch (e) {
-      console.log("GameUnity: No tourney contract loaded");
+      console.log(e);
     }
   }
-
 
   fetchGameNo = async (account, tournamentId) => {
     const gameSessionId = await getGameSessionId(account, tournamentId);
@@ -126,9 +141,11 @@ export class GameUnity extends React.Component<IProps, any> {
     const gameId = this.props.path;
     let gameServerUrl = "ws://localhost:3001";
 
+    console.log(this.state.selectedLevel);
+
     switch (gameId) {
       case "wom":
-        this.unityContent.send("OutplayManager", "SetLevel",
+        this.unityContent.send("Game3JsManager", "SetLevel",
           this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
         this.unityContent.send("Game3JsManager", "StartGame", "start");
         this.setState({ gameName: Constants.WOM });

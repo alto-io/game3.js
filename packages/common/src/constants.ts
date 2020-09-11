@@ -87,7 +87,7 @@ export const WOM_COUNTRIES_ARRAY =
     {
       "value": "Tourney",
       "label": "None"
-    }
+    },
     {
       "value": "Russia",
       "label": "Russia"
