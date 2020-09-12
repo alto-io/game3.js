@@ -1,4 +1,4 @@
-name: Deploy to Heroku
+name: Deploy to game3js-staging.herokuapp.com
 
 on:
   push:

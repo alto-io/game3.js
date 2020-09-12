@@ -1,4 +1,4 @@
-name: Deploy to Heroku
+name: Deploy to play.outplay.games
 
 on:
   push:
