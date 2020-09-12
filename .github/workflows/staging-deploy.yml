@@ -3,13 +3,13 @@ name: Deploy to Heroku
 on:
   push:
     branches:
-      - staging
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Staging
+      - name: Checkout Master
         uses: actions/checkout@master
 
       - name: Make envfile
@@ -34,7 +34,7 @@ jobs:
       - name: Push to Heroku
         uses: sjdonado/heroku@master
         with:
-          args: container:push -a game3-js web 
+          args: container:push -a game3js-staging web 
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           GANACHE_MNEMONIC: ${{ secrets.GANACHE_MNEMONIC }}
@@ -44,7 +44,7 @@ jobs:
       - name: Release in Heroku
         uses: sjdonado/heroku@master
         with:
-          args: container:release -a game3-js web
+          args: container:release -a game3js-staging web
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           GANACHE_MNEMONIC: ${{ secrets.GANACHE_MNEMONIC }}

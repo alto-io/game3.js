@@ -3,13 +3,13 @@ name: Deploy to Heroku
 on:
   push:
     branches:
-      - master
+      - production
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Master
+      - name: Checkout Production
         uses: actions/checkout@master
 
       - name: Make envfile
