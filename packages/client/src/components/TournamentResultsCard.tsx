@@ -45,10 +45,12 @@ const SharesText = styled.div`
   }
 `;
 
-const ResultDivStyle = styled.div`
+// Container for individual results
+const ResultStyle = styled.div`
  display: flex;
  justify-content: space-between;
  align-items: center;
+ font-family: 'Apercu Pro Mono';
  font-size: 0.825rem;
  letter-spacing: 0.1px;
  padding: 0.5rem;
@@ -59,25 +61,116 @@ const ResultDivStyle = styled.div`
  }
 
  .shares {
-   margin: 0;
+   margin: 0 0 0 1rem;
+   width: 32%;
+   text-align: left;
  }
 
  .score {
    color: #0093d5;
-   font-family: 'Apercu Bold';
    margin: 0;
    text-align: right;
    width: 33%;
  }
+
+ .player-background {
+   background: #c4c4c4;
+ }
  `
 
 const JoinTourneyBtn = styled(Button)`
-  color: #101010;
   font-family: 'Apercu Light';
   font-size: 0.825rem;
   letter-spacing: 0.4px;
   text-transform: uppercase;
   width: 100%;
+ `
+
+ const JoinLeaderboardsMsg = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+ `
+
+ const WidgetStyle = styled.div`
+  color: #101010;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+ `
+
+ const LeaderboardStyle = styled.div`
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin-bottom: 0.75rem;
+  padding: 1rem;
+  width: 100%;
+
+  .title-header {
+    color: ${baseColors.dark};
+    font-family: 'Apercu Bold';
+    margin-bottom: 1rem;
+    text-align: center;
+    text-transform: uppercase;
+  }
+ `
+
+//  Used inside <LeaderboardStyle>
+ const ResultDivsStyle = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0;
+  width: 100%;
+ `
+
+ const TournamentInfoStyle = styled.div`
+  background: #ffb600;
+  border-radius: 7px 7px 0 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 1rem;
+  width: 100%;
+
+  .tourney-title {
+    font-size: 1.5rem;
+    font-family: 'Apercu Bold';
+    margin: 5px;
+  }
+
+  .tourney-title-info {
+    font-size: 1rem;
+  }
+ `
+
+ const TotalBuyInContainer = styled.div`
+  background: #06df9b;
+  border: none;
+  border-radius: 7px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  outline: none;
+  font-size: 1rem;
+  padding: 1rem 0.75rem;
+  width: 100%;
+
+  .total-buyin {
+    font-family: 'Apercu Bold';
+    font-size: 1.5rem;
+  }
  `
 
  interface IState {
@@ -466,10 +559,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
 
         if (result.sessionData) {
           return (
-            <ResultDivStyle
-              style={{
-                background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`
-              }}
+            <ResultStyle className={playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase() ? "player-background"  : ""}
               key={result.sessionId}
             >
               <p className="address" style={{ width: shares !== undefined ? '33%' : '50%' }}>
@@ -479,16 +569,16 @@ class TournamentResultsCard extends Component<IProps, IState> {
                 <p className="shares">{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
               ) : ""}
               <p className="score" style={{ width: shares !== undefined ? '33%' : '50%' }}>{result.sessionData && this.setDisplayScore(result)}</p>
-            </ResultDivStyle>
+            </ResultStyle>
           )
         }
       });
     } else {
       if (!tournamentId) {
         resultDivs = (
-          <div style={resultDivStyle}>
+          <JoinLeaderboardsMsg>
             Join Tournament to be in leaderboards!
-          </div>
+          </JoinLeaderboardsMsg>
         )
       } else {
         resultDivs = shares.map((share, idx) => {
@@ -525,31 +615,34 @@ class TournamentResultsCard extends Component<IProps, IState> {
 
     return (
       <>
-        <div style={widgetStyle}>
+        <WidgetStyle>
           {!!tournament ? (
             <>
-              <div style={tournamentInfoStyle}>
+              <TournamentInfoStyle>
                 {tournament.gameStage ? (
-                  <span style={tourneyTitleStyle}>{tournament.gameStage}</span>
+                  <h5 className="tourney-title">{tournament.gameStage}</h5>
                 ) : (
-                    <span style={tourneyTitleStyle}>{this.formatTourneyTitle(tournament)}</span>
+                    <h5 className="tourney-title">{this.formatTourneyTitle(tournament)}</h5>
                   )
                 }
-                <span style={tourneyTitleInfo}>{this.formatTourneyTimeInfo(tournament)}</span>
-                <span style={tourneyTitleInfo}>Status: {this.getStatus(tournament)}</span>
-              </div>
-              <div style={leaderBoardStyle}>
-                <h1 style={titleHeader}>Leaderboard</h1>
-                <div style={resultDivsStyle}>
+                <p className="tourney-title-info">{this.formatTourneyTimeInfo(tournament)}</p>
+                <p className="tourney-title-info">Status: {this.getStatus(tournament)}</p>
+              </TournamentInfoStyle>
+
+              <LeaderboardStyle>
+                <h1 className="title-header">Leaderboard</h1>
+                <ResultDivsStyle>
                   {resultDivs}
-                </div>
-              </div>
+                </ResultDivsStyle>
+              </LeaderboardStyle>
+
               <JoinPromptModal
                 isOpen={isJoinModalOpen}
                 handleCloseModal={this.handleCloseJoinModal}
                 connectAndValidateAccount={connectAndValidateAccount}
                 modalText={"You must be logged in to join a tournament"}
               />
+
               <BuyinPromptModal
                 isOpen={isBuyinModalOpen}
                 handleCloseBuyinModal={this.handleCloseBuyinModal}
@@ -563,111 +656,21 @@ class TournamentResultsCard extends Component<IProps, IState> {
               {tournamentId === undefined ? (
                 button()
               ) : (
-                  <div style={totalBuyIn} >
-                    <span>Total Buy-in Pool</span>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tournament.pool && web3.utils.fromWei((tournament.pool).toString())} ETH</span>
-                  </div>
+                  <TotalBuyInContainer>
+                    <p>Total Buy-in Pool</p>
+                    <h5 className="total-buyin">{tournament.pool && web3.utils.fromWei((tournament.pool).toString())} ETH</h5>
+                  </TotalBuyInContainer>
                 )}
             </>
           ) : (
-              <div style={tournamentInfoStyle}>
-                <span style={tourneyTitleStyle}>No Tournaments</span>
-              </div>
+              <TournamentInfoStyle>
+                <h5 className="tourney-title">No Tournaments</h5>
+              </TournamentInfoStyle>
             )}
-        </div>
+        </WidgetStyle>
       </>
     )
   }
 }
 
-const widgetStyle: CSS.Properties = {
-  width: '100%',
-  height: '100%',
-  justifyContent: 'center',
-}
-
-const leaderBoardStyle: CSS.Properties = {
-  width: '100%',
-  padding: '0.8rem 1rem',
-  display: 'flex',
-  flexDirection: 'column',
-  margin: '0 0 0.512rem 0',
-  background: `rgb(${baseColors.white})`,
-  boxShadow: shadows.soft,
-  justifyContent: 'center',
-}
-
-const divLoadingStyle: CSS.Properties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center'
-}
-
-const titleHeader: CSS.Properties = {
-  textTransform: 'uppercase',
-  fontFamily: fonts.family.ApercuBold,
-  margin: '1rem auto',
-  fontSize: fonts.size.h4,
-  fontWeight: fonts.weight.medium,
-  color: `rgb(${baseColors.dark})`
-}
-
-const resultDivsStyle: CSS.Properties = {
-  width: '100%',
-  padding: '0',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center'
-}
-
-const resultDivStyle: CSS.Properties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  margin: '0 0 1rem 0',
-  padding: '0.3rem 0.5rem'
-}
-
-const tournamentInfoStyle: CSS.Properties = {
-  width: '100%',
-  background: `#ffb600`,
-  padding: '0.9rem',
-  display: 'flex',
-  flexDirection: 'column',
-  boxShadow: shadows.soft,
-  justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: '7px 7px 0 0'
-}
-
-const tourneyTitleStyle: CSS.Properties = {
-  fontSize: fonts.size.h5,
-  fontFamily: fonts.family.ApercuBold,
-  color: `rgb(${baseColors.dark})`,
-  margin: '5px'
-}
-
-const tourneyTitleInfo: CSS.Properties = {
-  fontSize: fonts.size.medium,
-  fontFamily: fonts.family.ApercuLight,
-  color: `rgb(${baseColors.dark})`
-}
-
-
-const totalBuyIn: CSS.Properties = {
-  fontSize: fonts.size.medium,
-  fontFamily: fonts.family.ApercuBold,
-  color: `rgb(${baseColors.dark})`,
-  background: `#06df9b`,
-  padding: '1rem 0.9rem',
-  width: '100%',
-  outline: 'none',
-  border: 'none',
-  borderRadius: '7px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  flexDirection: 'column',
-}
-
-export default TournamentResultsCard
+export default TournamentResultsCard;
