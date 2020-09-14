@@ -53,7 +53,22 @@ const ResponsiveCard = styled(Card)`
   }
 `
 
-class BuyInPromptModal extends Component {
+interface IProps {
+  address?: any;
+  drizzle?: any;
+  tournamentId?: any;
+  tournamentBuyInAmount?: any;
+  handleJoinClick?: any;
+  handleCloseBuyinModal?: any;
+  isOpen: boolean;
+  maxTries?: any;
+}
+
+interface IState {
+  isLoading: boolean;
+}
+
+class BuyInPromptModal extends Component<IProps, IState> {
   constructor(props) {
     super(props);
     this.state = {

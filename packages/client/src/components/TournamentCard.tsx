@@ -445,8 +445,6 @@ class TournamentCard extends Component<IProps, IState> {
               isOpen={isOpen}
               handleCloseModal={this.handleCloseModal}
               connectAndValidateAccount={connectAndValidateAccount}
-              account={account}
-              accountValidated={accountValidated}
               modalText={"You need to be logged in to join a tournament"}
             />
 
