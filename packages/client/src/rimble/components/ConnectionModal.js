@@ -109,6 +109,7 @@ class ConnectionModal extends React.Component {
           onClick={this.props.validateAccount}
           width={[1, 1/2]}
           mb={[5, 0]}
+          className="btn-custom"
         >
           Connect with MetaMask
         </MetaMaskButton>

@@ -15,6 +15,16 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Apercu Pro Mono';
+  src: local('Apercu Pro Mono'), local('ApercuPro-Mono'),
+      url('./assets/fonts/apercupro-mono-webfont.woff2') format('woff2'),
+      url('./assets/fonts/apercupro-mono-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
