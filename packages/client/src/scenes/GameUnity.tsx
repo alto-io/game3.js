@@ -159,8 +159,9 @@ export class GameUnity extends React.Component<IProps, any> {
 
     await this.initializeGame(playerAddress, tournamentId); // should be called here
 
-    // TODO: disable recording for now
-    // this.props.startRecording.call(null, gameId);
+    if (tournamentId || tournamentId === 0) {
+      this.props.startRecording.call();
+    }
 
     this.setState(
       {
@@ -229,6 +230,7 @@ export class GameUnity extends React.Component<IProps, any> {
   processOutplayEvent = async (outplayEvent) => {
     const { sessionId, playerAddress, tournamentId, score } = this.state;
     let payLoad = {}
+    let data = {};
     const gameEnded = new Event('gameend');
     switch (outplayEvent) {
       case 'GameReady':
@@ -250,11 +252,13 @@ export class GameUnity extends React.Component<IProps, any> {
         this.fetchGameNo(this.props.address, this.props.tournamentId);
         payLoad = this.produceGamePayload('score', false); // gets appropriate payload
         console.log("GAME UNITY PAYLOAD IN FAIL", payLoad)
-        await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
+        data = await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
         dispatchEvent(gameEnded);
-
-        // this.props.stopRecording.call(null, "wom");
+        
+        if (tournamentId || tournamentId === 0) {
+          this.props.stopRecording(data.newHighScore);
+        }
 
         break;
       case 'GameEndSuccess':
@@ -267,11 +271,15 @@ export class GameUnity extends React.Component<IProps, any> {
         this.fetchGameNo(this.props.address, this.props.tournamentId);
         payLoad = this.produceGamePayload('score', true); // gets appropriate payload
         console.log("GAME UNITY PAYLOAD IN SUCCESS", payLoad)
-        await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
+        data = await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
         dispatchEvent(gameEnded);
 
-        // this.props.stopRecording.call(null, "wom");
+        console.log("GAME END SUCCESS DATA",data);
+        if (tournamentId || tournamentId === 0) {
+          this.props.stopRecording(data.newHighScore);
+        }
+
         break;
 
       case 'GameEndSuccessTime':
@@ -284,9 +292,13 @@ export class GameUnity extends React.Component<IProps, any> {
         this.fetchGameNo(this.props.address, this.props.tournamentId);
         payLoad = this.produceGamePayload('score', true); // gets appropriate payload
         console.log("GAME UNITY PAYLOAD IN SUCCESS", payLoad)
-        await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
+        data = await updateSessionScore(sessionId, playerAddress, tournamentId, payLoad);
 
         dispatchEvent(gameEnded);
+
+        if (tournamentId || tournamentId === 0) {
+          this.props.stopRecording(data.newHighScore);
+        }
 
         break;
 
