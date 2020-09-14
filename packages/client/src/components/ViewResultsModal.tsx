@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Box, Modal, Button, Card } from 'rimble-ui';
-import styled from 'styled-components';
 
 import TournamentResultsCard from './TournamentResultsCard';
 

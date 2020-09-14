@@ -53,7 +53,7 @@ button {
 .btn-custom {
   font-size: 0.9375rem;
   letter-spacing: 0.5px;
-  min-width: 150px;
+  min-width: 180px;
 }
 
 @media screen and (min-width: 768px) {

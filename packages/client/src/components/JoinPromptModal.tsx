@@ -1,7 +1,16 @@
 import React, { Component } from "react";
 import { Modal, Card, Button, Flex, Box, Heading, Text } from "rimble-ui";
+import styled from 'styled-components';
 
 import ConnectWalletButton from "./ConnectWalletButton";
+
+const StyledCard = styled(Card)`
+  width: 90%;
+
+  @media screen and (min-width: 600px) {
+    width: 400px;
+  }
+`
 
 class JoinPromptModal extends Component{
   handleConnectAccount = () => {
@@ -22,7 +31,7 @@ class JoinPromptModal extends Component{
     return (
       <>
         <Modal isOpen={this.props.isOpen}>
-          <Card p={0}>
+          <StyledCard p={0}>
               <Button.Text
                 icononly
                 icon={"Close"}
@@ -35,7 +44,7 @@ class JoinPromptModal extends Component{
                 onClick={this.props.handleCloseModal}
               />
 
-              <Box p={4}>
+              <Box px={4} pt={5} pb={4}>
                 <Heading.h3>No Wallet Connected</Heading.h3>
                 <Text>{this.props.modalText}</Text>
               </Box>
@@ -48,7 +57,7 @@ class JoinPromptModal extends Component{
                 <ConnectWalletButton handleConnectAccount={this.handleConnectAccount} />
                 
               </Flex>
-            </Card>
+            </StyledCard>
         </Modal>
       </>
     )

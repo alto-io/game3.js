@@ -17,7 +17,7 @@ const StyledBox = styled(Box)`
   }
 
   .active {
-    height: 10vh;
+    height: 15vh;
     padding-bottom: 1rem;
 
     li {
@@ -39,6 +39,7 @@ const Dropdown = styled.ul`
   margin: 0;
 
   li {
+    background-color: #fff;
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -55,6 +56,10 @@ const Dropdown = styled.ul`
   .title {
     color: #2b2c36;
     font-weight: 600;
+  }
+
+  .wallet {
+    margin-top: 2.5rem;
   }
 `
 
@@ -83,7 +88,7 @@ class NavBarDropdown extends Component {
         {account && accountValidated ? (
           <>
             {/* ID */}
-            <li>
+            <li className="wallet">
               <img src={walletIcon} alt="wallet-icon"/>
               <p><span className="title">Connected as </span>{shortenAddress(account)}</p>
             </li>

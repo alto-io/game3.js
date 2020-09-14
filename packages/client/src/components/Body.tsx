@@ -107,8 +107,3 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
 }
 
 export default Body;
-
-/*
-            Dashboard: <Dashboard address={address} store={store} setRoute={setRoute} />,
-            Wallet:  <Wallet address={address} store={store} setRoute={setRoute} />
-*/

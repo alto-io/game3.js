@@ -22,6 +22,17 @@ const ResponsiveCard = styled(Card)`
     }
   }
 
+  .confirmation-msg {
+    height: 0;
+    opacity: 0;
+    transition: 300ms ease;
+  }
+
+  .confirmation-msg-open {
+    height: 50px;
+    opacity: 1;
+  }
+
   @media screen and (min-width: 768px) {
     width: 500px;
 
@@ -42,7 +53,7 @@ const ResponsiveCard = styled(Card)`
   }
 `
 
-class BuyInPromptModal extends Component<any, any> {
+class BuyInPromptModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -95,6 +106,10 @@ class BuyInPromptModal extends Component<any, any> {
           <Heading.h3 mb={4}>Tournament Buy-in Confirmation</Heading.h3>
           <Text mb={3}>Before you join, you must accept the binding Metamask transaction.</Text>
           <Text>By confirming, your buy-in would be processed and you can play in the tournament up to {maxTries} times.</Text>
+        </Box>
+
+        <Box className={ !isLoading ? "confirmation-msg" : "confirmation-msg confirmation-msg-open"} pt={1} mb={4} px={4}>
+          <Text>Process ongoing. You will be redirected to the tournament automatically.</Text>
         </Box>
 
         <Box className="btn-container"
