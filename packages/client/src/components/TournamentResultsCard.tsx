@@ -80,7 +80,27 @@ const JoinTourneyBtn = styled(Button)`
   width: 100%;
  `
 
-class TournamentResultsCard extends Component<any, any> {
+ interface IState {
+  results: Array<any>;
+  tournament: any;
+  shares: Array<any>;
+  isLoading: boolean;
+  isJoinModalOpen: boolean;
+  isBuyinModalOpen: boolean;
+  accountBuyIn: number;
+  gameNo: number;
+ }
+
+ interface IProps {
+   tournamentId: any;
+   address: any;
+   playerAddress: any;
+   drizzle: any;
+   accountValidated: any;
+   connectAndValidateAccount: any;
+ }
+
+class TournamentResultsCard extends Component<IProps, IState> {
   constructor(props) {
     super(props)
 
@@ -212,7 +232,7 @@ class TournamentResultsCard extends Component<any, any> {
     }
 
     // Get tournament results
-    // const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
+
     let sessionsData = await getTournamentResult(tournamentId);
     console.log("PLAYER ADD: sessionsData", sessionsData);
 
