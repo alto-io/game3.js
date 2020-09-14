@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { RouteComponentProps, navigate } from '@reach/router';
+import { navigate } from '@reach/router';
 import { Button } from 'rimble-ui';
 import styled from 'styled-components';
 
@@ -120,7 +120,7 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   async getTournamentAndLeaderBoards(tournamentId: any, loggedIn: boolean) {
-    const { drizzle, address, playerAddress, accountValidated } = this.props;
+    const { drizzle, playerAddress, accountValidated } = this.props;
 
     this.setState({ isLoading: true })
 
@@ -200,7 +200,9 @@ class TournamentResultsCard extends Component<any, any> {
         startDate: '8/16',
         endDate: '9/4',
         state: parseInt(raw[0].state),
-        pool: raw[0].pool
+        pool: raw[0].pool,
+        maxTries: 0,
+        buyInAmount: 0,
       }
       console.log("FETCH SHARES NOT LOGGED IN", raw[0].shares);
       console.log("FETCH POOL NOT LOGGED IN", raw[0].pool);
@@ -208,15 +210,6 @@ class TournamentResultsCard extends Component<any, any> {
         shares: raw[0].shares
       })
     }
-
-    // switch (tournament.name) {
-    //   case Constants.WOM:
-    //     tournament.gameStage = "United Kingdom";
-    //     break;
-    //   default:
-    //     tournament.gameStage = undefined;
-    //     break;
-    // }
 
     // Get tournament results
     // const resultsCount = await contract.methods.getResultsCount(tournamentId).call()
@@ -237,17 +230,7 @@ class TournamentResultsCard extends Component<any, any> {
           sessionData: sessionsData[resultIdx].sessionData.playerData[playerAddress]
         })
       }
-      // let sessions = [];
-      // results.forEach(result => {
-      //   session = await 
-      // })
 
-      // const sessions = await Promise.all(results.map(async result => {
-      //   const session = await getGameSession(result.sessionId, result.playerAddress, tournamentId);
-      //   return session;
-      // }))  
-
-      // results.forEach((result, idx) => result.sessionData = sessions[idx])
       console.log("RESULTS:", results)
       results = results.filter(result => !!result.sessionData)
       if (results.length > 1) {
@@ -289,7 +272,7 @@ class TournamentResultsCard extends Component<any, any> {
       }
       await this.getTournamentAndLeaderBoards(tI, true);
     } else {
-      let ids = await getTournament();
+      let ids = await getTournaments();
       console.log("IDSSSS", ids);
       let tId = undefined;
       if (ids.length > 0) {
@@ -334,16 +317,6 @@ class TournamentResultsCard extends Component<any, any> {
   handleJoinClick = () => {
     const { tournament } = this.state;
     let options = {};
-
-    const tosiosOptions = {
-      mode: 'score attack',
-      roomMap: 'small',
-      roomMaxPlayers: '1',
-      roomName: '',
-      tournamentId: tournament.id,
-      playerName: "Guest",
-      viewOnly: tournament.timeIsUp
-    }
 
     switch (tournament.name) {
       case Constants.WOM:
@@ -555,8 +528,6 @@ class TournamentResultsCard extends Component<any, any> {
                 isOpen={isJoinModalOpen}
                 handleCloseModal={this.handleCloseJoinModal}
                 connectAndValidateAccount={connectAndValidateAccount}
-                account={playerAddress}
-                accountValidated={accountValidated}
                 modalText={"You must be logged in to join a tournament"}
               />
               <BuyinPromptModal
@@ -592,7 +563,6 @@ class TournamentResultsCard extends Component<any, any> {
 const widgetStyle: CSS.Properties = {
   width: '100%',
   height: '100%',
-  // padding: '0.8rem 1rem',
   justifyContent: 'center',
 }
 
@@ -605,7 +575,6 @@ const leaderBoardStyle: CSS.Properties = {
   background: `rgb(${baseColors.white})`,
   boxShadow: shadows.soft,
   justifyContent: 'center',
-  // borderRadius: '7px 7px 0 0'
 }
 
 const divLoadingStyle: CSS.Properties = {
@@ -639,20 +608,6 @@ const resultDivStyle: CSS.Properties = {
   padding: '0.3rem 0.5rem'
 }
 
-const playerAddressStyle: CSS.Properties = {
-  fontSize: fonts.size.medium,
-  color: `rgb(${baseColors.dark})`,
-  fontFamily: fonts.family.ApercuBold,
-  marginRight: '0.2rem'
-}
-
-const timeLeftStyle: CSS.Properties = {
-  fontSize: fonts.size.medium,
-  color: `#0093d5`,
-  fontFamily: fonts.family.ApercuBold,
-  marginLeft: '0.2rem'
-}
-
 const tournamentInfoStyle: CSS.Properties = {
   width: '100%',
   background: `#ffb600`,
@@ -678,19 +633,6 @@ const tourneyTitleInfo: CSS.Properties = {
   color: `rgb(${baseColors.dark})`
 }
 
-const joinTourneyBtn: CSS.Properties = {
-  fontSize: fonts.size.medium,
-  fontFamily: fonts.family.ApercuBold,
-  color: `rgb(${baseColors.dark})`,
-  background: `#06df9b`,
-  padding: '1rem 0.9rem',
-  width: '100%',
-  cursor: 'pointer',
-  outline: 'none',
-  border: 'none',
-  borderRadius: '7px',
-  textTransform: 'uppercase',
-}
 
 const totalBuyIn: CSS.Properties = {
   fontSize: fonts.size.medium,
