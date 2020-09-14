@@ -41,10 +41,34 @@ const PrizeContainer = styled(Box)`
   width: 100%;
 `
 
-class TournamentCard extends Component<any, any> {
+interface IProps {
+  account?: any;
+  accountValidated?: any;
+  address?: any;
+  drizzle?: any;
+  tournamentId?: any;
+  playerAddress?: any;
+  connectAndValidateAccount?: any;
+}
+
+interface IState {
+  tournament?: any;
+  address?: any;
+  gameId?: any;
+  ownTournament: boolean;
+  isOpen: boolean;
+  isBuyinModalOpen: boolean;
+  accountBuyIn: number;
+  isContractOwner: boolean;
+  gameNo: number;
+  gameName: string,
+  gameImage: string
+  prizeString: Array<any>;
+}
+
+class TournamentCard extends Component<IProps, IState> {
   constructor(props) {
     super(props)
-
     this.state = {
       tournament: null,
       gameId: null,
@@ -54,12 +78,11 @@ class TournamentCard extends Component<any, any> {
       accountBuyIn: 0,
       isContractOwner: false,
       gameNo: 0,
-      gameDetails: {
-        name: '',
-        image: ''
-      },
+      gameName: '',
+      gameImage: '',
       prizeString: []
     }
+
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseBuyinModal = this.handleCloseBuyinModal.bind(this);
@@ -149,8 +172,6 @@ class TournamentCard extends Component<any, any> {
 
   handleJoinClick = () => {
     const { tournament, gameId } = this.state;
-    // const name = window.prompt("Enter your name", "");
-    // console.log(`Hi ${name}!`);
 
     let options = {}
 
@@ -307,13 +328,13 @@ class TournamentCard extends Component<any, any> {
       )
     }
 
-    const isActive = tournament.state === TOURNAMENT_STATE_ACTIVE
+    const isActive = tournament.state === TOURNAMENT_STATE_ACTIVE;
+
     // don't show own tournaments
     // if (ownTournament || !isActive) {
     //   return (null)
     // }
 
-    //    const prizeStr = `${drizzle.web3.utils.fromWei(tournament.prize)} ETH`
     const endTimeStr = format(new Date(tournament.endTime),
       'MMM d, yyyy, HH:mm:ss')
 
@@ -372,7 +393,7 @@ class TournamentCard extends Component<any, any> {
     })
 
     return (
-      <Box width={[1, 1 / 2, 1 / 3]} p={3}>
+      <Box width={[1, 1/2, 1/2, 1/3]} p={3}>
         <Card p={0} borderColor={"#d6d6d6"}>
           <RainbowBox height={"5px"} />
           <Flex
@@ -415,9 +436,9 @@ class TournamentCard extends Component<any, any> {
             {/* {!isContractOwner ? button() : ""} */}
             {tournament.state && tournament.state === 1 && button()}
             <ViewResultsModal
-              tournamentId={tournament && tournament.id}
-              playerAddress={address && address}
-              drizzle={drizzle && drizzle}
+              tournamentId={tournament.id}
+              playerAddress={address}
+              drizzle={drizzle}
             />
             {tournament.state === 0 && <Button onClick={() => {this.onActivate(tournament)}} mt={3}>Activate</Button>}
             <JoinPromptModal

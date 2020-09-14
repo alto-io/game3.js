@@ -1,7 +1,11 @@
 import React, { Component } from "react";
 import { Button } from "rimble-ui";
 
-class ConnectWalletButton extends Component {
+interface IProps {
+  handleConnectAccount?: any;
+}
+
+class ConnectWalletButton extends Component<IProps> {
   render() {
     return(
       <Button 

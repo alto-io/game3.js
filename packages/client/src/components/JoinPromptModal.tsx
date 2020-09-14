@@ -12,7 +12,14 @@ const StyledCard = styled(Card)`
   }
 `
 
-class JoinPromptModal extends Component{
+interface IProps {
+  connectAndValidateAccount?: any;
+  isOpen?: boolean;
+  handleCloseModal?: any;
+  modalText: string;
+}
+
+class JoinPromptModal extends Component<IProps>{
   handleConnectAccount = () => {
     this.props.connectAndValidateAccount( result => {
       if (result === "success") {

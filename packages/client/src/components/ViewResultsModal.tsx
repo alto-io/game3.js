@@ -3,7 +3,16 @@ import { Box, Modal, Button, Card } from 'rimble-ui';
 
 import TournamentResultsCard from './TournamentResultsCard';
 
-class ViewResultsModal extends Component {
+interface IProps {
+  tournamentId?: any;
+  drizzle?: any;
+  playerAddress?: any;
+}
+interface IState {
+  isOpen: boolean;
+}
+
+class ViewResultsModal extends Component<IProps, IState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -22,7 +31,7 @@ class ViewResultsModal extends Component {
   };
 
   render() {
-    const { tournamentId, playerAddress, drizzle, setRoute } = this.props;
+    const { tournamentId, playerAddress, drizzle } = this.props;
     
     return (
       <>
@@ -48,7 +57,6 @@ class ViewResultsModal extends Component {
                   tournamentId={tournamentId}
                   playerAddress={playerAddress}
                   drizzle={drizzle}
-                  setRoute={setRoute}
                 />
               </Box>
 
