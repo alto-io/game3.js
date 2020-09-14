@@ -14,9 +14,6 @@ import web3 from 'web3';
 import qs from 'querystringify';
 import { format } from 'date-fns';
 
-import CSS from 'csstype';
-import { baseColors, fonts, shadows, } from '../styles';
-
 import {
   TOURNAMENT_STATE_ACTIVE,
   TOURNAMENT_STATE_ENDED,
@@ -115,7 +112,6 @@ const JoinTourneyBtn = styled(Button)`
   width: 100%;
 
   .title-header {
-    color: ${baseColors.dark};
     font-family: 'Apercu Bold';
     margin-bottom: 1rem;
     text-align: center;
@@ -456,14 +452,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
         break;
       default:
         break;
-    }
-  }
-
-  setResultBgColor(playerAddress, currentPlayerAddress) {
-    if (playerAddress && playerAddress.toLowerCase() === currentPlayerAddress.toLowerCase()) {
-      return baseColors.lightGrey;
-    } else {
-      return baseColors.white;
     }
   }
 

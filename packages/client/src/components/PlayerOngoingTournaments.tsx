@@ -61,7 +61,15 @@ const GameImage = styled(Image)`
   }
 `
 
-class PlayerOngoingTournaments extends Component {
+interface IProps {
+  tournaments: Array<any>;
+  setRoute: any;
+  account: any;
+  drizzle: any;
+  isLoading: boolean;
+}
+
+class PlayerOngoingTournaments extends Component<IProps> {
   render() {
     const { tournaments, setRoute, account, drizzle, isLoading } = this.props;
 

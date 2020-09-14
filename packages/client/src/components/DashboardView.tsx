@@ -31,7 +31,26 @@ const StyledFlex = styled(Flex)`
   }
 `
 
-class DashboardView extends Component<any, any> {
+interface IProps {
+  account: any;
+  accountValidated: any;
+  address: any;
+  networkId: any;
+  drizzle: any;
+  drizzleStatus: any;
+  setRoute: any;
+  store: any;
+}
+
+interface IState {
+  isLoading: boolean;
+  tournaments: Array<object>;
+  tournamentsCount: number;
+  currentNetwork: any;
+  address: any;
+}
+
+class DashboardView extends Component<IProps, IState> {
   constructor(props) {
     super(props);
     this.state = {

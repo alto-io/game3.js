@@ -27,22 +27,22 @@ const EventsCard = styled(Card)`
 
   .tournamentID {
     font-size: 0.75rem;
-    letter=spacing: 0.4px;
+    letter-spacing: 0.4px;
     margin: 0;
   }
 
   .gameName {
     font-size: 1rem;
-    font-weight: bold;
+    font-family: 'Apercu Bold';
     letter-spacing: 0.15px;
     margin: 0 0 1rem 0;
   }
 
-  .h3 {
+  .prize {
     font-family: 'Apercu Bold';
     font-size: 1.25rem;
     letter-spacing: 0;
-    margin: 0
+    margin-bottom: 1rem;
   }
   
   @media screen and (min-width: 768px) {
@@ -65,6 +65,22 @@ const GameImage = styled(Image)`
     height: 123px;
   }
 `
+
+interface IProps {
+  account: any;
+  address: any;
+  networkId: any;
+  drizzleStatus: any;
+  drizzle: any;
+  isLoading: boolean;
+  parseData: any;
+}
+
+interface IState {
+  currentNetwork: any;
+  address: any;
+  events: Array<any>;
+}
 
 class PayoutEventsView extends Component<any, any> {
   constructor(props) {
@@ -244,7 +260,7 @@ class PayoutEventsView extends Component<any, any> {
           <Box>
             <p className="tournamentID">Tournament {noPayout.id}</p>
             <h6 className="gameName">{noPayout.gameName} {noPayout.gameStage !== undefined ? "- " + noPayout.gameStage : ""}</h6>
-            <h3 className="prize" mb={3}>You'll win next time!</h3>
+            <h3 className="prize">You'll win next time!</h3>
 
             <ViewResultsModal 
               tournamentId={noPayout.id}
