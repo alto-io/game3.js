@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import JoinPromptModal from './JoinPromptModal';
 import BuyinPromptModal from './BuyInPromptModal';
 import SkeletonLeaderboardLoader from './SkeletonLeaderboardLoader';
+import Modal from './Modal';
+import PlayerGameReplays from './PlayerGameReplays';
 
 import { getTournamentResult, getTournament, getGameNo, getGameSessionId, getTournaments } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress";
@@ -52,6 +54,7 @@ const ResultDivStyle = styled.div`
  font-size: 0.825rem;
  letter-spacing: 0.1px;
  padding: 0.5rem;
+ cursor: pointer;
 
  .address {
    font-weight: bold;
@@ -91,6 +94,8 @@ class TournamentResultsCard extends Component<any, any> {
       shares: [],
       isJoinModalOpen: false,
       isBuyinModalOpen: false,
+      isReplayModalOpen: false,
+      currentFileHash: '',
       accountBuyIn: 0,
       gameNo: 0,
       tournamentId: '',
@@ -127,7 +132,7 @@ class TournamentResultsCard extends Component<any, any> {
     return data.split(' ').join('').split(",");
   }
 
-  refreshResults = async() => {
+  refreshResults = async () => {
     const { tournamentId } = this.state;
     let results = [];
     let sessionsData = await getTournamentResult(tournamentId);
@@ -511,6 +516,17 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
+  toggleModal = fileHash => {
+    this.setState({
+      isReplayModalOpen: !this.state.isReplayModalOpen,
+      currentFileHash: fileHash
+    })
+  }
+
+  handleTournamentClicked = fileHash => {
+    this.toggleModal(fileHash);
+  }
+
   handleCloseJoinModal = e => {
     this.setState({ isJoinModalOpen: false });
   }
@@ -534,7 +550,7 @@ class TournamentResultsCard extends Component<any, any> {
   }
 
   render() {
-    const { results, isLoading, tournament, shares, isJoinModalOpen, isBuyinModalOpen, gameNo, accountBuyIn } = this.state;
+    const { currentFileHash, isReplayModalOpen, results, isLoading, tournament, shares, isJoinModalOpen, isBuyinModalOpen, gameNo, accountBuyIn } = this.state;
     const { tournamentId, playerAddress, accountValidated, connectAndValidateAccount, drizzle } = this.props;
 
     if (isLoading) {
@@ -556,6 +572,7 @@ class TournamentResultsCard extends Component<any, any> {
                 background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`
               }}
               key={result.sessionId}
+              onClick={() => this.handleTournamentClicked(result.sessionData.replayHash)}
             >
               <p className="address" style={{ width: shares !== undefined ? '33%' : '50%' }}>
                 {shortenAddress(result.playerAddress)}
@@ -564,7 +581,7 @@ class TournamentResultsCard extends Component<any, any> {
                 <p className="shares">{this.setTrophy(idx, shares)} {(parseInt(web3.utils.fromWei(tournament.pool)) * parseInt(shares[idx]) / 100)} ETH</p>
               ) : ""}
               <p className="score" style={{ width: shares !== undefined ? '33%' : '50%' }}>{result.sessionData && this.setDisplayScore(result)}</p>
-            </ResultDivStyle>
+            </ResultDivStyle >
           )
         }
       });
@@ -613,6 +630,9 @@ class TournamentResultsCard extends Component<any, any> {
         <div style={widgetStyle}>
           {!!tournament ? (
             <>
+              <Modal show={isReplayModalOpen} toggleModal={this.toggleModal}>
+                <PlayerGameReplays hash={currentFileHash} />
+              </Modal>
               <div style={tournamentInfoStyle}>
                 {tournament.gameStage ? (
                   <span style={tourneyTitleStyle}>{tournament.gameStage}</span>

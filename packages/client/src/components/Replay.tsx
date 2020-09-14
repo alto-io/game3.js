@@ -14,6 +14,7 @@ const REPLAY = {
   overflow: 'hidden',
   display: 'flex',
   alignItems: 'center',
+  width: '100%'
 };
 
 const REPLAY_HOVERED = {
@@ -36,15 +37,15 @@ const getPadded = (time: number, padding: number = 2) => {
 };
 
 export function Replay(props: {
-  id: string;
-  time: number;
+  // id: string;
+  // time: number;
   hash: string;
 
   onClick: (id: string) => void;
 }): React.ReactElement {
   const {
-    id,
-    time,
+    // id,
+    // time,
     hash,
     onClick,
   } = props;
@@ -52,14 +53,14 @@ export function Replay(props: {
 
   let timeDisplay: string;
 
-  if (time <= 0) {
-    timeDisplay = '00:00';
-  } else {
-    const minutesLeft: number = getMinutes(time / 1000);
-    const secondsLeft: number = getSeconds(time / 1000);
+  // if (time <= 0) {
+  //   timeDisplay = '00:00';
+  // } else {
+  //   const minutesLeft: number = getMinutes(time / 1000);
+  //   const secondsLeft: number = getSeconds(time / 1000);
 
-    timeDisplay = getPadded(minutesLeft) + ":" + getPadded(secondsLeft);
-  }
+  //   timeDisplay = getPadded(minutesLeft) + ":" + getPadded(secondsLeft);
+  // }
 
   return (
     <View
@@ -73,8 +74,8 @@ export function Replay(props: {
       onClick={() => onClick(hash)}
     >
       <View>
-        <p><b>{`ID: "${id}"`}</b></p>
-        <p><b>{`Time: "${timeDisplay}"`}</b></p>
+        {/* <p><b>{`ID: "${id}"`}</b></p>
+        <p><b>{`Time: "${timeDisplay}"`}</b></p> */}
       </View>
       {isMobile && <Space size="xs" />}
       <Button
