@@ -516,15 +516,19 @@ class TournamentResultsCard extends Component<any, any> {
     }
   }
 
-  toggleModal = fileHash => {
-    this.setState({
-      isReplayModalOpen: !this.state.isReplayModalOpen,
-      currentFileHash: fileHash
-    })
+  toggleModal = (fileHash, shouldRender) => {
+    if (shouldRender) {
+      this.setState({
+        isReplayModalOpen: !this.state.isReplayModalOpen,
+        currentFileHash: fileHash
+      })
+    }
   }
 
-  handleTournamentClicked = fileHash => {
-    this.toggleModal(fileHash);
+  handleReplayModal = () => {
+    this.setState({
+      isReplayModalOpen: !this.state.isReplayModalOpen,
+    })
   }
 
   handleCloseJoinModal = e => {
@@ -547,6 +551,22 @@ class TournamentResultsCard extends Component<any, any> {
     const gameSessionId = await getGameSessionId(account, tournamentId);
     const gameNo = await getGameNo(gameSessionId, account, tournamentId);
     this.setState({ gameNo: gameNo });
+  }
+
+  extractHighScore = result => {
+    
+    let gameName = result.gameName;
+
+    switch(gameName) {
+      case Constants.TOSIOS:
+        return result.sessionData.currentHighestNumber;
+      case Constants.WOM:
+        return result.sessionData.highScore;
+      case Constants.FP:
+        return result.sessionData.highScore;
+      default:
+        break;
+    }
   }
 
   render() {
@@ -572,7 +592,7 @@ class TournamentResultsCard extends Component<any, any> {
                 background: `rgb(${this.setResultBgColor(playerAddress, result.playerAddress)})`
               }}
               key={result.sessionId}
-              onClick={() => this.handleTournamentClicked(result.sessionData.replayHash)}
+              onClick={() => this.toggleModal(result.sessionData.replayHash, this.extractHighScore(result) !== 0)}
             >
               <p className="address" style={{ width: shares !== undefined ? '33%' : '50%' }}>
                 {shortenAddress(result.playerAddress)}
@@ -630,7 +650,7 @@ class TournamentResultsCard extends Component<any, any> {
         <div style={widgetStyle}>
           {!!tournament ? (
             <>
-              <Modal show={isReplayModalOpen} toggleModal={this.toggleModal}>
+              <Modal show={isReplayModalOpen} toggleModal={this.handleReplayModal}>
                 <PlayerGameReplays hash={currentFileHash} />
               </Modal>
               <div style={tournamentInfoStyle}>

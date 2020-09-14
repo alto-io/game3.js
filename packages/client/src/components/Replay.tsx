@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
 import {
   Button,
@@ -62,31 +62,33 @@ export function Replay(props: {
   //   timeDisplay = getPadded(minutesLeft) + ":" + getPadded(secondsLeft);
   // }
 
-  return (
-    <View
-      style={{
-        ...REPLAY,
-        flexDirection: isMobile ? 'column' : 'row',
-        ...(hovered && REPLAY_HOVERED),
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onClick={() => onClick(hash)}
-    >
-      <View>
-        {/* <p><b>{`ID: "${id}"`}</b></p>
-        <p><b>{`Time: "${timeDisplay}"`}</b></p> */}
-      </View>
-      {isMobile && <Space size="xs" />}
-      <Button
-        type="button"
-        style={{
-          marginLeft: 'auto',
-          width: isMobile ? '100%' : 'fit-content',
-        }}
-      >
-        Watch
-      </Button>
-    </View>
-  );
+  useEffect(() => {
+    onClick(hash);
+  }, [])
+
+
+
+  return (null);
 }
+
+  // <View
+  //   style={{
+  //     ...REPLAY,
+  //     flexDirection: isMobile ? 'column' : 'row',
+  //     ...(hovered && REPLAY_HOVERED),
+  //   }}
+  //   onMouseEnter={() => setHovered(true)}
+  //   onMouseLeave={() => setHovered(false)}
+  //   onClick={() => onClick(hash)}
+  // >
+  //   {isMobile && <Space size="xs" />}
+  //   <Button
+  //     type="button"
+  //     style={{
+  //       marginLeft: 'auto',
+  //       width: isMobile ? '100%' : 'fit-content',
+  //     }}
+  //   >
+  //     Watch
+  //   </Button>
+  // </View>

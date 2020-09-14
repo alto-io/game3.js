@@ -90,7 +90,9 @@ const SCloseButton = styled.div<ICloseButtonStyleProps>`
 const SCard = styled.div`
   position: relative;
   width: 100%;
-  max-width: 500px;
+  height: 100%;
+  max-height: 450px;
+  max-width: 700px;
   padding: 25px;
   background-color: rgb(${colors.white});
   border-radius: 6px;
@@ -103,6 +105,7 @@ const SCard = styled.div`
 const SModalContent = styled.div`
   position: relative;
   width: 100%;
+  height:100%;
   position: relative;
   word-wrap: break-word;
 `
