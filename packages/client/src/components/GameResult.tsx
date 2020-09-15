@@ -96,7 +96,7 @@ export default class GameResult extends React.Component<IProps, IState> {
 
     if (gameSessionId !== newGameSessionId ||
       playerAddress !== newPlayerAddress) {
-        await this.getSessionData(newGameSessionId, newPlayerAddress)
+      await this.getSessionData(newGameSessionId, newPlayerAddress)
     }
   }
 
@@ -154,10 +154,10 @@ export default class GameResult extends React.Component<IProps, IState> {
       let totalTime = '';
       if (parseInt(seconds) > 60) {
         let sec = (parseInt(seconds) % 60).toFixed(2);
-    
-        totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min " + sec+"sec").toString()
+
+        totalTime += isLeaderBoards ? (minutes + ":" + sec).toString() : (minutes + "min" + " " + sec + "sec").toString()
       } else {
-        totalTime += isLeaderBoards ? ("0:"+seconds).toString() : (seconds+"sec").toString()
+        totalTime += isLeaderBoards ? ("0:" + seconds).toString() : (seconds + "sec").toString()
       }
       return totalTime
     }
@@ -175,34 +175,39 @@ export default class GameResult extends React.Component<IProps, IState> {
     console.log('Do you win?', didWin);
     console.log('Your score?', score);
     console.log('Your highScore?', highScore);
-    
-    // let shouldSubmit = didWin || gameNo === tourneyMaxTries;
+
     let canTryAgain = gameNo < tourneyMaxTries;
 
     let scoreMsg = score === highScore ? `New high score!!` : ``;
-    // let finalScore = `Final score ${highScore}`
+    let finalMsg = `final Score ${this.formatTime(score, false)}`
 
     return (
       <Modal show={show} toggleModal={onToggle}>
         <StyledContainer>
           <h6>Game {gameNo} of {tourneyMaxTries}</h6>
           {canTryAgain ? (
-            <p className="score">{score && this.formatTime(score, false)}</p>
+            <>
+              <p className="score">{score && this.formatTime(score, false)}</p>
+              <p className="score-msg">{scoreMsg}</p>
+            </>
           ) : (
-            <p className="score-msg">{scoreMsg}</p>
-          )} 
+              <>
+                <p className="score-msg">{finalMsg}</p>
+                <p className="score-msg">{scoreMsg}</p>
+              </>
+            )}
 
           <p className="highscore-submitted">High score is automatically submitted</p>
 
-          {( (!didWin && canTryAgain) || canTryAgain ) ? (
+          {((!didWin && canTryAgain) || canTryAgain) ? (
             <div className="btn-container">
-              <Button onClick={ async () => {
-                  navigateTo('/');
+              <Button onClick={async () => {
+                navigateTo('/');
               }}>Try Again</Button>
             </div>
           ) : (
-            <p className="thanks-msg">Thanks for Playing!</p>
-          )}
+              <p className="thanks-msg">Thanks for Playing!</p>
+            )}
         </StyledContainer>
       </Modal>
     )

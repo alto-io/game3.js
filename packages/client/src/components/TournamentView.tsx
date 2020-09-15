@@ -26,8 +26,7 @@ interface IState {
 // Optional parameters to pass into RimbleWeb3
 const RIMBLE_CONFIG = {
   // accountBalanceMinimum: 0.001,
-   requiredNetwork: 5777, // ganache
-  // requiredNetwork: 4 // rinkeby
+  requiredNetwork: parseInt(process.env.REACT_APP_NETWORK_ID),
 };
 
 class TournamentView extends Component<IProps, IState> {

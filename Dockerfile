@@ -22,6 +22,11 @@ RUN apk --no-cache --virtual build-dependencies add \
 # Files
 COPY . .
 
+ENV REACT_APP_NETWORK_ID=4
+
+# Deploy smart contracts
+RUN yarn sol:deploy-rinkeby
+
 # Build
 RUN yarn build
 
