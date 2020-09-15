@@ -1,20 +1,13 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { RouteComponentProps } from '@reach/router'
 
 import Modal from './Modal';
 import { Button } from '../components';
-import GameJavascript, { GameJavascriptContext } from '../scenes/GameJavascript';
+// import GameJavascript, { GameJavascriptContext } from '../scenes/GameJavascript';
 import { navigateTo } from '../helpers/utilities';
 
-import {
-  updateGameNo,
-  getGameNo,
-  getGameSession,
-  putGameReplay,
-  updateSessionScore
-} from '../helpers/database'
+import { getGameSession, putGameReplay } from '../helpers/database'
 
 const StyledContainer = styled.div`
   margin-top: 1.25rem;
@@ -62,7 +55,25 @@ const StyledContainer = styled.div`
   }
 `
 
-export default class GameResult extends React.Component<any, any> {
+interface IState {
+  sessionData: any,
+  tourneyMaxTries: number
+}
+
+interface IProps {
+  playerAddress: string;
+  gameSessionId?: string;
+  tournamentId?: string;
+  recordFileHash: string;
+  onToggle: any;
+  contractMethodSendWrapper?: any;
+  drizzle: any;
+  drizzleState: any;
+  didWin?: boolean;
+  show: boolean;
+}
+
+export default class GameResult extends React.Component<IProps, IState> {
   constructor(props) {
     super(props)
 
@@ -73,7 +84,7 @@ export default class GameResult extends React.Component<any, any> {
   }
 
   componentDidMount = async () => {
-    const { gameSessionId, playerAddress, tournamentId, didWin } = this.props;
+    const { gameSessionId, playerAddress } = this.props;
     await this.getTournamentInfo();
     await this.getSessionData(gameSessionId, playerAddress);
   }
@@ -144,7 +155,7 @@ export default class GameResult extends React.Component<any, any> {
       if (parseInt(seconds) > 60) {
         let sec = (parseInt(seconds) % 60).toFixed(2);
     
-        totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min"+" "+sec+"sec").toString()
+        totalTime += isLeaderBoards ? (minutes+":"+sec).toString() : (minutes+"min " + sec+"sec").toString()
       } else {
         totalTime += isLeaderBoards ? ("0:"+seconds).toString() : (seconds+"sec").toString()
       }
@@ -153,7 +164,7 @@ export default class GameResult extends React.Component<any, any> {
   }
 
   render() {
-    const { show, onToggle, didWin, gameSessionId, playerAddress, tournamentId } = this.props
+    const { show, onToggle, didWin } = this.props
     const { sessionData, tourneyMaxTries } = this.state
 
     const score = didWin ? (sessionData && sessionData.timeLeft) : 0;
@@ -165,11 +176,11 @@ export default class GameResult extends React.Component<any, any> {
     console.log('Your score?', score);
     console.log('Your highScore?', highScore);
     
-    let shouldSubmit = didWin || gameNo === tourneyMaxTries;
+    // let shouldSubmit = didWin || gameNo === tourneyMaxTries;
     let canTryAgain = gameNo < tourneyMaxTries;
 
     let scoreMsg = score === highScore ? `New high score!!` : ``;
-    let finalScore = `Final score ${highScore}`
+    // let finalScore = `Final score ${highScore}`
 
     return (
       <Modal show={show} toggleModal={onToggle}>

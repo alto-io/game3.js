@@ -56,12 +56,12 @@ const ResponsiveCard = styled(Card)`
 interface IProps {
   address?: any;
   drizzle?: any;
-  tournamentId?: any;
-  tournamentBuyInAmount?: any;
+  tournamentId: number;
+  tournamentBuyInAmount: string;
   handleJoinClick?: any;
   handleCloseBuyinModal?: any;
   isOpen: boolean;
-  maxTries?: any;
+  maxTries: number;
 }
 
 interface IState {
