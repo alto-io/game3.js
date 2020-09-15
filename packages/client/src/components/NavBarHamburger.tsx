@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Box, Flex } from "rimble-ui";
 import styled from "styled-components";
-import { isThisHour } from "date-fns";
 
 const BurgerContainer = styled(Flex)`
   cursor: pointer;
@@ -28,7 +27,13 @@ const BurgerDiv = styled(Box)`
   height: 3px;
   transition: 300ms ease-in-out;
 `
-class NavBarHamburger extends Component {
+
+interface IProps {
+  handleBurger: any;
+  isOpen: boolean;
+}
+
+class NavBarHamburger extends Component<IProps> {
   render() {
     return (
       <>

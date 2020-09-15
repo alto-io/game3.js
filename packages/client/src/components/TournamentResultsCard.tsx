@@ -48,7 +48,7 @@ const ResultStyle = styled.div`
  justify-content: space-between;
  align-items: center;
  font-family: 'Apercu Pro Mono';
- font-size: 0.825rem;
+ font-size: 0.78rem;
  letter-spacing: 0.1px;
  padding: 0.5rem;
 
@@ -58,9 +58,9 @@ const ResultStyle = styled.div`
  }
 
  .shares {
-   margin: 0 0 0 1rem;
-   width: 32%;
-   text-align: left;
+  margin-left: 1rem;
+  width: 33%;
+  text-align: left;
  }
 
  .score {
@@ -76,6 +76,7 @@ const ResultStyle = styled.div`
  `
 
 const JoinTourneyBtn = styled(Button)`
+  color: #101010;
   font-family: 'Apercu Light';
   font-size: 0.825rem;
   letter-spacing: 0.4px;

@@ -70,7 +70,17 @@ const StyledTextLink = styled(Link)`
   }
 `
 
-class NavBarDropdown extends Component {
+interface IProps {
+  account: any;
+  accountBalance: any;
+  accountValidated: any;
+  shortenAddress: any;
+  balanceIcon: any;
+  walletIcon: any;
+  isOpen: boolean;
+}
+
+class NavBarDropdown extends Component<IProps> {
   render() {
     const {
       account, 

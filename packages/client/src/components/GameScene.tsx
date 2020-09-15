@@ -2,9 +2,7 @@ import React, {Component} from 'react';
 import { Flex, Box } from 'rimble-ui';
 import styled from 'styled-components';
 
-import { Router } from '@reach/router'
 import qs from 'querystringify';
-import { DEFAULT_GAME_DIMENSION } from '../constants'
 
 import TournamentResultsCard from './TournamentResultsCard';
 
@@ -43,10 +41,19 @@ const GameWindowContainer = styled(Flex)`
   }
 `
 
-// import CSS from 'csstype';
-// import { baseColors } from '../styles';
+interface IProps {
+  children: any;
+  drizzle: any;
+  playerAddress?: string;
+  accountValidated: any;
+  connectAndValidateAccount: any;
+}
 
-export default class GameScene extends Component<any, any> {
+interface IState {
+  tournamentId?: string;
+}
+
+export default class GameScene extends Component<IProps, IState> {
 
 	constructor(props) {
 		super(props);
