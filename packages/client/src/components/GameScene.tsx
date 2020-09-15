@@ -47,6 +47,7 @@ interface IProps {
   playerAddress?: string;
   accountValidated: any;
   connectAndValidateAccount: any;
+  setRoute: any;
 }
 
 interface IState {
@@ -72,7 +73,8 @@ export default class GameScene extends Component<IProps, IState> {
 			drizzle,
       playerAddress,
       accountValidated,
-      connectAndValidateAccount
+      connectAndValidateAccount,
+      setRoute
 		} = this.props;
 
 		const {
@@ -92,6 +94,7 @@ export default class GameScene extends Component<IProps, IState> {
             playerAddress={playerAddress}
             accountValidated={accountValidated}
             connectAndValidateAccount={connectAndValidateAccount}
+            setRoute={setRoute}
           />
         </Box>
 			</GameWindowContainer>

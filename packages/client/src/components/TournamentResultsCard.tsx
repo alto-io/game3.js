@@ -3,15 +3,12 @@ import { navigate } from '@reach/router';
 import { Button } from 'rimble-ui';
 import styled from 'styled-components';
 
-import JoinPromptModal from './JoinPromptModal';
-import BuyinPromptModal from './BuyInPromptModal';
 import SkeletonLeaderboardLoader from './SkeletonLeaderboardLoader';
 
-import { getTournamentResult, getTournament, getGameNo, getGameSessionId, getTournaments } from '../helpers/database'
+import { getTournamentResult, getTournament, getTournaments } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress";
 import { Constants } from '@game3js/common';
 import web3 from 'web3';
-import qs from 'querystringify';
 import { format } from 'date-fns';
 
 import {
@@ -79,6 +76,7 @@ const JoinTourneyBtn = styled(Button)`
   color: #101010;
   font-family: 'Apercu Light';
   font-size: 0.825rem;
+  outline: none;
   letter-spacing: 0.4px;
   text-transform: uppercase;
   width: 100%;
@@ -175,10 +173,6 @@ const JoinTourneyBtn = styled(Button)`
   tournament: any;
   shares: Array<any>;
   isLoading: boolean;
-  isJoinModalOpen: boolean;
-  isBuyinModalOpen: boolean;
-  accountBuyIn: number;
-  gameNo: number;
   tournamentId?: string;
   loggedIn: any;
  }
@@ -190,7 +184,8 @@ const JoinTourneyBtn = styled(Button)`
    drizzle: any;
    accountValidated: any;
    connectAndValidateAccount: any;
- }
+   setRoute: any;
+  }
 
 class TournamentResultsCard extends Component<IProps, IState> {
   constructor(props) {
@@ -201,18 +196,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
       tournament: {},
       isLoading: false,
       shares: [],
-      isJoinModalOpen: false,
-      isBuyinModalOpen: false,
-      accountBuyIn: 0,
-      gameNo: 0,
       tournamentId: '',
       loggedIn: ''
     }
-
-    this.handleCloseJoinModal = this.handleCloseJoinModal.bind(this);
-    this.handleOpenJoinModal = this.handleOpenJoinModal.bind(this);
-    this.handleCloseBuyinModal = this.handleCloseBuyinModal.bind(this);
-    this.handleOpenBuyinModal = this.handleOpenBuyinModal.bind(this);
   }
 
   async componentDidMount() {
@@ -329,11 +315,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
       const maxTries = await contract.methods.getMaxTries(tournamentId).call();
       const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
 
-      if (playerAddress && accountValidated) {
-        const accountBuyIn = await contract.methods.buyIn(tournamentId, playerAddress).call();
-        this.setState({ accountBuyIn });
-      }
-
       tournament = {
         id: tournamentId,
         name: gameName,
@@ -349,7 +330,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
         buyInAmount: tournamentBuyIn
       }
 
-      this.fetchGameNo(playerAddress, tournamentId);
     } else {
       raw = await getTournament(tournamentId);
       console.log("TOURNAMENT DATA FROM DB", raw);
@@ -492,35 +472,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   handleJoinClick = () => {
-    const { tournament } = this.state;
-    let options = {};
-
-    switch (tournament.name) {
-      case Constants.WOM:
-        navigate(`/game/wom${qs.stringify(options, true)}`); //Join tourney for wom
-        break;
-      case Constants.TOSIOS:
-        options = {
-          mode: 'score attack',
-          roomMap: 'small',
-          roomMaxPlayers: '1',
-          roomName: '',
-          tournamentId: tournament.id,
-          playerName: "Guest",
-          viewOnly: tournament.timeIsUp
-        }
-        navigate(`/game/new${qs.stringify(options, true)}`);
-        break;
-      case Constants.FP:
-        options = {
-          tournamentId: tournament.id,
-          viewOnly: tournament.timeIsUp
-        }
-        navigate(`/game/flappybird${qs.stringify(options, true)}`); //Join tourney for flappy bird
-        break;
-      default:
-        break;
-    }
+    const { setRoute } = this.props;
+    setRoute("TournamentView");
+    navigate("/");
   }
 
   fetchShares = async (tournamentId) => {
@@ -588,31 +542,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
     }
   }
 
-  handleCloseJoinModal = e => {
-    this.setState({ isJoinModalOpen: false });
-  }
-
-  handleOpenJoinModal = e => {
-    this.setState({ isJoinModalOpen: true });
-  }
-
-  handleCloseBuyinModal = e => {
-    this.setState({ isBuyinModalOpen: false });
-  }
-
-  handleOpenBuyinModal = e => {
-    this.setState({ isBuyinModalOpen: true });
-  }
-
-  fetchGameNo = async (account, tournamentId) => {
-    const gameSessionId = await getGameSessionId(account, tournamentId);
-    const gameNo = await getGameNo(gameSessionId, account, tournamentId);
-    this.setState({ gameNo: gameNo });
-  }
-
   render() {
-    const { results, isLoading, tournament, shares, isJoinModalOpen, isBuyinModalOpen, gameNo, accountBuyIn } = this.state;
-    const { tournamentId, playerAddress, accountValidated, connectAndValidateAccount, drizzle } = this.props;
+    const { results, isLoading, tournament, shares } = this.state;
+    const { tournamentId, playerAddress } = this.props;
 
     if (isLoading) {
       return (
@@ -661,27 +593,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
       }
     }
 
-    const button = () => {
-      if (accountBuyIn > 0 && playerAddress && accountValidated) {
-        return (
-          <JoinTourneyBtn
-            onClick={this.handleJoinClick}
-            mainColor={"#06df9b"}
-            disabled={gameNo === tournament.maxTries ? "disabled" : ""}
-          >
-            {`Play ( ${typeof gameNo !== "number" ? 0 : gameNo} out of ${tournament.maxTries} )`}
-          </JoinTourneyBtn>
-        )
-      } else {
-        return (<JoinTourneyBtn
-          onClick={playerAddress && accountValidated ? this.handleOpenBuyinModal : this.handleOpenJoinModal}
-          mainColor={"#06df9b"}
-        >
-          {`Join ( ${tournament.buyInAmount && web3.utils.fromWei(tournament.buyInAmount.toString())} ETH )`}
-        </JoinTourneyBtn>)
-      }
-    }
-
     return (
       <>
         <WidgetStyle>
@@ -705,25 +616,10 @@ class TournamentResultsCard extends Component<IProps, IState> {
                 </ResultDivsStyle>
               </LeaderboardStyle>
 
-              <JoinPromptModal
-                isOpen={isJoinModalOpen}
-                handleCloseModal={this.handleCloseJoinModal}
-                connectAndValidateAccount={connectAndValidateAccount}
-                modalText={"You must be logged in to join a tournament"}
-              />
-
-              <BuyinPromptModal
-                isOpen={isBuyinModalOpen}
-                handleCloseBuyinModal={this.handleCloseBuyinModal}
-                handleJoinClick={this.handleJoinClick}
-                drizzle={drizzle}
-                tournamentId={tournament.id}
-                tournamentBuyInAmount={tournament.buyInAmount}
-                maxTries={tournament.maxTries}
-                address={playerAddress}
-              />
               {tournamentId === undefined ? (
-                button()
+                <JoinTourneyBtn onClick={this.handleJoinClick} mainColor={"#06df9b"}>
+                  View Tournaments
+                </JoinTourneyBtn>
               ) : (
                   <TotalBuyInContainer>
                     <p>Total Buy-in Pool</p>

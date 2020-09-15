@@ -97,6 +97,7 @@ export interface IAppState {
   web3: any;
   provider: any;
   networkId: number;
+  route: string;
 }
 
 const DEFAULT_ACCOUNTS = CREATE_WALLET_ON_GUEST_ACCOUNT
@@ -144,7 +145,8 @@ const INITIAL_STATE: IAppState = {
   assets: [],
   web3: null,
   provider: null,
-  networkId: 1
+  networkId: 1,
+  route: 'Play'
 };
 
 
@@ -637,6 +639,10 @@ class App extends React.Component<any, any> {
     await this.dbManager.getGuestConfig(this.getGuestConfigCallback);
   };
 
+  public setRoute = (inputRoute) => {
+    this.setState({ route: inputRoute })
+  }
+
   public render = () => {
     const {
       playerProfile,
@@ -710,6 +716,8 @@ class App extends React.Component<any, any> {
                         account={account}
                         accountValidated={accountValidated}
                         connectAndValidateAccount={connectAndValidateAccount}
+                        route={this.state.route}
+                        setRoute={this.setRoute}
                       />
 
                       <GameContainer
@@ -720,6 +728,7 @@ class App extends React.Component<any, any> {
                         drizzle={this.props.drizzle}
                         drizzleState={drizzleState}
                         contractMethodSendWrapper={contractMethodSendWrapper}
+                        setRoute={this.setRoute}
                         >
                       </GameContainer>
 

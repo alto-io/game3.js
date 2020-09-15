@@ -53,6 +53,8 @@ interface IProps extends RouteComponentProps {
   drizzle: any;
   drizzleState: any;
   contractMethodSendWrapper: any;
+  setRoute: any;
+  route: string;
 }
 
 interface IState {
@@ -251,7 +253,7 @@ export default class Home extends Component<IProps, IState> {
   
   // RENDER
   render() {
-    const { drizzle, drizzleState, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount} = this.props
+    const { drizzle, drizzleState, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute} = this.props
 
     return (
       <>
@@ -263,6 +265,8 @@ export default class Home extends Component<IProps, IState> {
             account={account}
             accountValidated={accountValidated}
             connectAndValidateAccount={connectAndValidateAccount}
+            route={route}
+            setRoute={setRoute}
           />
 
           {   
