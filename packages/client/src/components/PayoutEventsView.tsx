@@ -9,21 +9,23 @@ import ViewResultsModal from './ViewResultsModal';
 import SkeletonResultsLoader from './SkeletonResultsLoader';
 
 const PlayerTournamentResultsCard = styled(Card)`
-  padding: 1rem 0.5rem;
-  margin: 1rem;
-  
-  @media screen and (min-width: 640px) {
-    padding: 2rem 1rem;
-    margin: 0 1rem;
+  margin-bottom: 2rem;
+  padding: 2rem 1rem;
+  width: 90%;
+
+  @media screen and (min-width: 1024px) {
+    width: 45%;
   }
 `
+
 const EventsCard = styled(Card)`
   box-shadow: none;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   flex-direction: column;
   padding: 1rem;
+  width: 100%;
 
   .tournamentID {
     font-size: 0.75rem;
@@ -33,19 +35,17 @@ const EventsCard = styled(Card)`
 
   .gameName {
     font-size: 1rem;
-    font-family: 'Apercu Bold';
     letter-spacing: 0.15px;
     margin: 0 0 1rem 0;
   }
 
   .prize {
-    font-family: 'Apercu Bold';
     font-size: 1.25rem;
     letter-spacing: 0;
     margin-bottom: 1rem;
   }
   
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 500px) {
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
@@ -55,10 +55,10 @@ const EventsCard = styled(Card)`
 const GameImage = styled(Image)`
   border-radius: 15px;
   margin-bottom: 1rem;
-  width: 270px;
-  height: 170px;
+  width: 220px;
+  height: 140px;
   
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 500px) {
     margin-right: 2rem;
     margin-bottom : 0;
     width: 185px;
@@ -74,6 +74,7 @@ interface IProps {
   drizzle: any;
   isLoading: boolean;
   parseData: any;
+  tournaments: Array<any>;
 }
 
 interface IState {
@@ -82,7 +83,7 @@ interface IState {
   events: Array<any>;
 }
 
-class PayoutEventsView extends Component<any, any> {
+class PayoutEventsView extends Component<IProps, IState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -218,18 +219,6 @@ class PayoutEventsView extends Component<any, any> {
         <SkeletonResultsLoader />
       )
     }
-
-    // const eventsRendered = events.map(event => 
-    //   <Flex key={event.id}>
-    //     <Box mr={2}>Amount: {event.returnValues.amount}</Box>
-    //     <Box mr={2}>tournamentId: {event.returnValues.tournamentId}</Box>
-    //     <Box mr={2}>resultId: {event.returnValues.resultId}</Box>
-    //   </Flex>
-    // )
-
-    // event.returnValues.amount
-    // tournamentId
-    // resultId
 
     // If player has winnings
     const eventsRendered = events.map( event =>

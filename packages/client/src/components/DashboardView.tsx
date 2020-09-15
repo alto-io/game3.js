@@ -16,18 +16,19 @@ const StyledFlex = styled(Flex)`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  flex-wrap: wrap;
-  margin: 0;
-  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
 
-  @media screen and (min-width: 375px) {
-    margin: 0 auto;
-  }
-
-  @media screen and (min-width: 640px) {
-    justify-content: center;
+  @media screen and (min-width: 1024px) {
+    justify-content: space-evenly;
     align-items: flex-start;
     flex-direction: row;
+    flex-wrap: wrap;
+    width: 90%;
+  }
+
+  @media screen and (min-width: 1200px) {
+    max-width: 1138px;
   }
 `
 
