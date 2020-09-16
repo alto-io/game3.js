@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { format, isPast } from 'date-fns'
 import qs from 'querystringify';
 import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
-import { getGameNo, getGameSessionId } from '../helpers/database';
+import { getGameNo, getGameSessionId, updateTournament } from '../helpers/database';
 import { Constants } from "@game3js/common";
 
 import web3 from 'web3';
@@ -61,8 +61,9 @@ interface IState {
   accountBuyIn: number;
   isContractOwner: boolean;
   gameNo: number;
-  gameName: string,
-  gameImage: string
+  gameName: string;
+  gameImage: string;
+  tournamentLoading: boolean;
   prizeString: Array<any>;
 }
 
@@ -80,6 +81,7 @@ class TournamentCard extends Component<IProps, IState> {
       gameNo: 0,
       gameName: '',
       gameImage: '',
+      tournamentLoading: true,
       prizeString: []
     }
 
@@ -91,6 +93,24 @@ class TournamentCard extends Component<IProps, IState> {
 
   async componentDidMount() {
     await this.getBlockchainInfo(this.props);
+
+    // Listen to tournamentActivation
+    await this.props.drizzle.contracts.Tournaments.events.TournamentActivated().on('data', async (event) => {
+      let tId = event.returnValues.tournamentId;
+
+      if (parseInt(this.props.tournamentId) === parseInt(tId)) {
+        this.setState({tournamentLoading: true});
+        const raw = await this.props.drizzle.contracts.Tournaments.methods.getTournament(tId).call();
+
+        const updatedTournament = {
+          state: raw['3'],
+          pool: raw['4']
+        }
+        console.log("TID UPDATE TO DB", tId);
+        await updateTournament(tId, updatedTournament);
+        await this.getBlockchainInfo(this.props);
+      }
+    });
   }
 
   componentDidUpdate() {
@@ -110,7 +130,7 @@ class TournamentCard extends Component<IProps, IState> {
 
   getBlockchainInfo = async (props) => {
     const { tournamentId, drizzle, address } = props
-
+    
     const contract = drizzle.contracts.Tournaments;
     const raw = await contract.methods.getTournament(tournamentId).call();
     const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
@@ -165,7 +185,8 @@ class TournamentCard extends Component<IProps, IState> {
     this.setState({
       gameId: tournament.gameId,
       tournament,
-      ownTournament
+      ownTournament,
+      tournamentLoading: false
     })
 
   }
@@ -181,7 +202,7 @@ class TournamentCard extends Component<IProps, IState> {
           tournamentId: tournament.id,
           viewOnly: tournament.timeIsUp
         }
-        
+
         navigate(`/game/wom${qs.stringify(options, true)}`);
 
         break;
@@ -298,7 +319,7 @@ class TournamentCard extends Component<IProps, IState> {
       for (let i = 0; i < shares.length; i++) {
         if (i === 0) {
           prizeString.push(`${i + 1}st: ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH`);
-          
+
         } else if (i === 1) {
           prizeString.push(`${i + 1}nd: ${(parseInt(web3.utils.fromWei(tournament.balance.toString())) * parseInt(shares[i]) / 100)} ETH`);
         } else if (i === 2) {
@@ -315,12 +336,10 @@ class TournamentCard extends Component<IProps, IState> {
   }
 
   render() {
-    const { tournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner, gameNo, gameName, gameImage, prizeString } = this.state
+    const { tournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner, tournamentLoading, gameNo, gameName, gameImage, prizeString } = this.state
     const { connectAndValidateAccount, account, accountValidated, drizzle, address } = this.props
 
-    const hasTournament = !!tournament
-
-    if (!hasTournament) {
+    if (tournamentLoading) {
       return (
         <Box width={[1, 1 / 2, 1 / 3]} p={3}>
           <SkeletonTournamentLoader />
@@ -330,6 +349,7 @@ class TournamentCard extends Component<IProps, IState> {
 
     const isActive = tournament.state === TOURNAMENT_STATE_ACTIVE;
 
+    // const isActive = tournament.state === TOURNAMENT_STATE_ACTIVE
     // don't show own tournaments
     // if (ownTournament || !isActive) {
     //   return (null)
@@ -386,8 +406,8 @@ class TournamentCard extends Component<IProps, IState> {
       }
     }
 
-    const prizeRender = prizeString.map( (prize, idx) => {
-      return(
+    const prizeRender = prizeString.map((prize, idx) => {
+      return (
         <PrizeBadge key={idx}>{prize}</PrizeBadge>
       )
     })
@@ -423,8 +443,8 @@ class TournamentCard extends Component<IProps, IState> {
                 {tournament.state && tournament.state === 1 ? (
                   `Ending: ${endTimeStr}`
                 ) : (
-                  "Ended"
-                )}
+                    "Ended"
+                  )}
               </Text>
             </Flex>
             <Flex justifyContent={"center"} mt={1} mb={2}>
@@ -440,7 +460,7 @@ class TournamentCard extends Component<IProps, IState> {
               playerAddress={address}
               drizzle={drizzle}
             />
-            {tournament.state === 0 && <Button onClick={() => {this.onActivate(tournament)}} mt={3}>Activate</Button>}
+            {tournament.state === 0 && <Button onClick={() => { this.onActivate(tournament) }} mt={3}>Activate</Button>}
             <JoinPromptModal
               isOpen={isOpen}
               handleCloseModal={this.handleCloseModal}

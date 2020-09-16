@@ -4,6 +4,8 @@ import { Button } from 'rimble-ui';
 import styled from 'styled-components';
 
 import SkeletonLeaderboardLoader from './SkeletonLeaderboardLoader';
+import Modal from './Modal';
+import PlayerGameReplays from './PlayerGameReplays';
 
 import { getTournamentResult, getTournament, getTournaments } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress";
@@ -48,6 +50,7 @@ const ResultStyle = styled.div`
  font-size: 0.78rem;
  letter-spacing: 0.1px;
  padding: 0.5rem;
+ cursor: pointer;
 
  .address {
    font-weight: bold;
@@ -175,6 +178,8 @@ const JoinTourneyBtn = styled(Button)`
   isLoading: boolean;
   tournamentId?: string;
   loggedIn: any;
+  isReplayModalOpen: boolean;
+  currentFileHash?: string;
  }
 
  interface IProps {
@@ -196,6 +201,8 @@ class TournamentResultsCard extends Component<IProps, IState> {
       tournament: {},
       isLoading: false,
       shares: [],
+      isReplayModalOpen: false,
+      currentFileHash: '',
       tournamentId: '',
       loggedIn: ''
     }
@@ -225,7 +232,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
     return data.split(' ').join('').split(",");
   }
 
-  refreshResults = async() => {
+  refreshResults = async () => {
     const { tournamentId } = this.state;
     let results = [];
     let sessionsData = await getTournamentResult(tournamentId);
@@ -542,8 +549,39 @@ class TournamentResultsCard extends Component<IProps, IState> {
     }
   }
 
+  toggleModal = (fileHash, shouldRender) => {
+    if (shouldRender) {
+      this.setState({
+        isReplayModalOpen: !this.state.isReplayModalOpen,
+        currentFileHash: fileHash
+      })
+    }
+  }
+
+  handleReplayModal = () => {
+    this.setState({
+      isReplayModalOpen: !this.state.isReplayModalOpen,
+    })
+  }
+
+  extractHighScore = result => {
+    
+    let gameName = result.gameName;
+
+    switch(gameName) {
+      case Constants.TOSIOS:
+        return result.sessionData.currentHighestNumber;
+      case Constants.WOM:
+        return result.sessionData.highScore;
+      case Constants.FP:
+        return result.sessionData.highScore;
+      default:
+        break;
+    }
+  }
+
   render() {
-    const { results, isLoading, tournament, shares } = this.state;
+    const { currentFileHash, isReplayModalOpen, results, isLoading, tournament, shares } = this.state;
     const { tournamentId, playerAddress } = this.props;
 
     if (isLoading) {
@@ -562,6 +600,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
           return (
             <ResultStyle className={playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase() ? "player-background"  : ""}
               key={result.sessionId}
+              onClick={() => this.toggleModal(result.sessionData.replayHash, this.extractHighScore(result) !== 0)}
             >
               <p className="address" style={{ width: shares !== undefined ? '33%' : '50%' }}>
                 {shortenAddress(result.playerAddress)}
@@ -599,6 +638,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
           {!!tournament ? (
             <>
               <TournamentInfoStyle>
+              <Modal show={isReplayModalOpen} toggleModal={this.handleReplayModal}>
+                <PlayerGameReplays hash={currentFileHash} />
+              </Modal>
                 {tournament.gameStage ? (
                   <h5 className="tourney-title">{tournament.gameStage}</h5>
                 ) : (

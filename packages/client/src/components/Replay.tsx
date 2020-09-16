@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { isMobile } from 'react-device-detect';
 import {
   Button,
@@ -14,6 +14,7 @@ const REPLAY = {
   overflow: 'hidden',
   display: 'flex',
   alignItems: 'center',
+  width: '100%'
 };
 
 const REPLAY_HOVERED = {
@@ -36,15 +37,15 @@ const getPadded = (time: number, padding: number = 2) => {
 };
 
 export function Replay(props: {
-  id: string;
-  time: number;
+  // id: string;
+  // time: number;
   hash: string;
 
   onClick: (id: string) => void;
 }): React.ReactElement {
   const {
-    id,
-    time,
+    // id,
+    // time,
     hash,
     onClick,
   } = props;
@@ -52,40 +53,42 @@ export function Replay(props: {
 
   let timeDisplay: string;
 
-  if (time <= 0) {
-    timeDisplay = '00:00';
-  } else {
-    const minutesLeft: number = getMinutes(time / 1000);
-    const secondsLeft: number = getSeconds(time / 1000);
+  // if (time <= 0) {
+  //   timeDisplay = '00:00';
+  // } else {
+  //   const minutesLeft: number = getMinutes(time / 1000);
+  //   const secondsLeft: number = getSeconds(time / 1000);
 
-    timeDisplay = getPadded(minutesLeft) + ":" + getPadded(secondsLeft);
-  }
+  //   timeDisplay = getPadded(minutesLeft) + ":" + getPadded(secondsLeft);
+  // }
 
-  return (
-    <View
-      style={{
-        ...REPLAY,
-        flexDirection: isMobile ? 'column' : 'row',
-        ...(hovered && REPLAY_HOVERED),
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onClick={() => onClick(hash)}
-    >
-      <View>
-        <p><b>{`ID: "${id}"`}</b></p>
-        <p><b>{`Time: "${timeDisplay}"`}</b></p>
-      </View>
-      {isMobile && <Space size="xs" />}
-      <Button
-        type="button"
-        style={{
-          marginLeft: 'auto',
-          width: isMobile ? '100%' : 'fit-content',
-        }}
-      >
-        Watch
-      </Button>
-    </View>
-  );
+  useEffect(() => {
+    onClick(hash);
+  }, [])
+
+
+
+  return (null);
 }
+
+  // <View
+  //   style={{
+  //     ...REPLAY,
+  //     flexDirection: isMobile ? 'column' : 'row',
+  //     ...(hovered && REPLAY_HOVERED),
+  //   }}
+  //   onMouseEnter={() => setHovered(true)}
+  //   onMouseLeave={() => setHovered(false)}
+  //   onClick={() => onClick(hash)}
+  // >
+  //   {isMobile && <Space size="xs" />}
+  //   <Button
+  //     type="button"
+  //     style={{
+  //       marginLeft: 'auto',
+  //       width: isMobile ? '100%' : 'fit-content',
+  //     }}
+  //   >
+  //     Watch
+  //   </Button>
+  // </View>

@@ -190,6 +190,8 @@ export class OrbitDBManager implements DBManager {
   }
 
   async getFileFromHash(hash: string) {
+    console.log("GET_FILEFROMHASH: Function Invoked...");
+    console.log("GET_FILEFROMHASH: Getting file from hash: ", hash);
 
     let result;
 
@@ -221,6 +223,7 @@ export class OrbitDBManager implements DBManager {
   }
 
   async serverPutGameReplay(requestBody) {
+    console.log("PUT_GREPLAY: Function Invoked...");
     console.log('serverPutGameReplay')
     const { sessionId, playerAddress, fileHash } = requestBody
 
@@ -234,7 +237,7 @@ export class OrbitDBManager implements DBManager {
       return
     }
     playerData.replayHash = fileHash
-    console.log(entry)
+    console.log("PUT_GSESSION: Entry", entry);
     await this.gameSessions.put(entry)
     return { result: sessionId }
   }
