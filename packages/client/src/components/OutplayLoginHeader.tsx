@@ -1,21 +1,14 @@
 import React from "react";
-import { Card, Text, Box, Button, Flex, Image, Link } from "rimble-ui";
 import OutplayLoginHeaderDesktop from "./OutplayLoginHeaderDesktop";
 import OutplayLoginHeaderMobile from "./OutplayLoginHeaderMobile";
 
-import RimbleWeb3 from "../rimble/RimbleWeb3";
 
 import TransactionToastUtil from "../rimble/TransactionToastUtil";
-import SmartContractControls from "./SmartContractControls";
-import TransactionsCard from "./TransactionsCard";
-
-import AccountOverview from "../rimble/components/AccountOverview";
 
 import logo from './../images/op-logo.png';
 import walletIcon from "./../images/icon-wallet.svg";
 import balanceIcon from "./../images/icon-balance.svg";
 import shortenAddress from "../core/utilities/shortenAddress";
-import { navigate } from '@reach/router';
 
 import { navigateTo } from '../helpers/utilities';
 
@@ -27,7 +20,8 @@ class OutplayLoginHeader extends React.Component {
     super(props);
     this.state = {
       width: window.innerWidth,
-      height: window.innerHeight
+      height: window.innerHeight,
+      rimbleInitialized: false,
     };
   }
 
@@ -56,8 +50,9 @@ class OutplayLoginHeader extends React.Component {
       })
     }
 
+
     componentDidMount () {
-      window.addEventListener('resize', this.handleResize)
+      window.addEventListener('resize', this.handleResize);
 
       this.setState({
         width: window.innerWidth,
@@ -91,6 +86,7 @@ class OutplayLoginHeader extends React.Component {
 
                 console.log("contract initialized");
                 this.contractInitialized = true;
+                this.setState({ rimbleInitialized: true });
             }
         }
       }    
@@ -109,6 +105,8 @@ class OutplayLoginHeader extends React.Component {
         {
           accountBalance = web3.utils.fromWei(accountBalances[account].toString(), "ether")
         }
+
+        console.log(this.state.rimbleInitialized);
     return (
         <>
           {this.state.width > 768 ? (
@@ -122,6 +120,7 @@ class OutplayLoginHeader extends React.Component {
             walletIcon={walletIcon}
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
+            rimbleInitialized={this.state.rimbleInitialized}
           />
                     
           ) : <OutplayLoginHeaderMobile 
@@ -134,6 +133,7 @@ class OutplayLoginHeader extends React.Component {
             walletIcon={walletIcon}
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
+            rimbleInitialized={this.state.rimbleInitialized}
           />}
 
 
