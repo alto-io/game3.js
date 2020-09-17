@@ -29,8 +29,7 @@ class OutplayLoginHeaderMobile extends Component {
       logo, 
       balanceIcon,
       walletIcon,
-      rimbleInitialized,
-      drizzleInitialized
+      rimbleInitialized
     } = this.props;
 
     return (
@@ -48,7 +47,7 @@ class OutplayLoginHeaderMobile extends Component {
 
           <Flex>
             {account && accountValidated ? "" : (
-            <ConnectWalletButton handleConnectAccount={handleConnectAccount} rimbleInitialized={rimbleInitialized} drizzleInitialized={drizzleInitialized}/>
+            <ConnectWalletButton handleConnectAccount={handleConnectAccount} rimbleInitialized={rimbleInitialized}/>
             )}
             
 

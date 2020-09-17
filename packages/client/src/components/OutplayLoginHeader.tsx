@@ -21,8 +21,7 @@ class OutplayLoginHeader extends React.Component {
     this.state = {
       width: window.innerWidth,
       height: window.innerHeight,
-      rimbleInitialized: false,
-      drizzleInitialized: false
+      rimbleInitialized: false
     };
   }
 
@@ -68,7 +67,6 @@ class OutplayLoginHeader extends React.Component {
     componentDidUpdate() {
 
         if (!this.contractInitialized) {
-          this.getDrizzleState();
             if (this.props.drizzle.contracts.Tournaments) {
                 console.log(this.props.drizzle.contracts.Tournaments);
 
@@ -89,23 +87,13 @@ class OutplayLoginHeader extends React.Component {
             }
         }
       }    
-
-    getDrizzleState = () => {
-      const { drizzle } = this.props;
-      const state = drizzle.store.getState();
-
-      if (state.drizzleStatus.initialized) {
-        this.setState({ drizzleInitialized : true });
-      }
-    }
     
     render() {
     const {
         account,
         accountBalances,
         accountValidated,
-        transactions,
-        drizzle
+        transactions
         } = this.props;     
        
         let accountBalance = null
@@ -129,7 +117,6 @@ class OutplayLoginHeader extends React.Component {
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
             rimbleInitialized={this.state.rimbleInitialized}
-            drizzleInitialized={this.state.drizzleInitialized}
           />
                     
           ) : <OutplayLoginHeaderMobile 
@@ -143,7 +130,6 @@ class OutplayLoginHeader extends React.Component {
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
             rimbleInitialized={this.state.rimbleInitialized}
-            drizzleInitialized={this.state.drizzleInitialized}
           />}
 
 
