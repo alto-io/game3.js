@@ -4,16 +4,19 @@ import { Button } from "rimble-ui";
 interface IProps {
   handleConnectAccount?: any;
   rimbleInitialized: boolean;
+  drizzleInitialized?: boolean;
 }
 
 class ConnectWalletButton extends Component<IProps> {
   render() {
+    const { handleConnectAccount, rimbleInitialized, drizzleInitialized } = this.props;
+
     return(
       <Button 
-        onClick={this.props.handleConnectAccount}
+        onClick={handleConnectAccount}
         mr={3}
         size={"small"} 
-        disabled={this.props.rimbleInitialized ? "" : "disabled"}
+        disabled={!rimbleInitialized ? "disabled" : ""}
       >
         Connect your wallet
       </Button>

@@ -22,6 +22,7 @@ class OutplayLoginHeader extends React.Component {
       width: window.innerWidth,
       height: window.innerHeight,
       rimbleInitialized: false,
+      drizzleInitialized: false
     };
   }
 
@@ -66,12 +67,10 @@ class OutplayLoginHeader extends React.Component {
 
     componentDidUpdate() {
 
-        if (!this.contractInitialized)
-        {
-            if (this.props.drizzle.contracts.Tournaments)
-
-            {
-                console.log(this.props.drizzle.contracts.Tournaments)
+        if (!this.contractInitialized) {
+          this.getDrizzleState();
+            if (this.props.drizzle.contracts.Tournaments) {
+                console.log(this.props.drizzle.contracts.Tournaments);
 
                 // get initial contract
                 const tournamentContract = this.props.drizzle.contracts.Tournaments;
@@ -85,18 +84,28 @@ class OutplayLoginHeader extends React.Component {
                 });
 
                 console.log("contract initialized");
+                this.setState({ rimbleInitialized : true });
                 this.contractInitialized = true;
-                this.setState({ rimbleInitialized: true });
             }
         }
       }    
 
+    getDrizzleState = () => {
+      const { drizzle } = this.props;
+      const state = drizzle.store.getState();
+
+      if (state.drizzleStatus.initialized) {
+        this.setState({ drizzleInitialized : true });
+      }
+    }
+    
     render() {
     const {
         account,
         accountBalances,
         accountValidated,
-        transactions
+        transactions,
+        drizzle
         } = this.props;     
        
         let accountBalance = null
@@ -106,7 +115,6 @@ class OutplayLoginHeader extends React.Component {
           accountBalance = web3.utils.fromWei(accountBalances[account].toString(), "ether")
         }
 
-        console.log(this.state.rimbleInitialized);
     return (
         <>
           {this.state.width > 768 ? (
@@ -121,6 +129,7 @@ class OutplayLoginHeader extends React.Component {
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
             rimbleInitialized={this.state.rimbleInitialized}
+            drizzleInitialized={this.state.drizzleInitialized}
           />
                     
           ) : <OutplayLoginHeaderMobile 
@@ -134,6 +143,7 @@ class OutplayLoginHeader extends React.Component {
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
             rimbleInitialized={this.state.rimbleInitialized}
+            drizzleInitialized={this.state.drizzleInitialized}
           />}
 
 

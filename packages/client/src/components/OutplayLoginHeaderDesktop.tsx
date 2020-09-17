@@ -35,7 +35,8 @@ class OutplayLoginHeaderDesktop extends Component {
       logo, 
       balanceIcon,
       walletIcon,
-      rimbleInitialized
+      rimbleInitialized,
+      drizzleInitialized
       } = this.props;
 
     return(
@@ -106,7 +107,7 @@ class OutplayLoginHeaderDesktop extends Component {
               </Flex>
             </Flex>
           ) : (
-            <ConnectWalletButton handleConnectAccount={handleConnectAccount} rimbleInitialized={this.props.rimbleInitialized}/>
+            <ConnectWalletButton handleConnectAccount={handleConnectAccount} rimbleInitialized={rimbleInitialized} drizzleInitialized={drizzleInitialized}/>
           )}
 
         </Flex>
