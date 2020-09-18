@@ -150,10 +150,6 @@ export default class GameContainer extends Component<IProps, any> {
         recordFileHash
       })
 
-      // const resultId = 1
-      // const result = await putTournamentResult(tournamentId, resultId, fileHash);
-      // console.log(result)
-
       if (shouldUpdateDB !== undefined && shouldUpdateDB) {
         console.log("SHOULD UPDATE DB TO SERVER")
         const sessionId = await getGameSessionId(address, tournamentId);

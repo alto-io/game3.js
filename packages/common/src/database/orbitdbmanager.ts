@@ -123,40 +123,6 @@ export class OrbitDBManager implements DBManager {
     await this.user.load()
   }
 
-  async getPlayerProfile(walletid) {
-    const playerProfile = await this.user.get(walletid)
-    return playerProfile
-  }
-
-  async getLeaderboard() {
-
-    const lb = await this.user.all
-
-    return lb
-  }
-
-  async savePlayerProfile(playerProfile: PlayerProfile) {
-
-    const id = playerProfile.walletid;
-    delete playerProfile.walletid;
-
-    const result = await this.user.set(id, playerProfile)
-    const savedUser = await this.user.get(id)
-
-    return savedUser
-  }
-
-  async getTournamentData(tournamentId: any) {
-    const data = await this.user.get(tournamentId)
-    return data
-  }
-
-  async putTournamentData(tournamentData: TournamentData) {
-    const id = tournamentData.id
-    const result = await this.user.set(id, tournamentData)
-    return result
-  }
-
   async getGuestConfig(callback?) {
     const guestAccount = await this.guest.all;
 

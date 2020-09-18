@@ -164,16 +164,6 @@ class CreateTourneyView extends Component<any, any> {
       (txStatus, transaction) => { // callback
         console.log("createTournament callback: ", txStatus, transaction);
       })
-
-    // const receipt = await contract.methods.createTournament(address, timestamp, data, prize, shares, buyInAmount, triesPerBuyin)
-    //   .send({from: address})
-
-    // const { tournamentId } = receipt.events.TournamentCreated.returnValues
-
-    // // TODO
-    // putTournamentData({ id: tournamentId })
-
-    // this.updateTournaments()
   }
 
   updateTournaments = async () => {
