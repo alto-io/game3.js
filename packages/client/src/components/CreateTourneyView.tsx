@@ -441,7 +441,8 @@ class CreateTourneyView extends Component<any, any> {
       {
         name: input.name,
         type: input.type,
-        value: input.value
+        value: input.value,
+        placeholder: ''
       }
       switch (input.name) {
         case "organizer":
@@ -449,6 +450,9 @@ class CreateTourneyView extends Component<any, any> {
           break;
         case "endTime":
           newInput.value = Date.now() + 10 * 24 * 60 * 60 * 1000;
+          break;
+        case "uintParams":
+          newInput.placeholder = "prize,buyInAmt,maxTries";
           break;
         default:
           newInput.value = input.value;
@@ -664,6 +668,7 @@ class CreateTourneyView extends Component<any, any> {
                                 required={true}
                                 onChange={this.handleInputChange}
                                 value={this.state.contractInputs[index].value}
+                                placeholder={this.state.contractInputs[index].placeholder}
                               />
                             }
                           </Field>
