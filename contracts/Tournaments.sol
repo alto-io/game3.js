@@ -155,36 +155,45 @@ contract Tournaments is Ownable {
   */
   function createTournament(
     address payable     organizer,
-    uint                endTime,
     string calldata     data,
-    uint256             prize,
+    uint                endTime,
     uint256[] calldata  shares,
-    uint256             buyInAmount,
-    uint                triesPerBuyIn
+    uint256[] calldata  uintParams,
+    uint                value
   )
     external
+    payable
     notInPast(endTime)
     noTournamentsOverflow()
+    correctPaymentAmount(value)
     returns (uint)
   {
-    require(prize != 0, "Prize must not be zero");
-    require(buyInAmount != 0, "Buy in amount must not be zero");
-    require(triesPerBuyIn != 0, "Tries count must not be zero");
+    // uintParams[0] = prize
+    // uintParams[1] = buyInAmount
+    // uintParams[2] = triesPerBuyIn
+
+    require(uintParams[0] != 0, "Prize must not be zero");
+    require(uintParams[1] != 0, "Buy in amount must not be zero");
+    require(uintParams[2] != 0, "Tries count must not be zero");
 
     // check and claulate shares
-    uint total = 0;
     uint sharesCount = shares.length;
     require(sharesCount >= 1, "Must have at least one share");
     for (uint i = 0; i < sharesCount; i++) {
       require((shares[i]) > 0, "Must not have zero shares");
-      total += shares[i];
+      totalShares[tournaments.length - 1] += shares[i];
     }
 
-    tournaments.push(Tournament(organizer, endTime, data, prize,
-      buyInAmount, triesPerBuyIn, TournamentState.Draft, 0, shares));
+    tournaments.push(Tournament(organizer, endTime, data, uintParams[0],
+      uintParams[1], uintParams[2], TournamentState.Draft, 0, shares));
 
     winnerShares[tournaments.length - 1] = shares;
-    totalShares[tournaments.length - 1] = total;
+    
+    // activate tournament
+    tournaments[tournaments.length - 1].balance += value;
+    require (tournaments[tournaments.length - 1].balance >= tournaments[tournaments.length - 1].prize,
+      "Payment amount is lower than prize");
+    tournaments[tournaments.length - 1].state = TournamentState.Active;
 
     emit TournamentCreated(tournaments.length - 1);
     return (tournaments.length - 1);
