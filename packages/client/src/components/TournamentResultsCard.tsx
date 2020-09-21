@@ -82,7 +82,7 @@ const JoinTourneyBtn = styled(Button)`
   width: 100%;
  `
 
- const JoinLeaderboardsMsg = styled.div`
+const JoinLeaderboardsMsg = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -90,7 +90,7 @@ const JoinTourneyBtn = styled(Button)`
   padding: 0.5rem;
  `
 
- const WidgetStyle = styled.div`
+const WidgetStyle = styled.div`
   color: #101010;
   display: flex;
   justify-content: center;
@@ -100,7 +100,7 @@ const JoinTourneyBtn = styled(Button)`
   height: 100%;
  `
 
- const LeaderboardStyle = styled.div`
+const LeaderboardStyle = styled.div`
   background: #fff;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   display: flex;
@@ -119,7 +119,7 @@ const JoinTourneyBtn = styled(Button)`
  `
 
 //  Used inside <LeaderboardStyle>
- const ResultDivsStyle = styled.div`
+const ResultDivsStyle = styled.div`
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -127,7 +127,7 @@ const JoinTourneyBtn = styled(Button)`
   width: 100%;
  `
 
- const TournamentInfoStyle = styled.div`
+const TournamentInfoStyle = styled.div`
   background: #ffb600;
   border-radius: 7px 7px 0 0;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
@@ -149,7 +149,7 @@ const JoinTourneyBtn = styled(Button)`
   }
  `
 
- const TotalBuyInContainer = styled.div`
+const TotalBuyInContainer = styled.div`
   background: #06df9b;
   border: none;
   border-radius: 7px;
@@ -168,7 +168,7 @@ const JoinTourneyBtn = styled(Button)`
   }
  `
 
- interface IState {
+interface IState {
   results: Array<any>;
   tournament: any;
   shares: Array<any>;
@@ -176,17 +176,17 @@ const JoinTourneyBtn = styled(Button)`
   tournamentId?: string;
   isReplayModalOpen: boolean;
   currentFileHash?: string;
- }
+}
 
- interface IProps {
-   tournamentId: any;
-   address: any;
-   playerAddress: any;
-   drizzle: any;
-   accountValidated: any;
-   connectAndValidateAccount: any;
-   setRoute: any;
-  }
+interface IProps {
+  tournamentId: any;
+  address: any;
+  playerAddress: any;
+  drizzle: any;
+  accountValidated: any;
+  connectAndValidateAccount: any;
+  setRoute: any;
+}
 
 class TournamentResultsCard extends Component<IProps, IState> {
   constructor(props) {
@@ -256,10 +256,16 @@ class TournamentResultsCard extends Component<IProps, IState> {
         results.sort((el1, el2) => {
           switch (el1.gameName) {
             case Constants.FP:
-              return el2.sessionData.highScore - el1.sessionData.highScore
+              if (el1.sessionData.highScore === 0) return 1;        
+              if (el2.sessionData.highScore === 0) return -1;
+              return el2.sessionData.highScore - el1.sessionData.highScore;
             case Constants.TOSIOS:
+              if (el1.sessionData.currentHighestNumber === 0) return -1;        
+              if (el2.sessionData.currentHighestNumber === 0) return 1;
               return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
             case Constants.WOM:
+              if (el1.sessionData.highScore === 0) return 1;        
+              if (el2.sessionData.highScore === 0) return -1;
               return el1.sessionData.highScore - el2.sessionData.highScore
             default:
               break;
@@ -518,10 +524,10 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   extractHighScore = result => {
-    
+
     let gameName = result.gameName;
 
-    switch(gameName) {
+    switch (gameName) {
       case Constants.TOSIOS:
         return result.sessionData.currentHighestNumber;
       case Constants.WOM:
@@ -551,7 +557,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
         if (result.sessionData) {
           let isMyData = playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase();
           return (
-            <ResultStyle 
+            <ResultStyle
               mydata={isMyData}
               key={result.sessionId}
               onClick={() => this.toggleModal(result.sessionData.replayHash, this.extractHighScore(result) !== 0)}
@@ -592,9 +598,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
           {!!tournament ? (
             <>
               <TournamentInfoStyle>
-              <Modal show={isReplayModalOpen} toggleModal={this.handleReplayModal}>
-                <PlayerGameReplays hash={currentFileHash} />
-              </Modal>
+                <Modal show={isReplayModalOpen} toggleModal={this.handleReplayModal}>
+                  <PlayerGameReplays hash={currentFileHash} />
+                </Modal>
                 {tournament.gameStage ? (
                   <h5 className="tourney-title">{tournament.gameStage}</h5>
                 ) : (
