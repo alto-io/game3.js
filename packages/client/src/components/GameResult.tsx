@@ -149,6 +149,9 @@ export default class GameResult extends React.Component<IProps, IState> {
 
   formatTime = (time, isLeaderBoards) => {
     if (time) {
+      if (time === 0) {
+        return '0';
+      } 
       const seconds = (parseInt(time) / 1000).toFixed(2);
       const minutes = Math.floor(parseInt(seconds) / 60);
       let totalTime = '';
@@ -179,7 +182,7 @@ export default class GameResult extends React.Component<IProps, IState> {
     let canTryAgain = gameNo < tourneyMaxTries;
 
     let scoreMsg = score === highScore ? `New high score!!` : ``;
-    let finalMsg = `final Score ${this.formatTime(score, false)}`
+    let finalMsg = `final Score ${this.formatTime(highScore, false)}`
 
     return (
       <Modal show={show} toggleModal={onToggle}>
