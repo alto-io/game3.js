@@ -91,7 +91,7 @@ export default class GameJavascript extends Component<any, any> {
     console.log("GAME JAVASCRIPT-endGame: Tourney ID", tournamentId)
     if (tournamentId || tournamentId === 0) {
       console.log("GAME JAVASCRIPT-endGame: New Highscore?", data.newHighScore);
-      stopRecording(data.newHighScore);
+      await stopRecording(data.newHighScore);
       console.log("GAME JAVASCRIPT-endGame: Recording stopped")
     }
 

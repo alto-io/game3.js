@@ -51,6 +51,7 @@ const ResultStyle = styled.div`
  letter-spacing: 0.1px;
  padding: 0.5rem;
  cursor: pointer;
+ background: ${props => props.mydata ? "#c4c4c4" : "none"}
 
  .address {
    font-weight: bold;
@@ -68,10 +69,6 @@ const ResultStyle = styled.div`
    margin: 0;
    text-align: right;
    width: 33%;
- }
-
- .player-background {
-   background: #c4c4c4;
  }
  `
 
@@ -231,6 +228,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   refreshResults = async () => {
+    console.log("REFRESHING RESULTS");
     const { tournamentId } = this.state;
     let results = [];
     let sessionsData = await getTournamentResult(tournamentId);
@@ -550,10 +548,12 @@ class TournamentResultsCard extends Component<IProps, IState> {
     if (results.length > 0) {
 
       resultDivs = results.map((result, idx) => {
-
+        console.log("RESULT PLAYER ADDRESS", result.playerAddress.toLowerCase());
         if (result.sessionData) {
+          let isMyData = playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase();
           return (
-            <ResultStyle className={playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase() ? "player-background"  : ""}
+            <ResultStyle 
+              mydata={isMyData}
               key={result.sessionId}
               onClick={() => this.toggleModal(result.sessionData.replayHash, this.extractHighScore(result) !== 0)}
             >
