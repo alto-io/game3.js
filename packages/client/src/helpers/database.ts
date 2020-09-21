@@ -179,21 +179,6 @@ export async function newTournament(tournamentId):Promise<any> {
   return result.data; 
 }
 
-export async function getTournaments():Promise<any> {
-
-  const result = await api.get('/tournaments')
-  return result.data; 
-}
-
-export async function getTournament(tournamentId):Promise<any> {
-  const params = { tournamentId }
-
-  console.log("GET TOURNAMENT CALLED", tournamentId);
-  const result = await api.get('/tourney', {params});
-  console.log("GET TOURNAMENT FETCHED", result);
-  return result.data; 
-}
-
 export async function updateTournament(tournamentId, updatedData): Promise<any> {
   const params = {
     tournamentId,
@@ -214,9 +199,10 @@ export async function getTournamentResult(tournamentId: number): Promise<any> {
   return response.data;
 }
 
-export async function getTourneyWinners(tournamentId): Promise<any> {
+export async function getTopResults(tournamentId, resultsCount): Promise<any> {
   const params = {
-    tournamentId
+    tournamentId,
+    resultsCount
   }
 
   console.log("GET TOURNAMENT WINNERS", params);

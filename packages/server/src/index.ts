@@ -209,8 +209,9 @@ app.patch('/tournament/update', async (req: any, res: any) => {
 app.get('/tourney/winners', async(req: any, res: any) => {
 
   const tournamentId = req.query.tournamentId;
+  const resultsCount = req.query.resultsCount;
 
-  const result = await GlobalState.ServerState.dbManager.getTourneyWinners(tournamentId);
+  const result = await GlobalState.ServerState.dbManager.getTopResults(tournamentId, resultsCount);
   res.json(result);
 })
 

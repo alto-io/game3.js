@@ -16,7 +16,7 @@ import '../react-datetime.css';
 
 import { Constants } from '@game3js/common';
 
-import { newTournament, updateTournament, getTourneyWinners } from '../helpers/database'
+import { newTournament, updateTournament, getTopResults } from '../helpers/database'
 
 class CreateTourneyView extends Component<any, any> {
 
@@ -461,14 +461,14 @@ class CreateTourneyView extends Component<any, any> {
     e.preventDefault();
     const {contractInputs} = this.state;
 
-    let winners = await getTourneyWinners(parseInt(contractInputs[0].value));
+    let topResults = await getTopResults(parseInt(contractInputs[0].value), 5);
 
-    console.log("WINNERS ARRAY", winners);
+    console.log("WINNERS ARRAY", topResults);
 
     contractInputs.forEach((input, idx) => {
       switch(input.name) {
         case "playerIds":
-          contractInputs[idx].value = winners;
+          contractInputs[idx].value = topResults;
           break;
         default:
           break;
@@ -634,7 +634,7 @@ class CreateTourneyView extends Component<any, any> {
                             >
                               {
                                 <Button size={"medium"} mr={3} mb={3} onClick={this.populatePlayerIds}>
-                                  Get Winners From DB
+                                  Get Top results From DB
                                 </Button>
                               }
                             </Field>

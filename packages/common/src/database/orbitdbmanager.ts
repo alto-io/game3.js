@@ -532,17 +532,6 @@ export class OrbitDBManager implements DBManager {
     }
   }
 
-  async getTournaments() {
-    console.log("GET_TOURNEYS: Initiating...");
-    console.log("GET_TOURNEYS: Fetching all tourneys");
-    let tournaments = await this.tournaments.query(tournament =>
-      tournament.id > -1
-    )
-    console.log("GET_TOURNEYS: Fetched!", tournaments);
-    console.log("GET_TOURNEYS: Returning...");
-    return tournaments
-  }
-
   async getTournament(tournamentId) {
     console.log("GET_TOURNEY: Initiating...");
     console.log("GET_TOURNEY: Fetching tourney with id:", tournamentId);
@@ -554,129 +543,116 @@ export class OrbitDBManager implements DBManager {
     return tournament
   }
 
-  async getTourneyWinners(tournamentId) {
+  async getTopResults(tournamentId, resultsCount) {
     console.log("GET_TOURNEY_WINNERS: Initiating...");
-    console.log("GET_TOURNEY_WINNERS: Fetching tourney");
 
-    let tourney = await this.tournaments.query(tournament =>
-      tournament.id === tournamentId
-    )
+    let winnersLength = resultsCount;
 
-    if (tourney.length > 0) {
-      console.log("GET_TOURNEY_WINNERS: Tourney fetched!!", tourney);
+    console.log("GET_TOURNEY_WINNERS: Fetching tourney session data");
+    let tourneySession = await this.getTournamentResult(tournamentId);
 
-      let winnersLength = tourney[0].shares.length;
+    let players = []
+    let winners = []
 
-      console.log("GET_TOURNEY_WINNERS: Fetching tourney session data");
-      let tourneySession = await this.getTournamentResult(tournamentId);
+    if (tourneySession.length > 0) {
+      console.log("GET_TOURNEY_WINNERS: Tourney session fetched!!", tourneySession);
 
-      let players = []
-      let winners = []
-
-      if (tourneySession.length > 0) {
-        console.log("GET_TOURNEY_WINNERS: Tourney session fetched!!", tourneySession);
-
-        switch (tourneySession[0].sessionData.gameName) {
-          case TOSIOS:
-            players = tourneySession.map(session => {
-              let playerAddress = Object.keys(session.sessionData.playerData);
-              return {
-                address: playerAddress[0],
-                score: session.sessionData.playerData[playerAddress[0]].currentHighestNumber
-              }
-            });
-
-            console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
-
-            console.log("GET_TOURNEY_WINNERS: Sorting player scores");
-
-            // sort in ascending order since shortest time is the winner
-            players.sort((el1, el2) => el1.score - el2.score);
-
-            console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
-
-            console.log("GET_TOURNEY_WINNERS: Mapping winners...");
-
-            winners = []
-
-            for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
-              winners.push(players[i].address);
+      switch (tourneySession[0].sessionData.gameName) {
+        case TOSIOS:
+          players = tourneySession.map(session => {
+            let playerAddress = Object.keys(session.sessionData.playerData);
+            return {
+              address: playerAddress[0],
+              score: session.sessionData.playerData[playerAddress[0]].currentHighestNumber
             }
+          });
 
-            console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
-            console.log("GET_TOURNEY_WINNERS: Returning...");
+          console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
 
-            return winners;
-          case FP:
-            players = tourneySession.map(session => {
-              let playerAddress = Object.keys(session.sessionData.playerData);
-              return {
-                address: playerAddress[0],
-                score: session.sessionData.playerData[playerAddress[0]].highScore
-              }
-            });
+          console.log("GET_TOURNEY_WINNERS: Sorting player scores");
 
-            console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+          // sort in ascending order since shortest time is the winner
+          players.sort((el1, el2) => el1.score - el2.score);
 
-            console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+          console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
 
-            // sort in descending order
-            players.sort((el1, el2) => el2.score - el1.score);
+          console.log("GET_TOURNEY_WINNERS: Mapping winners...");
 
-            console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+          winners = []
 
-            console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+          for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
+            winners.push(players[i].address);
+          }
 
-            winners = []
+          console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+          console.log("GET_TOURNEY_WINNERS: Returning...");
 
-            for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
-              winners.push(players[i].address);
+          return winners;
+        case FP:
+          players = tourneySession.map(session => {
+            let playerAddress = Object.keys(session.sessionData.playerData);
+            return {
+              address: playerAddress[0],
+              score: session.sessionData.playerData[playerAddress[0]].highScore
             }
+          });
 
-            console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
-            console.log("GET_TOURNEY_WINNERS: Returning...");
+          console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
 
-            return winners;
-          case WOM:
-            players = tourneySession.map(session => {
-              let playerAddress = Object.keys(session.sessionData.playerData);
-              return {
-                address: playerAddress[0],
-                score: session.sessionData.playerData[playerAddress[0]].highScore
-              }
-            });
+          console.log("GET_TOURNEY_WINNERS: Sorting player scores");
 
-            console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
+          // sort in descending order
+          players.sort((el1, el2) => el2.score - el1.score);
 
-            console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+          console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
 
-            // sort in ascending order
-            players.sort((el1, el2) => el1.score - el2.score);
+          console.log("GET_TOURNEY_WINNERS: Mapping winners...");
 
-            console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+          winners = []
 
-            console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+          for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
+            winners.push(players[i].address);
+          }
 
-            winners = []
+          console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+          console.log("GET_TOURNEY_WINNERS: Returning...");
 
-            for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
-              winners.push(players[i].address);
+          return winners;
+        case WOM:
+          players = tourneySession.map(session => {
+            let playerAddress = Object.keys(session.sessionData.playerData);
+            return {
+              address: playerAddress[0],
+              score: session.sessionData.playerData[playerAddress[0]].highScore
             }
+          });
 
-            console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
-            console.log("GET_TOURNEY_WINNERS: Returning...");
+          console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
 
-            return winners;
-          default:
-            break;
-        }
-      } else {
-        console.log("GET_TOURNEY_WINNERS: No tourney session fetched with id: ", tournamentId);
-        console.log("GET_TOURNEY_WINNERS: Returning...");
-        return []
+          console.log("GET_TOURNEY_WINNERS: Sorting player scores");
+
+          // sort in ascending order
+          players.sort((el1, el2) => el1.score - el2.score);
+
+          console.log("GET_TOURNEY_WINNERS: Sorted!!", players);
+
+          console.log("GET_TOURNEY_WINNERS: Mapping winners...");
+
+          winners = []
+
+          for (let i = 0; i < (players.length <= winnersLength ? players.length : winnersLength); i++) {
+            winners.push(players[i].address);
+          }
+
+          console.log("GET_TOURNEY_WINNERS: Winners Mapped!!", winners);
+          console.log("GET_TOURNEY_WINNERS: Returning...");
+
+          return winners;
+        default:
+          break;
       }
     } else {
-      console.log("GET_TOURNEY_WINNERS: No tourney fetched with id: ", tournamentId);
+      console.log("GET_TOURNEY_WINNERS: No tourney session fetched with id: ", tournamentId);
       console.log("GET_TOURNEY_WINNERS: Returning...");
       return []
     }
