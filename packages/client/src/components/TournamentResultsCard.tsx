@@ -233,6 +233,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   refreshResults = async () => {
+    console.log("REFRESHING RESULTS");
     const { tournamentId } = this.state;
     let results = [];
     let sessionsData = await getTournamentResult(tournamentId);
@@ -598,7 +599,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
 
         if (result.sessionData) {
           return (
-            <ResultStyle className={playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase() ? "player-background"  : ""}
+            <ResultStyle className={playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase() ? "player-background" : ""}
               key={result.sessionId}
               onClick={() => this.toggleModal(result.sessionData.replayHash, this.extractHighScore(result) !== 0)}
             >
