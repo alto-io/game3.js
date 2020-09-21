@@ -52,38 +52,7 @@ export async function getLocalDatabaseManager(): Promise<Database.DBManager> {
   return dbManager;
 }
 
-
 // Database API calls
-export async function getServerPlayerProfile(playerProfile: Database.PlayerProfile): Promise<any> {
-  const response = await api.get('/profile?walletid=' + playerProfile.walletid);
-  return response.data;
-}
-
-export async function updateServerPlayerProfile(playerProfile: Database.PlayerProfile): Promise<any> {
-  const response = await api.post('/profile', playerProfile);
-  const { result } = response.data;
-  return result;
-}
-
-export async function getTournamentData(tournamentData: Database.TournamentData): Promise<any> {
-  const response = await api.get('/tournament?tournamentId=' + tournamentData.id);
-  return response.data;
-}
-
-export async function getTournamentResult(tournamentId: number): Promise<any> {
-  const params = {
-    tournamentId
-  }
-  const response = await api.get('/tournament/results', {params});
-  return response.data;
-}
-
-export async function putTournamentData(tournamentData: Database.TournamentData): Promise<any> {
-  const response = await api.post('/tournament', tournamentData);
-  const { result } = response.data;
-  return result;
-}
-
 export async function clientSaveTournamentReplay(file: File) {
   const result = await dbManager.clientSaveTournamentReplay(file)
   return result
@@ -191,16 +160,6 @@ export async function getFileFromHash(hash: string) {
   return result;
 }
 
-export async function getPlayerProfile(playerProfile: Database.PlayerProfile): Promise<any> {
-  const response = await dbManager.getPlayerProfile(playerProfile.walletid);
-  return response;
-}
-
-export async function updatePlayerProfile(playerProfile: Database.PlayerProfile): Promise<any> {
-  const response = await dbManager.savePlayerProfile(playerProfile);
-  return response;
-}
-
 export async function saveTournamentReplay(playerId: string, tournamentId: string, time: number, file: File) {
   console.log(`saveTournamentReplay: tournamentId: ${tournamentId}`)
   const result = await dbManager.saveTournamentReplay(playerId, tournamentId, time, file);
@@ -220,21 +179,6 @@ export async function newTournament(tournament):Promise<any> {
   return result.data; 
 }
 
-export async function getTournaments():Promise<any> {
-
-  const result = await api.get('/tournaments/getall')
-  return result.data; 
-}
-
-export async function getTournament(tournamentId):Promise<any> {
-  const params = { tournamentId }
-
-  console.log("GET TOURNAMENT CALLED", tournamentId);
-  const result = await api.get('/tournaments/getone', {params});
-  console.log("GET TOURNAMENT FETCHED", result);
-  return result.data; 
-}
-
 export async function updateTournament(tournamentId, updatedData): Promise<any> {
   const params = {
     tournamentId,
@@ -247,9 +191,18 @@ export async function updateTournament(tournamentId, updatedData): Promise<any> 
   return result.data
 }
 
-export async function getTourneyWinners(tournamentId): Promise<any> {
+export async function getTournamentResult(tournamentId: number): Promise<any> {
   const params = {
     tournamentId
+  }
+  const response = await api.get('/tournament/results', {params});
+  return response.data;
+}
+
+export async function getTopResults(tournamentId, resultsCount): Promise<any> {
+  const params = {
+    tournamentId,
+    resultsCount
   }
 
   console.log("GET TOURNAMENT WINNERS", params);

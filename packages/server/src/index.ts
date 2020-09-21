@@ -57,32 +57,7 @@ app.use("/colyseus", basicAuthMiddleware, monitor());
 // Serve static resources from the "public" folder
 app.use(express.static(join(__dirname, 'public')));
 
-app.post('/profile', async (req: any, res: any) => {
-  const result = await GlobalState.ServerState.dbManager.savePlayerProfile(req.body);
-  res.json(result);
-});
-
-app.get('/profile', async (req: any, res: any) => {
-  const result = await GlobalState.ServerState.dbManager.getPlayerProfile(req.query.walletid);
-  res.json(result);
-});
-
-app.get('/leaderboard', async (req: any, res: any) => {
-  const result = await GlobalState.ServerState.dbManager.getLeaderboard();
-  res.json(result);
-});
-
 // TODO: only organizer must be able to put info
-app.post('/tournament', async (req: any, res: any) => {
-  const result = await GlobalState.ServerState.dbManager.putTournamentData(req.body);
-  res.json(result);
-});
-
-app.get('/tournament', async (req: any, res: any) => {
-  const result = await GlobalState.ServerState.dbManager.getTournamentData(req.query.tournamentId);
-  res.json(result);
-});
-
 app.get('/tournament/results', async (req: any, res: any) => {
   const tournamentId = req.query.tournamentId;
 
