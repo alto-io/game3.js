@@ -593,7 +593,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
     if (results.length > 0) {
 
       resultDivs = results.map((result, idx) => {
-        console.log("RESULT PLAYER ADDRESS", result.playerAddress.toLowerCase());
         if (result.sessionData) {
           let isMyData = playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase();
           return (

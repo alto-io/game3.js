@@ -271,7 +271,18 @@ class CreateTourneyView extends Component<any, any> {
           break;
         case 'uint256[]':
           let arr = param.value.split(',');
-          contractParams.push(arr);
+          if (param.name === "uintParams") {
+            let newArr = arr.map((input, idx) => {
+              if(idx < 2) { // don't convert all to eth because last element is the no. of max tries
+                return web3.utils.toWei(input.toString(), 'ether')
+              } else {
+                return input
+              }
+            });
+            contractParams.push(newArr);
+          } else {
+            contractParams.push(arr);
+          }
           break;
         default:
           // TODO: refactor to support other contracts aside from Tournament
