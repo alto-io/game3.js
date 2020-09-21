@@ -93,7 +93,7 @@ export async function putGameReplay(sessionId, playerAddress, fileHash): Promise
   const body = {
     sessionId, playerAddress, fileHash
   }
-  const response = await api.post('/gameReplay', body);
+  const response = await api.post('/gameReplay/put', body);
   console.log(response)
   return response.data;
 }
@@ -104,7 +104,7 @@ export async function getGameSession(gameSessionId, playerAddress, tournamentId)
     playerAddress,
     tournamentId
   }
-  const response = await api.get('/gameSession', { params })
+  const response = await api.get('/gameSession/get', { params })
   return response.data
 }
 
@@ -114,7 +114,7 @@ export async function getGameNo(gameSessionId, playerAddress, tournamentId): Pro
     playerAddress,
     tournamentId
   }
-  const response = await api.get('/gameSession/gameNo', { params })
+  const response = await api.get('/gameSession/gameno', { params })
   return response.data
 }
 
@@ -127,7 +127,7 @@ export async function createSessionId(playerAddress, tournamentId): Promise<any>
   console.log("DATABASE: player_add", playerAddress)
   console.log("DATABASE: tournamentId", tournamentId)
 
-  const response = await api.post('/gameSessionId/create', params)
+  const response = await api.post('/gameSessionId/new', params)
   return response.data
 }
 
@@ -137,7 +137,7 @@ export async function getGameSessionId(playerAddress, tournamentId): Promise<any
     tournamentId
   }
 
-  const response = await api.get('/gameSessionId', { params })
+  const response = await api.get('/gameSessionId/get', { params })
   return response.data
 }
 
@@ -153,7 +153,7 @@ export async function deleteGameSessionId(gameSessionId): Promise<any> {
 export async function updateSessionScore(sessionId, playerAddress, tournamentId, gamePayload): Promise<any> {
   const params = {sessionId, playerAddress, tournamentId, gamePayload}
 
-  const res = await api.post('/gameSession/score', params);
+  const res = await api.post('/gameSession/updatescore', params);
   return res.data;
 }
 
@@ -164,7 +164,7 @@ export async function updateGameNo(sessionId, playerAddress, tournamentId) {
     tournamentId
   }
 
-  const res = await api.post('/gameSession/gameNo', params);
+  const res = await api.post('/gameSession/updategameno', params);
   return res.data;
 }
 
@@ -214,15 +214,15 @@ export async function resetData(): Promise<any> {
   await api.delete('/deleteDBS');
 }
 
-export async function newTournament(tournamentId):Promise<any> {
-  const params = { tournamentId }
-  const result = await api.post('/tournament/new', params)
+export async function newTournament(tournament):Promise<any> {
+  const params = { tournament }
+  const result = await api.post('/tournaments/new', params)
   return result.data; 
 }
 
 export async function getTournaments():Promise<any> {
 
-  const result = await api.get('/tournaments')
+  const result = await api.get('/tournaments/getall')
   return result.data; 
 }
 
@@ -230,7 +230,7 @@ export async function getTournament(tournamentId):Promise<any> {
   const params = { tournamentId }
 
   console.log("GET TOURNAMENT CALLED", tournamentId);
-  const result = await api.get('/tourney', {params});
+  const result = await api.get('/tournaments/getone', {params});
   console.log("GET TOURNAMENT FETCHED", result);
   return result.data; 
 }
@@ -242,7 +242,7 @@ export async function updateTournament(tournamentId, updatedData): Promise<any> 
   }
 
   console.log("UPDATE TOURNAMENT CALLED", params);
-  const result = await api.patch('/tournament/update', params);
+  const result = await api.patch('/tournaments/update', params);
   console.log("UPDATE TOURNAMENT FINISHED", result);
   return result.data
 }
@@ -253,7 +253,7 @@ export async function getTourneyWinners(tournamentId): Promise<any> {
   }
 
   console.log("GET TOURNAMENT WINNERS", params);
-  const result = await api.get('/tourney/winners', {params});
+  const result = await api.get('/tournaments/winners', {params});
   console.log("GET TOURNAMENT WINNERS FINISHED", result);
   return result.data
 }
