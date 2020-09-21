@@ -94,7 +94,7 @@ app.get('/tournament/results', async (req: any, res: any) => {
 app.use('/tournaments', require('./routes/tournaments/tournament.routes'));
 app.use('/gameSession', require('./routes/game_sessions/gameSessions.routes'));
 app.use('/gameSessionId', require('./routes/game_sessions/gameSessionIds.routes'));
-app.use('/gameReplay ', require('./routes/replay/replay.routes'));
+app.use('/gameReplay', require('./routes/replay/replay.routes'));
 
 // Serve the frontend client
 app.get('*', (req: any, res: any) => {
