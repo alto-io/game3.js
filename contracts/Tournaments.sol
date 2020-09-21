@@ -245,6 +245,7 @@ contract Tournaments is Ownable {
     emit ResultSubmitted(tournamentId, msg.sender, resultId);
   }
 
+  // temp placeholder function, remove once payout client side is implemented
   function declareWinnersByPlayerId(uint tournamentId, address payable[] calldata playerIds)
     external
     tournamentIdIsCorrect(tournamentId)

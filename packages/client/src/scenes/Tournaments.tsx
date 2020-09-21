@@ -10,7 +10,7 @@ import Tournament from '../components/Tournament'
 import { Types } from '@game3js/common'
 
 import { getTournamentContract } from '../helpers/web3'
-import { putTournamentData, getFileFromHash } from "../helpers/database"
+import { getFileFromHash } from "../helpers/database"
 
 const SBold = styled.div`
   margin: 1em 0;
@@ -94,12 +94,8 @@ export default class Tournaments extends Component<IProps, IState> {
     const data = ''
     const prize = web3.utils.toBN(1) // TODO
 
-    const receipt = await contract.methods.createTournament(address, timestamp, data, prize)
+    await contract.methods.createTournament(address, timestamp, data, prize)
       .send({from: address})
-    const { tournamentId } = receipt.events.TournamentCreated.returnValues
-
-    // TODO
-    putTournamentData({ id: tournamentId })
 
     this.updateTournaments()
   }

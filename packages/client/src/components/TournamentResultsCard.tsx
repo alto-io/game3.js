@@ -7,7 +7,7 @@ import SkeletonLeaderboardLoader from './SkeletonLeaderboardLoader';
 import Modal from './Modal';
 import PlayerGameReplays from './PlayerGameReplays';
 
-import { getTournamentResult, getTournament, getTournaments } from '../helpers/database'
+import { getTournamentResult } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress";
 import { Constants } from '@game3js/common';
 import web3 from 'web3';
@@ -174,7 +174,6 @@ const JoinTourneyBtn = styled(Button)`
   shares: Array<any>;
   isLoading: boolean;
   tournamentId?: string;
-  loggedIn: any;
   isReplayModalOpen: boolean;
   currentFileHash?: string;
  }
@@ -201,7 +200,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
       isReplayModalOpen: false,
       currentFileHash: '',
       tournamentId: '',
-      loggedIn: ''
     }
   }
 
@@ -276,7 +274,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
 
   getTournamentAndLeaderBoards = async () => {
     const { drizzle, playerAddress, accountValidated } = this.props;
-    const { tournamentId, loggedIn } = this.state;
+    const { tournamentId } = this.state;
 
     this.setState({ isLoading: true })
 
@@ -311,54 +309,28 @@ class TournamentResultsCard extends Component<IProps, IState> {
     }
 
     let raw = undefined;
-    if (loggedIn) {
-      raw = await contract.methods.getTournament(tournamentId).call()
-      await this.fetchShares(tournamentId);
-      let data = this.parseData(raw['5']);
-      const gameName = data[0];
-      const gameStage = data[1] ? data[1] : undefined;
-      const maxTries = await contract.methods.getMaxTries(tournamentId).call();
-      const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
 
-      tournament = {
-        id: tournamentId,
-        name: gameName,
-        gameStage: gameStage,
-        timeZone: 'GMT+8',
-        startTime: '12:00',
-        endTime: format(new Date(parseInt(raw['1'])), 'MMM d, yyyy'),
-        startDate: '8/16',
-        endDate: '9/4',
-        state: parseInt(raw['3']),
-        pool: raw['4'],
-        maxTries: parseInt(maxTries),
-        buyInAmount: tournamentBuyIn
-      }
+    raw = await contract.methods.getTournament(tournamentId).call()
+    await this.fetchShares(tournamentId);
+    let data = this.parseData(raw['5']);
+    const gameName = data[0];
+    const gameStage = data[1] ? data[1] : undefined;
+    const maxTries = await contract.methods.getMaxTries(tournamentId).call();
+    const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
 
-    } else {
-      raw = await getTournament(tournamentId);
-      console.log("TOURNAMENT DATA FROM DB", raw);
-      let data = this.parseData(raw[0].data);
-      let gameName = data[0];
-      tournament = {
-        id: tournamentId,
-        name: gameName,
-        gameStage: data[1] ? data[1] : undefined,
-        timeZone: 'GMT+8',
-        startTime: '12:00',
-        endTime: format(new Date(parseInt(raw[0].endTime)), 'MMM d, yyyy'),
-        startDate: '8/16',
-        endDate: '9/4',
-        state: parseInt(raw[0].state),
-        pool: raw[0].pool,
-        maxTries: 0,
-        buyInAmount: 0,
-      }
-      console.log("FETCH SHARES NOT LOGGED IN", raw[0].shares);
-      console.log("FETCH POOL NOT LOGGED IN", raw[0].pool);
-      this.setState({
-        shares: raw[0].shares
-      })
+    tournament = {
+      id: tournamentId,
+      name: gameName,
+      gameStage: gameStage,
+      timeZone: 'GMT+8',
+      startTime: '12:00',
+      endTime: format(new Date(parseInt(raw['1'])), 'MMM d, yyyy'),
+      startDate: '8/16',
+      endDate: '9/4',
+      state: parseInt(raw['3']),
+      pool: raw['4'],
+      maxTries: parseInt(maxTries),
+      buyInAmount: tournamentBuyIn
     }
 
     // Get tournament results
@@ -407,10 +379,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   getBlockchainInfo = async (props) => {
-    const { tournamentId } = props
+    const { tournamentId, drizzle } = props
 
-    if (this.props.drizzle.contracts.Tournaments) {
-      const { drizzle } = this.props;
+    if (drizzle.contracts.Tournaments) {
       // Get the latest tournament
       const contract = drizzle.contracts.Tournaments;
 
@@ -423,22 +394,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
 
       this.setState({
         tournamentId: tI,
-        loggedIn: true
-      })
-
-      await this.getTournamentAndLeaderBoards();
-    } else {
-      let ids = await getTournaments();
-      console.log("IDSSSS", ids);
-      let tId = undefined;
-      if (ids.length > 0) {
-        tId = ids[ids.length - 1].id
-      }
-      console.log("THE ID IN DB IS", tId);
-
-      this.setState({
-        tournamentId: tId,
-        loggedIn: false
       })
 
       await this.getTournamentAndLeaderBoards();

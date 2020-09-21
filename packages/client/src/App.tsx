@@ -263,29 +263,6 @@ class App extends React.Component<any, any> {
     this.initDatabase();
   }
 
-  public getLoggedInPlayerProfile = async () => {
-    const { playerProfile } = this.state;
-    const walletid = playerProfile.walletid
-
-    await this.setState({ fetching: true });
-    try {
-      var serverPlayerProfile = await getPlayerProfile(playerProfile);
-
-      if (serverPlayerProfile)
-      {
-        serverPlayerProfile.walletid = walletid
-        await this.setState({ playerProfile: serverPlayerProfile });
-
-        toast.info('🤗 Welcome back, ' + serverPlayerProfile.username + '!');
-
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    await this.setState({ fetching: false });
-  }
-
-
   public onConnect = async () => {
     const provider = await this.web3Modal.connect();
 
@@ -315,7 +292,6 @@ class App extends React.Component<any, any> {
     const { playerProfile } = this.state;
     playerProfile.walletid = address;
     await this.setState( { playerProfile });
-    this.getLoggedInPlayerProfile();
   };
 
   public subscribeProvider = async (provider: any) => {
