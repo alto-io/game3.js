@@ -28,6 +28,7 @@ const RimbleTransactionContext = React.createContext({
     isCorrectNetwork: null,
     checkNetwork: () => {}
   },
+  validBrowser: () => {},
   modals: {
     data: {
       noWeb3BrowserModalIsOpen: {},
@@ -934,6 +935,7 @@ class RimbleTransaction extends React.Component {
       isCorrectNetwork: null,
       checkNetwork: this.checkNetwork
     },
+    validBrowser: this.checkModernBrowser(),
     modals: {
       data: {
         noWeb3BrowserModalIsOpen: this.noWeb3BrowserModalIsOpen,
@@ -981,7 +983,7 @@ class RimbleTransaction extends React.Component {
 
   componentDidMount() {
     // Performs a check on browser and will load a web3 provider
-    // this.initWeb3();
+    this.initWeb3();
   }
 
   render() {

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Text, Box, Button, Flex, Image, Link } from "rimble-ui";
+import {Text, Box, Flex, Image, Link } from "rimble-ui";
 import styled from "styled-components";
 
 import ConnectWalletButton from "./ConnectWalletButton";
@@ -23,13 +23,6 @@ const StyledTextLink = styled(Link)`
   }
 `
 
-const StyledButton = styled(Button)`
-  font-family: 'Apercu Light';
-  font-size: 0.75rem;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-`
-
 class OutplayLoginHeaderDesktop extends Component {
   render() {
     const {
@@ -41,7 +34,8 @@ class OutplayLoginHeaderDesktop extends Component {
       shortenAddress, 
       logo, 
       balanceIcon,
-      walletIcon
+      walletIcon,
+      rimbleInitialized
       } = this.props;
 
     return(
@@ -112,7 +106,7 @@ class OutplayLoginHeaderDesktop extends Component {
               </Flex>
             </Flex>
           ) : (
-            <ConnectWalletButton handleConnectAccount={handleConnectAccount}/>
+            <ConnectWalletButton handleConnectAccount={handleConnectAccount} rimbleInitialized={rimbleInitialized}/>
           )}
 
         </Flex>
