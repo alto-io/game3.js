@@ -366,10 +366,16 @@ class TournamentResultsCard extends Component<IProps, IState> {
         results.sort((el1, el2) => {
           switch (el1.gameName) {
             case Constants.FP:
+              if (el1.sessionData.highScore === 0) return 1;
+              if (el2.sessionData.highScore === 0) return -1;
               return el2.sessionData.highScore - el1.sessionData.highScore
             case Constants.TOSIOS:
+              if (el1.sessionData.currentHighestNumber === 0) return 1;
+              if (el2.sessionData.currentHighestNumber === 0) return -1;
               return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
             case Constants.WOM:
+              if (el1.sessionData.highScore === 0) return 1;
+              if (el2.sessionData.highScore === 0) return -1;
               return el1.sessionData.highScore - el2.sessionData.highScore
             default:
               break;
@@ -377,6 +383,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
         })
       }
     }
+
+    console.log("RESULTS: sorted", results)
+
     this.setState({
       results,
       tournament,
