@@ -116,27 +116,6 @@ export default class GameResult extends React.Component<IProps, IState> {
 
   }
 
-  submitResult = async () => {
-    const { tournamentId, recordFileHash, playerAddress,
-      onToggle, gameSessionId, contractMethodSendWrapper } = this.props
-
-    const result = await putGameReplay(gameSessionId, playerAddress, recordFileHash)
-    console.log(result)
-
-    try {
-      contractMethodSendWrapper(
-        "submitResult", // name
-        [tournamentId, gameSessionId], //contract parameters
-        { from: playerAddress }, // send parameters
-        (txStatus, transaction) => { // callback
-          console.log("submitResult callback: ", txStatus, transaction);
-        })
-      onToggle(true)
-    } catch (err) {
-      console.log('errrrrroooorrr');
-    }
-  }
-
   async getTournamentInfo() {
     const { drizzle, tournamentId } = this.props;
     const contract = drizzle.contracts.Tournaments;
