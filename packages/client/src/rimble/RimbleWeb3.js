@@ -3,6 +3,8 @@ import Web3 from "web3"; // uses latest 1.x.x version
 import RimbleUtils from "@rimble/utils";
 import ConnectionModalUtil from "./ConnectionModalsUtil";
 import TransactionUtil from "./TransactionUtil";
+import Web3Modal from 'web3modal';
+import WalletConnectProvider from '@walletconnect/web3-provider';
 
 const RimbleTransactionContext = React.createContext({
   contract: {},
@@ -69,6 +71,20 @@ const RimbleTransactionContext = React.createContext({
     methods: {}
   }
 });
+
+const infuraId = "b71d4cce6c0c4f2ebaecc118a35dfaf5"
+
+const web3Modal = new Web3Modal({
+  cacheProvider: true,
+  providerOptions: {
+    walletconnect: {
+      package: WalletConnectProvider, // required
+      options: {
+        infuraId
+      }
+    }
+  }
+})
 
 class RimbleTransaction extends React.Component {
   static Consumer = RimbleTransactionContext.Consumer;
@@ -388,7 +404,10 @@ class RimbleTransaction extends React.Component {
     // Check for account
     if (!this.state.account || !this.state.accountValidated) {
       // Show modal to connect account
-      this.openConnectionModal(null, callback);
+      // this.openConnectionModal(null, callback);
+
+      const provider = await web3Modal.connect()
+      console.log(provider);
     }
 
     // await this.initAccount();
@@ -983,7 +1002,7 @@ class RimbleTransaction extends React.Component {
 
   componentDidMount() {
     // Performs a check on browser and will load a web3 provider
-    this.initWeb3();
+    // this.initWeb3();
   }
 
   render() {
