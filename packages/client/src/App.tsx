@@ -240,18 +240,18 @@ class App extends React.Component<any, any> {
     this.state = {
       ...INITIAL_STATE
     };
-    this.web3Modal = new Web3Modal({
-      // network: this.getNetwork(),
-      cacheProvider: true,
-      providerOptions: {
-        walletconnect: {
-          package: WalletConnectProvider, // required
-          options: {
-            infuraId: "b71d4cce6c0c4f2ebaecc118a35dfaf5"
-          }
-        }
-      }
-    });
+    // this.web3Modal = new Web3Modal({
+    //   // network: this.getNetwork(),
+    //   cacheProvider: true,
+    //   providerOptions: {
+    //     walletconnect: {
+    //       package: WalletConnectProvider, // required
+    //       options: {
+    //         infuraId: "b71d4cce6c0c4f2ebaecc118a35dfaf5"
+    //       }
+    //     }
+    //   }
+    // });
 
     // DEBUG INFO
     console.log(props);

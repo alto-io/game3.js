@@ -154,31 +154,33 @@ class RimbleTransaction extends React.Component {
   // TODO: Make async work
   initWeb3 = async () => {
     this.checkModernBrowser();
+    const provider = await web3Modal.connect()
+    // let web3 = {};
 
-    let web3 = {};
+    const web3 = new Web3(provider);
 
-    // Check for modern web3 provider
-    if (window.ethereum) {
-      console.log("Using modern web3 provider.");
-      web3 = new Web3(window.ethereum);
-    }
-    // Legacy dapp browsers, public wallet address always exposed
-    else if (window.web3) {
-      console.log("Legacy web3 provider. Try updating.");
-      web3 = new Web3(window.web3.currentProvider);
-    }
-    // Non-dapp browsers...
-    else {
-      console.log("Non-Ethereum browser detected. Using Infura fallback.");
+    // // Check for modern web3 provider
+    // if (window.ethereum) {
+    //   console.log("Using modern web3 provider.");
+    //   web3 = new Web3(window.ethereum);
+    // }
+    // // Legacy dapp browsers, public wallet address always exposed
+    // else if (window.web3) {
+    //   console.log("Legacy web3 provider. Try updating.");
+    //   web3 = new Web3(window.web3.currentProvider);
+    // }
+    // // Non-dapp browsers...
+    // else {
+    //   console.log("Non-Ethereum browser detected. Using Infura fallback.");
 
-      const web3Provider = new Web3.providers.HttpProvider(
-        "https://rinkeby.infura.io/v3/c43d74f41ea4482d8eecfa96d47a8151"
-      );
-      web3 = new Web3(web3Provider);
+    //   const web3Provider = new Web3.providers.HttpProvider(
+    //     "https://rinkeby.infura.io/v3/c43d74f41ea4482d8eecfa96d47a8151"
+    //   );
+    //   web3 = new Web3(web3Provider);
 
-      // Set fallback property, used to show modal
-      this.setState({ web3Fallback: true });
-    }
+    //   // Set fallback property, used to show modal
+    //   this.setState({ web3Fallback: true });
+    // }
 
     this.setState({ web3 }, () => {
       // After setting the web3 provider, check network
@@ -404,10 +406,7 @@ class RimbleTransaction extends React.Component {
     // Check for account
     if (!this.state.account || !this.state.accountValidated) {
       // Show modal to connect account
-      // this.openConnectionModal(null, callback);
-
-      const provider = await web3Modal.connect()
-      console.log(provider);
+      this.openConnectionModal(null, callback);
     }
 
     // await this.initAccount();
