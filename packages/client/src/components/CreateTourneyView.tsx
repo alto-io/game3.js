@@ -475,8 +475,14 @@ class CreateTourneyView extends Component<any, any> {
   populatePlayerIds = async(e) => {
     e.preventDefault();
     const {contractInputs} = this.state;
+    const { drizzle } = this.props;
 
-    let topResults = await getTopResults(parseInt(contractInputs[0].value), 5);
+    const contract = drizzle.contracts.Tournaments;
+    const tournamentId = contractInputs[0].value; 
+
+    const winners = await contract.methods.getShares(tournamentId).call();
+
+    let topResults = await getTopResults(parseInt(contractInputs[0].value), winners.length);
 
     console.log("WINNERS ARRAY", topResults);
 

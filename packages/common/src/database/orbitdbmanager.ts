@@ -559,13 +559,19 @@ export class OrbitDBManager implements DBManager {
 
       switch (tourneySession[0].sessionData.gameName) {
         case TOSIOS:
-          players = tourneySession.map(session => {
+
+          players = tourneySession.filter(session => {
             let playerAddress = Object.keys(session.sessionData.playerData);
+            let score = session.sessionData.playerData[playerAddress[0]].currentHighestNumber;
+            return score > 0
+          }).map(session => {
+            let playerAddress = Object.keys(session.sessionData.playerData);
+            let score = session.sessionData.playerData[playerAddress[0]].currentHighestNumber;
             return {
               address: playerAddress[0],
-              score: session.sessionData.playerData[playerAddress[0]].currentHighestNumber
+              score
             }
-          });
+          })
 
           console.log("GET_TOURNEY_WINNERS: Player data mapped!!", players);
 
@@ -589,11 +595,16 @@ export class OrbitDBManager implements DBManager {
 
           return winners;
         case FP:
-          players = tourneySession.map(session => {
+          players = tourneySession.filter(session => {
             let playerAddress = Object.keys(session.sessionData.playerData);
+            let score = session.sessionData.playerData[playerAddress[0]].highScore;
+            return score > 0
+          }).map(session => {
+            let playerAddress = Object.keys(session.sessionData.playerData);
+            let score = session.sessionData.playerData[playerAddress[0]].highScore;
             return {
               address: playerAddress[0],
-              score: session.sessionData.playerData[playerAddress[0]].highScore
+              score
             }
           });
 
@@ -619,11 +630,16 @@ export class OrbitDBManager implements DBManager {
 
           return winners;
         case WOM:
-          players = tourneySession.map(session => {
+          players = tourneySession.filter(session => {
             let playerAddress = Object.keys(session.sessionData.playerData);
+            let score = session.sessionData.playerData[playerAddress[0]].highScore;
+            return score > 0
+          }).map(session => {
+            let playerAddress = Object.keys(session.sessionData.playerData);
+            let score = session.sessionData.playerData[playerAddress[0]].highScore;
             return {
               address: playerAddress[0],
-              score: session.sessionData.playerData[playerAddress[0]].highScore
+              score
             }
           });
 

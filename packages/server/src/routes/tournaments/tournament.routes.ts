@@ -8,7 +8,7 @@ import { GlobalState } from '@game3js/common';
 * access: PUBLIC 
 * desc: fetch the winners of a single tournament
 */
-route.patch('/winners', async (req, res) => {
+route.get('/winners', async (req, res) => {
   const tournamentId = req.query.tournamentId;
   const resultsCount = req.query.resultsCount;
 

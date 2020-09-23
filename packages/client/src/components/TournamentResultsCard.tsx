@@ -452,6 +452,12 @@ class TournamentResultsCard extends Component<IProps, IState> {
     navigate("/");
   }
 
+  setShares = () => {
+    const {shares} = this.state;
+
+    
+  }
+
   fetchShares = async (tournamentId) => {
     console.log("FETCH SHARES");
     const { drizzle } = this.props;
