@@ -7,7 +7,6 @@ import {
 } from "rimble-ui";
 
 import RainbowBox from './RainbowBox';
-import Tournament from './Tournament';
 
 import web3 from 'web3';
 
@@ -220,10 +219,17 @@ class CreateTourneyView extends Component<any, any> {
 
     switch (param.name) {
       case "prize":
+        value = web3.utils.toWei(param.value.toString(), 'ether');
+        break;
       case "buyInAmount":
+        value = web3.utils.toWei(param.value.toString(), 'ether');
+        break;
       case "value":
         value = web3.utils.toWei(param.value.toString(), 'ether');
         break;
+      // case "tournamentId":
+      //   value = parseInt(param.value);
+      //   break;
       default:
 
         break;
@@ -258,6 +264,7 @@ class CreateTourneyView extends Component<any, any> {
           console.log("TYPE OF VALUE", typeof param.value);
           let addressArr = typeof param.value === 'object' ? param.value : param.value.split(',');
           contractParams.push(addressArr);
+          console.log("VALUE NOW", addressArr);
           break;
         case 'uint256[]':
           let arr = param.value.split(',');
@@ -280,9 +287,6 @@ class CreateTourneyView extends Component<any, any> {
           contractParams.push(value);
           break;
       }
-
-
-
     })
 
     console.log(contractParams);
@@ -296,6 +300,7 @@ class CreateTourneyView extends Component<any, any> {
     }
 
     if (this.state.view) {
+      console.log("STATE IS VIEW");
       const output = await (await drizzle.contracts[selectedContract].methods[selectedMethod].call()).call(); //double call: weird
       this.setState(
         {
@@ -306,6 +311,12 @@ class CreateTourneyView extends Component<any, any> {
 
 
     else {
+      console.log("STATE IS NOT VIEW");
+      console.log("PARAMS: ");
+      console.log("Method: ",selectedMethod);
+      console.log("Contract params: ", contractParams);
+      console.log("sendParams: ", sendParams);
+
       this.props.contractMethodSendWrapper(
         selectedMethod, // name
         contractParams,
@@ -488,7 +499,7 @@ class CreateTourneyView extends Component<any, any> {
 
     contractInputs.forEach((input, idx) => {
       switch(input.name) {
-        case "playerIds":
+        case "addresses":
           contractInputs[idx].value = topResults;
           break;
         default:
@@ -634,7 +645,7 @@ class CreateTourneyView extends Component<any, any> {
                           </Field>
                         );
                         break;
-                      case "playerIds":
+                      case "addresses":
                         return (
                           <>
                             <Field
