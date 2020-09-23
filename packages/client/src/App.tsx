@@ -56,7 +56,6 @@ import { getLocalDatabaseManager, getPlayerProfile } from "./helpers/database";
 import Home from './scenes/Home';
 import GameContainer from './scenes/GameContainer';
 import Recorder from './scenes/Recorder';
-import Tournaments from './scenes/Tournaments'
 import Replay from './scenes/Replay';
 
 import { Slide, ToastContainer, toast } from 'react-toastify'
@@ -715,12 +714,6 @@ class App extends React.Component<any, any> {
                       <Recorder
                         path="/recorder"
                         propVar={ connected }
-                      />
-                      <Tournaments
-                        path="/tournaments"
-                        web3={web3}
-                        address={address}
-                        playerProfile={playerProfile}
                       />
                     </Router>
                   </>

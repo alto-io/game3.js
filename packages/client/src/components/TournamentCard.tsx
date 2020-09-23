@@ -155,21 +155,6 @@ class TournamentCard extends Component<IProps, IState> {
 
     tournament.timeIsUp = isPast(new Date(tournament.endTime))
 
-    let results = [];
-    const resultsCount = await contract.methods.getResultsCount(tournamentId).call();
-    for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
-      const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
-      results.push({
-        tournamentId: tournament.id,
-        resultId: resultIdx,
-        isWinner: resultDetails['0'],
-        playerAdress: resultDetails['1'],
-        sessionData: resultDetails['2']
-      })
-    }
-
-    tournament.results = results;
-
     const buyIn = await contract.methods.buyIn(tournamentId, address).call();
     this.setState({ accountBuyIn: parseInt(buyIn) });
     this.fetchGameNo(address, tournamentId);
