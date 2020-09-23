@@ -177,24 +177,6 @@ class CreateTourneyView extends Component<any, any> {
     })
   }
 
-  onActivate = (tournament) => {
-    this.activateTournament(tournament)
-  }
-
-  activateTournament = async (tournament) => {
-    const { drizzle } = this.props
-
-    const address = this.state.address;
-    const contract = drizzle.contracts.Tournaments;
-
-    await contract.methods.activateTournament(tournament.id, tournament.prize)
-      .send({
-        from: address,
-        value: tournament.prize
-      })
-    this.updateTournaments()
-  }
-
   changeSelectedContract = (event) => {
     this.setState({
       selectedContract: event.target.value,

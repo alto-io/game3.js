@@ -14,9 +14,7 @@ import web3 from 'web3';
 import { format } from 'date-fns';
 
 import {
-  TOURNAMENT_STATE_ACTIVE,
-  TOURNAMENT_STATE_ENDED,
-  TOURNAMENT_STATE_DRAFT
+  TOURNAMENT_STATES,
 } from '../constants'
 
 const SharesText = styled.div`
@@ -416,16 +414,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   getStatus(tournament: any) {
-    switch (tournament.state) {
-      case TOURNAMENT_STATE_DRAFT:
-        return 'Draft'
-      case TOURNAMENT_STATE_ACTIVE:
-        return 'Active'
-      case TOURNAMENT_STATE_ENDED:
-        return 'Done'
-      default:
-        return 'None'
-    }
+    return TOURNAMENT_STATES[tournament.state]
   }
 
   formatTourneyTimeInfo(tournament: any) {

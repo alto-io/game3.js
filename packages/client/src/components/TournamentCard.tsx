@@ -277,23 +277,6 @@ class TournamentCard extends Component<IProps, IState> {
     }
   }
 
-  onActivate = (tournament) => {
-    this.activateTournament(tournament)
-  }
-
-  activateTournament = async (tournament) => {
-    const { drizzle } = this.props
-
-    const address = this.state.address;
-    const contract = drizzle.contracts.Tournaments;
-
-    await contract.methods.activateTournament(tournament.id, tournament.prize)
-      .send({
-        from: address,
-        value: tournament.prize
-      })
-  }
-
   showWinnings = async (drizzle, tournament) => {
     if (drizzle && tournament) {
       const contract = drizzle.contracts.Tournaments;
@@ -332,13 +315,7 @@ class TournamentCard extends Component<IProps, IState> {
       )
     }
 
-    const isActive = tournament.state === TOURNAMENT_STATE_ACTIVE;
-
-    // const isActive = tournament.state === TOURNAMENT_STATE_ACTIVE
-    // don't show own tournaments
-    // if (ownTournament || !isActive) {
-    //   return (null)
-    // }
+    const isActive = tournament.state === TOURNAMENT_STATE_ACTIVE
 
     const endTimeStr = format(new Date(tournament.endTime),
       'MMM d, yyyy, HH:mm:ss')
@@ -411,7 +388,7 @@ class TournamentCard extends Component<IProps, IState> {
               <RainbowImage src={"images/" + gameImage} />
             </Flex>
 
-            {tournament.state && tournament.state === 1 && (
+            { isActive && (
               <PrizeContainer>
                 {prizeString.length > 0 && prizeRender}
               </PrizeContainer>
@@ -425,7 +402,7 @@ class TournamentCard extends Component<IProps, IState> {
 
             <Flex justifyContent={"center"} mt={1} mb={2}>
               <Text fontWeight={300} lineHeight={"0.75em"}>
-                {tournament.state && tournament.state === 1 ? (
+                {isActive ? (
                   `Ending: ${endTimeStr}`
                 ) : (
                     "Ended"
@@ -439,13 +416,12 @@ class TournamentCard extends Component<IProps, IState> {
             </Flex>
 
             {/* {!isContractOwner ? button() : ""} */}
-            {tournament.state && tournament.state === 1 && button()}
+            {isActive && button()}
             <ViewResultsModal
               tournamentId={tournament.id}
               playerAddress={address}
               drizzle={drizzle}
             />
-            {tournament.state === 0 && <Button onClick={() => { this.onActivate(tournament) }} mt={3}>Activate</Button>}
             <JoinPromptModal
               isOpen={isOpen}
               handleCloseModal={this.handleCloseModal}

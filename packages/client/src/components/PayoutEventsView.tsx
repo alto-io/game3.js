@@ -4,6 +4,7 @@ import { Box, Card, Heading, Image, Flash } from "rimble-ui";
 import styled from "styled-components";
 
 import { Constants } from '@game3js/common';
+import { TOURNAMENT_STATE_WINNERS_DECLARED } from '../constants';
 
 import ViewResultsModal from './ViewResultsModal';
 import SkeletonResultsLoader from './SkeletonResultsLoader';
@@ -234,7 +235,7 @@ class PayoutEventsView extends Component<IProps, IState> {
 
 
     // If none 
-    const doneTournaments = tournaments.filter (tournament => tournament.state === 3);
+    const doneTournaments = tournaments.filter (tournament => tournament.state === TOURNAMENT_STATE_WINNERS_DECLARED);
     events.forEach( event => {
       eventTournamentIds.push(event.returnValues.tournamentId);
       noEventsTournaments = doneTournaments.filter( tournament => tournament.id !== event.returnValues.tournamentId);
