@@ -7,7 +7,6 @@ contract Tournaments is Ownable {
   `Data
   */
   enum TournamentState {
-    Draft,
     Active,
     Ended,
     WinnersDeclared
@@ -100,14 +99,13 @@ contract Tournaments is Ownable {
     string calldata     data,
     uint                endTime,
     uint256[] calldata  shares,
-    uint256[] calldata  uintParams,
-    uint                value
+    uint256[] calldata  uintParams
   )
     external
     payable
     notInPast(endTime)
     noTournamentsOverflow()
-    correctPaymentAmount(value)
+    correctPaymentAmount(uintParams[0])
     returns (uint)
   {
     // uintParams[0] = prize
@@ -118,7 +116,7 @@ contract Tournaments is Ownable {
     require(uintParams[1] != 0, "Buy in amount must not be zero");
     require(uintParams[2] != 0, "Tries count must not be zero");
 
-    // check and claulate shares
+    // check and calculate shares
     uint sharesCount = shares.length;
     require(sharesCount >= 1, "Must have at least one share");
     for (uint i = 0; i < sharesCount; i++) {
@@ -126,35 +124,14 @@ contract Tournaments is Ownable {
       totalShares[tournaments.length - 1] += shares[i];
     }
 
+    // create the tournament with initial balance equal to prize (uintParams[0])
     tournaments.push(Tournament(organizer, endTime, data, uintParams[0],
-      uintParams[1], uintParams[2], TournamentState.Draft, 0, shares));
+      uintParams[1], uintParams[2], TournamentState.Active, uintParams[0], shares));
 
     winnerShares[tournaments.length - 1] = shares;
-    
-    // activate tournament
-    tournaments[tournaments.length - 1].balance += value;
-    require (tournaments[tournaments.length - 1].balance >= tournaments[tournaments.length - 1].prize,
-      "Payment amount is lower than prize");
-    tournaments[tournaments.length - 1].state = TournamentState.Active;
 
     emit TournamentCreated(tournaments.length - 1);
     return (tournaments.length - 1);
-  }
-
-  function activateTournament(uint tournamentId, uint value)
-    external
-    payable
-    tournamentIdIsCorrect(tournamentId)
-    tournamentNotEnded(tournamentId)
-    onlyOrganizer(tournamentId)
-    correctPaymentAmount(value)
-    correctTournamentState(tournamentId, TournamentState.Draft)
-  {
-      tournaments[tournamentId].balance += value;
-      require (tournaments[tournamentId].balance >= tournaments[tournamentId].prize,
-        "Payment amount is lower than prize");
-      tournaments[tournamentId].state = TournamentState.Active;
-      emit TournamentActivated(tournamentId);
   }
 
   function payBuyIn(uint tournamentId, uint value)

@@ -9,6 +9,8 @@ import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
 import ViewResultsModal from './ViewResultsModal';
 import SkeletonResultsLoader from './SkeletonResultsLoader';
 
+import { TOURNAMENT_STATE_ACTIVE } from '../constants';
+
 const StyledCard = styled(Card)`
   margin-bottom: 2rem;
   padding: 2rem 1rem;
@@ -81,7 +83,7 @@ class PlayerOngoingTournaments extends Component<IProps> {
       )
     }
 
-    const activeTournaments = tournaments.filter( tournament => tournament.state === 1);
+    const activeTournaments = tournaments.filter( tournament => tournament.state === TOURNAMENT_STATE_ACTIVE);
 
     const tournamentResults = activeTournaments.map( tournament => {
       const results = tournament.results.map( result => {
