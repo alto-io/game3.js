@@ -13,7 +13,8 @@ const StyledBox = styled(Box)`
 
   li {
     transition: 300ms ease-in-out;
-    opacity: 0
+    opacity: 0;
+    height: 0;
   }
 
   .active {
@@ -22,6 +23,11 @@ const StyledBox = styled(Box)`
 
     li {
       opacity: 1;
+      height: 44px;
+    }
+
+    .wallet {
+      margin-top: 2.5rem;
     }
   }
 `
@@ -59,7 +65,7 @@ const Dropdown = styled.ul`
   }
 
   .wallet {
-    margin-top: 2.5rem;
+    margin-top: 0;
   }
 `
 

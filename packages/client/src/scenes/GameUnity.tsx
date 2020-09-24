@@ -96,8 +96,6 @@ export class GameUnity extends React.Component<IProps, any> {
         height,width
       })
     }
-
-    console.log(height, width);
   }
 
   speed = 30;
