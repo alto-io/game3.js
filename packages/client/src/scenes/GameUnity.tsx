@@ -12,15 +12,12 @@ const StyledBox = styled.div`
   background: #fcfcfc;
   border-radius: 10px;
   box-shadow: 4px 8px 16px rgba(0,0,0,0.25);
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
   margin-top: 1.5rem;
 
-  .web-gl canvas#canvas {
-    height: 100%;
-    width: 100%;
-  }
+@media screen and (min-width: 950px) {
+  height: 100%;
+  width: 100%;
+}
 `
 
 interface IProps extends RouteComponentProps {
@@ -36,6 +33,15 @@ interface IProps extends RouteComponentProps {
 }
 
 export class GameUnity extends React.Component<IProps, any> {
+  componentDidMount () {
+    window.addEventListener('resize', this.handleResize, false);
+    window.addEventListener('orientationchange', this.handleResize, false);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize, false);
+    window.removeEventListener('orientationchange', this.handleResize, false);
+  }
 
   constructor(props) {
     super(props);
@@ -55,11 +61,43 @@ export class GameUnity extends React.Component<IProps, any> {
       score: 1,
       gameName: '',
       doubleTime: null,
-      gameId: ''
+      gameId: '',
+      width: '',
+      height: '',
     };
 
     this.initializeUnity();
     this.preparePlayButton();
+  }
+
+  handleResize = () => {
+    const widthToHeight =  DEFAULT_GAME_DIMENSION.width / DEFAULT_GAME_DIMENSION.height;
+    let newWidth = window.innerWidth;
+    let newHeight = window.innerHeight;
+    let newWidthToHeight = newWidth / newHeight;
+    let height = newHeight;
+    let width = newWidth;
+    newWidth = window.innerWidth;
+    newHeight = window.innerHeight;
+    newWidthToHeight = newWidth / newHeight;
+
+    if (newWidthToHeight > widthToHeight) {
+      newWidth = newHeight * widthToHeight;
+      height = newHeight * 0.85;
+      width = newWidth * 0.85;
+      this.setState({
+        height,width
+      })
+    } else {
+      newHeight = newWidth / widthToHeight;
+      width = newWidth * 0.85;
+      height = newHeight * 0.85;
+      this.setState({
+        height,width
+      })
+    }
+
+    console.log(height, width);
   }
 
   speed = 30;
@@ -385,8 +423,11 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   render() {
-    const { isGameRunning, gameReady, playBtnText, progression } = this.state;
+    const { isGameRunning, gameReady, playBtnText, progression, width, height } = this.state;
     const { tournamentId } = this.props;
+
+    let canvasWidth =  (window.innerWidth <= 950 ? `${width}px` : "100%");
+    let canvasHeight = (window.innerWidth <= 950 ? `${height}px` : "100%");
 
     return (
       <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
@@ -409,10 +450,10 @@ export class GameUnity extends React.Component<IProps, any> {
           }
         </Button>
 
-        <StyledBox p={0}>
+        <StyledBox p={0} width={`${width}px`} height={`${height}px`}>
           {
             this.state.unityShouldBeMounted === true && (
-              <Unity width="100%" height="100%" unityContent={this.unityContent} className="web-gl" />
+              <Unity unityContent={this.unityContent}  width={canvasWidth} height={canvasHeight}/>
             )
           }
         </StyledBox>
