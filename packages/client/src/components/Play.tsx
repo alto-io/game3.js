@@ -55,8 +55,6 @@ function Play({ drizzle, drizzleStatus, account, accountValidated, networkId, ha
 
   return (
     <Box>
-      {
-        !drizzleState ? (
         <Box m={4}>
           <ConnectionBanner
             currentNetwork={currentNetwork}
@@ -64,7 +62,6 @@ function Play({ drizzle, drizzleStatus, account, accountValidated, networkId, ha
             onWeb3Fallback={null}
           />
         </Box>
-        ) : (
         <Box maxWidth={"1180px"} p={3} mx={"auto"}>
           <Text my={4} />
           <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
@@ -77,9 +74,7 @@ function Play({ drizzle, drizzleStatus, account, accountValidated, networkId, ha
             );
             })}
           </Flex>
-        </Box>  
-        )
-      }
+        </Box> 
     </Box>
   );
 }
