@@ -21,9 +21,8 @@
   "scripts": {
     "redeploy": "yarn clean:ipfs && yarn sol:deploy",
     "sol:compile": "truffle compile --config truffle-config.js",
-    "sol:compile-reset": "truffle compile --config truffle-config.js --reset --compile-all",
     "sol:deploy": "truffle migrate --reset --compile-all",
-    "sol:deploy-rinkeby": "yarn sol:compile-reset && truffle deploy --network rinkeby --reset",
+    "sol:deploy-rinkeby": "truffle deploy --network rinkeby --reset",
     "sol:test": "truffle test",
     "clean:ipfs": "rimraf ./packages/server/orbitdb && rimraf ./packages/server/ipfs",
     "clean:dependencies": "rimraf ./**/node_modules",
