@@ -62,8 +62,6 @@ import Replay from './scenes/Replay';
 import { Slide, ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import WorkerProxy from './utils/worker-proxy'
-
 // app settings
 const CREATE_WALLET_ON_GUEST_ACCOUNT = false;
 
@@ -150,21 +148,21 @@ const INITIAL_STATE: IAppState = {
 };
 
 
-// function initWeb3(provider: any) {
-//   const web3: any = new Web3(provider);
+function initWeb3(provider: any) {
+  const web3: any = new Web3(provider);
 
-//   web3.eth.extend({
-//     methods: [
-//       {
-//         name: "chainId",
-//         call: "eth_chainId",
-//         outputFormatter: web3.utils.hexToNumber
-//       }
-//     ]
-//   });
+  web3.eth.extend({
+    methods: [
+      {
+        name: "chainId",
+        call: "eth_chainId",
+        outputFormatter: web3.utils.hexToNumber
+      }
+    ]
+  });
 
-//   return web3;
-// }
+  return web3;
+}
 
 const preflightCheck = () => {
   if (window.ethereum) {
@@ -240,18 +238,18 @@ class App extends React.Component<any, any> {
     this.state = {
       ...INITIAL_STATE
     };
-    // this.web3Modal = new Web3Modal({
-    //   // network: this.getNetwork(),
-    //   cacheProvider: true,
-    //   providerOptions: {
-    //     walletconnect: {
-    //       package: WalletConnectProvider, // required
-    //       options: {
-    //         infuraId: "b71d4cce6c0c4f2ebaecc118a35dfaf5"
-    //       }
-    //     }
-    //   }
-    // });
+    this.web3Modal = new Web3Modal({
+      network: this.getNetwork(),
+      cacheProvider: true,
+      providerOptions: {
+        walletconnect: {
+          package: WalletConnectProvider, // required
+          options: {
+            infuraId: "b71d4cce6c0c4f2ebaecc118a35dfaf5"
+          }
+        }
+      }
+    });
 
     // DEBUG INFO
     console.log(props);
@@ -262,9 +260,9 @@ class App extends React.Component<any, any> {
   }
 
   public componentDidMount() {
-    // if (this.web3Modal.cachedProvider) {
-    //   this.onConnect();
-    // }
+    if (this.web3Modal.cachedProvider) {
+      this.onConnect();
+    }
 
     this.initDatabase();
   }
@@ -292,91 +290,91 @@ class App extends React.Component<any, any> {
   }
 
 
-  // public onConnect = async () => {
-  //   const provider = await this.web3Modal.connect();
+  public onConnect = async () => {
+    const provider = await this.web3Modal.connect();
 
-  //   await this.subscribeProvider(provider);
+    // await this.subscribeProvider(provider);
 
-  //   const web3: any = initWeb3(provider);
+    // const web3: any = initWeb3(provider);
 
-  //   const accounts = await web3.eth.getAccounts();
+    // const accounts = await web3.eth.getAccounts();
 
-  //   const address = accounts[0];
+    // const address = accounts[0];
 
-  //   const networkId = await web3.eth.net.getId();
+    // const networkId = await web3.eth.net.getId();
 
-  //   const chainId = await web3.eth.chainId();
+    // const chainId = await web3.eth.chainId();
 
-  //   await this.setState({
-  //     web3,
-  //     provider,
-  //     connected: true,
-  //     address,
-  //     chainId,
-  //     networkId
-  //   });
-  //   // await this.getAccountAssets();
+    // await this.setState({
+    //   web3,
+    //   provider,
+    //   connected: true,
+    //   address,
+    //   chainId,
+    //   networkId
+    // });
+    // await this.getAccountAssets();
 
-  //   // set the walletid to the loggedin Address
-  //   const { playerProfile } = this.state;
-  //   playerProfile.walletid = address;
-  //   await this.setState( { playerProfile });
-  //   this.getLoggedInPlayerProfile();
-  // };
+    // set the walletid to the loggedin Address
+    // const { playerProfile } = this.state;
+    // playerProfile.walletid = address;
+    // await this.setState( { playerProfile });
+    // this.getLoggedInPlayerProfile();
+  };
 
-  // public subscribeProvider = async (provider: any) => {
-  //   if (!provider.on) {
-  //     return;
-  //   }
-  //   provider.on("close", () => this.resetApp());
-  //   provider.on("accountsChanged", async (accounts: string[]) => {
-  //     await this.setState({ address: accounts[0] });
-  //     await this.getAccountAssets();
-  //   });
-  //   provider.on("chainChanged", async (chainId: number) => {
-  //     const { web3 } = this.state;
-  //     const networkId = await web3.eth.net.getId();
-  //     await this.setState({ chainId, networkId });
-  //     await this.getAccountAssets();
-  //   });
+  public subscribeProvider = async (provider: any) => {
+    if (!provider.on) {
+      return;
+    }
+    provider.on("close", () => this.resetApp());
+    provider.on("accountsChanged", async (accounts: string[]) => {
+      await this.setState({ address: accounts[0] });
+      await this.getAccountAssets();
+    });
+    provider.on("chainChanged", async (chainId: number) => {
+      const { web3 } = this.state;
+      const networkId = await web3.eth.net.getId();
+      await this.setState({ chainId, networkId });
+      await this.getAccountAssets();
+    });
 
-  //   provider.on("networkChanged", async (networkId: number) => {
-  //     const { web3 } = this.state;
-  //     const chainId = await web3.eth.chainId();
-  //     await this.setState({ chainId, networkId });
-  //     await this.getAccountAssets();
-  //   });
-  // };
+    provider.on("networkChanged", async (networkId: number) => {
+      const { web3 } = this.state;
+      const chainId = await web3.eth.chainId();
+      await this.setState({ chainId, networkId });
+      await this.getAccountAssets();
+    });
+  };
 
-  // public getNetwork = () => getChainData(this.state.chainId).network;
+  public getNetwork = () => getChainData(this.state.chainId).network;
 
-  // public getProviderOptions = () => {
-  //   const infuraId = (process.env.NODE_ENV === "production" ? "b71d4cce6c0c4f2ebaecc118a35dfaf5" : process.env.REACT_APP_INFURA_ID)
+  public getProviderOptions = () => {
+    const infuraId = (process.env.NODE_ENV === "production" ? "b71d4cce6c0c4f2ebaecc118a35dfaf5" : process.env.REACT_APP_INFURA_ID)
         
-  //   const providerOptions = {
-  //     walletconnect: {
-  //       package: WalletConnectProvider,
-  //       options: {
-  //         infuraId
-  //       }
-  //     }
-  //   };
-  //   return providerOptions;
-  // };
+    const providerOptions = {
+      walletconnect: {
+        package: WalletConnectProvider,
+        options: {
+          infuraId
+        }
+      }
+    };
+    return providerOptions;
+  };
 
-  // public getAccountAssets = async () => {
-  //   const { address, chainId } = this.state;
-  //   this.setState({ fetching: true });
-  //   try {
-  //     // get account balances
-  //     const assets = await apiGetAccountAssets(address, chainId);
+  public getAccountAssets = async () => {
+    const { address, chainId } = this.state;
+    this.setState({ fetching: true });
+    try {
+      // get account balances
+      const assets = await apiGetAccountAssets(address, chainId);
 
-  //     await this.setState({ fetching: false, assets });
-  //   } catch (error) {
-  //     console.error(error); // tslint:disable-line
-  //     await this.setState({ fetching: false });
-  //   }
-  // };
+      await this.setState({ fetching: false, assets });
+    } catch (error) {
+      console.error(error); // tslint:disable-line
+      await this.setState({ fetching: false });
+    }
+  };
 
   // public toggleModal = () =>
   //   this.setState({ showModal: !this.state.showModal });
@@ -635,15 +633,15 @@ class App extends React.Component<any, any> {
   //   }
   // };
 
-  // public resetApp = async () => {
-  //   const { web3 } = this.state;
-  //   if (web3 && web3.currentProvider && web3.currentProvider.close) {
-  //     await web3.currentProvider.close();
-  //   }
-  //   await this.web3Modal.clearCachedProvider();
-  //   this.setState({ ...INITIAL_STATE });
-  //   await this.dbManager.getGuestConfig(this.getGuestConfigCallback);
-  // };
+  public resetApp = async () => {
+    const { web3 } = this.state;
+    if (web3 && web3.currentProvider && web3.currentProvider.close) {
+      await web3.currentProvider.close();
+    }
+    await this.web3Modal.clearCachedProvider();
+    this.setState({ ...INITIAL_STATE });
+    await this.dbManager.getGuestConfig(this.getGuestConfigCallback);
+  };
 
   public setRoute = (inputRoute) => {
     this.setState({ route: inputRoute })
@@ -707,7 +705,8 @@ class App extends React.Component<any, any> {
                         accountBalance={accountBalance}
                         accountBalanceLow={accountBalanceLow}
                         accountValidated={accountValidated}
-                        connectAndValidateAccount={connectAndValidateAccount}      
+                        connectAndValidateAccount={connectAndValidateAccount}    
+                        onConnect={this.onConnect}  
                   />
 
                     <Router>
