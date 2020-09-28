@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { drizzleConnect } from "@drizzle/react-plugin";
 import ConnectionBanner from "@rimble/connection-banner";
 import { Box, Flex, Text } from "rimble-ui";
+import { isMobile } from 'react-device-detect';
 
 import { GAME_DETAILS } from '../constants';
 import GameCard from '../components/GameCard';
@@ -55,13 +56,16 @@ function Play({ drizzle, drizzleStatus, account, accountValidated, networkId, ha
 
   return (
     <Box>
-        <Box m={4}>
-          <ConnectionBanner
-            currentNetwork={currentNetwork}
-            requiredNetwork={RIMBLE_CONFIG.requiredNetwork}
-            onWeb3Fallback={null}
-          />
-        </Box>
+        {!isMobile ? (
+          <Box m={4}>
+            <ConnectionBanner
+              currentNetwork={currentNetwork}
+              requiredNetwork={RIMBLE_CONFIG.requiredNetwork}
+              onWeb3Fallback={null}
+            />
+          </Box>
+        ) : ""}
+
         <Box maxWidth={"1180px"} p={3} mx={"auto"}>
           <Text my={4} />
           <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>

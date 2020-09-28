@@ -29,9 +29,7 @@ ReactDOM.render(
   <>
     {/*<GlobalStyle/>*/}
     <ThemeProvider theme={CustomTheme}>
-      <ScreenSizeProvider>
-        <DrizzleLoader />
-      </ScreenSizeProvider>
+      <DrizzleLoader />
     </ThemeProvider>
   </>,
   document.getElementById("root"),
