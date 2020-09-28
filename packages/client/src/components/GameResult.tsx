@@ -116,27 +116,6 @@ export default class GameResult extends React.Component<IProps, IState> {
 
   }
 
-  submitResult = async () => {
-    const { tournamentId, recordFileHash, playerAddress,
-      onToggle, gameSessionId, contractMethodSendWrapper } = this.props
-
-    const result = await putGameReplay(gameSessionId, playerAddress, recordFileHash)
-    console.log(result)
-
-    try {
-      contractMethodSendWrapper(
-        "submitResult", // name
-        [tournamentId, gameSessionId], //contract parameters
-        { from: playerAddress }, // send parameters
-        (txStatus, transaction) => { // callback
-          console.log("submitResult callback: ", txStatus, transaction);
-        })
-      onToggle(true)
-    } catch (err) {
-      console.log('errrrrroooorrr');
-    }
-  }
-
   async getTournamentInfo() {
     const { drizzle, tournamentId } = this.props;
     const contract = drizzle.contracts.Tournaments;
@@ -149,6 +128,9 @@ export default class GameResult extends React.Component<IProps, IState> {
 
   formatTime = (time, isLeaderBoards) => {
     if (time) {
+      if (time === 0) {
+        return '0';
+      } 
       const seconds = (parseInt(time) / 1000).toFixed(2);
       const minutes = Math.floor(parseInt(seconds) / 60);
       let totalTime = '';
@@ -179,7 +161,7 @@ export default class GameResult extends React.Component<IProps, IState> {
     let canTryAgain = gameNo < tourneyMaxTries;
 
     let scoreMsg = score === highScore ? `New high score!!` : ``;
-    let finalMsg = `final Score ${this.formatTime(score, false)}`
+    let finalMsg = `final Score ${this.formatTime(highScore, false)}`
 
     return (
       <Modal show={show} toggleModal={onToggle}>

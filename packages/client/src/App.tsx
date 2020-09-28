@@ -56,7 +56,6 @@ import { getLocalDatabaseManager, getPlayerProfile } from "./helpers/database";
 import Home from './scenes/Home';
 import GameContainer from './scenes/GameContainer';
 import Recorder from './scenes/Recorder';
-import Tournaments from './scenes/Tournaments'
 import Replay from './scenes/Replay';
 
 import { Slide, ToastContainer, toast } from 'react-toastify'
@@ -266,29 +265,6 @@ class App extends React.Component<any, any> {
 
     this.initDatabase();
   }
-
-  public getLoggedInPlayerProfile = async () => {
-    const { playerProfile } = this.state;
-    const walletid = playerProfile.walletid
-
-    await this.setState({ fetching: true });
-    try {
-      var serverPlayerProfile = await getPlayerProfile(playerProfile);
-
-      if (serverPlayerProfile)
-      {
-        serverPlayerProfile.walletid = walletid
-        await this.setState({ playerProfile: serverPlayerProfile });
-
-        toast.info('🤗 Welcome back, ' + serverPlayerProfile.username + '!');
-
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    await this.setState({ fetching: false });
-  }
-
 
   public onConnect = async () => {
     const provider = await this.web3Modal.connect();
@@ -744,12 +720,6 @@ class App extends React.Component<any, any> {
                       <Recorder
                         path="/recorder"
                         propVar={ connected }
-                      />
-                      <Tournaments
-                        path="/tournaments"
-                        web3={web3}
-                        address={address}
-                        playerProfile={playerProfile}
                       />
                     </Router>
                   </>

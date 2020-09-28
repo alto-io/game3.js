@@ -9,7 +9,7 @@ import { Flex, Text } from "rimble-ui";
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import { updatePlayerProfile, refreshLeaderboard, getFileFromHash } from "../helpers/database";
+import { refreshLeaderboard, getFileFromHash } from "../helpers/database";
 
 import styled from "styled-components";
 import { colors } from "../styles";
@@ -152,7 +152,7 @@ export default class Home extends Component<IProps, IState> {
 
     this.props.playerProfile.username = playerName;
 
-    updatePlayerProfile(this.props.playerProfile)
+    //updatePlayerProfile(this.props.playerProfile)
 
     this.setState({
       newPlayerName: playerName,

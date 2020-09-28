@@ -27,14 +27,12 @@ export const DAI_CONTRACT = {
   }
 }
 
-export const TOURNAMENT_STATE_DRAFT = 0
-export const TOURNAMENT_STATE_ACTIVE = 1
-export const TOURNAMENT_STATE_ENDED = 2
-export const TOURNAMENT_STATE_WINNERS_DECLARED = 3
+export const TOURNAMENT_STATE_ACTIVE = 0
+export const TOURNAMENT_STATE_ENDED = 1
+export const TOURNAMENT_STATE_WINNERS_DECLARED = 2
 
 export const TOURNAMENT_STATES =
 [
-  "Draft",
   "Active",
   "Ended",
   "Winners Declared"

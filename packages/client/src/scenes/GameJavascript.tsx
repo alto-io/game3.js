@@ -83,15 +83,16 @@ export default class GameJavascript extends Component<any, any> {
   async endGame(died: boolean) {
     const { stopRecording } = this.props;
     const { tournamentId } = this.state;
-
-    const data = await this.updateSessionHighScore();
+    
     this.gameIsRunning(false);
     this.playerIsDead(died);
+    
+    const data = await this.updateSessionHighScore();
 
     console.log("GAME JAVASCRIPT-endGame: Tourney ID", tournamentId)
     if (tournamentId || tournamentId === 0) {
       console.log("GAME JAVASCRIPT-endGame: New Highscore?", data.newHighScore);
-      stopRecording(data.newHighScore);
+      await stopRecording(data.newHighScore);
       console.log("GAME JAVASCRIPT-endGame: Recording stopped")
     }
 

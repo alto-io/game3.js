@@ -161,6 +161,7 @@ class DashboardView extends Component<IProps, IState> {
         tournament.timeIsUp = isPast(new Date(tournament.endTime));
   
         let results = []
+/* results are no longer in the contract
         const resultsCount = await contract.methods.getResultsCount(tournament.id).call()
         for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
           const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
@@ -180,7 +181,7 @@ class DashboardView extends Component<IProps, IState> {
           
           results.push(result);
         }
-
+*/
         let playerResults = results.filter( result => result.playerAddress === address.toLowerCase());
         tournament.results = playerResults;
 

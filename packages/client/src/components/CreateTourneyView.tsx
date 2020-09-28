@@ -16,7 +16,7 @@ import '../react-datetime.css';
 
 import { Constants } from '@game3js/common';
 
-import { newTournament, updateTournament, getTourneyWinners } from '../helpers/database'
+import { newTournament, updateTournament, getTopResults } from '../helpers/database'
 
 class CreateTourneyView extends Component<any, any> {
 
@@ -164,16 +164,6 @@ class CreateTourneyView extends Component<any, any> {
       (txStatus, transaction) => { // callback
         console.log("createTournament callback: ", txStatus, transaction);
       })
-
-    // const receipt = await contract.methods.createTournament(address, timestamp, data, prize, shares, buyInAmount, triesPerBuyin)
-    //   .send({from: address})
-
-    // const { tournamentId } = receipt.events.TournamentCreated.returnValues
-
-    // // TODO
-    // putTournamentData({ id: tournamentId })
-
-    // this.updateTournaments()
   }
 
   updateTournaments = async () => {
@@ -185,24 +175,6 @@ class CreateTourneyView extends Component<any, any> {
     this.setState({
       tournamentsCount,
     })
-  }
-
-  onActivate = (tournament) => {
-    this.activateTournament(tournament)
-  }
-
-  activateTournament = async (tournament) => {
-    const { drizzle } = this.props
-
-    const address = this.state.address;
-    const contract = drizzle.contracts.Tournaments;
-
-    await contract.methods.activateTournament(tournament.id, tournament.prize)
-      .send({
-        from: address,
-        value: tournament.prize
-      })
-    this.updateTournaments()
   }
 
   changeSelectedContract = (event) => {
@@ -271,7 +243,18 @@ class CreateTourneyView extends Component<any, any> {
           break;
         case 'uint256[]':
           let arr = param.value.split(',');
-          contractParams.push(arr);
+          if (param.name === "uintParams") {
+            let newArr = arr.map((input, idx) => {
+              if(idx < 2) { // don't convert all to eth because last element is the no. of max tries
+                return web3.utils.toWei(input.toString(), 'ether')
+              } else {
+                return input
+              }
+            });
+            contractParams.push(newArr);
+          } else {
+            contractParams.push(arr);
+          }
           break;
         default:
           // TODO: refactor to support other contracts aside from Tournament
@@ -441,7 +424,8 @@ class CreateTourneyView extends Component<any, any> {
       {
         name: input.name,
         type: input.type,
-        value: input.value
+        value: input.value,
+        placeholder: ''
       }
       switch (input.name) {
         case "organizer":
@@ -449,6 +433,9 @@ class CreateTourneyView extends Component<any, any> {
           break;
         case "endTime":
           newInput.value = Date.now() + 10 * 24 * 60 * 60 * 1000;
+          break;
+        case "uintParams":
+          newInput.placeholder = "prize,buyInAmt,maxTries";
           break;
         default:
           newInput.value = input.value;
@@ -470,15 +457,21 @@ class CreateTourneyView extends Component<any, any> {
   populatePlayerIds = async(e) => {
     e.preventDefault();
     const {contractInputs} = this.state;
+    const { drizzle } = this.props;
 
-    let winners = await getTourneyWinners(parseInt(contractInputs[0].value));
+    const contract = drizzle.contracts.Tournaments;
+    const tournamentId = contractInputs[0].value; 
 
-    console.log("WINNERS ARRAY", winners);
+    const winners = await contract.methods.getShares(tournamentId).call();
+
+    let topResults = await getTopResults(parseInt(contractInputs[0].value), winners.length);
+
+    console.log("WINNERS ARRAY", topResults);
 
     contractInputs.forEach((input, idx) => {
       switch(input.name) {
         case "playerIds":
-          contractInputs[idx].value = winners;
+          contractInputs[idx].value = topResults;
           break;
         default:
           break;
@@ -644,7 +637,7 @@ class CreateTourneyView extends Component<any, any> {
                             >
                               {
                                 <Button size={"medium"} mr={3} mb={3} onClick={this.populatePlayerIds}>
-                                  Get Winners From DB
+                                  Get Top results From DB
                                 </Button>
                               }
                             </Field>
@@ -664,6 +657,7 @@ class CreateTourneyView extends Component<any, any> {
                                 required={true}
                                 onChange={this.handleInputChange}
                                 value={this.state.contractInputs[index].value}
+                                placeholder={this.state.contractInputs[index].placeholder}
                               />
                             }
                           </Field>
@@ -723,125 +717,3 @@ const mapStateToProps = state => {
 };
 
 export default drizzleConnect(CreateTourneyView, mapStateToProps);
-
-
-
-/*
-const { drizzle } = this.props
-const { tournamentsCount, contract, ownerView } = this.state
-const { web3, address, contractMethodSendWrapper } = this.props
-
-const noTournaments = tournamentsCount <= 0
-
-const allTrnsDivs = []
-for(let i = 0; i < tournamentsCount; i++) {
-  allTrnsDivs.push(
-    <Tournament
-      userAddress={address}
-      tournamentId={i}
-      contract={drizzle.contracts.Tournaments}
-      web3={drizzle.web3}
-      onPlay={this.onPlay}
-      onActivate={this.onActivate}
-      onPlayResult={this.showReplay}
-      onDeclareWinner={this.declareWinner}
-      showOwn={ownerView}
-    />
-  )
-}
-return (
-  <Fragment>
-    <View
-      flex={true}
-      center={true}
-      style={{
-        padding: 32,
-        flexDirection: 'column',
-      }}
-    >
-      <Fragment>
-        <video id="recorded"></video>
-      </Fragment>
-      <Box
-        style={{
-          width: 500,
-          maxWidth: '100%',
-        }}
-      >
-        { !ownerView && (
-          <View
-            flex={true}
-            style={{
-              alignItems: 'flex-start',
-              flexDirection: 'column',
-            }}
-          >
-            <Button
-              title="To organizer view"
-              onClick={() => {this.setState({ownerView: true})}}
-              text={'To organizer view'}
-            />
-          </View>
-        )}
-        { ownerView && (
-          <View
-            flex={true}
-            style={{
-              alignItems: 'flex-start',
-              flexDirection: 'column',
-            }}
-          >
-            <Button
-              title="To player view"
-              onClick={() => {this.setState({ownerView: false})}}
-              text={'To player view'}
-            />
-          </View>
-        )}
-        { ownerView && (
-          <View
-            flex={true}
-            style={{
-              alignItems: 'flex-start',
-              flexDirection: 'column',
-            }}
-          >
-            <Button
-              title="Sponsor a tournament"
-              onClick={this.onNewTournament}
-              text={'+ New Tournament'}
-            />
-          </View>
-        )}
-        <Space size="xxs" />
-        <Separator />
-        <Space size="xxs" />
-        { noTournaments && (
-          <View
-            flex={true}
-            center={true}
-            style={{
-              borderRadius: 8,
-              backgroundColor: '#efefef',
-              color: 'darkgrey',
-              height: 128,
-            }}
-          >
-            {'Active tournaments list here'}
-          </View>
-        )}
-        <>
-          <View flex={true} style={{ color: 'darkgrey', height: 32 }}>
-            {ownerView && (<SBold>My tournaments</SBold>)}
-            {!ownerView && (<SBold>Active tournaments</SBold>)}
-          </View>
-          <Separator />
-          <View flex={true} column={true} >
-            { allTrnsDivs }
-          </View>
-        </>
-      </Box>
-    </View>
-  </Fragment>
-)
-*/

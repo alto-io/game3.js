@@ -8,10 +8,5 @@ export interface DBManager {
     saveGuestConfig(guestConfig: GuestConfig);
     getFileFromHash(hash: string);
     localSaveReplay(playerId: string, tournamentId: string, time: number, recordedBlobs: any);
-    getPlayerProfile(walletid: string);
-    savePlayerProfile(playerProfile: PlayerProfile);
-    getLeaderboard();
-    putTournamentData(reqBody: any);
-    getTournamentData(tournamentId: string);
     serverPutGameReplay(reqBody: any);
 }

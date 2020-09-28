@@ -7,16 +7,14 @@ import SkeletonLeaderboardLoader from './SkeletonLeaderboardLoader';
 import Modal from './Modal';
 import PlayerGameReplays from './PlayerGameReplays';
 
-import { getTournamentResult, getTournament, getTournaments } from '../helpers/database'
+import { getTournamentResult } from '../helpers/database'
 import shortenAddress from "../core/utilities/shortenAddress";
 import { Constants } from '@game3js/common';
 import web3 from 'web3';
 import { format } from 'date-fns';
 
 import {
-  TOURNAMENT_STATE_ACTIVE,
-  TOURNAMENT_STATE_ENDED,
-  TOURNAMENT_STATE_DRAFT
+  TOURNAMENT_STATES,
 } from '../constants'
 
 const SharesText = styled.div`
@@ -51,6 +49,7 @@ const ResultStyle = styled.div`
  letter-spacing: 0.1px;
  padding: 0.5rem;
  cursor: pointer;
+ background: ${props => props.mydata ? "#c4c4c4" : "none"}
 
  .address {
    font-weight: bold;
@@ -69,10 +68,6 @@ const ResultStyle = styled.div`
    text-align: right;
    width: 33%;
  }
-
- .player-background {
-   background: #c4c4c4;
- }
  `
 
 const JoinTourneyBtn = styled(Button)`
@@ -85,7 +80,7 @@ const JoinTourneyBtn = styled(Button)`
   width: 100%;
  `
 
- const JoinLeaderboardsMsg = styled.div`
+const JoinLeaderboardsMsg = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -93,7 +88,7 @@ const JoinTourneyBtn = styled(Button)`
   padding: 0.5rem;
  `
 
- const WidgetStyle = styled.div`
+const WidgetStyle = styled.div`
   color: #101010;
   display: flex;
   justify-content: center;
@@ -103,7 +98,7 @@ const JoinTourneyBtn = styled(Button)`
   height: 100%;
  `
 
- const LeaderboardStyle = styled.div`
+const LeaderboardStyle = styled.div`
   background: #fff;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   display: flex;
@@ -122,7 +117,7 @@ const JoinTourneyBtn = styled(Button)`
  `
 
 //  Used inside <LeaderboardStyle>
- const ResultDivsStyle = styled.div`
+const ResultDivsStyle = styled.div`
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -130,7 +125,7 @@ const JoinTourneyBtn = styled(Button)`
   width: 100%;
  `
 
- const TournamentInfoStyle = styled.div`
+const TournamentInfoStyle = styled.div`
   background: #ffb600;
   border-radius: 7px 7px 0 0;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
@@ -152,7 +147,7 @@ const JoinTourneyBtn = styled(Button)`
   }
  `
 
- const TotalBuyInContainer = styled.div`
+const TotalBuyInContainer = styled.div`
   background: #06df9b;
   border: none;
   border-radius: 7px;
@@ -171,26 +166,25 @@ const JoinTourneyBtn = styled(Button)`
   }
  `
 
- interface IState {
+interface IState {
   results: Array<any>;
   tournament: any;
   shares: Array<any>;
   isLoading: boolean;
   tournamentId?: string;
-  loggedIn: any;
   isReplayModalOpen: boolean;
   currentFileHash?: string;
- }
+}
 
- interface IProps {
-   tournamentId: any;
-   address: any;
-   playerAddress: any;
-   drizzle: any;
-   accountValidated: any;
-   connectAndValidateAccount: any;
-   setRoute: any;
-  }
+interface IProps {
+  tournamentId: any;
+  address: any;
+  playerAddress: any;
+  drizzle: any;
+  accountValidated: any;
+  connectAndValidateAccount: any;
+  setRoute: any;
+}
 
 class TournamentResultsCard extends Component<IProps, IState> {
   constructor(props) {
@@ -204,7 +198,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
       isReplayModalOpen: false,
       currentFileHash: '',
       tournamentId: '',
-      loggedIn: ''
     }
   }
 
@@ -233,6 +226,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   refreshResults = async () => {
+    console.log("REFRESHING RESULTS");
     const { tournamentId } = this.state;
     let results = [];
     let sessionsData = await getTournamentResult(tournamentId);
@@ -260,10 +254,16 @@ class TournamentResultsCard extends Component<IProps, IState> {
         results.sort((el1, el2) => {
           switch (el1.gameName) {
             case Constants.FP:
-              return el2.sessionData.highScore - el1.sessionData.highScore
+              if (el1.sessionData.highScore === 0) return 1;        
+              if (el2.sessionData.highScore === 0) return -1;
+              return el2.sessionData.highScore - el1.sessionData.highScore;
             case Constants.TOSIOS:
+              if (el1.sessionData.currentHighestNumber === 0) return -1;        
+              if (el2.sessionData.currentHighestNumber === 0) return 1;
               return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
             case Constants.WOM:
+              if (el1.sessionData.highScore === 0) return 1;        
+              if (el2.sessionData.highScore === 0) return -1;
               return el1.sessionData.highScore - el2.sessionData.highScore
             default:
               break;
@@ -278,7 +278,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
 
   getTournamentAndLeaderBoards = async () => {
     const { drizzle, playerAddress, accountValidated } = this.props;
-    const { tournamentId, loggedIn } = this.state;
+    const { tournamentId } = this.state;
 
     this.setState({ isLoading: true })
 
@@ -313,54 +313,28 @@ class TournamentResultsCard extends Component<IProps, IState> {
     }
 
     let raw = undefined;
-    if (loggedIn) {
-      raw = await contract.methods.getTournament(tournamentId).call()
-      await this.fetchShares(tournamentId);
-      let data = this.parseData(raw['5']);
-      const gameName = data[0];
-      const gameStage = data[1] ? data[1] : undefined;
-      const maxTries = await contract.methods.getMaxTries(tournamentId).call();
-      const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
 
-      tournament = {
-        id: tournamentId,
-        name: gameName,
-        gameStage: gameStage,
-        timeZone: 'GMT+8',
-        startTime: '12:00',
-        endTime: format(new Date(parseInt(raw['1'])), 'MMM d, yyyy'),
-        startDate: '8/16',
-        endDate: '9/4',
-        state: parseInt(raw['3']),
-        pool: raw['4'],
-        maxTries: parseInt(maxTries),
-        buyInAmount: tournamentBuyIn
-      }
+    raw = await contract.methods.getTournament(tournamentId).call()
+    await this.fetchShares(tournamentId);
+    let data = this.parseData(raw['5']);
+    const gameName = data[0];
+    const gameStage = data[1] ? data[1] : undefined;
+    const maxTries = await contract.methods.getMaxTries(tournamentId).call();
+    const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
 
-    } else {
-      raw = await getTournament(tournamentId);
-      console.log("TOURNAMENT DATA FROM DB", raw);
-      let data = this.parseData(raw[0].data);
-      let gameName = data[0];
-      tournament = {
-        id: tournamentId,
-        name: gameName,
-        gameStage: data[1] ? data[1] : undefined,
-        timeZone: 'GMT+8',
-        startTime: '12:00',
-        endTime: format(new Date(parseInt(raw[0].endTime)), 'MMM d, yyyy'),
-        startDate: '8/16',
-        endDate: '9/4',
-        state: parseInt(raw[0].state),
-        pool: raw[0].pool,
-        maxTries: 0,
-        buyInAmount: 0,
-      }
-      console.log("FETCH SHARES NOT LOGGED IN", raw[0].shares);
-      console.log("FETCH POOL NOT LOGGED IN", raw[0].pool);
-      this.setState({
-        shares: raw[0].shares
-      })
+    tournament = {
+      id: tournamentId,
+      name: gameName,
+      gameStage: gameStage,
+      timeZone: 'GMT+8',
+      startTime: '12:00',
+      endTime: format(new Date(parseInt(raw['1'])), 'MMM d, yyyy'),
+      startDate: '8/16',
+      endDate: '9/4',
+      state: parseInt(raw['3']),
+      pool: raw['4'],
+      maxTries: parseInt(maxTries),
+      buyInAmount: tournamentBuyIn
     }
 
     // Get tournament results
@@ -390,10 +364,16 @@ class TournamentResultsCard extends Component<IProps, IState> {
         results.sort((el1, el2) => {
           switch (el1.gameName) {
             case Constants.FP:
+              if (el1.sessionData.highScore === 0) return 1;
+              if (el2.sessionData.highScore === 0) return -1;
               return el2.sessionData.highScore - el1.sessionData.highScore
             case Constants.TOSIOS:
+              if (el1.sessionData.currentHighestNumber === 0) return 1;
+              if (el2.sessionData.currentHighestNumber === 0) return -1;
               return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
             case Constants.WOM:
+              if (el1.sessionData.highScore === 0) return 1;
+              if (el2.sessionData.highScore === 0) return -1;
               return el1.sessionData.highScore - el2.sessionData.highScore
             default:
               break;
@@ -401,6 +381,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
         })
       }
     }
+
+    console.log("RESULTS: sorted", results)
+
     this.setState({
       results,
       tournament,
@@ -409,10 +392,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   getBlockchainInfo = async (props) => {
-    const { tournamentId } = props
+    const { tournamentId, drizzle } = props
 
-    if (this.props.drizzle.contracts.Tournaments) {
-      const { drizzle } = this.props;
+    if (drizzle.contracts.Tournaments) {
       // Get the latest tournament
       const contract = drizzle.contracts.Tournaments;
 
@@ -425,22 +407,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
 
       this.setState({
         tournamentId: tI,
-        loggedIn: true
-      })
-
-      await this.getTournamentAndLeaderBoards();
-    } else {
-      let ids = await getTournaments();
-      console.log("IDSSSS", ids);
-      let tId = undefined;
-      if (ids.length > 0) {
-        tId = ids[ids.length - 1].id
-      }
-      console.log("THE ID IN DB IS", tId);
-
-      this.setState({
-        tournamentId: tId,
-        loggedIn: false
       })
 
       await this.getTournamentAndLeaderBoards();
@@ -448,16 +414,7 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   getStatus(tournament: any) {
-    switch (tournament.state) {
-      case TOURNAMENT_STATE_DRAFT:
-        return 'Draft'
-      case TOURNAMENT_STATE_ACTIVE:
-        return 'Active'
-      case TOURNAMENT_STATE_ENDED:
-        return 'Done'
-      default:
-        return 'None'
-    }
+    return TOURNAMENT_STATES[tournament.state]
   }
 
   formatTourneyTimeInfo(tournament: any) {
@@ -482,6 +439,12 @@ class TournamentResultsCard extends Component<IProps, IState> {
     const { setRoute } = this.props;
     setRoute("TournamentView");
     navigate("/");
+  }
+
+  setShares = () => {
+    const {shares} = this.state;
+
+    
   }
 
   fetchShares = async (tournamentId) => {
@@ -565,10 +528,10 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   extractHighScore = result => {
-    
+
     let gameName = result.gameName;
 
-    switch(gameName) {
+    switch (gameName) {
       case Constants.TOSIOS:
         return result.sessionData.currentHighestNumber;
       case Constants.WOM:
@@ -595,10 +558,11 @@ class TournamentResultsCard extends Component<IProps, IState> {
     if (results.length > 0) {
 
       resultDivs = results.map((result, idx) => {
-
         if (result.sessionData) {
+          let isMyData = playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase();
           return (
-            <ResultStyle className={playerAddress && playerAddress.toLowerCase() === result.playerAddress.toLowerCase() ? "player-background"  : ""}
+            <ResultStyle
+              mydata={isMyData}
               key={result.sessionId}
               onClick={() => this.toggleModal(result.sessionData.replayHash, this.extractHighScore(result) !== 0)}
             >
@@ -638,9 +602,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
           {!!tournament ? (
             <>
               <TournamentInfoStyle>
-              <Modal show={isReplayModalOpen} toggleModal={this.handleReplayModal}>
-                <PlayerGameReplays hash={currentFileHash} />
-              </Modal>
+                <Modal show={isReplayModalOpen} toggleModal={this.handleReplayModal}>
+                  <PlayerGameReplays hash={currentFileHash} />
+                </Modal>
                 {tournament.gameStage ? (
                   <h5 className="tourney-title">{tournament.gameStage}</h5>
                 ) : (
