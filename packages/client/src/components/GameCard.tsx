@@ -21,19 +21,6 @@ function GameCard({
     padding: 1rem 1.5rem;
   `
 
-  const StyledButton = styled(Button)`
-    font-family: 'Apercu Light';
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    margin: 1.625rem 0;
-    text-transform: uppercase;
-
-    @media screen and (min-width: 1024px) {
-      font-size: 0.825rem;
-      letter-spacing: 1.25px;
-    }
-  `
-
   const handleCreateRoomClick = () => {
     switch (game.name) {
       case "World of Mines":
@@ -63,13 +50,15 @@ function GameCard({
             </Text>
         </Flex>
 
-        <StyledButton
+        <Button
           type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
           name={"recepient"} // set the name to the method's argument key
           onClick={handleCreateRoomClick}
+          my={"1.625rem"}
+          className="btn-custom"
         >
             {game.button}
-        </StyledButton>
+        </Button>
       </StyledGameCard>
     </Box>
   );

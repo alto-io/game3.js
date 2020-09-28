@@ -39,7 +39,6 @@ export class MinimongoDBManager implements DBManager {
 
     this.db.addCollection("guest");
     this.db.addCollection("user");
-    this.db.addCollection("leaderboardEntries");
     this.db.addCollection("tournaments");
 
     // this.user = await this.orbitdb.kvstore('user', this.defaultOptions)
@@ -51,75 +50,6 @@ export class MinimongoDBManager implements DBManager {
     // this.tournaments = await this.orbitdb.kvstore('tournaments', this.defaultOptions);
     // await this.tournaments.load()
 
-  }
-
-  async refreshLeaderboard() {
-
-    // this.db.leaderboardEntries.find()
-
-
-    // if (this.leaderboardEntries)
-    // { 
-    //   return await this.leaderboardEntries.query( (doc) => doc.id != null);
-    // }
-    // else return null;
-  }
-
-  async getPlayerProfile(walletid: any) {
-    
-    await this.db.user.find().fetch(
-    (result) => { // on success
-        console.log(result)
-        if (result.length > 0)
-            return result[0];
-        else return null;
-    },
-    (error) => {
-        console.log(error)
-        return null;
-    }
-    )
-  }
-
-  async getLeaderboard() {
-
-    const lb = await this.user.all
-
-    return lb
-  }
-
-  async savePlayerProfile(playerProfile: PlayerProfile) {
-    await this.db.user.upsert(playerProfile, playerProfile, 
-        (result) => { // on success
-                return result;
-        },
-        (error) => {
-            console.log(error)
-            return null;
-        }
-        )
-  }
-
-  async getTournamentData(tournamentId: any) {
-    
-    await this.db.tournaments.find({ tournamentId }).fetch(
-        (result) => { // on success
-            if (result.length > 0)
-                return result[0];
-            else return null;
-        },
-        (error) => {
-            console.log(error)
-            return null;
-        }
-        )
-  }
-
-  // TODO: update for minimongodb, still uses orbit code
-  async putTournamentData(tournamentData: TournamentData) {
-    const id = tournamentData.id
-    const result = await this.user.set(id, tournamentData)
-    return result
   }
 
   async getGuestConfig(callback?) {

@@ -4,48 +4,49 @@ import { Box, Card, Heading, Image, Flash } from "rimble-ui";
 import styled from "styled-components";
 
 import { Constants } from '@game3js/common';
+import { TOURNAMENT_STATE_WINNERS_DECLARED } from '../constants';
 
 import ViewResultsModal from './ViewResultsModal';
 import SkeletonResultsLoader from './SkeletonResultsLoader';
 
 const PlayerTournamentResultsCard = styled(Card)`
-  padding: 1rem 0.5rem;
-  margin: 1rem;
-  
-  @media screen and (min-width: 640px) {
-    padding: 2rem 1rem;
-    margin: 0 1rem;
+  margin-bottom: 2rem;
+  padding: 2rem 1rem;
+  width: 90%;
+
+  @media screen and (min-width: 1024px) {
+    width: 45%;
   }
 `
+
 const EventsCard = styled(Card)`
   box-shadow: none;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   flex-direction: column;
   padding: 1rem;
+  width: 100%;
 
   .tournamentID {
     font-size: 0.75rem;
-    letter=spacing: 0.4px;
+    letter-spacing: 0.4px;
     margin: 0;
   }
 
   .gameName {
     font-size: 1rem;
-    font-weight: bold;
     letter-spacing: 0.15px;
     margin: 0 0 1rem 0;
   }
 
-  .h3 {
-    font-family: 'Apercu Bold';
+  .prize {
     font-size: 1.25rem;
     letter-spacing: 0;
-    margin: 0
+    margin-bottom: 1rem;
   }
   
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 500px) {
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
@@ -55,10 +56,10 @@ const EventsCard = styled(Card)`
 const GameImage = styled(Image)`
   border-radius: 15px;
   margin-bottom: 1rem;
-  width: 270px;
-  height: 170px;
+  width: 220px;
+  height: 140px;
   
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 500px) {
     margin-right: 2rem;
     margin-bottom : 0;
     width: 185px;
@@ -66,7 +67,24 @@ const GameImage = styled(Image)`
   }
 `
 
-class PayoutEventsView extends Component<any, any> {
+interface IProps {
+  account: any;
+  address: any;
+  networkId: any;
+  drizzleStatus: any;
+  drizzle: any;
+  isLoading: boolean;
+  parseData: any;
+  tournaments: Array<any>;
+}
+
+interface IState {
+  currentNetwork: any;
+  address: any;
+  events: Array<any>;
+}
+
+class PayoutEventsView extends Component<IProps, IState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -203,18 +221,6 @@ class PayoutEventsView extends Component<any, any> {
       )
     }
 
-    // const eventsRendered = events.map(event => 
-    //   <Flex key={event.id}>
-    //     <Box mr={2}>Amount: {event.returnValues.amount}</Box>
-    //     <Box mr={2}>tournamentId: {event.returnValues.tournamentId}</Box>
-    //     <Box mr={2}>resultId: {event.returnValues.resultId}</Box>
-    //   </Flex>
-    // )
-
-    // event.returnValues.amount
-    // tournamentId
-    // resultId
-
     // If player has winnings
     const eventsRendered = events.map( event =>
       <EventsCard key={event.id} mb={3}>
@@ -229,7 +235,7 @@ class PayoutEventsView extends Component<any, any> {
 
 
     // If none 
-    const doneTournaments = tournaments.filter (tournament => tournament.state === 3);
+    const doneTournaments = tournaments.filter (tournament => tournament.state === TOURNAMENT_STATE_WINNERS_DECLARED);
     events.forEach( event => {
       eventTournamentIds.push(event.returnValues.tournamentId);
       noEventsTournaments = doneTournaments.filter( tournament => tournament.id !== event.returnValues.tournamentId);
@@ -244,7 +250,7 @@ class PayoutEventsView extends Component<any, any> {
           <Box>
             <p className="tournamentID">Tournament {noPayout.id}</p>
             <h6 className="gameName">{noPayout.gameName} {noPayout.gameStage !== undefined ? "- " + noPayout.gameStage : ""}</h6>
-            <h3 className="prize" mb={3}>You'll win next time!</h3>
+            <h3 className="prize">You'll win next time!</h3>
 
             <ViewResultsModal 
               tournamentId={noPayout.id}

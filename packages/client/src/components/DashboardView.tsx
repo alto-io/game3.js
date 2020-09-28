@@ -16,22 +16,42 @@ const StyledFlex = styled(Flex)`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  flex-wrap: wrap;
-  margin: 0;
-  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
 
-  @media screen and (min-width: 375px) {
-    margin: 0 auto;
-  }
-
-  @media screen and (min-width: 640px) {
-    justify-content: center;
+  @media screen and (min-width: 1024px) {
+    justify-content: space-evenly;
     align-items: flex-start;
     flex-direction: row;
+    flex-wrap: wrap;
+    width: 90%;
+  }
+
+  @media screen and (min-width: 1200px) {
+    max-width: 1138px;
   }
 `
 
-class DashboardView extends Component<any, any> {
+interface IProps {
+  account: any;
+  accountValidated: any;
+  address: any;
+  networkId: any;
+  drizzle: any;
+  drizzleStatus: any;
+  setRoute: any;
+  store: any;
+}
+
+interface IState {
+  isLoading: boolean;
+  tournaments: Array<object>;
+  tournamentsCount: number;
+  currentNetwork: any;
+  address: any;
+}
+
+class DashboardView extends Component<IProps, IState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -141,6 +161,7 @@ class DashboardView extends Component<any, any> {
         tournament.timeIsUp = isPast(new Date(tournament.endTime));
   
         let results = []
+/* results are no longer in the contract
         const resultsCount = await contract.methods.getResultsCount(tournament.id).call()
         for (let resultIdx = 0; resultIdx < resultsCount; resultIdx++) {
           const resultDetails = await contract.methods.getResult(tournament.id, resultIdx).call()
@@ -160,7 +181,7 @@ class DashboardView extends Component<any, any> {
           
           results.push(result);
         }
-
+*/
         let playerResults = results.filter( result => result.playerAddress === address.toLowerCase());
         tournament.results = playerResults;
 

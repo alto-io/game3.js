@@ -13,15 +13,21 @@ const StyledBox = styled(Box)`
 
   li {
     transition: 300ms ease-in-out;
-    opacity: 0
+    opacity: 0;
+    height: 0;
   }
 
   .active {
-    height: 10vh;
+    height: 15vh;
     padding-bottom: 1rem;
 
     li {
       opacity: 1;
+      height: 44px;
+    }
+
+    .wallet {
+      margin-top: 2.5rem;
     }
   }
 `
@@ -39,6 +45,7 @@ const Dropdown = styled.ul`
   margin: 0;
 
   li {
+    background-color: #fff;
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -56,6 +63,10 @@ const Dropdown = styled.ul`
     color: #2b2c36;
     font-weight: 600;
   }
+
+  .wallet {
+    margin-top: 0;
+  }
 `
 
 const StyledTextLink = styled(Link)`
@@ -65,7 +76,17 @@ const StyledTextLink = styled(Link)`
   }
 `
 
-class NavBarDropdown extends Component {
+interface IProps {
+  account: any;
+  accountBalance: any;
+  accountValidated: any;
+  shortenAddress: any;
+  balanceIcon: any;
+  walletIcon: any;
+  isOpen: boolean;
+}
+
+class NavBarDropdown extends Component<IProps> {
   render() {
     const {
       account, 
@@ -83,7 +104,7 @@ class NavBarDropdown extends Component {
         {account && accountValidated ? (
           <>
             {/* ID */}
-            <li>
+            <li className="wallet">
               <img src={walletIcon} alt="wallet-icon"/>
               <p><span className="title">Connected as </span>{shortenAddress(account)}</p>
             </li>

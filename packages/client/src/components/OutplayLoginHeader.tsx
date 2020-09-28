@@ -1,33 +1,28 @@
 import React from "react";
-import { Card, Text, Box, Button, Flex, Image, Link } from "rimble-ui";
 import OutplayLoginHeaderDesktop from "./OutplayLoginHeaderDesktop";
 import OutplayLoginHeaderMobile from "./OutplayLoginHeaderMobile";
 
-import RimbleWeb3 from "../rimble/RimbleWeb3";
 
 import TransactionToastUtil from "../rimble/TransactionToastUtil";
-import SmartContractControls from "./SmartContractControls";
-import TransactionsCard from "./TransactionsCard";
-
-import AccountOverview from "../rimble/components/AccountOverview";
 
 import logo from './../images/op-logo.png';
 import walletIcon from "./../images/icon-wallet.svg";
 import balanceIcon from "./../images/icon-balance.svg";
 import shortenAddress from "../core/utilities/shortenAddress";
-import { navigate } from '@reach/router';
 
 import { navigateTo } from '../helpers/utilities';
 
 import { drizzleConnect } from "@drizzle/react-plugin";
 import web3 from 'web3';
+import { isMobile } from 'react-device-detect';
 
 class OutplayLoginHeader extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       width: window.innerWidth,
-      height: window.innerHeight
+      height: window.innerHeight,
+      rimbleInitialized: false
     };
   }
 
@@ -38,6 +33,7 @@ class OutplayLoginHeader extends React.Component {
     }
 
     handleConnectAccount = () => {
+      if(!isMobile) {
         this.props.connectAndValidateAccount(result => {
           if (result === "success") {
             // success
@@ -47,6 +43,10 @@ class OutplayLoginHeader extends React.Component {
             console.log("Callback ERROR");
           }
         })
+      } else{
+        this.props.onConnect();
+      }
+
       }
       
     handleResize = () => {
@@ -56,8 +56,9 @@ class OutplayLoginHeader extends React.Component {
       })
     }
 
+
     componentDidMount () {
-      window.addEventListener('resize', this.handleResize)
+      window.addEventListener('resize', this.handleResize);
 
       this.setState({
         width: window.innerWidth,
@@ -71,12 +72,9 @@ class OutplayLoginHeader extends React.Component {
 
     componentDidUpdate() {
 
-        if (!this.contractInitialized)
-        {
-            if (this.props.drizzle.contracts.Tournaments)
-
-            {
-                console.log(this.props.drizzle.contracts.Tournaments)
+        if (!this.contractInitialized) {
+            if (this.props.drizzle.contracts.Tournaments) {
+                console.log(this.props.drizzle.contracts.Tournaments);
 
                 // get initial contract
                 const tournamentContract = this.props.drizzle.contracts.Tournaments;
@@ -90,17 +88,19 @@ class OutplayLoginHeader extends React.Component {
                 });
 
                 console.log("contract initialized");
+                this.setState({ rimbleInitialized : true });
                 this.contractInitialized = true;
             }
         }
       }    
-
+    
     render() {
     const {
         account,
         accountBalances,
         accountValidated,
-        transactions
+        transactions,
+        onConnect
         } = this.props;     
        
         let accountBalance = null
@@ -109,6 +109,7 @@ class OutplayLoginHeader extends React.Component {
         {
           accountBalance = web3.utils.fromWei(accountBalances[account].toString(), "ether")
         }
+
     return (
         <>
           {this.state.width > 768 ? (
@@ -122,6 +123,7 @@ class OutplayLoginHeader extends React.Component {
             walletIcon={walletIcon}
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
+            rimbleInitialized={this.state.rimbleInitialized}
           />
                     
           ) : <OutplayLoginHeaderMobile 
@@ -134,6 +136,8 @@ class OutplayLoginHeader extends React.Component {
             walletIcon={walletIcon}
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
+            rimbleInitialized={this.state.rimbleInitialized}
+            onConnect={this.props}
           />}
 
 

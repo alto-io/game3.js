@@ -9,18 +9,31 @@ import NoTournamentsJoinedCard from './NoTournamentsJoinedCard';
 import ViewResultsModal from './ViewResultsModal';
 import SkeletonResultsLoader from './SkeletonResultsLoader';
 
+import { TOURNAMENT_STATE_ACTIVE } from '../constants';
+
+const StyledCard = styled(Card)`
+  margin-bottom: 2rem;
+  padding: 2rem 1rem;
+  width: 90%;
+
+  @media screen and (min-width: 1024px) {
+    width: 50%;
+  }
+`
+
 const OngoingCard = styled(Card)`
   box-shadow: none;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   flex-direction: column;
   padding: 1rem;
+  width: 100%;
 
   .tournamentID,
   .lead {
     font-size: 0.75rem;
-    letter=spacing: 0.4px;
+    letter-spacing: 0.4px;
     margin: 0;
   }
 
@@ -31,29 +44,20 @@ const OngoingCard = styled(Card)`
     margin: 0 0 1rem 0;
   }
 
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 500px) {
     justify-content: flex-start;
     align-items: center;
     flex-direction: row;
-  }
-`
-const StyledCard = styled(Card)`
-  padding: 1rem 0.5rem;
-  margin: 1rem;
-  
-  @media screen and (min-width: 640px) {
-    padding: 2rem 1rem;
-    margin: 0 1rem;
   }
 `
 
 const GameImage = styled(Image)`
   border-radius: 15px;
   margin-bottom: 1rem;
-  width: 270px;
-  height: 170px;
+  width: 220px;
+  height: 140px;
   
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 500px) {
     margin-bottom : 0;
     margin-right: 2rem;
     width: 185px;
@@ -61,7 +65,15 @@ const GameImage = styled(Image)`
   }
 `
 
-class PlayerOngoingTournaments extends Component {
+interface IProps {
+  tournaments: Array<any>;
+  setRoute: any;
+  account: any;
+  drizzle: any;
+  isLoading: boolean;
+}
+
+class PlayerOngoingTournaments extends Component<IProps> {
   render() {
     const { tournaments, setRoute, account, drizzle, isLoading } = this.props;
 
@@ -71,7 +83,7 @@ class PlayerOngoingTournaments extends Component {
       )
     }
 
-    const activeTournaments = tournaments.filter( tournament => tournament.state === 1);
+    const activeTournaments = tournaments.filter( tournament => tournament.state === TOURNAMENT_STATE_ACTIVE);
 
     const tournamentResults = activeTournaments.map( tournament => {
       const results = tournament.results.map( result => {
@@ -94,6 +106,7 @@ class PlayerOngoingTournaments extends Component {
             <p className="lead">State</p>
             <Text fontWeight="bold" marginBottom={"1rem"}>Active</Text>
             {results}
+
             <ViewResultsModal
               tournamentId={tournament.id}
               playerAddress={account}
@@ -106,7 +119,7 @@ class PlayerOngoingTournaments extends Component {
     });
 
     return(
-      <StyledCard px={3} py={4}>
+      <StyledCard>
         <Heading as={"h2"} mb={"3"}>Your Ongoing Tournaments</Heading>
         {tournaments.length === 0 ? (
           <NoTournamentsJoinedCard setRoute={setRoute}/>

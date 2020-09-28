@@ -9,7 +9,7 @@ import { Flex, Text } from "rimble-ui";
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import { updatePlayerProfile, refreshLeaderboard, getFileFromHash } from "../helpers/database";
+import { refreshLeaderboard, getFileFromHash } from "../helpers/database";
 
 import styled from "styled-components";
 import { colors } from "../styles";
@@ -53,6 +53,8 @@ interface IProps extends RouteComponentProps {
   drizzle: any;
   drizzleState: any;
   contractMethodSendWrapper: any;
+  setRoute: any;
+  route: string;
 }
 
 interface IState {
@@ -150,7 +152,7 @@ export default class Home extends Component<IProps, IState> {
 
     this.props.playerProfile.username = playerName;
 
-    updatePlayerProfile(this.props.playerProfile)
+    //updatePlayerProfile(this.props.playerProfile)
 
     this.setState({
       newPlayerName: playerName,
@@ -251,7 +253,7 @@ export default class Home extends Component<IProps, IState> {
   
   // RENDER
   render() {
-    const { drizzle, drizzleState, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount} = this.props
+    const { drizzle, drizzleState, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute} = this.props
 
     return (
       <>
@@ -263,6 +265,8 @@ export default class Home extends Component<IProps, IState> {
             account={account}
             accountValidated={accountValidated}
             connectAndValidateAccount={connectAndValidateAccount}
+            route={route}
+            setRoute={setRoute}
           />
 
           {   

@@ -27,6 +27,7 @@ interface IProps extends RouteComponentProps {
   drizzle: any;
   drizzleState: any;
   contractMethodSendWrapper: any;
+  setRoute: any;
 }
 
 interface IState {
@@ -149,10 +150,6 @@ export default class GameContainer extends Component<IProps, any> {
         recordFileHash
       })
 
-      // const resultId = 1
-      // const result = await putTournamentResult(tournamentId, resultId, fileHash);
-      // console.log(result)
-
       if (shouldUpdateDB !== undefined && shouldUpdateDB) {
         console.log("SHOULD UPDATE DB TO SERVER")
         const sessionId = await getGameSessionId(address, tournamentId);
@@ -167,7 +164,7 @@ export default class GameContainer extends Component<IProps, any> {
 
   // RENDER
   render() {
-    const { drizzle, drizzleState, contractMethodSendWrapper, address, accountValidated, connectAndValidateAccount } = this.props
+    const { drizzle, drizzleState, contractMethodSendWrapper, address, accountValidated, connectAndValidateAccount, setRoute } = this.props
     const { tournamentId } = this.state;
 
     return (
@@ -186,6 +183,7 @@ export default class GameContainer extends Component<IProps, any> {
                 playerAddress={address}
                 accountValidated={accountValidated}
                 connectAndValidateAccount={connectAndValidateAccount}
+                setRoute={setRoute}
               >
                 <Router>
                   <Game
@@ -193,7 +191,7 @@ export default class GameContainer extends Component<IProps, any> {
                     drizzle={drizzle}
                     drizzleState={drizzleState}
                     contractMethodSendWrapper={contractMethodSendWrapper}
-                    gameJavascriptContext={context}
+                    gameJavascriptContext={context}                  
                   />
 
                   <GameUnity

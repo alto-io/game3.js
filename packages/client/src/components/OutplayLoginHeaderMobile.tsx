@@ -1,17 +1,9 @@
 import React, { Component } from "react";
-import { Flex, Button, Link, Image, Box, Text } from "rimble-ui";
-import styled  from "styled-components";
+import { Flex, Link, Image } from "rimble-ui";
 
 import NavBarHamburger from "./NavBarHamburger";
 import NavBarDropdown from "./NavBarDropdown";
 import ConnectWalletButton from "./ConnectWalletButton";
-
-const StyledButton = styled(Button)`
-  font-family: 'Apercu Light';
-  font-size: 0.75rem;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-`
 
 class OutplayLoginHeaderMobile extends Component {
   constructor(props) {
@@ -36,7 +28,8 @@ class OutplayLoginHeaderMobile extends Component {
       shortenAddress, 
       logo, 
       balanceIcon,
-      walletIcon
+      walletIcon,
+      rimbleInitialized,
     } = this.props;
 
     return (
@@ -54,9 +47,8 @@ class OutplayLoginHeaderMobile extends Component {
 
           <Flex>
             {account && accountValidated ? "" : (
-            <ConnectWalletButton handleConnectAccount={handleConnectAccount}/>
+            <ConnectWalletButton handleConnectAccount={handleConnectAccount} rimbleInitialized={rimbleInitialized}/>
             )}
-            
 
             <NavBarHamburger handleBurger={this.handleBurger} isOpen={this.state.isOpen}/>
           </Flex> 

@@ -1,20 +1,13 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { RouteComponentProps } from '@reach/router'
 
 import Modal from './Modal';
 import { Button } from '../components';
-import GameJavascript, { GameJavascriptContext } from '../scenes/GameJavascript';
+// import GameJavascript, { GameJavascriptContext } from '../scenes/GameJavascript';
 import { navigateTo } from '../helpers/utilities';
 
-import {
-  updateGameNo,
-  getGameNo,
-  getGameSession,
-  putGameReplay,
-  updateSessionScore
-} from '../helpers/database'
+import { getGameSession, putGameReplay } from '../helpers/database'
 
 const StyledContainer = styled.div`
   margin-top: 1.25rem;
@@ -62,7 +55,25 @@ const StyledContainer = styled.div`
   }
 `
 
-export default class GameResult extends React.Component<any, any> {
+interface IState {
+  sessionData: any,
+  tourneyMaxTries: number
+}
+
+interface IProps {
+  playerAddress: string;
+  gameSessionId?: string;
+  tournamentId?: string;
+  recordFileHash: string;
+  onToggle: any;
+  contractMethodSendWrapper?: any;
+  drizzle: any;
+  drizzleState: any;
+  didWin?: boolean;
+  show: boolean;
+}
+
+export default class GameResult extends React.Component<IProps, IState> {
   constructor(props) {
     super(props)
 
@@ -73,7 +84,7 @@ export default class GameResult extends React.Component<any, any> {
   }
 
   componentDidMount = async () => {
-    const { gameSessionId, playerAddress, tournamentId, didWin } = this.props;
+    const { gameSessionId, playerAddress } = this.props;
     await this.getTournamentInfo();
     await this.getSessionData(gameSessionId, playerAddress);
   }
@@ -105,27 +116,6 @@ export default class GameResult extends React.Component<any, any> {
 
   }
 
-  submitResult = async () => {
-    const { tournamentId, recordFileHash, playerAddress,
-      onToggle, gameSessionId, contractMethodSendWrapper } = this.props
-
-    const result = await putGameReplay(gameSessionId, playerAddress, recordFileHash)
-    console.log(result)
-
-    try {
-      contractMethodSendWrapper(
-        "submitResult", // name
-        [tournamentId, gameSessionId], //contract parameters
-        { from: playerAddress }, // send parameters
-        (txStatus, transaction) => { // callback
-          console.log("submitResult callback: ", txStatus, transaction);
-        })
-      onToggle(true)
-    } catch (err) {
-      console.log('errrrrroooorrr');
-    }
-  }
-
   async getTournamentInfo() {
     const { drizzle, tournamentId } = this.props;
     const contract = drizzle.contracts.Tournaments;
@@ -138,6 +128,9 @@ export default class GameResult extends React.Component<any, any> {
 
   formatTime = (time, isLeaderBoards) => {
     if (time) {
+      if (time === 0) {
+        return '0';
+      } 
       const seconds = (parseInt(time) / 1000).toFixed(2);
       const minutes = Math.floor(parseInt(seconds) / 60);
       let totalTime = '';
@@ -153,7 +146,7 @@ export default class GameResult extends React.Component<any, any> {
   }
 
   render() {
-    const { show, onToggle, didWin, gameSessionId, playerAddress, tournamentId } = this.props
+    const { show, onToggle, didWin } = this.props
     const { sessionData, tourneyMaxTries } = this.state
 
     const score = didWin ? (sessionData && sessionData.timeLeft) : 0;
@@ -168,7 +161,7 @@ export default class GameResult extends React.Component<any, any> {
     let canTryAgain = gameNo < tourneyMaxTries;
 
     let scoreMsg = score === highScore ? `New high score!!` : ``;
-    let finalMsg = `final Score ${this.formatTime(score, false)}`
+    let finalMsg = `final Score ${this.formatTime(highScore, false)}`
 
     return (
       <Modal show={show} toggleModal={onToggle}>

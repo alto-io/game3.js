@@ -9,9 +9,9 @@ import OutplayNavigation from "./OutplayNavigation";
 import JoinPromptModal from "./JoinPromptModal";
 import { Box, Flex } from "rimble-ui";
 
-function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount }) {
+function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute }) {
   const [address, setAddress] = useState(null);
-  const [route, setRoute] = useState("Play");
+  // const [route, setRoute] = useState("Play");
   const [isOpen, setIsOpen] = useState(false);
   const [isContractOwner, setIsContractOwner] = useState(false);
 
@@ -107,8 +107,3 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
 }
 
 export default Body;
-
-/*
-            Dashboard: <Dashboard address={address} store={store} setRoute={setRoute} />,
-            Wallet:  <Wallet address={address} store={store} setRoute={setRoute} />
-*/

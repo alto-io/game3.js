@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
-import { Box, Flex, Modal, Button, Text, Card } from 'rimble-ui';
-import styled from 'styled-components';
+import { Box, Modal, Button, Card } from 'rimble-ui';
 
 import TournamentResultsCard from './TournamentResultsCard';
 
-const StyledButton = styled(Button)`
-  font-family: 'Apercu Light';
-  font-size: 0.75rem;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-`
-class ViewResultsModal extends Component {
+interface IProps {
+  tournamentId?: any;
+  drizzle?: any;
+  playerAddress?: any;
+}
+interface IState {
+  isOpen: boolean;
+}
+
+class ViewResultsModal extends Component<IProps, IState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -29,12 +31,12 @@ class ViewResultsModal extends Component {
   };
 
   render() {
-    const { tournamentId, playerAddress, drizzle, setRoute } = this.props;
+    const { tournamentId, playerAddress, drizzle } = this.props;
     
     return (
       <>
         <Box>
-          <StyledButton onClick={this.openModal}>View Results</StyledButton>
+          <Button onClick={this.openModal} className="btn-custom">View Results</Button>
 
           <Modal isOpen={this.state.isOpen}>
             <Card width={"420px"} p={0}>
@@ -55,7 +57,6 @@ class ViewResultsModal extends Component {
                   tournamentId={tournamentId}
                   playerAddress={playerAddress}
                   drizzle={drizzle}
-                  setRoute={setRoute}
                 />
               </Box>
 

@@ -1,4 +1,4 @@
-import { globalHistory, navigate, RouteComponentProps } from '@reach/router';
+import { navigate, RouteComponentProps } from '@reach/router';
 import { Constants, Keys, Maths, Types } from '@game3js/common';
 import { Client, Room } from 'colyseus.js';
 import qs from 'querystringify';
@@ -6,22 +6,18 @@ import React, { Component, RefObject } from 'react';
 import { isMobile } from 'react-device-detect';
 import { Helmet } from 'react-helmet';
 import ReactNipple from 'react-nipple';
-import { Card, Flex } from "rimble-ui";
-import CSS from 'csstype';
 
 import GameManager from '../managers/GameManager';
 
-import { GameJavascriptContext } from './GameJavascript';
+// import { GameJavascriptContext } from './GameJavascript';
 import { View } from '../components'
 import GameResult from '../components/GameResult'
-import TournamentResultsCard from '../components/TournamentResultsCard'
-import LeavingGamePrompt from '../components/LeavingGamePrompt';
+// import TournamentResultsCard from '../components/TournamentResultsCard'
 import GameSceneContainer from '../components/GameSceneContainer';
 import { DEFAULT_GAME_DIMENSION } from '../constants'
 
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { isThisSecond } from 'date-fns';
 
 interface IProps extends RouteComponentProps {
   roomId?: string;

@@ -1,25 +1,25 @@
 import React, { Component } from "react";
 import { Button } from "rimble-ui";
-import styled from "styled-components";
+import { isMobile } from 'react-device-detect';
 
-const StyledButton = styled(Button)`
-  font-family: 'Apercu Light';
-  font-size: 0.75rem;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-`
+interface IProps {
+  handleConnectAccount?: any;
+  rimbleInitialized: boolean;
+}
 
-class ConnectWalletButton extends Component {
+class ConnectWalletButton extends Component<IProps> {
   render() {
+    const { handleConnectAccount, rimbleInitialized } = this.props;
+
     return(
-      <StyledButton 
-        color="primary" 
-        size="small"
-        onClick={this.props.handleConnectAccount}
-        mr={3} 
+      <Button 
+        onClick={handleConnectAccount}
+        mr={3}
+        size={"small"} 
+        disabled={!rimbleInitialized && !isMobile ? "disabled" : ""}
       >
         Connect your wallet
-      </StyledButton>
+      </Button>
     )
   }
 }

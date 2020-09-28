@@ -1,15 +1,27 @@
-import React from "react";
+import React, { Component } from "react";
 import { drizzleConnect } from "@drizzle/react-plugin";
 import ConnectionBanner from "@rimble/connection-banner";
 import { Box, Flex, Text } from "rimble-ui";
 
 import TournamentCard from '../components/TournamentCard';
 
-const TEMP_TOURNEY = [{
-  name: "Tourney 1",
-  image: "RER",
-  button: "TEST"
-}]
+interface IProps {
+  drizzle?: any;
+  drizzleState?: any;
+  drizzleStatus?: any;
+  address?: any;
+  networkId: any;
+  store?: any;
+  account?: any;
+  accountValidated?: any;
+  connectAndValidateAccount?: any;
+}
+
+interface IState {
+  currentNetwork?: any;
+  address?: any;
+  tournamentsCount: number;
+}
 
 // Optional parameters to pass into RimbleWeb3
 const RIMBLE_CONFIG = {
@@ -17,9 +29,7 @@ const RIMBLE_CONFIG = {
   requiredNetwork: parseInt(process.env.REACT_APP_NETWORK_ID),
 };
 
-
-class TournamentView extends React.Component<any, any> {
-
+class TournamentView extends Component<IProps, IState> {
   constructor(props) {
     super(props)
 
@@ -82,7 +92,7 @@ class TournamentView extends React.Component<any, any> {
   }
 
   render() {
-    const { drizzleState, address, store, drizzle, account, accountValidated, connectAndValidateAccount, setRoute } = this.props;
+    const { drizzleState, address, store, drizzle, account, accountValidated, connectAndValidateAccount} = this.props;
     const { currentNetwork, tournamentsCount } = this.state;
 
     const tournaments = [];
@@ -97,7 +107,6 @@ class TournamentView extends React.Component<any, any> {
           account={account}
           accountValidated={accountValidated}
           connectAndValidateAccount={connectAndValidateAccount}
-          setRoute={setRoute}
         />
       );
     }
@@ -118,7 +127,7 @@ class TournamentView extends React.Component<any, any> {
           }
             <Box maxWidth={"1180px"} p={3} mx={"auto"}>
               <Text my={4} />
-              <Flex justifyContent={"space-between"} mx={-3} flexWrap={"wrap"}>
+              <Flex justifyContent={ tournamentsCount <= 2? "flex-start" : "space-between"} mx={-3} flexWrap={"wrap"}>
                 { tournaments }
               </Flex>
             </Box>  
