@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { Flex, Box } from 'rimble-ui';
 import styled from 'styled-components';
+import { isBrowser} from 'react-device-detect';
 
 import qs from 'querystringify';
 
@@ -87,6 +88,7 @@ export default class GameScene extends Component<IProps, IState> {
 					{children}
 				</Box>
 
+      {isBrowser && (
         <Box className="leaderboards">
           <TournamentResultsCard
             tournamentId={tournamentId}
@@ -97,6 +99,7 @@ export default class GameScene extends Component<IProps, IState> {
             setRoute={setRoute}
           />
         </Box>
+      )}
 			</GameWindowContainer>
 		)
 	}

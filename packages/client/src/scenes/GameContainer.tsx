@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Router } from '@reach/router';
 import qs from 'querystringify';
+import { isBrowser} from 'react-device-detect';
 
 import { RouteComponentProps } from '@reach/router';
 import { Database } from '@game3js/common';
@@ -169,7 +170,7 @@ export default class GameContainer extends Component<IProps, any> {
 
     return (
       <>
-        <OutplayGameNavigation />
+        {isBrowser && <OutplayGameNavigation />}
         <GameJavascript
           startRecording={this.startRecording}
           stopRecording={this.stopRecording}

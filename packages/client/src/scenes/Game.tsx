@@ -3,7 +3,8 @@ import { Constants, Keys, Maths, Types } from '@game3js/common';
 import { Client, Room } from 'colyseus.js';
 import qs from 'querystringify';
 import React, { Component, RefObject } from 'react';
-import { isMobile } from 'react-device-detect';
+// import { isMobile, MobileView } from 'react-device-detect';
+import MediaQuery from 'react-responsive'
 import { Helmet } from 'react-helmet';
 import ReactNipple from 'react-nipple';
 
@@ -37,20 +38,10 @@ interface IState {
   showResult: boolean;
   recordFileHash: string;
   viewOnly: boolean;
+  isLoading: boolean;
 }
 
 export default class Game extends Component<IProps, IState> {
-
-  public state = {
-    playerId: '',
-    tournamentId: null,
-    playersCount: 0,
-    maxPlayersCount: 0,
-    showResult: false,
-    recordFileHash: null,
-    viewOnly: false,
-  };
-
   private gameCanvas: RefObject<HTMLDivElement>;
   private gameManager: GameManager;
   private client?: Client;
@@ -66,11 +57,24 @@ export default class Game extends Component<IProps, IState> {
       DEFAULT_GAME_DIMENSION.height,
       this.handleActionSend,
     );
+    this.state = {
+      playerId: '',
+      tournamentId: null,
+      playersCount: 0,
+      maxPlayersCount: 0,
+      showResult: false,
+      recordFileHash: null,
+      viewOnly: false,
+      isLoading: true
+    }
   }
 
 
   async componentDidMount() {
+    this.setState({ isLoading: true });
     await this.start();
+    this.setState({ isLoading: false });
+    window.dispatchEvent(new Event('resize'));
   }
 
   componentWillUnmount() {
@@ -465,6 +469,7 @@ export default class Game extends Component<IProps, IState> {
 
     console.log("The Session ID is", gameJavascriptContext.sessionId);
     console.log("The Game is over?", !gameJavascriptContext.isGameRunning);
+    // console.log("ISMOBILE", isMobile);
 
     return (
       <GameSceneContainer when={gameJavascriptContext.isGameRunning} viewOnly={viewOnly} tournamentId={tournamentId}>
@@ -488,8 +493,13 @@ export default class Game extends Component<IProps, IState> {
             didWin={!gameJavascriptContext.isPlayerDead}
           />
         )}
-
-        {isMobile && this.renderJoySticks()}
+        <MediaQuery maxDeviceWidth={768}>
+          {this.renderJoySticks()}
+        </MediaQuery>
+        {/* <MobileView>
+          {this.renderJoySticks()}
+        </MobileView> */}
+        {/* {isMobile && this.renderJoySticks()} */}
         {
           // <video id="recorded" loop></video>
         }
