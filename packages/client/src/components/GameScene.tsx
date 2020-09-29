@@ -6,6 +6,7 @@ import MediaQuery from 'react-responsive'
 import qs from 'querystringify';
 
 import TournamentResultsCard from './TournamentResultsCard';
+import FloatingActionButton from './FloatingActionButton';
 
 const GameWindowContainer = styled(Flex)`
   display: flex;
@@ -15,6 +16,10 @@ const GameWindowContainer = styled(Flex)`
   margin: 0 auto;
   padding: 3rem 0;
   max-width: 1180px;
+
+  .fab {
+
+  }
 
   .game {
     width: 100%:
@@ -29,7 +34,6 @@ const GameWindowContainer = styled(Flex)`
     flex-direction: row;
     justify-content: space-around;
     align-items: flex-start;
-    padding: 4rem 0;
 
     .game {
       width: 65%;
@@ -84,6 +88,18 @@ export default class GameScene extends Component<IProps, IState> {
 
     return (
       <GameWindowContainer>
+        <MediaQuery maxDeviceWidth={728}>
+          <FloatingActionButton>
+            <TournamentResultsCard
+              tournamentId={tournamentId}
+              drizzle={drizzle}
+              playerAddress={playerAddress}
+              accountValidated={accountValidated}
+              connectAndValidateAccount={connectAndValidateAccount}
+              setRoute={setRoute}
+            />
+          </FloatingActionButton>
+        </MediaQuery>
         <Box className="game">
           {children}
         </Box>
