@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Flex, Box, Link } from "rimble-ui";
 
@@ -52,8 +52,7 @@ const StyledNavigation = styled(Flex)`
   }
 `;
 
-const OutplayNavigation = ({ route, setRoute, account, accountValidated, handleOpenModal, isContractOwner }) => {
-
+const OutplayNavigation = ({ route, setRoute, account, accountValidated, handleOpenModal, isContractOwner, connected, address }) => {
   return (
     <StyledNavigation justifyContent={"center"} p={3}>
       <StyledLinkContainer
