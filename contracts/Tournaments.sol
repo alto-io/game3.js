@@ -149,7 +149,7 @@ contract Tournaments is Ownable {
   }
 
   // function sends all the tournament pool to adresses
-  function declareWinnersByAddresses(uint tournamentId, address payable[] calldata addresses)
+  function declareWinnersByPlayerId(uint tournamentId, address payable[] calldata addresses)
     external
     tournamentIdIsCorrect(tournamentId)
     onlyOrganizer(tournamentId)

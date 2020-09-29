@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Router } from '@reach/router';
 import qs from 'querystringify';
+import MediaQuery from 'react-responsive'
 
 import { RouteComponentProps } from '@reach/router';
 import { Database } from '@game3js/common';
@@ -169,7 +170,9 @@ export default class GameContainer extends Component<IProps, any> {
 
     return (
       <>
-        <OutplayGameNavigation />
+        <MediaQuery minDeviceWidth={728}>
+          {<OutplayGameNavigation />}
+        </MediaQuery>
         <GameJavascript
           startRecording={this.startRecording}
           stopRecording={this.stopRecording}
@@ -191,7 +194,7 @@ export default class GameContainer extends Component<IProps, any> {
                     drizzle={drizzle}
                     drizzleState={drizzleState}
                     contractMethodSendWrapper={contractMethodSendWrapper}
-                    gameJavascriptContext={context}                  
+                    gameJavascriptContext={context}
                   />
 
                   <GameUnity
