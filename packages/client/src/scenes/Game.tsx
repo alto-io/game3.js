@@ -3,7 +3,6 @@ import { Constants, Keys, Maths, Types } from '@game3js/common';
 import { Client, Room } from 'colyseus.js';
 import qs from 'querystringify';
 import React, { Component, RefObject } from 'react';
-// import { isMobile, MobileView } from 'react-device-detect';
 import MediaQuery from 'react-responsive'
 import { Helmet } from 'react-helmet';
 import ReactNipple from 'react-nipple';
@@ -496,9 +495,6 @@ export default class Game extends Component<IProps, IState> {
         <MediaQuery maxDeviceWidth={768}>
           {this.renderJoySticks()}
         </MediaQuery>
-        {/* <MobileView>
-          {this.renderJoySticks()}
-        </MobileView> */}
         {/* {isMobile && this.renderJoySticks()} */}
         {
           // <video id="recorded" loop></video>

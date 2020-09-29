@@ -1,7 +1,7 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import { Flex, Box } from 'rimble-ui';
 import styled from 'styled-components';
-import { isBrowser} from 'react-device-detect';
+import MediaQuery from 'react-responsive'
 
 import qs from 'querystringify';
 
@@ -57,50 +57,50 @@ interface IState {
 
 export default class GameScene extends Component<IProps, IState> {
 
-	constructor(props) {
-		super(props);
+  constructor(props) {
+    super(props);
 
-		let params = qs.parse(window.location.search);
+    let params = qs.parse(window.location.search);
     const { tournamentId } = params;
 
     this.state = {
-    	tournamentId
+      tournamentId
     }
-	}
+  }
 
-	render() {
-		const {
-			children,
-			drizzle,
+  render() {
+    const {
+      children,
+      drizzle,
       playerAddress,
       accountValidated,
       connectAndValidateAccount,
       setRoute
-		} = this.props;
+    } = this.props;
 
-		const {
-			tournamentId
-		} = this.state;
+    const {
+      tournamentId
+    } = this.state;
 
-		return (
-			<GameWindowContainer>
-				<Box className="game">
-					{children}
-				</Box>
-
-      {isBrowser && (
-        <Box className="leaderboards">
-          <TournamentResultsCard
-            tournamentId={tournamentId}
-            drizzle={drizzle}
-            playerAddress={playerAddress}
-            accountValidated={accountValidated}
-            connectAndValidateAccount={connectAndValidateAccount}
-            setRoute={setRoute}
-          />
+    return (
+      <GameWindowContainer>
+        <Box className="game">
+          {children}
         </Box>
-      )}
-			</GameWindowContainer>
-		)
-	}
+
+        <MediaQuery minDeviceWidth={728}>
+          <Box className="leaderboards">
+            <TournamentResultsCard
+              tournamentId={tournamentId}
+              drizzle={drizzle}
+              playerAddress={playerAddress}
+              accountValidated={accountValidated}
+              connectAndValidateAccount={connectAndValidateAccount}
+              setRoute={setRoute}
+            />
+          </Box>
+        </MediaQuery>
+      </GameWindowContainer>
+    )
+  }
 }
