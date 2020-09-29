@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Link, Box } from "rimble-ui";
+import { Link, Box, Button } from "rimble-ui";
+import { isMobile } from 'react-device-detect';
 import styled from "styled-components";
 
 const StyledBox = styled(Box)`
@@ -20,6 +21,7 @@ const StyledBox = styled(Box)`
   .active {
     height: 15vh;
     padding-bottom: 1rem;
+    margin-bottom: 2rem;
 
     li {
       opacity: 1;
@@ -76,6 +78,17 @@ const StyledTextLink = styled(Link)`
   }
 `
 
+const StyledButtonText = styled(Button.Text)`
+  letter-spacing: 0.5px;
+  text-transform: capitalize;
+  transition: 300ms ease;
+
+  &:hover {
+    color: #7065D8;
+    text-decoration: none;
+  }
+`
+
 interface IProps {
   account: any;
   accountBalance: any;
@@ -84,6 +97,10 @@ interface IProps {
   balanceIcon: any;
   walletIcon: any;
   isOpen: boolean;
+  address: any;
+  balance: any;
+  connected: any;
+  killSession: any;
 }
 
 class NavBarDropdown extends Component<IProps> {
@@ -95,13 +112,19 @@ class NavBarDropdown extends Component<IProps> {
       shortenAddress, 
       balanceIcon,
       walletIcon,
-      isOpen
+      isOpen,
+      address,
+      balance,
+      connected,
+      killSession
     } = this.props;
+
+    console.log(address);
 
     return(
       <StyledBox>
         <Dropdown className={isOpen ? "active" : ""}>
-        {account && accountValidated ? (
+        {account && accountValidated && !isMobile ? (
           <>
             {/* ID */}
             <li className="wallet">
@@ -116,6 +139,26 @@ class NavBarDropdown extends Component<IProps> {
             </li>
           </>
         ) : ""}
+        { balance ? (
+          <>
+            {/* ID */}
+            <li className="wallet">
+              <img src={walletIcon} alt="wallet-icon"/>
+              <p><span className="title">Connected as </span>{address !== null ? shortenAddress(address) : ""}</p>
+            </li>
+
+            {/* Balance */}
+            <li>
+              <img src={balanceIcon} alt="balance-icon"/>
+              <p><span className="title">Balance </span>{balance.toString()} ETH</p>
+            </li>
+
+            <li>
+              <StyledButtonText onClick={e => {e.preventDefault(); killSession()}}>Disconnect</StyledButtonText>
+            </li>
+          </>
+        ) : ""}
+
         <li>
           <StyledTextLink 
               href="https://outplay.games" 

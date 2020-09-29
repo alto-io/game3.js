@@ -22,7 +22,7 @@ class OutplayLoginHeader extends React.Component {
     this.state = {
       width: window.innerWidth,
       height: window.innerHeight,
-      rimbleInitialized: false
+      rimbleInitialized: false,
     };
   }
 
@@ -100,14 +100,23 @@ class OutplayLoginHeader extends React.Component {
         accountBalances,
         accountValidated,
         transactions,
-        onConnect
+        address,
+        balance,
+        connected,
+        killSession,
+        onConnect,
         } = this.props;     
        
-        let accountBalance = null
+        let accountBalance = null;
+        let convertedBalance = null;
 
         if (account && accountBalances[account])
         {
           accountBalance = web3.utils.fromWei(accountBalances[account].toString(), "ether")
+        }
+
+        if (address && balance) {
+          convertedBalance = web3.utils.fromWei(balance.toString(), "ether");
         }
 
     return (
@@ -137,7 +146,10 @@ class OutplayLoginHeader extends React.Component {
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
             rimbleInitialized={this.state.rimbleInitialized}
-            onConnect={this.props}
+            address={address}
+            balance={convertedBalance}
+            connected={connected}
+            killSession={killSession}
           />}
 
 
