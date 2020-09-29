@@ -13,6 +13,7 @@ const FabContainer = styled.div`
   z-index: 99;
   display: flex;
   align-items: center;
+  opacity: 0.4;
 
   .fab {
     font-family: 'Apercu Pro Mono';
