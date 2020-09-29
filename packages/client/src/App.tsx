@@ -471,6 +471,7 @@ class App extends React.Component<any, any> {
                         connectAndValidateAccount={connectAndValidateAccount}
                         route={this.state.route}
                         setRoute={this.setRoute}
+                        address={address}
                       />
 
                       <GameContainer

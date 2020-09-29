@@ -337,7 +337,7 @@ class TournamentCard extends Component<IProps, IState> {
 
   render() {
     const { tournament, accountBuyIn, isBuyinModalOpen, isOpen, isContractOwner, tournamentLoading, gameNo, gameName, gameImage, prizeString } = this.state
-    const { connectAndValidateAccount, account, accountValidated, drizzle, address } = this.props
+    const { connectAndValidateAccount, account, accountValidated, drizzle, address, connected } = this.props
 
     if (tournamentLoading) {
       return (
@@ -362,7 +362,7 @@ class TournamentCard extends Component<IProps, IState> {
     const playBtnText = `Play ( ${typeof gameNo !== "number" ? 0 : gameNo} out of ${tournament.maxTries} )`;
 
     const button = () => {
-      if (accountBuyIn !== 0 && account && accountValidated) {
+      if ((accountBuyIn !== 0 && account && accountValidated) || (accountBuyIn !== 0 && address !== null && connected)) {
         return (
           <Button
             mt={"26px"}
@@ -384,7 +384,7 @@ class TournamentCard extends Component<IProps, IState> {
               mb={2}
               type={"text"} // manually set properties on the button so that the handleInputChange and handleSubmit still work properly
               name={"recepient"} // set the name to the method's argument key
-              onClick={account && accountValidated ? this.handleOpenBuyinModal : this.handleOpenModal}
+              onClick={(account && accountValidated) || (address !== null && connected) ? this.handleOpenBuyinModal : this.handleOpenModal}
               className="btn-custom"
             >
               {buttonText}

@@ -62,6 +62,7 @@ interface IProps {
   handleCloseBuyinModal?: any;
   isOpen: boolean;
   maxTries: number;
+  connected?: any;
 }
 
 interface IState {

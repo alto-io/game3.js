@@ -15,6 +15,7 @@ interface IProps {
   account?: any;
   accountValidated?: any;
   connectAndValidateAccount?: any;
+  connected?: any;
 }
 
 interface IState {
@@ -92,7 +93,7 @@ class TournamentView extends Component<IProps, IState> {
   }
 
   render() {
-    const { drizzleState, address, store, drizzle, account, accountValidated, connectAndValidateAccount} = this.props;
+    const { drizzleState, store, drizzle, account, accountValidated, connectAndValidateAccount, address, connected} = this.props;
     const { currentNetwork, tournamentsCount } = this.state;
 
     const tournaments = [];
@@ -101,12 +102,13 @@ class TournamentView extends Component<IProps, IState> {
         <TournamentCard
           key={i}
           tournamentId={i}
-          address={address}
           store={store}
           drizzle={drizzle}
           account={account}
           accountValidated={accountValidated}
           connectAndValidateAccount={connectAndValidateAccount}
+          address={address}
+          connected={connected}
         />
       );
     }
