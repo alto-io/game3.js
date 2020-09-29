@@ -138,7 +138,6 @@ class RimbleTransaction extends React.Component {
   // TODO: Make async work
   initWeb3 = async () => {
     this.checkModernBrowser();
-
     let web3 = {};
 
     // Check for modern web3 provider
@@ -935,7 +934,7 @@ class RimbleTransaction extends React.Component {
       isCorrectNetwork: null,
       checkNetwork: this.checkNetwork
     },
-    validBrowser: this.checkModernBrowser(),
+    validBrowser: this.checkModernBrowser,
     modals: {
       data: {
         noWeb3BrowserModalIsOpen: this.noWeb3BrowserModalIsOpen,
@@ -983,7 +982,7 @@ class RimbleTransaction extends React.Component {
 
   componentDidMount() {
     // Performs a check on browser and will load a web3 provider
-    this.initWeb3();
+    // this.initWeb3();
   }
 
   render() {

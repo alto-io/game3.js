@@ -61,8 +61,6 @@ import Replay from './scenes/Replay';
 import { Slide, ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import WorkerProxy from './utils/worker-proxy'
-
 // app settings
 const CREATE_WALLET_ON_GUEST_ACCOUNT = false;
 
@@ -242,8 +240,14 @@ class App extends React.Component<any, any> {
     this.web3Modal = new Web3Modal({
       network: this.getNetwork(),
       cacheProvider: true,
-      providerOptions: this.getProviderOptions(),
-      theme: "dark"
+      providerOptions: {
+        walletconnect: {
+          package: WalletConnectProvider, // required
+          options: {
+            infuraId: "b71d4cce6c0c4f2ebaecc118a35dfaf5"
+          }
+        }
+      }
     });
 
     // DEBUG INFO
@@ -265,32 +269,33 @@ class App extends React.Component<any, any> {
   public onConnect = async () => {
     const provider = await this.web3Modal.connect();
 
-    await this.subscribeProvider(provider);
+    // await this.subscribeProvider(provider);
 
-    const web3: any = initWeb3(provider);
+    // const web3: any = initWeb3(provider);
 
-    const accounts = await web3.eth.getAccounts();
+    // const accounts = await web3.eth.getAccounts();
 
-    const address = accounts[0];
+    // const address = accounts[0];
 
-    const networkId = await web3.eth.net.getId();
+    // const networkId = await web3.eth.net.getId();
 
-    const chainId = await web3.eth.chainId();
+    // const chainId = await web3.eth.chainId();
 
-    await this.setState({
-      web3,
-      provider,
-      connected: true,
-      address,
-      chainId,
-      networkId
-    });
+    // await this.setState({
+    //   web3,
+    //   provider,
+    //   connected: true,
+    //   address,
+    //   chainId,
+    //   networkId
+    // });
     // await this.getAccountAssets();
 
     // set the walletid to the loggedin Address
-    const { playerProfile } = this.state;
-    playerProfile.walletid = address;
-    await this.setState( { playerProfile });
+    // const { playerProfile } = this.state;
+    // playerProfile.walletid = address;
+    // await this.setState( { playerProfile });
+    // this.getLoggedInPlayerProfile();
   };
 
   public subscribeProvider = async (provider: any) => {
@@ -347,262 +352,262 @@ class App extends React.Component<any, any> {
     }
   };
 
-  public toggleModal = () =>
-    this.setState({ showModal: !this.state.showModal });
+  // public toggleModal = () =>
+  //   this.setState({ showModal: !this.state.showModal });
 
-  public testSendTransaction = async () => {
-    const { web3, address, chainId } = this.state;
+  // public testSendTransaction = async () => {
+  //   const { web3, address, chainId } = this.state;
 
-    if (!web3) {
-      return;
-    }
+  //   if (!web3) {
+  //     return;
+  //   }
 
-    const tx = await formatTestTransaction(address, chainId);
+  //   const tx = await formatTestTransaction(address, chainId);
 
-    try {
-      // open modal
-      this.toggleModal();
+  //   try {
+  //     // open modal
+  //     this.toggleModal();
 
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
+  //     // toggle pending request indicator
+  //     this.setState({ pendingRequest: true });
 
-      // @ts-ignore
-      function sendTransaction(_tx: any) {
-        return new Promise((resolve, reject) => {
-          web3.eth
-            .sendTransaction(_tx)
-            .once("transactionHash", (txHash: string) => resolve(txHash))
-            .catch((err: any) => reject(err));
-        });
-      }
+  //     // @ts-ignore
+  //     function sendTransaction(_tx: any) {
+  //       return new Promise((resolve, reject) => {
+  //         web3.eth
+  //           .sendTransaction(_tx)
+  //           .once("transactionHash", (txHash: string) => resolve(txHash))
+  //           .catch((err: any) => reject(err));
+  //       });
+  //     }
 
-      // send transaction
-      const result = await sendTransaction(tx);
+  //     // send transaction
+  //     const result = await sendTransaction(tx);
 
-      // format displayed result
-      const formattedResult = {
-        action: ETH_SEND_TRANSACTION,
-        txHash: result,
-        from: address,
-        to: address,
-        value: "0 ETH"
-      };
+  //     // format displayed result
+  //     const formattedResult = {
+  //       action: ETH_SEND_TRANSACTION,
+  //       txHash: result,
+  //       from: address,
+  //       to: address,
+  //       value: "0 ETH"
+  //     };
 
-      // display result
-      this.setState({
-        web3,
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ web3, pendingRequest: false, result: null });
-    }
-  };
+  //     // display result
+  //     this.setState({
+  //       web3,
+  //       pendingRequest: false,
+  //       result: formattedResult || null
+  //     });
+  //   } catch (error) {
+  //     console.error(error); // tslint:disable-line
+  //     this.setState({ web3, pendingRequest: false, result: null });
+  //   }
+  // };
 
-  public testSignMessage = async () => {
-    const { web3, address } = this.state;
+  // public testSignMessage = async () => {
+  //   const { web3, address } = this.state;
 
-    if (!web3) {
-      return;
-    }
+  //   if (!web3) {
+  //     return;
+  //   }
 
-    // test message
-    const message = "My email is john@doe.com - 1537836206101";
+  //   // test message
+  //   const message = "My email is john@doe.com - 1537836206101";
 
-    // hash message
-    const hash = hashPersonalMessage(message);
+  //   // hash message
+  //   const hash = hashPersonalMessage(message);
 
-    try {
-      // open modal
-      this.toggleModal();
+  //   try {
+  //     // open modal
+  //     this.toggleModal();
 
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
+  //     // toggle pending request indicator
+  //     this.setState({ pendingRequest: true });
 
-      // send message
-      const result = await web3.eth.sign(hash, address);
+  //     // send message
+  //     const result = await web3.eth.sign(hash, address);
 
-      // verify signature
-      const signer = recoverPublicKey(result, hash);
-      const verified = signer.toLowerCase() === address.toLowerCase();
+  //     // verify signature
+  //     const signer = recoverPublicKey(result, hash);
+  //     const verified = signer.toLowerCase() === address.toLowerCase();
 
-      // format displayed result
-      const formattedResult = {
-        action: ETH_SIGN,
-        address,
-        signer,
-        verified,
-        result
-      };
+  //     // format displayed result
+  //     const formattedResult = {
+  //       action: ETH_SIGN,
+  //       address,
+  //       signer,
+  //       verified,
+  //       result
+  //     };
 
-      // display result
-      this.setState({
-        web3,
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ web3, pendingRequest: false, result: null });
-    }
-  };
+  //     // display result
+  //     this.setState({
+  //       web3,
+  //       pendingRequest: false,
+  //       result: formattedResult || null
+  //     });
+  //   } catch (error) {
+  //     console.error(error); // tslint:disable-line
+  //     this.setState({ web3, pendingRequest: false, result: null });
+  //   }
+  // };
 
-  public testSignPersonalMessage = async () => {
-    const { web3, address } = this.state;
+  // public testSignPersonalMessage = async () => {
+  //   const { web3, address } = this.state;
 
-    if (!web3) {
-      return;
-    }
+  //   if (!web3) {
+  //     return;
+  //   }
 
-    // test message
-    const message = "My email is john@doe.com - 1537836206101";
+  //   // test message
+  //   const message = "My email is john@doe.com - 1537836206101";
 
-    // encode message (hex)
-    const hexMsg = convertUtf8ToHex(message);
+  //   // encode message (hex)
+  //   const hexMsg = convertUtf8ToHex(message);
 
-    try {
-      // open modal
-      this.toggleModal();
+  //   try {
+  //     // open modal
+  //     this.toggleModal();
 
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
+  //     // toggle pending request indicator
+  //     this.setState({ pendingRequest: true });
 
-      // send message
-      const result = await web3.eth.personal.sign(hexMsg, address);
+  //     // send message
+  //     const result = await web3.eth.personal.sign(hexMsg, address);
 
-      // verify signature
-      const signer = recoverPersonalSignature(result, message);
-      const verified = signer.toLowerCase() === address.toLowerCase();
+  //     // verify signature
+  //     const signer = recoverPersonalSignature(result, message);
+  //     const verified = signer.toLowerCase() === address.toLowerCase();
 
-      // format displayed result
-      const formattedResult = {
-        action: PERSONAL_SIGN,
-        address,
-        signer,
-        verified,
-        result
-      };
+  //     // format displayed result
+  //     const formattedResult = {
+  //       action: PERSONAL_SIGN,
+  //       address,
+  //       signer,
+  //       verified,
+  //       result
+  //     };
 
-      // display result
-      this.setState({
-        web3,
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ web3, pendingRequest: false, result: null });
-    }
-  };
+  //     // display result
+  //     this.setState({
+  //       web3,
+  //       pendingRequest: false,
+  //       result: formattedResult || null
+  //     });
+  //   } catch (error) {
+  //     console.error(error); // tslint:disable-line
+  //     this.setState({ web3, pendingRequest: false, result: null });
+  //   }
+  // };
 
-  public testContractCall = async (functionSig: string) => {
-    let contractCall = null;
-    switch (functionSig) {
-      case DAI_BALANCE_OF:
-        contractCall = callBalanceOf;
-        break;
-      case DAI_TRANSFER:
-        contractCall = callTransfer;
-        break;
+  // public testContractCall = async (functionSig: string) => {
+  //   let contractCall = null;
+  //   switch (functionSig) {
+  //     case DAI_BALANCE_OF:
+  //       contractCall = callBalanceOf;
+  //       break;
+  //     case DAI_TRANSFER:
+  //       contractCall = callTransfer;
+  //       break;
 
-      default:
-        break;
-    }
+  //     default:
+  //       break;
+  //   }
 
-    if (!contractCall) {
-      throw new Error(
-        `No matching contract calls for functionSig=${functionSig}`
-      );
-    }
+  //   if (!contractCall) {
+  //     throw new Error(
+  //       `No matching contract calls for functionSig=${functionSig}`
+  //     );
+  //   }
 
-    const { web3, address, chainId } = this.state;
-    try {
-      // open modal
-      this.toggleModal();
+  //   const { web3, address, chainId } = this.state;
+  //   try {
+  //     // open modal
+  //     this.toggleModal();
 
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
+  //     // toggle pending request indicator
+  //     this.setState({ pendingRequest: true });
 
-      // send transaction
-      const result = await contractCall(address, chainId, web3);
+  //     // send transaction
+  //     const result = await contractCall(address, chainId, web3);
 
-      // format displayed result
-      const formattedResult = {
-        action: functionSig,
-        result
-      };
+  //     // format displayed result
+  //     const formattedResult = {
+  //       action: functionSig,
+  //       result
+  //     };
 
-      // display result
-      this.setState({
-        web3,
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ web3, pendingRequest: false, result: null });
-    }
-  };
+  //     // display result
+  //     this.setState({
+  //       web3,
+  //       pendingRequest: false,
+  //       result: formattedResult || null
+  //     });
+  //   } catch (error) {
+  //     console.error(error); // tslint:disable-line
+  //     this.setState({ web3, pendingRequest: false, result: null });
+  //   }
+  // };
 
-  public testOpenBox = async () => {
-    function getBoxProfile(
-      address: string,
-      provider: any
-    ): Promise<IBoxProfile> {
-      return new Promise(async (resolve, reject) => {
-        try {
-          await openBox(address, provider, async () => {
-            const profile = await getProfile(address);
-            resolve(profile);
-          });
-        } catch (error) {
-          reject(error);
-        }
-      });
-    }
+  // public testOpenBox = async () => {
+  //   function getBoxProfile(
+  //     address: string,
+  //     provider: any
+  //   ): Promise<IBoxProfile> {
+  //     return new Promise(async (resolve, reject) => {
+  //       try {
+  //         await openBox(address, provider, async () => {
+  //           const profile = await getProfile(address);
+  //           resolve(profile);
+  //         });
+  //       } catch (error) {
+  //         reject(error);
+  //       }
+  //     });
+  //   }
 
-    const { address, provider } = this.state;
+  //   const { address, provider } = this.state;
 
-    try {
-      // open modal
-      this.toggleModal();
+  //   try {
+  //     // open modal
+  //     this.toggleModal();
 
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
+  //     // toggle pending request indicator
+  //     this.setState({ pendingRequest: true });
 
-      // send transaction
-      const profile = await getBoxProfile(address, provider);
+  //     // send transaction
+  //     const profile = await getBoxProfile(address, provider);
 
-      let result = null;
-      if (profile) {
-        result = {
-          name: profile.name,
-          description: profile.description,
-          job: profile.job,
-          employer: profile.employer,
-          location: profile.location,
-          website: profile.website,
-          github: profile.github
-        };
-      }
+  //     let result = null;
+  //     if (profile) {
+  //       result = {
+  //         name: profile.name,
+  //         description: profile.description,
+  //         job: profile.job,
+  //         employer: profile.employer,
+  //         location: profile.location,
+  //         website: profile.website,
+  //         github: profile.github
+  //       };
+  //     }
 
-      // format displayed result
-      const formattedResult = {
-        action: BOX_GET_PROFILE,
-        result
-      };
+  //     // format displayed result
+  //     const formattedResult = {
+  //       action: BOX_GET_PROFILE,
+  //       result
+  //     };
 
-      // display result
-      this.setState({
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ pendingRequest: false, result: null });
-    }
-  };
+  //     // display result
+  //     this.setState({
+  //       pendingRequest: false,
+  //       result: formattedResult || null
+  //     });
+  //   } catch (error) {
+  //     console.error(error); // tslint:disable-line
+  //     this.setState({ pendingRequest: false, result: null });
+  //   }
+  // };
 
   public resetApp = async () => {
     const { web3 } = this.state;
@@ -676,7 +681,8 @@ class App extends React.Component<any, any> {
                         accountBalance={accountBalance}
                         accountBalanceLow={accountBalanceLow}
                         accountValidated={accountValidated}
-                        connectAndValidateAccount={connectAndValidateAccount}      
+                        connectAndValidateAccount={connectAndValidateAccount}    
+                        onConnect={this.onConnect}  
                   />
 
                     <Router>

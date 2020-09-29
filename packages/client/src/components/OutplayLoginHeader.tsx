@@ -14,6 +14,7 @@ import { navigateTo } from '../helpers/utilities';
 
 import { drizzleConnect } from "@drizzle/react-plugin";
 import web3 from 'web3';
+import { isMobile } from 'react-device-detect';
 
 class OutplayLoginHeader extends React.Component {
   constructor(props) {
@@ -32,6 +33,7 @@ class OutplayLoginHeader extends React.Component {
     }
 
     handleConnectAccount = () => {
+      if(!isMobile) {
         this.props.connectAndValidateAccount(result => {
           if (result === "success") {
             // success
@@ -41,6 +43,10 @@ class OutplayLoginHeader extends React.Component {
             console.log("Callback ERROR");
           }
         })
+      } else{
+        this.props.onConnect();
+      }
+
       }
       
     handleResize = () => {
@@ -93,7 +99,8 @@ class OutplayLoginHeader extends React.Component {
         account,
         accountBalances,
         accountValidated,
-        transactions
+        transactions,
+        onConnect
         } = this.props;     
        
         let accountBalance = null
@@ -130,6 +137,7 @@ class OutplayLoginHeader extends React.Component {
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
             rimbleInitialized={this.state.rimbleInitialized}
+            onConnect={this.props}
           />}
 
 

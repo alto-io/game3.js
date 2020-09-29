@@ -77,9 +77,6 @@ export class GameUnity extends React.Component<IProps, any> {
     let newWidthToHeight = newWidth / newHeight;
     let height = newHeight;
     let width = newWidth;
-    newWidth = window.innerWidth;
-    newHeight = window.innerHeight;
-    newWidthToHeight = newWidth / newHeight;
 
     if (newWidthToHeight > widthToHeight) {
       newWidth = newHeight * widthToHeight;
