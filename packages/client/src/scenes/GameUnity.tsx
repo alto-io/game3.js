@@ -8,17 +8,21 @@ import { DEFAULT_GAME_DIMENSION } from '../constants'
 import { Constants } from '@game3js/common';
 import { makeNewGameSession, getGameNo, getGameSessionId, updateSessionScore, updateGameNo, createSessionId } from '../helpers/database';
 
-const StyledBox = styled.div` 
-  background: #fcfcfc;
-  border-radius: 10px;
-  box-shadow: 4px 8px 16px rgba(0,0,0,0.25);
-  margin-top: 1.5rem;
-
-@media screen and (min-width: 950px) {
-  height: 100%;
-  width: 100%;
+const StyledBoxStyle = {
+  position: 'relative',
+  background: '#fcfcfc',
+  borderRadius: '10px',
+  boxShadow: '4px 8px 16px rgba(0,0,0,0.25)',
+  marginTop: '1.5rem',
 }
-`
+
+const FullscreenBoxStyle = {
+  position: 'absolute',
+  top: '0',
+  bottom: '0',
+  left: '0',
+  right: '0',
+}
 
 interface IProps extends RouteComponentProps {
   path: string;
@@ -64,6 +68,7 @@ export class GameUnity extends React.Component<IProps, any> {
       gameId: '',
       width: '',
       height: '',
+      fullscreen: false,
     };
 
     this.initializeUnity();
@@ -398,17 +403,30 @@ export class GameUnity extends React.Component<IProps, any> {
     this.unityContent.send("Cube", "SetRotationSpeed", this.speed);
   }
 
+  onClickFullscreen = () => {
+    const { fullscreen } = this.state
+    this.setState({
+      fullscreen: !fullscreen
+    })
+  }
+
   onClickUnount() {
     this.setState({ unityShouldBeMounted: false });
   }
 
   render() {
-    const { isGameRunning, gameReady, playBtnText, progression, width, height } = this.state;
+    const { isGameRunning, gameReady, playBtnText, progression, 
+      width, height, fullscreen } = this.state;
     const { tournamentId } = this.props;
 
     let canvasWidth =  (window.innerWidth <= 950 ? `${width}px` : "100%");
     let canvasHeight = (window.innerWidth <= 950 ? `${height}px` : "100%");
 
+    if (fullscreen) {
+      canvasWidth = '100%';
+      canvasHeight = '100%';
+    }
+    const boxStyle = fullscreen ? FullscreenBoxStyle : StyledBoxStyle;
     return (
       <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
         <Button
@@ -430,13 +448,38 @@ export class GameUnity extends React.Component<IProps, any> {
           }
         </Button>
 
-        <StyledBox p={0} width={`${width}px`} height={`${height}px`}>
-          {
-            this.state.unityShouldBeMounted === true && (
-              <Unity unityContent={this.unityContent}  width={canvasWidth} height={canvasHeight}/>
-            )
-          }
-        </StyledBox>
+          <div p={0} width={`${width}px`} height={`${height}px`} style={boxStyle} >
+            {
+              <>
+                {this.state.unityShouldBeMounted === true && (
+                  <Unity 
+                    unityContent={this.unityContent}
+                    width={canvasWidth}
+                    height={canvasHeight}
+                    style={{
+                      position: 'relative',
+                      top: '0px',
+                      left: '0px'
+                    }}
+                  />
+                )}
+                <Button
+                  color="primary"
+                  type="button"
+                  onClick={this.onClickFullscreen}
+                  style={{ 
+                    position: 'absolute', 
+                    left: '16px', 
+                    bottom: '18px',
+                    width: '48px',
+                    padding: '4px'
+                  }}
+                >
+                  {'⛶'}
+                </Button>
+              </>
+            }
+          </div>
       </GameSceneContainer>
     );
   }
