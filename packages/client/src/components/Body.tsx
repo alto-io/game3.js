@@ -89,7 +89,10 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
               accountValidated={accountValidated}
               store={store}
               drizzle={drizzle}
-              setRoute={setRoute}/>,
+              setRoute={setRoute}
+              address={addressModal}
+              connected={connected}
+              />,
             WalletView: 
             <WalletView 
               store={store}

@@ -204,12 +204,12 @@ class DashboardView extends Component<IProps, IState> {
 
     render() {
       const { account, accountValidated, drizzle, 
-        setRoute, store } = this.props;
+        setRoute, store, address, connected } = this.props;
       const { tournaments, isLoading } = this.state;
 
       return (
         <StyledFlex>
-          {account && accountValidated ? (
+          {(account && accountValidated) || (address !== "" && connected) ? (
             <>
             <PayoutEventsView 
               account={account}
