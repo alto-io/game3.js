@@ -29,7 +29,11 @@ class OutplayLoginHeaderMobile extends Component {
       logo, 
       balanceIcon,
       walletIcon,
-      rimbleInitialized
+      rimbleInitialized,
+      address,
+      balance,
+      connected,
+      killSession
     } = this.props;
 
     return (
@@ -46,10 +50,9 @@ class OutplayLoginHeaderMobile extends Component {
           </Link>
 
           <Flex>
-            {account && accountValidated ? "" : (
+            {(account && accountValidated) || (address !== null && connected) ? "" : (
             <ConnectWalletButton handleConnectAccount={handleConnectAccount} rimbleInitialized={rimbleInitialized}/>
             )}
-            
 
             <NavBarHamburger handleBurger={this.handleBurger} isOpen={this.state.isOpen}/>
           </Flex> 
@@ -63,6 +66,10 @@ class OutplayLoginHeaderMobile extends Component {
           balanceIcon={balanceIcon}
           walletIcon={walletIcon}
           isOpen={this.state.isOpen}
+          address={address}
+          balance={balance}
+          connected={connected}
+          killSession={killSession}
         />
       </>
     )

@@ -5,6 +5,7 @@ import RimbleWeb3 from "../rimble/RimbleWeb3";
 
 class RimbleContainer extends React.Component {
   render() {
+    const { onConnect, address, balance, connected, killSession} = this.props
     return (
       <RimbleWeb3.Consumer>
         {({
@@ -27,6 +28,11 @@ class RimbleContainer extends React.Component {
                 accountBalanceLow={this.props.accountBalanceLow}
                 accountValidated={this.props.accountValidated}
                 connectAndValidateAccount={this.props.connectAndValidateAccount}
+                onConnect={onConnect}
+                address={address}
+                balance={balance}
+                connected={connected}
+                killSession={killSession}
               />
         )}
       </RimbleWeb3.Consumer>

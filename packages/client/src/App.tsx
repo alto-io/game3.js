@@ -11,7 +11,7 @@ import { DrizzleContext } from "@drizzle/react-plugin";
 
 // WalletConnect
 import WalletConnect from "@walletconnect/browser";
-import Web3Modal from "web3modal";
+import Web3Modal, { providers } from "web3modal";
 
 // Rimble
 import RimbleWeb3 from "./rimble/RimbleWeb3";
@@ -61,8 +61,6 @@ import Replay from './scenes/Replay';
 import { Slide, ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import WorkerProxy from './utils/worker-proxy'
-
 // app settings
 const CREATE_WALLET_ON_GUEST_ACCOUNT = false;
 
@@ -94,6 +92,7 @@ export interface IAppState {
   result: any | null;
   assets: IAssetData[];
   web3: any;
+  balance: any;
   provider: any;
   networkId: number;
   route: string;
@@ -144,6 +143,7 @@ const INITIAL_STATE: IAppState = {
   assets: [],
   web3: null,
   provider: null,
+  balance: null,
   networkId: 1,
   route: 'Play'
 };
@@ -242,16 +242,19 @@ class App extends React.Component<any, any> {
     this.web3Modal = new Web3Modal({
       network: this.getNetwork(),
       cacheProvider: true,
-      providerOptions: this.getProviderOptions(),
-      theme: "dark"
+      providerOptions: {
+        walletconnect: {
+          package: WalletConnectProvider, // required
+          options: {
+            infuraId: "b71d4cce6c0c4f2ebaecc118a35dfaf5"
+          }
+        }
+      }
     });
 
     // DEBUG INFO
     console.log(props);
     console.log(process.env);
-
-
-
   }
 
   public componentDidMount() {
@@ -285,12 +288,14 @@ class App extends React.Component<any, any> {
       chainId,
       networkId
     });
-    // await this.getAccountAssets();
+
+    await this.getBalance();
 
     // set the walletid to the loggedin Address
-    const { playerProfile } = this.state;
-    playerProfile.walletid = address;
-    await this.setState( { playerProfile });
+    // const { playerProfile } = this.state;
+    // playerProfile.walletid = address;
+    // await this.setState( { playerProfile });
+    // this.getLoggedInPlayerProfile();
   };
 
   public subscribeProvider = async (provider: any) => {
@@ -300,20 +305,20 @@ class App extends React.Component<any, any> {
     provider.on("close", () => this.resetApp());
     provider.on("accountsChanged", async (accounts: string[]) => {
       await this.setState({ address: accounts[0] });
-      await this.getAccountAssets();
+      await this.getBalance();
     });
     provider.on("chainChanged", async (chainId: number) => {
       const { web3 } = this.state;
       const networkId = await web3.eth.net.getId();
       await this.setState({ chainId, networkId });
-      await this.getAccountAssets();
+      await this.getBalance();
     });
 
     provider.on("networkChanged", async (networkId: number) => {
       const { web3 } = this.state;
       const chainId = await web3.eth.chainId();
       await this.setState({ chainId, networkId });
-      await this.getAccountAssets();
+      await this.getBalance();
     });
   };
 
@@ -333,284 +338,27 @@ class App extends React.Component<any, any> {
     return providerOptions;
   };
 
-  public getAccountAssets = async () => {
-    const { address, chainId } = this.state;
-    this.setState({ fetching: true });
-    try {
-      // get account balances
-      const assets = await apiGetAccountAssets(address, chainId);
+  public getBalance = async () => {
+    const { address, web3, balance } = this.state;
+    let newBalance;
 
-      await this.setState({ fetching: false, assets });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      await this.setState({ fetching: false });
-    }
-  };
-
-  public toggleModal = () =>
-    this.setState({ showModal: !this.state.showModal });
-
-  public testSendTransaction = async () => {
-    const { web3, address, chainId } = this.state;
-
-    if (!web3) {
-      return;
+    if (address && web3) {
+      newBalance = await web3.eth.getBalance(address);
     }
 
-    const tx = await formatTestTransaction(address, chainId);
-
-    try {
-      // open modal
-      this.toggleModal();
-
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
-
-      // @ts-ignore
-      function sendTransaction(_tx: any) {
-        return new Promise((resolve, reject) => {
-          web3.eth
-            .sendTransaction(_tx)
-            .once("transactionHash", (txHash: string) => resolve(txHash))
-            .catch((err: any) => reject(err));
-        });
-      }
-
-      // send transaction
-      const result = await sendTransaction(tx);
-
-      // format displayed result
-      const formattedResult = {
-        action: ETH_SEND_TRANSACTION,
-        txHash: result,
-        from: address,
-        to: address,
-        value: "0 ETH"
-      };
-
-      // display result
-      this.setState({
-        web3,
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ web3, pendingRequest: false, result: null });
+    if (newBalance !== balance) {
+      this.setState({ balance : newBalance })
     }
-  };
-
-  public testSignMessage = async () => {
-    const { web3, address } = this.state;
-
-    if (!web3) {
-      return;
-    }
-
-    // test message
-    const message = "My email is john@doe.com - 1537836206101";
-
-    // hash message
-    const hash = hashPersonalMessage(message);
-
-    try {
-      // open modal
-      this.toggleModal();
-
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
-
-      // send message
-      const result = await web3.eth.sign(hash, address);
-
-      // verify signature
-      const signer = recoverPublicKey(result, hash);
-      const verified = signer.toLowerCase() === address.toLowerCase();
-
-      // format displayed result
-      const formattedResult = {
-        action: ETH_SIGN,
-        address,
-        signer,
-        verified,
-        result
-      };
-
-      // display result
-      this.setState({
-        web3,
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ web3, pendingRequest: false, result: null });
-    }
-  };
-
-  public testSignPersonalMessage = async () => {
-    const { web3, address } = this.state;
-
-    if (!web3) {
-      return;
-    }
-
-    // test message
-    const message = "My email is john@doe.com - 1537836206101";
-
-    // encode message (hex)
-    const hexMsg = convertUtf8ToHex(message);
-
-    try {
-      // open modal
-      this.toggleModal();
-
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
-
-      // send message
-      const result = await web3.eth.personal.sign(hexMsg, address);
-
-      // verify signature
-      const signer = recoverPersonalSignature(result, message);
-      const verified = signer.toLowerCase() === address.toLowerCase();
-
-      // format displayed result
-      const formattedResult = {
-        action: PERSONAL_SIGN,
-        address,
-        signer,
-        verified,
-        result
-      };
-
-      // display result
-      this.setState({
-        web3,
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ web3, pendingRequest: false, result: null });
-    }
-  };
-
-  public testContractCall = async (functionSig: string) => {
-    let contractCall = null;
-    switch (functionSig) {
-      case DAI_BALANCE_OF:
-        contractCall = callBalanceOf;
-        break;
-      case DAI_TRANSFER:
-        contractCall = callTransfer;
-        break;
-
-      default:
-        break;
-    }
-
-    if (!contractCall) {
-      throw new Error(
-        `No matching contract calls for functionSig=${functionSig}`
-      );
-    }
-
-    const { web3, address, chainId } = this.state;
-    try {
-      // open modal
-      this.toggleModal();
-
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
-
-      // send transaction
-      const result = await contractCall(address, chainId, web3);
-
-      // format displayed result
-      const formattedResult = {
-        action: functionSig,
-        result
-      };
-
-      // display result
-      this.setState({
-        web3,
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ web3, pendingRequest: false, result: null });
-    }
-  };
-
-  public testOpenBox = async () => {
-    function getBoxProfile(
-      address: string,
-      provider: any
-    ): Promise<IBoxProfile> {
-      return new Promise(async (resolve, reject) => {
-        try {
-          await openBox(address, provider, async () => {
-            const profile = await getProfile(address);
-            resolve(profile);
-          });
-        } catch (error) {
-          reject(error);
-        }
-      });
-    }
-
-    const { address, provider } = this.state;
-
-    try {
-      // open modal
-      this.toggleModal();
-
-      // toggle pending request indicator
-      this.setState({ pendingRequest: true });
-
-      // send transaction
-      const profile = await getBoxProfile(address, provider);
-
-      let result = null;
-      if (profile) {
-        result = {
-          name: profile.name,
-          description: profile.description,
-          job: profile.job,
-          employer: profile.employer,
-          location: profile.location,
-          website: profile.website,
-          github: profile.github
-        };
-      }
-
-      // format displayed result
-      const formattedResult = {
-        action: BOX_GET_PROFILE,
-        result
-      };
-
-      // display result
-      this.setState({
-        pendingRequest: false,
-        result: formattedResult || null
-      });
-    } catch (error) {
-      console.error(error); // tslint:disable-line
-      this.setState({ pendingRequest: false, result: null });
-    }
-  };
+  }
 
   public resetApp = async () => {
-    const { web3 } = this.state;
+    const { web3, address, connected, balance } = this.state;
     if (web3 && web3.currentProvider && web3.currentProvider.close) {
       await web3.currentProvider.close();
     }
     await this.web3Modal.clearCachedProvider();
     this.setState({ ...INITIAL_STATE });
+    console.log(web3, address, connected, balance);
     await this.dbManager.getGuestConfig(this.getGuestConfigCallback);
   };
 
@@ -621,7 +369,6 @@ class App extends React.Component<any, any> {
   public render = () => {
     const {
       playerProfile,
-      assets,
       address,
       connected,
       chainId,
@@ -629,9 +376,11 @@ class App extends React.Component<any, any> {
       showModal,
       pendingRequest,
       result,
-      web3
+      web3,
+      balance
     } = this.state;
 
+    console.log(address, balance);
     return (
     <RimbleWeb3 config={RIMBLE_CONFIG}>
       <RimbleWeb3.Consumer>
@@ -676,7 +425,12 @@ class App extends React.Component<any, any> {
                         accountBalance={accountBalance}
                         accountBalanceLow={accountBalanceLow}
                         accountValidated={accountValidated}
-                        connectAndValidateAccount={connectAndValidateAccount}      
+                        connectAndValidateAccount={connectAndValidateAccount}    
+                        onConnect={this.onConnect}
+                        killSession={this.resetApp}  
+                        address={address}
+                        connected={connected}
+                        balance={balance}
                   />
 
                     <Router>
@@ -693,6 +447,7 @@ class App extends React.Component<any, any> {
                         connectAndValidateAccount={connectAndValidateAccount}
                         route={this.state.route}
                         setRoute={this.setRoute}
+                        address={address}
                       />
 
                       <GameContainer

@@ -1,10 +1,12 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import { Flex, Box } from 'rimble-ui';
 import styled from 'styled-components';
+import MediaQuery from 'react-responsive'
 
 import qs from 'querystringify';
 
 import TournamentResultsCard from './TournamentResultsCard';
+import FloatingActionButton from './FloatingActionButton';
 
 const GameWindowContainer = styled(Flex)`
   display: flex;
@@ -14,6 +16,10 @@ const GameWindowContainer = styled(Flex)`
   margin: 0 auto;
   padding: 3rem 0;
   max-width: 1180px;
+
+  .fab {
+
+  }
 
   .game {
     width: 100%:
@@ -28,7 +34,6 @@ const GameWindowContainer = styled(Flex)`
     flex-direction: row;
     justify-content: space-around;
     align-items: flex-start;
-    padding: 4rem 0;
 
     .game {
       width: 65%;
@@ -56,48 +61,62 @@ interface IState {
 
 export default class GameScene extends Component<IProps, IState> {
 
-	constructor(props) {
-		super(props);
+  constructor(props) {
+    super(props);
 
-		let params = qs.parse(window.location.search);
+    let params = qs.parse(window.location.search);
     const { tournamentId } = params;
 
     this.state = {
-    	tournamentId
+      tournamentId
     }
-	}
+  }
 
-	render() {
-		const {
-			children,
-			drizzle,
+  render() {
+    const {
+      children,
+      drizzle,
       playerAddress,
       accountValidated,
       connectAndValidateAccount,
       setRoute
-		} = this.props;
+    } = this.props;
 
-		const {
-			tournamentId
-		} = this.state;
+    const {
+      tournamentId
+    } = this.state;
 
-		return (
-			<GameWindowContainer>
-				<Box className="game">
-					{children}
-				</Box>
-
-        <Box className="leaderboards">
-          <TournamentResultsCard
-            tournamentId={tournamentId}
-            drizzle={drizzle}
-            playerAddress={playerAddress}
-            accountValidated={accountValidated}
-            connectAndValidateAccount={connectAndValidateAccount}
-            setRoute={setRoute}
-          />
+    return (
+      <GameWindowContainer>
+        <MediaQuery maxDeviceWidth={728}>
+          <FloatingActionButton>
+            <TournamentResultsCard
+              tournamentId={tournamentId}
+              drizzle={drizzle}
+              playerAddress={playerAddress}
+              accountValidated={accountValidated}
+              connectAndValidateAccount={connectAndValidateAccount}
+              setRoute={setRoute}
+            />
+          </FloatingActionButton>
+        </MediaQuery>
+        <Box className="game">
+          {children}
         </Box>
-			</GameWindowContainer>
-		)
-	}
+
+        <MediaQuery minDeviceWidth={728}>
+          <Box className="leaderboards">
+            <TournamentResultsCard
+              tournamentId={tournamentId}
+              drizzle={drizzle}
+              playerAddress={playerAddress}
+              accountValidated={accountValidated}
+              connectAndValidateAccount={connectAndValidateAccount}
+              setRoute={setRoute}
+            />
+          </Box>
+        </MediaQuery>
+      </GameWindowContainer>
+    )
+  }
 }

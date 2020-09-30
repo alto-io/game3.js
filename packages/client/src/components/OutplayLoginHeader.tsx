@@ -14,6 +14,7 @@ import { navigateTo } from '../helpers/utilities';
 
 import { drizzleConnect } from "@drizzle/react-plugin";
 import web3 from 'web3';
+import { isMobile } from 'react-device-detect';
 
 class OutplayLoginHeader extends React.Component {
   constructor(props) {
@@ -21,7 +22,7 @@ class OutplayLoginHeader extends React.Component {
     this.state = {
       width: window.innerWidth,
       height: window.innerHeight,
-      rimbleInitialized: false
+      rimbleInitialized: false,
     };
   }
 
@@ -32,6 +33,7 @@ class OutplayLoginHeader extends React.Component {
     }
 
     handleConnectAccount = () => {
+      if(!isMobile) {
         this.props.connectAndValidateAccount(result => {
           if (result === "success") {
             // success
@@ -41,6 +43,10 @@ class OutplayLoginHeader extends React.Component {
             console.log("Callback ERROR");
           }
         })
+      } else{
+        this.props.onConnect();
+      }
+
       }
       
     handleResize = () => {
@@ -93,14 +99,24 @@ class OutplayLoginHeader extends React.Component {
         account,
         accountBalances,
         accountValidated,
-        transactions
+        transactions,
+        address,
+        balance,
+        connected,
+        killSession,
+        onConnect,
         } = this.props;     
        
-        let accountBalance = null
+        let accountBalance = null;
+        let convertedBalance = null;
 
         if (account && accountBalances[account])
         {
           accountBalance = web3.utils.fromWei(accountBalances[account].toString(), "ether")
+        }
+
+        if (address && balance) {
+          convertedBalance = web3.utils.fromWei(balance.toString(), "ether");
         }
 
     return (
@@ -130,6 +146,10 @@ class OutplayLoginHeader extends React.Component {
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
             rimbleInitialized={this.state.rimbleInitialized}
+            address={address}
+            balance={convertedBalance}
+            connected={connected}
+            killSession={killSession}
           />}
 
 

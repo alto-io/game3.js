@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Button } from "rimble-ui";
+import { isMobile } from 'react-device-detect';
 
 interface IProps {
   handleConnectAccount?: any;
@@ -15,7 +16,7 @@ class ConnectWalletButton extends Component<IProps> {
         onClick={handleConnectAccount}
         mr={3}
         size={"small"} 
-        disabled={!rimbleInitialized ? "disabled" : ""}
+        disabled={!rimbleInitialized && !isMobile ? "disabled" : ""}
       >
         Connect your wallet
       </Button>
