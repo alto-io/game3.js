@@ -982,7 +982,7 @@ class RimbleTransaction extends React.Component {
 
   componentDidMount() {
     // Performs a check on browser and will load a web3 provider
-    // this.initWeb3();
+    this.initWeb3();
   }
 
   render() {

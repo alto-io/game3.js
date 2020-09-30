@@ -118,8 +118,6 @@ class NavBarDropdown extends Component<IProps> {
       killSession
     } = this.props;
 
-    console.log(address);
-
     return(
       <StyledBox>
         <Dropdown className={isOpen ? "active" : ""}>

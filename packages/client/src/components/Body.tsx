@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Play from "./Play";
 import TournamentView from "./TournamentView";
 import CreateTourneyView from "./CreateTourneyView";
@@ -10,21 +10,8 @@ import JoinPromptModal from "./JoinPromptModal";
 import { Box, Flex } from "rimble-ui";
 
 function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute, addressModal, connected }) {
-  const [address, setAddress] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isContractOwner, setIsContractOwner] = useState(false);
-
-  useEffect(() => {
-    if (drizzleState) {
-      setAddress(drizzleState.accounts["0"]);
-    }
-  }, [drizzleState]);
-
-  const preflightCheck = () => {
-    if (window.ethereum) {
-      window.ethereum.enable();
-    }
-  };
 
   const handleOpenModal = e => {
     setIsOpen(true);
@@ -74,7 +61,7 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
                 account={account}
                 accountValidated={accountValidated}
                 connectAndValidateAccount={connectAndValidateAccount}
-                address={addressModal}
+                addressModal={addressModal}
                 connected={connected}
                 />,
             CreateTourneyView: 
