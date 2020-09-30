@@ -11,7 +11,6 @@ import { Box, Flex } from "rimble-ui";
 
 function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute, addressModal, connected }) {
   const [address, setAddress] = useState(null);
-  // const [route, setRoute] = useState("Play");
   const [isOpen, setIsOpen] = useState(false);
   const [isContractOwner, setIsContractOwner] = useState(false);
 
@@ -54,7 +53,7 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
           handleOpenModal={handleOpenModal}
           account={account}
           accountValidated={accountValidated}
-          address={address}
+          address={addressModal}
           connected={connected}
           isContractOwner={isContractOwner}/>
         {
@@ -75,7 +74,7 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
                 account={account}
                 accountValidated={accountValidated}
                 connectAndValidateAccount={connectAndValidateAccount}
-                address={address}
+                address={addressModal}
                 connected={connected}
                 />,
             CreateTourneyView: 

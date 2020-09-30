@@ -395,41 +395,22 @@ class App extends React.Component<any, any> {
       playerProfile,
       address,
       connected,
-      chainId,
-      fetching,
-      showModal,
-      pendingRequest,
-      result,
-      web3,
       balance
     } = this.state;
 
     console.log(address, balance);
+    console.log(this.state);
     return (
     <RimbleWeb3 config={RIMBLE_CONFIG}>
       <RimbleWeb3.Consumer>
           {({
-            needsPreflight,
-            validBrowser,
-            userAgent,
             web3,
             account,
             accountBalance,
             accountBalanceLow,
-            initAccount,
-            rejectAccountConnect,
-            userRejectedConnect,
             accountValidated,
-            accountValidationPending,
-            rejectValidation,
-            userRejectedValidation,
-            validateAccount,
             connectAndValidateAccount,
-            contractMethodSendWrapper,            
-            modals,
-            network,
-            transaction,
-            web3Fallback
+            contractMethodSendWrapper           
           }) => ( 
         <DrizzleContext.Provider drizzle={this.props.drizzle}>
             <ToastContainer
