@@ -11,13 +11,15 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-basic-auth": "^1.2.0",
+    "express-graphql": "^0.11.0",
+    "graphql": "^15.3.0",
     "path": "^0.12.7"
   },
   "resolutions": {
     "cids/multicodec": "1.0.1",
     "ipfs-bitswap/multicodec": "0.5.5",
     "**/redis": "3.0.2"
-  },  
+  },
   "devDependencies": {
     "@types/cors": "^2.8.6",
     "@types/node": "^13.1.2",

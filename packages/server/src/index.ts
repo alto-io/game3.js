@@ -14,6 +14,10 @@ import * as basicAuth from "express-basic-auth";
 
 import { join } from 'path';
 
+// GRAPHQL
+const {graphqlHTTP} = require('express-graphql');
+const root_gql_schema = require('./graphql_schema');
+
 const basicAuthMiddleware = basicAuth({
     // list of users and passwords
     users: {
@@ -27,6 +31,13 @@ const basicAuthMiddleware = basicAuth({
 const PORT = Number(process.env.PORT || Constants.WS_PORT);
 
 const app = express();
+
+// MIDDLEWARES
+app.use('/graphql', graphqlHTTP({
+  schema: root_gql_schema,
+  graphiql:true
+}))
+
 app.use(cors());
 app.use(express.json());
 
