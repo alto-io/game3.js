@@ -1,5 +1,6 @@
 import React from "react";
 import Unity, { UnityContent } from "react-unity-webgl";
+import fscreen from 'fscreen'
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
 import GameSceneContainer from '../components/GameSceneContainer';
 import styled from 'styled-components';
@@ -48,6 +49,8 @@ export class GameUnity extends React.Component<IProps, any> {
     window.removeEventListener('orientationchange', this.handleResize, false);
   }
 
+  unityElement: any = null
+
   constructor(props) {
     super(props);
     this.state = {
@@ -69,8 +72,10 @@ export class GameUnity extends React.Component<IProps, any> {
       gameId: '',
       width: '',
       height: '',
-      fullscreen: false,
+      pseudoFullscreen: false,
     };
+
+    this.unityElement = React.createRef();
 
     this.initializeUnity();
     this.preparePlayButton();
@@ -402,10 +407,18 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   onClickFullscreen = () => {
-    const { fullscreen } = this.state
-    this.setState({
-      fullscreen: !fullscreen
-    })
+    const { pseudoFullscreen } = this.state
+    if (fscreen.fullscreenEnabled) {
+      if (fscreen.fullscreenElement) {
+        fscreen.exitFullscreen();
+      } else {
+        fscreen.requestFullscreen(this.unityElement.current);
+      }
+    } else {
+      this.setState({
+        pseudoFullscreen: !pseudoFullscreen
+      })
+    }
   }
 
   onClickUnount() {
@@ -414,17 +427,17 @@ export class GameUnity extends React.Component<IProps, any> {
 
   render() {
     const { isGameRunning, gameReady, playBtnText, progression, 
-      width, height, fullscreen } = this.state;
+      width, height, pseudoFullscreen } = this.state;
     const { tournamentId } = this.props;
 
     let canvasWidth =  (window.innerWidth <= 950 ? `${width}px` : "100%");
     let canvasHeight = (window.innerWidth <= 950 ? `${height}px` : "100%");
 
-    if (fullscreen) {
+    if (pseudoFullscreen) {
       canvasWidth = '100%';
       canvasHeight = '100%';
     }
-    const boxStyle = fullscreen ? FullscreenBoxStyle : StyledBoxStyle;
+    const boxStyle = pseudoFullscreen ? FullscreenBoxStyle : StyledBoxStyle;
     return (
       <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
         <Button
@@ -446,11 +459,11 @@ export class GameUnity extends React.Component<IProps, any> {
           }
         </Button>
 
-          <div p={0} width={`${width}px`} height={`${height}px`} style={boxStyle} >
+          <div ref={this.unityElement} p={0} width={`${width}px`} height={`${height}px`} style={boxStyle} >
             {
               <>
                 {this.state.unityShouldBeMounted === true && (
-                  <Unity 
+                  <Unity
                     unityContent={this.unityContent}
                     width={canvasWidth}
                     height={canvasHeight}
