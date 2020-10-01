@@ -19,6 +19,7 @@ interface IProps {
   connectAndValidateAccount?: any;
   connected?: any;
   web3?: any;
+  chainId?: any;
 }
 
 interface IState {
@@ -100,9 +101,11 @@ class TournamentView extends Component<IProps, IState> {
   }
 
   fetchTournamentsMobile = async () => {
-    const { web3 } = this.props;
-    const contract = new web3.eth.Contract(TournamentContract.abi, "0x8Fd3ceAbB834aa606c670393df673110f31461CE");
+    const { web3, chainId } = this.props;
+    const contract = new web3.eth.Contract(TournamentContract.abi, TournamentContract.networks[chainId].address);
     const tournamentsCount = await contract.methods.getTournamentsCount().call();
+    // console.log(TournamentContract.networks[5777].address);
+    // console.log(chainId);
 
     this.setState({
       tournamentsCount
