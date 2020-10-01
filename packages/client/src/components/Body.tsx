@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Play from "./Play";
 import TournamentView from "./TournamentView";
 import CreateTourneyView from "./CreateTourneyView";
@@ -9,23 +9,9 @@ import OutplayNavigation from "./OutplayNavigation";
 import JoinPromptModal from "./JoinPromptModal";
 import { Box, Flex } from "rimble-ui";
 
-function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute, addressModal, connected }) {
-  const [address, setAddress] = useState(null);
-  // const [route, setRoute] = useState("Play");
+function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute, addressModal, connected, web3, networkId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isContractOwner, setIsContractOwner] = useState(false);
-
-  useEffect(() => {
-    if (drizzleState) {
-      setAddress(drizzleState.accounts["0"]);
-    }
-  }, [drizzleState]);
-
-  const preflightCheck = () => {
-    if (window.ethereum) {
-      window.ethereum.enable();
-    }
-  };
 
   const handleOpenModal = e => {
     setIsOpen(true);
@@ -54,7 +40,7 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
           handleOpenModal={handleOpenModal}
           account={account}
           accountValidated={accountValidated}
-          address={address}
+          address={addressModal}
           connected={connected}
           isContractOwner={isContractOwner}/>
         {
@@ -75,8 +61,10 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
                 account={account}
                 accountValidated={accountValidated}
                 connectAndValidateAccount={connectAndValidateAccount}
-                address={address}
+                addressModal={addressModal}
                 connected={connected}
+                web3={web3}
+                networkId={networkId}
                 />,
             CreateTourneyView: 
             <CreateTourneyView 
@@ -90,7 +78,10 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
               accountValidated={accountValidated}
               store={store}
               drizzle={drizzle}
-              setRoute={setRoute}/>,
+              setRoute={setRoute}
+              address={addressModal}
+              connected={connected}
+              />,
             WalletView: 
             <WalletView 
               store={store}

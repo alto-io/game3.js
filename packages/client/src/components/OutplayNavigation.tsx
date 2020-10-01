@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Flex, Box, Link } from "rimble-ui";
+import { isMobile } from 'react-device-detect';
 
 const StyledLinkContainer = styled(Box)`
   background: ${props =>
@@ -102,7 +103,7 @@ const OutplayNavigation = ({ route, setRoute, account, accountValidated, handleO
             e.preventDefault();
             setRoute("DashboardView");
           }}
-          className={!account && !accountValidated ? "disabled" : ""}
+          className={(!connected && address === "" && isMobile) || (!account && !accountValidated && !isMobile)? "disabled" : ""}
         >
           Dashboard
         </Link>
@@ -120,7 +121,7 @@ const OutplayNavigation = ({ route, setRoute, account, accountValidated, handleO
             e.preventDefault();
             setRoute("WalletView");
           }}
-          className={!account && !accountValidated ? "disabled" : ""}
+          className={(!connected && address === "" && isMobile) || (!account && !accountValidated && !isMobile) ? "disabled" : ""}
         >
           Wallet
         </Link>

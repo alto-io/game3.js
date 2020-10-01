@@ -253,7 +253,7 @@ export default class Home extends Component<IProps, IState> {
   
   // RENDER
   render() {
-    const { drizzle, drizzleState, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute, address, connected} = this.props
+    const { drizzle, drizzleState, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute, address, connected, web3, networkId} = this.props
 
     return (
       <>
@@ -269,6 +269,8 @@ export default class Home extends Component<IProps, IState> {
             setRoute={setRoute}
             addressModal={address}
             connected={connected}
+            web3={web3}
+            networkId={networkId}
           />
 
           {   

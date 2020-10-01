@@ -13,9 +13,16 @@ const StyledBox = styled(Box)`
   } 
 
   li {
-    transition: 300ms ease-in-out;
-    opacity: 0;
+    background-color: #fff;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
     height: 0;
+    opacity: 0;
+    padding: 0.75rem;
+    transition: 300ms ease-in-out;
+    transform: translateY(-50px);
+    width: 100%;
   }
 
   .active {
@@ -26,6 +33,7 @@ const StyledBox = styled(Box)`
     li {
       opacity: 1;
       height: 44px;
+      transform: translateY(0);
     }
 
     .wallet {
@@ -45,15 +53,6 @@ const Dropdown = styled.ul`
   list-style: none;
   letter-spacing: 0.5px;
   margin: 0;
-
-  li {
-    background-color: #fff;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0.75rem;
-    width: 100%;
-  }
 
   img {
     width: 1.25rem;
@@ -119,8 +118,6 @@ class NavBarDropdown extends Component<IProps> {
       killSession
     } = this.props;
 
-    console.log(address);
-
     return(
       <StyledBox>
         <Dropdown className={isOpen ? "active" : ""}>
@@ -139,7 +136,7 @@ class NavBarDropdown extends Component<IProps> {
             </li>
           </>
         ) : ""}
-        { balance ? (
+        { balance && connected &&isMobile ? (
           <>
             {/* ID */}
             <li className="wallet">

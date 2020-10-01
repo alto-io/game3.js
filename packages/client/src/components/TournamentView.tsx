@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { drizzleConnect } from "@drizzle/react-plugin";
 import ConnectionBanner from "@rimble/connection-banner";
 import { Box, Flex, Text } from "rimble-ui";
+import { isMobile } from 'react-device-detect';
+import TournamentContract from './../contracts/Tournaments.json';
 
 import TournamentCard from '../components/TournamentCard';
 
@@ -10,12 +12,13 @@ interface IProps {
   drizzleState?: any;
   drizzleStatus?: any;
   address?: any;
-  networkId: any;
   store?: any;
   account?: any;
   accountValidated?: any;
   connectAndValidateAccount?: any;
   connected?: any;
+  web3?: any;
+  networkId?: any;
 }
 
 interface IState {
@@ -37,15 +40,19 @@ class TournamentView extends Component<IProps, IState> {
     this.state = {
       currentNetwork: null,
       address: null,
-      tournamentsCount: 0,
+      tournamentsCount: 0
     }
   }
 
   componentDidMount() {
-    const { address, networkId, drizzleStatus, drizzle } = this.props
+    const { address, connected, networkId, drizzleStatus, drizzle } = this.props
 
     this.updateAddress(address)
-    this.updateDrizzle(networkId, drizzleStatus, drizzle)
+    this.updateDrizzle(networkId, drizzleStatus, drizzle);
+
+    if (isMobile && address !== null && connected) {
+      this.fetchTournamentsMobile();
+    }
   }
 
   componentWillReceiveProps(newProps) {
@@ -92,6 +99,17 @@ class TournamentView extends Component<IProps, IState> {
     console.log("tourney count: " + tournamentsCount);
   }
 
+  fetchTournamentsMobile = async () => {
+    const { web3, networkId } = this.props;
+    const contract = new web3.eth.Contract(TournamentContract.abi, TournamentContract.networks[networkId].address);
+    const tournamentsCount = await contract.methods.getTournamentsCount().call();
+    // console.log(TournamentContract.networks[networkId].address);
+
+    this.setState({
+      tournamentsCount
+    })
+  }
+
   render() {
     const { drizzleState, store, drizzle, account, accountValidated, connectAndValidateAccount, address, connected} = this.props;
     const { currentNetwork, tournamentsCount } = this.state;
@@ -117,7 +135,7 @@ class TournamentView extends Component<IProps, IState> {
       <>
         <Box>
           {
-            !drizzleState && (
+            !drizzleState && !isMobile && (
             <Box m={4}>
               <ConnectionBanner
                 currentNetwork={currentNetwork}
