@@ -472,7 +472,7 @@ export class OrbitDBManager implements DBManager {
     //   id: string
     //   endTime: string,
     //   state: string,
-    //   pool: number,
+    //   pool: string,
     //   data: string,
     //   shares: string[]
     // }
@@ -488,6 +488,13 @@ export class OrbitDBManager implements DBManager {
         console.log("CREATE_TOURNEY: Creating new one...");
         await this.tournaments.put(tournament)
         console.log("CREATE_TOURNEY: Added");
+        console.log("CREATE_TOURNEY: properties: ");
+        console.log("id: ", typeof tournament.id);
+        console.log("endTime: ", typeof tournament.endTime);
+        console.log("state: ", typeof tournament.state);
+        console.log("pool: ", typeof tournament.pool);
+        console.log("data: ", typeof tournament.data);
+        console.log("shares: ", typeof tournament.shares);
       } else {
         console.log("CREATE_TOURNEY: Id already exist");
       }
@@ -496,6 +503,13 @@ export class OrbitDBManager implements DBManager {
       console.log("CREATE_TOURNEY: Creating new one...");
       await this.tournaments.put(tournament)
       console.log("CREATE_TOURNEY: Added");
+      console.log("CREATE_TOURNEY: properties: ");
+      console.log("id: ", typeof tournament.id);
+      console.log("endTime: ", typeof tournament.endTime);
+      console.log("state: ", typeof tournament.state);
+      console.log("pool: ", typeof tournament.pool);
+      console.log("data: ", typeof tournament.data);
+      console.log("shares: ", typeof tournament.shares);
       console.log("CREATE_TOURNEY: Returning...");
     }
 
