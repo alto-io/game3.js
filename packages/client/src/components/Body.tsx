@@ -9,7 +9,7 @@ import OutplayNavigation from "./OutplayNavigation";
 import JoinPromptModal from "./JoinPromptModal";
 import { Box, Flex } from "rimble-ui";
 
-function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute, addressModal, connected, web3, chainId }) {
+function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account, accountValidated, connectAndValidateAccount, route, setRoute, addressModal, connected, web3, networkId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isContractOwner, setIsContractOwner] = useState(false);
 
@@ -64,7 +64,7 @@ function Body({ drizzle, drizzleState, store, contractMethodSendWrapper, account
                 addressModal={addressModal}
                 connected={connected}
                 web3={web3}
-                chainId={chainId}
+                networkId={networkId}
                 />,
             CreateTourneyView: 
             <CreateTourneyView 

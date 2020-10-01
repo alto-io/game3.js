@@ -377,8 +377,7 @@ class App extends React.Component<any, any> {
       address,
       connected,
       balance,
-      web3,
-      chainId
+      networkId
     } = this.state;
 
     return (
@@ -434,8 +433,8 @@ class App extends React.Component<any, any> {
                         route={this.state.route}
                         setRoute={this.setRoute}
                         address={address}
-                        web3={web3}
-                        chainId={chainId}
+                        web3={this.state.web3}
+                        networkId={networkId}
                       />
 
                       <GameContainer

@@ -12,14 +12,13 @@ interface IProps {
   drizzleState?: any;
   drizzleStatus?: any;
   address?: any;
-  networkId: any;
   store?: any;
   account?: any;
   accountValidated?: any;
   connectAndValidateAccount?: any;
   connected?: any;
   web3?: any;
-  chainId?: any;
+  networkId?: any;
 }
 
 interface IState {
@@ -101,11 +100,10 @@ class TournamentView extends Component<IProps, IState> {
   }
 
   fetchTournamentsMobile = async () => {
-    const { web3, chainId } = this.props;
-    const contract = new web3.eth.Contract(TournamentContract.abi, TournamentContract.networks[chainId].address);
+    const { web3, networkId } = this.props;
+    const contract = new web3.eth.Contract(TournamentContract.abi, TournamentContract.networks[networkId].address);
     const tournamentsCount = await contract.methods.getTournamentsCount().call();
-    // console.log(TournamentContract.networks[5777].address);
-    // console.log(chainId);
+    // console.log(TournamentContract.networks[networkId].address);
 
     this.setState({
       tournamentsCount
@@ -137,7 +135,7 @@ class TournamentView extends Component<IProps, IState> {
       <>
         <Box>
           {
-            !drizzleState && (
+            !drizzleState && !isMobile && (
             <Box m={4}>
               <ConnectionBanner
                 currentNetwork={currentNetwork}
