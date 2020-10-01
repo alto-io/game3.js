@@ -2,7 +2,6 @@
 import * as React from "react";
 import Web3 from "web3";
 
-import { convertUtf8ToHex } from "@walletconnect/utils";
 import { Router } from '@reach/router';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -11,11 +10,10 @@ import { DrizzleContext } from "@drizzle/react-plugin";
 
 // WalletConnect
 import WalletConnect from "@walletconnect/browser";
-import Web3Modal, { providers } from "web3modal";
+import Web3Modal from "web3modal";
 
 // Rimble
 import RimbleWeb3 from "./rimble/RimbleWeb3";
-
 
 // @ts-ignore
 import WalletConnectProvider from "@walletconnect/web3-provider";
@@ -25,31 +23,14 @@ import { Database } from '@game3js/common';
 import RimbleContainer from './components/RimbleContainer';
 
 import {
-  formatTestTransaction,
-  getChainData,
-  hashPersonalMessage,
-  recoverPersonalSignature,
-  recoverPublicKey,
+  getChainData
 } from "./helpers/utilities";
 
-import { apiGetAccountAssets } from "./helpers/api";
-import { getProfile, openBox } from "./helpers/box";
 import { IAssetData, IBoxProfile } from "./helpers/types";
-
-
-import {
-  BOX_GET_PROFILE,
-  DAI_BALANCE_OF,
-  DAI_TRANSFER,
-  ETH_SEND_TRANSACTION,
-  ETH_SIGN,
-  PERSONAL_SIGN
-} from "./constants";
 
 import { DEFAULT_ACTIVE_INDEX, DEFAULT_CHAIN_ID } from "./helpers/constants";
 import appConfig from "./config";
 
-import { callBalanceOf, callTransfer } from "./helpers/web3";
 import { getAccounts, initWallet, updateWallet } from "./helpers/wallet";
 import { getLocalDatabaseManager, getPlayerProfile } from "./helpers/database";
 
@@ -395,11 +376,10 @@ class App extends React.Component<any, any> {
       playerProfile,
       address,
       connected,
-      balance
+      balance,
+      web3
     } = this.state;
 
-    console.log(address, balance);
-    console.log(this.state);
     return (
     <RimbleWeb3 config={RIMBLE_CONFIG}>
       <RimbleWeb3.Consumer>
@@ -453,6 +433,7 @@ class App extends React.Component<any, any> {
                         route={this.state.route}
                         setRoute={this.setRoute}
                         address={address}
+                        web3={web3}
                       />
 
                       <GameContainer

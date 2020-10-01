@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { drizzleConnect } from "@drizzle/react-plugin";
 import ConnectionBanner from "@rimble/connection-banner";
 import { Box, Flex, Text } from "rimble-ui";
+import { isMobile } from 'react-device-detect';
+import TournamentContract from './../contracts/Tournaments.json';
 
 import TournamentCard from '../components/TournamentCard';
 
@@ -16,6 +18,7 @@ interface IProps {
   accountValidated?: any;
   connectAndValidateAccount?: any;
   connected?: any;
+  web3?: any;
 }
 
 interface IState {
@@ -37,15 +40,19 @@ class TournamentView extends Component<IProps, IState> {
     this.state = {
       currentNetwork: null,
       address: null,
-      tournamentsCount: 0,
+      tournamentsCount: 0
     }
   }
 
   componentDidMount() {
-    const { address, networkId, drizzleStatus, drizzle } = this.props
+    const { address, connected, networkId, drizzleStatus, drizzle } = this.props
 
     this.updateAddress(address)
-    this.updateDrizzle(networkId, drizzleStatus, drizzle)
+    this.updateDrizzle(networkId, drizzleStatus, drizzle);
+
+    if (isMobile && address !== null && connected) {
+      this.fetchTournamentsMobile();
+    }
   }
 
   componentWillReceiveProps(newProps) {
@@ -90,6 +97,16 @@ class TournamentView extends Component<IProps, IState> {
     })
 
     console.log("tourney count: " + tournamentsCount);
+  }
+
+  fetchTournamentsMobile = async () => {
+    const { web3 } = this.props;
+    const contract = new web3.eth.Contract(TournamentContract.abi, "0x8Fd3ceAbB834aa606c670393df673110f31461CE");
+    const tournamentsCount = await contract.methods.getTournamentsCount().call();
+
+    this.setState({
+      tournamentsCount
+    })
   }
 
   render() {
