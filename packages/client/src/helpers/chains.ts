@@ -182,7 +182,7 @@ const supportedChains: IChainData[] = [
     short_name: "gan",
     chain: "ETH",
     network: "local",
-    chain_id: 1337,
+    chain_id: 5777,
     network_id: 5777,
     rpc_url: "http://127.0.0.1:7545",
     native_currency: {

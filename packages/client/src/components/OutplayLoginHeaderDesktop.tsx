@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import {Text, Box, Flex, Image, Link } from "rimble-ui";
+import {Text, Box, Flex, Image, Link, Button } from "rimble-ui";
+import { isMobile } from 'react-device-detect';
 import styled from "styled-components";
 
 import ConnectWalletButton from "./ConnectWalletButton";
@@ -23,6 +24,17 @@ const StyledTextLink = styled(Link)`
   }
 `
 
+const StyledButtonText = styled(Button.Text)`
+  font-size: 0.875rem;
+  text-transform: capitalize;
+  transition: 300ms ease;
+
+  &:hover {
+    color: #7065D8;
+    text-decoration: none;
+  }
+`
+
 class OutplayLoginHeaderDesktop extends Component {
   render() {
     const {
@@ -35,7 +47,11 @@ class OutplayLoginHeaderDesktop extends Component {
       logo, 
       balanceIcon,
       walletIcon,
-      rimbleInitialized
+      rimbleInitialized,
+      address,
+      balance,
+      connected,
+      killSession
       } = this.props;
 
     return(
@@ -67,7 +83,7 @@ class OutplayLoginHeaderDesktop extends Component {
             About Us
           </StyledTextLink>
 
-          {account && accountValidated ? (
+          {(account && accountValidated && !isMobile) || (balance && connected && isMobile) ? (
             <Flex>
               {/* ID */}
               <Flex alignItems={"center"} mr={4}>
@@ -82,7 +98,7 @@ class OutplayLoginHeaderDesktop extends Component {
                         Connected as
                       </Text>
                       <Text fontSize={1} color={"primary"}>
-                        {shortenAddress(account)}
+                        {!isMobile ? shortenAddress(account) : shortenAddress(address)}
                       </Text>
                   </Box>
               </Flex>
@@ -100,10 +116,15 @@ class OutplayLoginHeaderDesktop extends Component {
                         Balance
                       </Text>
                       <Text fontSize={1} color={"primary"}>
-                        {accountBalance.toString()} ETH
+                        {!isMobile ? accountBalance.toString() : balance.toString()} ETH
                       </Text>
                   </Box>
               </Flex>
+
+              {/* Disconnect Button */}
+              {isMobile ? (
+                <StyledButtonText ml={3} onClick={e => {e.preventDefault(); killSession()}}>Disconnect</StyledButtonText>
+              ) : ""}
             </Flex>
           ) : (
             <ConnectWalletButton handleConnectAccount={handleConnectAccount} rimbleInitialized={rimbleInitialized}/>

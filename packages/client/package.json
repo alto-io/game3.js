@@ -24,6 +24,7 @@
     "dotenv": "^8.2.0",
     "ethereumjs-util": "^7.0.1",
     "ethers": "^4.0.42",
+    "fscreen": "^1.1.0",
     "moment": "^2.27.0",
     "pixi-particles": "^4.2.0",
     "pixi-viewport": "^4.5.0",
