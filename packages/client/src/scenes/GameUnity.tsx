@@ -1,5 +1,6 @@
 import React from "react";
 import Unity, { UnityContent } from "react-unity-webgl";
+import fscreen from 'fscreen'
 import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
 import GameSceneContainer from '../components/GameSceneContainer';
 import styled from 'styled-components';
@@ -8,17 +9,22 @@ import { DEFAULT_GAME_DIMENSION } from '../constants'
 import { Constants } from '@game3js/common';
 import { makeNewGameSession, getGameNo, getGameSessionId, updateSessionScore, updateGameNo, createSessionId } from '../helpers/database';
 
-const StyledBox = styled.div` 
-  background: #fcfcfc;
-  border-radius: 10px;
-  box-shadow: 4px 8px 16px rgba(0,0,0,0.25);
-  margin-top: 1.5rem;
-
-@media screen and (min-width: 950px) {
-  height: 100%;
-  width: 100%;
+const StyledBoxStyle = {
+  position: 'relative',
+  background: '#fcfcfc',
+  borderRadius: '10px',
+  boxShadow: '4px 8px 16px rgba(0,0,0,0.25)',
+  marginTop: '1.5rem',
 }
-`
+
+const FullscreenBoxStyle = {
+  position: 'fixed',
+  top: '0',
+  bottom: '0',
+  left: '0',
+  right: '0',
+  zIndex: '1',
+}
 
 interface IProps extends RouteComponentProps {
   path: string;
@@ -43,6 +49,8 @@ export class GameUnity extends React.Component<IProps, any> {
     window.removeEventListener('orientationchange', this.handleResize, false);
   }
 
+  unityElement: any = null
+
   constructor(props) {
     super(props);
     this.state = {
@@ -64,7 +72,10 @@ export class GameUnity extends React.Component<IProps, any> {
       gameId: '',
       width: '',
       height: '',
+      pseudoFullscreen: false,
     };
+
+    this.unityElement = React.createRef();
 
     this.initializeUnity();
     this.preparePlayButton();
@@ -395,17 +406,38 @@ export class GameUnity extends React.Component<IProps, any> {
     this.unityContent.send("Cube", "SetRotationSpeed", this.speed);
   }
 
+  onClickFullscreen = () => {
+    const { pseudoFullscreen } = this.state
+    if (fscreen.fullscreenEnabled) {
+      if (fscreen.fullscreenElement) {
+        fscreen.exitFullscreen();
+      } else {
+        fscreen.requestFullscreen(this.unityElement.current);
+      }
+    } else {
+      this.setState({
+        pseudoFullscreen: !pseudoFullscreen
+      })
+    }
+  }
+
   onClickUnount() {
     this.setState({ unityShouldBeMounted: false });
   }
 
   render() {
-    const { isGameRunning, gameReady, playBtnText, progression, width, height } = this.state;
+    const { isGameRunning, gameReady, playBtnText, progression, 
+      width, height, pseudoFullscreen } = this.state;
     const { tournamentId } = this.props;
 
     let canvasWidth =  (window.innerWidth <= 950 ? `${width}px` : "100%");
     let canvasHeight = (window.innerWidth <= 950 ? `${height}px` : "100%");
 
+    if (pseudoFullscreen) {
+      canvasWidth = '100%';
+      canvasHeight = '100%';
+    }
+    const boxStyle = pseudoFullscreen ? FullscreenBoxStyle : StyledBoxStyle;
     return (
       <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
         <Button
@@ -427,13 +459,38 @@ export class GameUnity extends React.Component<IProps, any> {
           }
         </Button>
 
-        <StyledBox p={0} width={`${width}px`} height={`${height}px`}>
-          {
-            this.state.unityShouldBeMounted === true && (
-              <Unity unityContent={this.unityContent}  width={canvasWidth} height={canvasHeight}/>
-            )
-          }
-        </StyledBox>
+          <div ref={this.unityElement} p={0} width={`${width}px`} height={`${height}px`} style={boxStyle} >
+            {
+              <>
+                {this.state.unityShouldBeMounted === true && (
+                  <Unity
+                    unityContent={this.unityContent}
+                    width={canvasWidth}
+                    height={canvasHeight}
+                    style={{
+                      position: 'relative',
+                      top: '0px',
+                      left: '0px'
+                    }}
+                  />
+                )}
+                <Button
+                  color="primary"
+                  type="button"
+                  onClick={this.onClickFullscreen}
+                  style={{ 
+                    position: 'absolute', 
+                    left: '16px', 
+                    bottom: '18px',
+                    width: '48px',
+                    padding: '4px'
+                  }}
+                >
+                  {'⛶'}
+                </Button>
+              </>
+            }
+          </div>
       </GameSceneContainer>
     );
   }

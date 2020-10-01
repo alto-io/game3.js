@@ -133,6 +133,10 @@ class OutplayLoginHeader extends React.Component {
             balanceIcon={balanceIcon}
             shortenAddress={shortenAddress}
             rimbleInitialized={this.state.rimbleInitialized}
+            address={address}
+            balance={convertedBalance}
+            connected={connected}
+            killSession={killSession}
           />
                     
           ) : <OutplayLoginHeaderMobile 

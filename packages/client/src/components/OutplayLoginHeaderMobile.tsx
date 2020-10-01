@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Flex, Link, Image } from "rimble-ui";
+import { isMobile } from 'react-device-detect';
 
 import NavBarHamburger from "./NavBarHamburger";
 import NavBarDropdown from "./NavBarDropdown";
@@ -50,7 +51,7 @@ class OutplayLoginHeaderMobile extends Component {
           </Link>
 
           <Flex>
-            {(account && accountValidated) || (address !== null && connected) ? "" : (
+            {(account && accountValidated && !isMobile) || (address !== null && connected && isMobile) ? "" : (
             <ConnectWalletButton handleConnectAccount={handleConnectAccount} rimbleInitialized={rimbleInitialized}/>
             )}
 
