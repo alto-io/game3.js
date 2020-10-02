@@ -107,7 +107,7 @@ export async function getGameSessionId(playerAddress, tournamentId): Promise<any
   }
 
   const response = await api.get('/gameSessionId/get', { params })
-  return response.data
+  return response.data.sessionId
 }
 
 export async function deleteGameSessionId(gameSessionId): Promise<any> {

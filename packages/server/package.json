@@ -14,6 +14,7 @@
     "express-basic-auth": "^1.2.0",
     "graphql": "^15.3.0",
     "graphql-tools": "^6.2.4",
+    "graphql-type-json": "^0.3.2",
     "lodash": "^4.17.20",
     "path": "^0.12.7"
   },

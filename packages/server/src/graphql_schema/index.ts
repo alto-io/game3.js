@@ -8,13 +8,18 @@ import {
    resolvers as tournamentResolvers
   } from './tournaments_gqlSchema';
 
+import {
+  typeDef as GameSession,
+  resolvers as gameSessionResolvers
+} from './gameSessions_gqlSchema';
 
 
-const typeDefs = [Query, Mutation, Tournament];
+
+const typeDefs = [Query, Mutation, Tournament, GameSession];
 
 let resolver = {}
 
-let _resolvers = merge(resolver, tournamentResolvers);
+let _resolvers = merge(resolver, tournamentResolvers, gameSessionResolvers);
 
 const schema = new ApolloServer({
   typeDefs,

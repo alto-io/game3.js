@@ -8,6 +8,7 @@ import { TournamentData } from './tournamentdata'
 import { v4 as uuidv4 } from 'uuid'
 
 import { TOSIOS, WOM, FP } from '../constants'
+import { Constants } from '..'
 
 const all = require('it-all')
 const { Buffer } = IPFS
@@ -343,8 +344,8 @@ export class OrbitDBManager implements DBManager {
 
         playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()]
         console.log("GET: PLAYER DATA", playerData);
-        if (!('currentHighestNumber' in playerData) && !('gameNo' in playerData)) {
-          playerData.currentHighestNumber = 0;
+        if (!('highScore' in playerData) && !('gameNo' in playerData)) {
+          playerData.highScore = 0;
           playerData.gameNo = 0;
         }
 
@@ -364,6 +365,9 @@ export class OrbitDBManager implements DBManager {
   }
 
   async getGameNo(gameSessionId, playerAddress, tournamentId) {
+    console.log("GET_GAMENO: Initialized...");
+    console.log("GET_GAMENO: Player address: ", playerAddress);
+    console.log("GET_GAMENO: Session id: ", gameSessionId);
     if (tournamentId || tournamentId === 0) {
       // get game session first
 
@@ -429,14 +433,14 @@ export class OrbitDBManager implements DBManager {
       let data = await this.gameSessionIds.query(sessionId =>
         sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId === tournamentId)
       if (data.length > 0) {
-        return data[0].id
+        return {success: true, sessionId: data[0].id, playerAddress, tournamentId}
       } else {
-        return null
+        return {success: false, sessionId: null, playerAddress, tournamentId}
       }
     } else {
       console.log("GET_SID: You're not in a tournament");
       console.log("GET_SID: Returning...");
-      return false;
+      return {success: false, sessionId: null, playerAddress, tournamentId};
     }
   }
 
@@ -578,11 +582,11 @@ export class OrbitDBManager implements DBManager {
 
           players = tourneySession.filter(session => {
             let playerAddress = Object.keys(session.sessionData.playerData);
-            let score = session.sessionData.playerData[playerAddress[0]].currentHighestNumber;
+            let score = session.sessionData.playerData[playerAddress[0]].highScore;
             return score > 0
           }).map(session => {
             let playerAddress = Object.keys(session.sessionData.playerData);
-            let score = session.sessionData.playerData[playerAddress[0]].currentHighestNumber;
+            let score = session.sessionData.playerData[playerAddress[0]].highScore;
             return {
               address: playerAddress[0],
               score
@@ -741,9 +745,9 @@ export class OrbitDBManager implements DBManager {
         const playerData = {
           name: player.name,
           kills: player.kills,
-          timeLeft: timeLeft,
+          score: timeLeft,
           gameNo: 0,
-          currentHighestNumber: 0
+          highScore: 0
         }
 
         console.log("NEW-tosios: Player address", player.address)
@@ -768,7 +772,7 @@ export class OrbitDBManager implements DBManager {
         console.log("NEW-tosios: Before", data[0].sessionData.playerData[player.address.toLowerCase()])
         data[0].sessionData.playerData[player.address.toLowerCase()].name = player.name;
         data[0].sessionData.playerData[player.address.toLowerCase()].kills = player.kills;
-        data[0].sessionData.playerData[player.address.toLowerCase()].timeLeft = timeLeft;
+        data[0].sessionData.playerData[player.address.toLowerCase()].score = timeLeft;
         console.log("NEW-tosios: After", data[0].sessionData.playerData[player.address.toLowerCase()])
       }
       await this.gameSessions.put(data[0]);
@@ -789,8 +793,8 @@ export class OrbitDBManager implements DBManager {
     console.log("UPDATE_SCORE-tosios: Session data", data[0].sessionData);
     console.log("UPDATE_SCORE-tosios: Player data", playerData);
     console.log("UPDATE_SCORE-tosios: Updating score...");
-    let playerScore = Math.abs(playerData.timeLeft - timeFinished);
-    console.log("UPDATE_SCORE-tosios: Current High Score (shortest time)", playerData.currentHighestNumber);
+    let playerScore = Math.abs(playerData.score - timeFinished);
+    console.log("UPDATE_SCORE-tosios: Current High Score (shortest time)", playerData.highScore);
     console.log("UPDATE_SCORE-tosios: Current Score", playerScore);
     console.log("UPDATE_SCORE-tosios: Did win?", didWin);
 
@@ -801,10 +805,10 @@ export class OrbitDBManager implements DBManager {
     } else {
       console.log("UPDATE_SCORE-tosios: Player did win");
 
-      playerData.timeLeft = playerScore;
+      playerData.score = playerScore;
 
-      if (playerScore < (playerData.currentHighestNumber === 0 ? playerScore + 1 : playerData.currentHighestNumber)) {
-        playerData.currentHighestNumber = playerScore;
+      if (playerScore < (playerData.highScore === 0 ? playerScore + 1 : playerData.highScore)) {
+        playerData.highScore = playerScore;
         console.log("UPDATE_SCORE-tosios: Thew new data", playerData);
         data[0].sessionData.playerData[playerAddress.toLowerCase()] = playerData;
         await this.gameSessions.put(data[0]);
