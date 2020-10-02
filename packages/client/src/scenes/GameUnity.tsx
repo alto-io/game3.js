@@ -89,20 +89,28 @@ export class GameUnity extends React.Component<IProps, any> {
     let height = newHeight;
     let width = newWidth;
 
-    if (newWidthToHeight > widthToHeight) {
-      newWidth = newHeight * widthToHeight;
-      height = newHeight * 0.85;
-      width = newWidth * 0.85;
+    if (fscreen.fullscreenElement) {
+      width = window.screen.width;
+      height = window.screen.height;
       this.setState({
         height,width
       })
     } else {
-      newHeight = newWidth / widthToHeight;
-      width = newWidth * 0.85;
-      height = newHeight * 0.85;
-      this.setState({
-        height,width
-      })
+      if (newWidthToHeight > widthToHeight) {
+        newWidth = newHeight * widthToHeight;
+        height = newHeight * 0.85;
+        width = newWidth * 0.85;
+        this.setState({
+          height,width
+        })
+      } else {
+        newHeight = newWidth / widthToHeight;
+        width = newWidth * 0.85;
+        height = newHeight * 0.85;
+        this.setState({
+          height,width
+        })
+      }
     }
   }
 
