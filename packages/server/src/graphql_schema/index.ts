@@ -1,35 +1,30 @@
-// import gameSessions_gqlSchema from './gameSessions_gqlSchema';
-// import replay_gqlSchema from './replay_gqlSchema';
-const tournaments_gqlSchema = require('./tournaments_gqlSchema');
+import {ApolloServer} from 'apollo-server-express';
 
-const graphql = require('graphql');
-import { GlobalState } from '@game3js/common';
+import { merge } from 'lodash';
 
-const dbMethods = GlobalState.ServerState;
+import { Query, Mutation } from './query';
+import {
+   typeDef as Tournament,
+   resolvers as tournamentResolvers
+  } from './tournaments_gqlSchema';
 
-const {
-  GraphQLObjectType,
-  GraphQLString,
-  GraphQLSchema,
-  GraphQLID,
-  GraphQLList
-} = graphql
 
-const root_gql_schema = new GraphQLObjectType({
-  name: "RootQueryType",
-  fields: {
-    tournament: { 
-      type: tournaments_gqlSchema,
-      args: { id: {type: GraphQLID}},
-      resolve: async (parent, args) => {
-        const res = await dbMethods.dbManager.getTournament(args.id);
-        console.log("DATA", res);
-        return res[0];
-      }
+
+const typeDefs = [Query, Mutation, Tournament];
+
+let resolver = {}
+
+let _resolvers = merge(resolver, tournamentResolvers);
+
+const schema = new ApolloServer({
+  typeDefs,
+  resolvers: _resolvers,
+  playground: {
+    endpoint: 'graphql',
+    settings: {
+      'editor.theme': 'light'
     }
   }
-})
-
-module.exports = new GraphQLSchema({
-  query: root_gql_schema
 });
+
+export default schema;

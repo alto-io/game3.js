@@ -495,6 +495,7 @@ export class OrbitDBManager implements DBManager {
         console.log("pool: ", typeof tournament.pool);
         console.log("data: ", typeof tournament.data);
         console.log("shares: ", typeof tournament.shares);
+        return tournament;
       } else {
         console.log("CREATE_TOURNEY: Id already exist");
       }
@@ -511,6 +512,7 @@ export class OrbitDBManager implements DBManager {
       console.log("data: ", typeof tournament.data);
       console.log("shares: ", typeof tournament.shares);
       console.log("CREATE_TOURNEY: Returning...");
+      return tournament;
     }
 
   }
@@ -538,11 +540,11 @@ export class OrbitDBManager implements DBManager {
       await this.tournaments.put(data[0]);
       console.log("UPDATE_TOURNEY: Updated!:", data[0]);
       console.log("UPDATE_TOURNEY: Returning...");
-      return true
+      return {success: true, updatedData: data[0]}
     } else {
       console.log("UPDATE_TOURNEY: No data found with id:", tournamentId);
       console.log("UPDATE_TOURNEY: Returning...");
-      return false
+      return {success: false, updatedData: data[0]}
     }
   }
 

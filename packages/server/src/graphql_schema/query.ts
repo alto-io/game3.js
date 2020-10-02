@@ -1,22 +1,13 @@
-const tournaments_gqlSchema = require('./tournaments_gqlSchema');
+import {gql} from 'apollo-server-express';
 
-import { GlobalState } from '@game3js/common';
+export const Query = gql`
+ type Query {
+   _empty: String
+ }
+`;
 
-const dbMethods = GlobalState.ServerState;
-
-const root_gql_schema = new GraphQLObjectType({
-  name: "RootQueryType",
-  fields: {
-    tournament: { 
-      type: tournaments_gqlSchema,
-      args: { id: {type: GraphQLID}},
-      resolve: async (parent, args) => {
-        const res = await dbMethods.dbManager.getTournament(args.id);
-        console.log("DATA", res);
-        return res[0];
-      }
-    }
-  }
-})
-
-module.exports = root_gql_schema;
+export const Mutation = gql`
+ type Mutation {
+   _empty: String
+ }
+`

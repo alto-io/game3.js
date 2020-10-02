@@ -14,47 +14,6 @@ import * as basicAuth from "express-basic-auth";
 
 import { join } from 'path';
 
-// GRAPHQL
-import {ApolloServer, gql} from 'apollo-server-express';
-const { makeExecutableSchema } = require('graphql-tools');
-const root_gql_schema = require('./graphql_schema');
-
-// Some fake data
-const books = [
-  {
-    title: "Harry Potter and the Sorcerer's stone",
-    author: 'J.K. Rowling',
-  },
-  {
-    title: 'Jurassic Park',
-    author: 'Michael Crichton',
-  },
-];
-
-// The GraphQL schema in string form
-const typeDefs = `
-  type Query { books: [Book] }
-  type Book { title: String, author: String }
-`;
-
-// The resolvers
-const resolvers = {
-  Query: { books: () => books },
-};
-
-
-// Put together a schema
-const schema = new ApolloServer({
-  typeDefs,
-  resolvers,
-  playground: {
-    endpoint: 'graphql',
-    settings: {
-      'editor.theme': 'light'
-    }
-  }
-});
-
 const basicAuthMiddleware = basicAuth({
     // list of users and passwords
     users: {
@@ -73,7 +32,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-schema.applyMiddleware({app});
+// GRAPHQL
+import schema from './graphql_schema';
+
+schema.applyMiddleware({app}); // Graphql
 
 
 // Game server
