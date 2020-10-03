@@ -13,13 +13,18 @@ import {
   resolvers as gameSessionResolvers
 } from './gameSessions_gqlSchema';
 
+import {
+  typeDef as Replay,
+  resolvers as replayResolvers
+} from './replay_gqlSchema';
 
 
-const typeDefs = [Query, Mutation, Tournament, GameSession];
+
+const typeDefs = [Query, Mutation, Tournament, GameSession, Replay];
 
 let resolver = {}
 
-let _resolvers = merge(resolver, tournamentResolvers, gameSessionResolvers);
+let _resolvers = merge(resolver, tournamentResolvers, gameSessionResolvers, replayResolvers);
 
 const schema = new ApolloServer({
   typeDefs,

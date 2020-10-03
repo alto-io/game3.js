@@ -206,7 +206,7 @@ export class OrbitDBManager implements DBManager {
     playerData.replayHash = fileHash
     console.log("PUT_GSESSION: Entry", entry);
     await this.gameSessions.put(entry)
-    return { result: sessionId }
+    return { result: sessionId, playerData }
   }
 
   async serverPutGameSession(sessionId, sessionData) {

@@ -26,6 +26,7 @@ export const typeDef = gql`
     gameNo: Int
     score: Int
     highScore: Int
+    hash: String
   }
   type SessionID {
     success: Boolean
