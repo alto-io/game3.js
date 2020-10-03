@@ -229,6 +229,7 @@ export class OrbitDBManager implements DBManager {
       console.log("UPDATE_SCORE: Function Invoked...");
       console.log("UPDATE_SCORE: Session ID", sessionId);
 
+      const params = {sessionId, playerAddress, tournamentId}
       const data = await this.gameSessions.query(data =>
         data.id === sessionId && data.sessionData.tournamentId === tournamentId
       );
@@ -238,11 +239,11 @@ export class OrbitDBManager implements DBManager {
         console.log("UPDATE_SCORE: Game name", data[0].sessionData.gameName);
         switch (data[0].sessionData.gameName) {
           case TOSIOS:
-            return await this.tosiosHighScoreHandler(playerAddress, data, gamePayload);
+            return await this.tosiosHighScoreHandler(playerAddress, data, gamePayload, params);
           case FP:
-            return await this.fpHighScoreHandler(playerAddress, data, gamePayload);
+            return await this.fpHighScoreHandler(playerAddress, data, gamePayload, params);
           case WOM:
-            return await this.womHighScoreHandler(playerAddress, data, gamePayload);
+            return await this.womHighScoreHandler(playerAddress, data, gamePayload, params);
           default:
             return false;
         }
@@ -404,7 +405,7 @@ export class OrbitDBManager implements DBManager {
       if (data.length > 0) {
         console.log("SID: DATA FOUND!", data);
         console.log("SID: Returning...", data[0].id);
-        return data[0].id;
+        return {success: true, sessionIdData: data[0]};
       } else {
         console.log("SID: DATA NOT FOUND!", data);
         console.log("SID: Creating new one...");
@@ -419,12 +420,12 @@ export class OrbitDBManager implements DBManager {
         await this.gameSessionIds.put(sessionIdData);
         console.log("SID: Saved!");
         console.log("SID: Returning...");
-        return sessionId;
+        return {success: true, sessionIdData};
       }
     } else {
       console.log("SID: You're not in a tournament");
       console.log("SID: Returning...");
-      return false;
+      return {success: true, sessionIdData: null};
     }
   }
 
@@ -433,14 +434,14 @@ export class OrbitDBManager implements DBManager {
       let data = await this.gameSessionIds.query(sessionId =>
         sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId === tournamentId)
       if (data.length > 0) {
-        return {success: true, sessionId: data[0].id, playerAddress, tournamentId}
+        return { success: true, sessionIdData: data[0] }
       } else {
-        return {success: false, sessionId: null, playerAddress, tournamentId}
+        return { success: false, sessionIdData: data[0] }
       }
     } else {
       console.log("GET_SID: You're not in a tournament");
       console.log("GET_SID: Returning...");
-      return {success: false, sessionId: null, playerAddress, tournamentId};
+      return { success: false, sessionId: null, playerAddress, tournamentId };
     }
   }
 
@@ -544,11 +545,11 @@ export class OrbitDBManager implements DBManager {
       await this.tournaments.put(data[0]);
       console.log("UPDATE_TOURNEY: Updated!:", data[0]);
       console.log("UPDATE_TOURNEY: Returning...");
-      return {success: true, updatedData: data[0]}
+      return { success: true, updatedData: data[0] }
     } else {
       console.log("UPDATE_TOURNEY: No data found with id:", tournamentId);
       console.log("UPDATE_TOURNEY: Returning...");
-      return {success: false, updatedData: data[0]}
+      return { success: false, updatedData: data[0] }
     }
   }
 
@@ -707,6 +708,7 @@ export class OrbitDBManager implements DBManager {
       console.log("NEW-score_type: Adding player in session...");
 
       const playerData = {
+        metadata: {},
         gameNo: 0,
         score: 0,
         highScore: 0
@@ -719,12 +721,12 @@ export class OrbitDBManager implements DBManager {
       await this.serverPutGameSession(sessionId, sessionData);
       console.log("NEW-score_type: Session Data created!!!");
       console.log("NEW-score_type: Function Finished...");
-      return true
+      return {success: true,  sessionData};
     } else {
       console.log("NEW-score_type: Session Exist!!");
       console.log("NEW-score_type: No need to create new one...")
       console.log("NEW-score_type: Returning...")
-      return true;
+      return {success: true,  sessionData};
     }
   }
 
@@ -743,8 +745,10 @@ export class OrbitDBManager implements DBManager {
         console.log("NEW-tosios: Player name", player.name)
 
         const playerData = {
-          name: player.name,
-          kills: player.kills,
+          metadata: {
+            name: player.name,
+            kills: player.kills,
+          },
           score: timeLeft,
           gameNo: 0,
           highScore: 0
@@ -762,7 +766,7 @@ export class OrbitDBManager implements DBManager {
       await this.serverPutGameSession(sessionId, sessionData);
       console.log("NEW-tosios: Session Data created!!!");
       console.log("NEW-tosios: Function Finished...");
-      return true;
+      return {success: true,  sessionData};
     } else {
       console.log("NEW-tosios: Session Exist!!");
       console.log("NEW-tosios: Updating playerData...")
@@ -778,13 +782,13 @@ export class OrbitDBManager implements DBManager {
       await this.gameSessions.put(data[0]);
       console.log("NEW-tosios: Updated!");
       console.log("NEW-tosios: Finished...");
-      return true;
+      return {success: true, sessionData: data[0].sessionData};
     }
   }
 
   // HIGH SCORE UPDATER HANDLERS
 
-  private async tosiosHighScoreHandler(playerAddress, data, gamePayload) {
+  private async tosiosHighScoreHandler(playerAddress, data, gamePayload, params) {
     const { timeFinished, didWin } = gamePayload;
     console.log("UPDATE_SCORE-tosios: payload", gamePayload);
     console.log("UPDATE_SCORE-tosios: Session Exist!");
@@ -801,7 +805,7 @@ export class OrbitDBManager implements DBManager {
     if (!didWin) {
       console.log("UPDATE_SCORE-tosios: Player did not win");
       console.log("UPDATE_SCORE-tosios: Player score reverts to 0");
-      return { result: false, newHighScore: false }
+      return { result: false, newHighScore: false, params }
     } else {
       console.log("UPDATE_SCORE-tosios: Player did win");
 
@@ -814,16 +818,16 @@ export class OrbitDBManager implements DBManager {
         await this.gameSessions.put(data[0]);
         console.log("UPDATE_SCORE-tosios: Updated!");
         console.log("UPDATE_SCORE-tosios: Returning...");
-        return { result: playerData, newHighScore: true }
+        return { result: playerData, newHighScore: true, params }
       } else {
         console.log("UPDATE_SCORE-tosios: Current score is lower than highscore, no need to update!");
         console.log("UPDATE_SCORE-tosios: Returning...");
-        return { result: playerData, newHighScore: false }
+        return { result: playerData, newHighScore: false, params }
       }
     }
   }
 
-  private async fpHighScoreHandler(playerAddress, data, gamePayload) {
+  private async fpHighScoreHandler(playerAddress, data, gamePayload, params) {
     let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
     console.log("UPDATE_SCORE-fp: payload", gamePayload);
     const { score } = gamePayload;
@@ -840,15 +844,15 @@ export class OrbitDBManager implements DBManager {
       await this.gameSessions.put(data[0]);
       console.log("UPDATE_SCORE-fp: Updated!");
       console.log("UPDATE_SCORE-fp: Returning...");
-      return { result: playerData, newHighScore: true }
+      return { result: playerData, newHighScore: true, params }
     } else {
       console.log("UPDATE_SCORE-fp: Current score is lower than highscore, no need to update!");
       console.log("UPDATE_SCORE-fp: Returning...");
-      return { result: playerData, newHighScore: false }
+      return { result: playerData, newHighScore: false, params }
     }
   }
 
-  private async womHighScoreHandler(playerAddress, data, gamePayload) {
+  private async womHighScoreHandler(playerAddress, data, gamePayload, params) {
     let playerData = data[0].sessionData.playerData[playerAddress.toLowerCase()];
     console.log("UPDATE_SCORE-wom: payload", gamePayload);
     const { score, didWin } = gamePayload;
@@ -861,7 +865,7 @@ export class OrbitDBManager implements DBManager {
     if (!didWin) {
       console.log("UPDATE_SCORE-wom: Did not win, score will be nullified");
       console.log("UPDATE_SCORE-wom: Returning...");
-      return { result: false, newHighScore: false };
+      return { result: false, newHighScore: false, params };
     }
 
     if (highScore === 0 || score < highScore) {
@@ -873,11 +877,11 @@ export class OrbitDBManager implements DBManager {
       await this.gameSessions.put(data[0]);
       console.log("UPDATE_SCORE-wom: Updated!");
       console.log("UPDATE_SCORE-wom: Returning...");
-      return { result: playerData, newHighScore: true }
+      return { result: playerData, newHighScore: true, params }
     } else {
       console.log("UPDATE_SCORE-wom: Current score is slower than highscore, no need to update!");
       console.log("UPDATE_SCORE-wom: Returning...");
-      return { result: playerData, newHighScore: false }
+      return { result: playerData, newHighScore: false, params }
     }
   }
 }

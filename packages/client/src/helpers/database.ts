@@ -97,7 +97,7 @@ export async function createSessionId(playerAddress, tournamentId): Promise<any>
   console.log("DATABASE: tournamentId", tournamentId)
 
   const response = await api.post('/gameSessionId/new', params)
-  return response.data
+  return response.data.sessionIdData.id
 }
 
 export async function getGameSessionId(playerAddress, tournamentId): Promise<any> {
@@ -107,7 +107,7 @@ export async function getGameSessionId(playerAddress, tournamentId): Promise<any
   }
 
   const response = await api.get('/gameSessionId/get', { params })
-  return response.data.sessionId
+  return response.data.sessionIdData.id
 }
 
 export async function deleteGameSessionId(gameSessionId): Promise<any> {

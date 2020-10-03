@@ -27,7 +27,7 @@ const schema = new ApolloServer({
   playground: {
     endpoint: 'graphql',
     settings: {
-      'editor.theme': 'light'
+      'editor.theme': 'dark'
     }
   }
 });
