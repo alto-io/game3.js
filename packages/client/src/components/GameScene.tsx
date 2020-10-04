@@ -53,6 +53,7 @@ interface IProps {
   accountValidated: any;
   connectAndValidateAccount: any;
   setRoute: any;
+  gqlContext: any;
 }
 
 interface IState {
@@ -87,6 +88,7 @@ export default class GameScene extends Component<IProps, IState> {
     } = this.state;
 
     return (
+      
       <GameWindowContainer>
         <MediaQuery maxDeviceWidth={728}>
           <FloatingActionButton>
@@ -97,6 +99,7 @@ export default class GameScene extends Component<IProps, IState> {
               accountValidated={accountValidated}
               connectAndValidateAccount={connectAndValidateAccount}
               setRoute={setRoute}
+              gqlContext={this.props.gqlContext}
             />
           </FloatingActionButton>
         </MediaQuery>
@@ -113,6 +116,7 @@ export default class GameScene extends Component<IProps, IState> {
               accountValidated={accountValidated}
               connectAndValidateAccount={connectAndValidateAccount}
               setRoute={setRoute}
+              gqlContext={this.props.gqlContext}
             />
           </Box>
         </MediaQuery>

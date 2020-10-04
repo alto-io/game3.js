@@ -455,11 +455,11 @@ export class OrbitDBManager implements DBManager {
       console.log("GET_TOURNEYRESULT: Sample playerData", sessions[0].sessionData.playerData);
       console.log("GET_TOURNEYRESULT: Sessions fetched!", sessions);
       console.log("GET_TOURNEYRESULT: Returning...", sessions);
-      return sessions;
+      return {session: sessions[0], sessions};
     } else {
       console.log("GET_TOURNEYRESULT: No data");
       console.log("GET_TOURNEYRESULT: Returning...", sessions);
-      return sessions;
+      return {session: sessions};
     }
   }
 
@@ -570,8 +570,8 @@ export class OrbitDBManager implements DBManager {
     let winnersLength = resultsCount;
 
     console.log("GET_TOURNEY_WINNERS: Fetching tourney session data");
-    let tourneySession = await this.getTournamentResult(tournamentId);
-
+    let result = await this.getTournamentResult(tournamentId);
+    const tourneySession = result.sessions;
     let players = []
     let winners = []
 

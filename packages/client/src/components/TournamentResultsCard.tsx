@@ -184,6 +184,7 @@ interface IProps {
   accountValidated: any;
   connectAndValidateAccount: any;
   setRoute: any;
+  gqlContext: any;
 }
 
 class TournamentResultsCard extends Component<IProps, IState> {
@@ -202,8 +203,6 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   async componentDidMount() {
-    await this.getBlockchainInfo(this.props)
-
     window.addEventListener('gameend', await this.refreshResults)
   }
 
@@ -228,7 +227,8 @@ class TournamentResultsCard extends Component<IProps, IState> {
   refreshResults = async () => {
     console.log("REFRESHING RESULTS");
     const { tournamentId } = this.state;
-    let results = [];
+    const { getTournamentResults } = this.props.gqlContext;
+    let results = []; 
     let sessionsData = await getTournamentResult(tournamentId);
     console.log("PLAYER ADD: sessionsData", sessionsData);
 
@@ -254,15 +254,15 @@ class TournamentResultsCard extends Component<IProps, IState> {
         results.sort((el1, el2) => {
           switch (el1.gameName) {
             case Constants.FP:
-              if (el1.sessionData.highScore === 0) return 1;        
+              if (el1.sessionData.highScore === 0) return 1;
               if (el2.sessionData.highScore === 0) return -1;
               return el2.sessionData.highScore - el1.sessionData.highScore;
             case Constants.TOSIOS:
-              if (el1.sessionData.currentHighestNumber === 0) return -1;        
+              if (el1.sessionData.currentHighestNumber === 0) return -1;
               if (el2.sessionData.currentHighestNumber === 0) return 1;
               return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
             case Constants.WOM:
-              if (el1.sessionData.highScore === 0) return 1;        
+              if (el1.sessionData.highScore === 0) return 1;
               if (el2.sessionData.highScore === 0) return -1;
               return el1.sessionData.highScore - el2.sessionData.highScore
             default:
@@ -442,9 +442,9 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   setShares = () => {
-    const {shares} = this.state;
+    const { shares } = this.state;
 
-    
+
   }
 
   fetchShares = async (tournamentId) => {
@@ -597,49 +597,47 @@ class TournamentResultsCard extends Component<IProps, IState> {
     }
 
     return (
-      <>
-        <WidgetStyle>
-          {!!tournament ? (
-            <>
-              <TournamentInfoStyle>
-                <Modal show={isReplayModalOpen} toggleModal={this.handleReplayModal}>
-                  <PlayerGameReplays hash={currentFileHash} />
-                </Modal>
-                {tournament.gameStage ? (
-                  <h5 className="tourney-title">{tournament.gameStage}</h5>
-                ) : (
-                    <h5 className="tourney-title">{this.formatTourneyTitle(tournament)}</h5>
-                  )
-                }
-                <p className="tourney-title-info">{this.formatTourneyTimeInfo(tournament)}</p>
-                <p className="tourney-title-info">Status: {this.getStatus(tournament)}</p>
-              </TournamentInfoStyle>
-
-              <LeaderboardStyle>
-                <h1 className="title-header">Leaderboard</h1>
-                <ResultDivsStyle>
-                  {resultDivs}
-                </ResultDivsStyle>
-              </LeaderboardStyle>
-
-              {tournamentId === undefined ? (
-                <JoinTourneyBtn onClick={this.handleJoinClick} mainColor={"#06df9b"}>
-                  View Tournaments
-                </JoinTourneyBtn>
+      <WidgetStyle>
+        {!!tournament ? (
+          <>
+            <TournamentInfoStyle>
+              <Modal show={isReplayModalOpen} toggleModal={this.handleReplayModal}>
+                <PlayerGameReplays hash={currentFileHash} />
+              </Modal>
+              {tournament.gameStage ? (
+                <h5 className="tourney-title">{tournament.gameStage}</h5>
               ) : (
-                  <TotalBuyInContainer>
-                    <p>Total Buy-in Pool</p>
-                    <h5 className="total-buyin">{tournament.pool && web3.utils.fromWei((tournament.pool).toString())} ETH</h5>
-                  </TotalBuyInContainer>
-                )}
-            </>
-          ) : (
-              <TournamentInfoStyle>
-                <h5 className="tourney-title">No Tournaments</h5>
-              </TournamentInfoStyle>
-            )}
-        </WidgetStyle>
-      </>
+                  <h5 className="tourney-title">{this.formatTourneyTitle(tournament)}</h5>
+                )
+              }
+              <p className="tourney-title-info">{this.formatTourneyTimeInfo(tournament)}</p>
+              <p className="tourney-title-info">Status: {this.getStatus(tournament)}</p>
+            </TournamentInfoStyle>
+
+            <LeaderboardStyle>
+              <h1 className="title-header">Leaderboard</h1>
+              <ResultDivsStyle>
+                {resultDivs}
+              </ResultDivsStyle>
+            </LeaderboardStyle>
+
+            {tournamentId === undefined ? (
+              <JoinTourneyBtn onClick={this.handleJoinClick} mainColor={"#06df9b"}>
+                View Tournaments
+              </JoinTourneyBtn>
+            ) : (
+                <TotalBuyInContainer>
+                  <p>Total Buy-in Pool</p>
+                  <h5 className="total-buyin">{tournament.pool && web3.utils.fromWei((tournament.pool).toString())} ETH</h5>
+                </TotalBuyInContainer>
+              )}
+          </>
+        ) : (
+            <TournamentInfoStyle>
+              <h5 className="tourney-title">No Tournaments</h5>
+            </TournamentInfoStyle>
+          )}
+      </WidgetStyle>
     )
   }
 }

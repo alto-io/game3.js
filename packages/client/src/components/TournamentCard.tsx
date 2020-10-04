@@ -17,6 +17,8 @@ import { TOURNAMENT_STATES, TOURNAMENT_STATE_ACTIVE } from '../constants';
 import { getGameNo, getGameSessionId, updateTournament } from '../helpers/database';
 import { Constants } from "@game3js/common";
 
+import { GraphQlContext } from '../helpers/context/graphql/GraphqlContextProvider';
+
 import web3 from 'web3';
 
 const PrizeBadge = styled.p`
@@ -99,7 +101,7 @@ class TournamentCard extends Component<IProps, IState> {
       let tId = event.returnValues.tournamentId;
 
       if (parseInt(this.props.tournamentId) === parseInt(tId)) {
-        this.setState({tournamentLoading: true});
+        this.setState({ tournamentLoading: true });
         const raw = await this.props.drizzle.contracts.Tournaments.methods.getTournament(tId).call();
 
         const updatedTournament = {
@@ -130,7 +132,7 @@ class TournamentCard extends Component<IProps, IState> {
 
   getBlockchainInfo = async (props) => {
     const { tournamentId, drizzle, address } = props
-    
+
     const contract = drizzle.contracts.Tournaments;
     const raw = await contract.methods.getTournament(tournamentId).call();
     const tournamentBuyIn = await contract.methods.getBuyIn(tournamentId).call();
@@ -375,7 +377,7 @@ class TournamentCard extends Component<IProps, IState> {
     })
 
     return (
-      <Box width={[1, 1/2, 1/2, 1/3]} p={3}>
+      <Box width={[1, 1 / 2, 1 / 2, 1 / 3]} p={3}>
         <Card p={0} borderColor={"#d6d6d6"}>
           <RainbowBox height={"5px"} />
           <Flex
@@ -388,7 +390,7 @@ class TournamentCard extends Component<IProps, IState> {
               <RainbowImage src={"images/" + gameImage} />
             </Flex>
 
-            { isActive && (
+            {isActive && (
               <PrizeContainer>
                 {prizeString.length > 0 && prizeRender}
               </PrizeContainer>

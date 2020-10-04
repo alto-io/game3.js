@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@apollo/client": "^3.2.2",
     "@drizzle/react-components": "^1.5.1",
     "@drizzle/react-plugin": "^1.5.1",
     "@drizzle/store": "^1.5.1",
@@ -25,6 +26,7 @@
     "ethereumjs-util": "^7.0.1",
     "ethers": "^4.0.42",
     "fscreen": "^1.1.0",
+    "graphql": "^15.3.0",
     "moment": "^2.27.0",
     "pixi-particles": "^4.2.0",
     "pixi-viewport": "^4.5.0",

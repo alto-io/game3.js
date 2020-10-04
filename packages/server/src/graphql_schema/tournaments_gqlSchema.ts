@@ -9,6 +9,7 @@ export const typeDef = gql`
   extend type Query {
     tournament(id: ID!): Tournament
     getWinners(id: ID!, resultsCount: Int!): [String]
+    getTournamentResults(id: ID!): TournamentResults
   }
   extend type Mutation {
     createTournament(tournament: TournamentObj!): Tournament
@@ -34,6 +35,13 @@ export const typeDef = gql`
     success: Boolean
     updatedData: Tournament
   }
+  type TournamentResults {
+    session: TournamentSession
+  }
+  type TournamentSession {
+    id: ID
+    sessionData: SessionData 
+  }
 `;
 
 export const resolvers = {
@@ -44,7 +52,11 @@ export const resolvers = {
     },
     getWinners: async(parent, args) => {
       return await db.dbManager.getTopResults(args.id, args.resultsCount);
-    } 
+    },
+    getTournamentResults: async(parent, args) => {
+      let result = await db.dbManager.getTournamentResult(args.id);
+      return result
+    }
   },
   Mutation: {
     createTournament: async (parent, args) => {

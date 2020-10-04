@@ -14,10 +14,10 @@ import GameUnity from './GameUnity';
 import TournamentResultsCard from '../components/TournamentResultsCard';
 import OutplayGameNavigation from '../components/OutplayGameNavigation';
 
+import { GraphQlContext } from '../helpers/graphql/GraphQlProvider';
+
 import CSS from 'csstype';
 import GameJavascript, { GameJavascriptContext } from './GameJavascript';
-
-
 declare global {
   interface Window { MediaRecorder: any; }
 }
@@ -177,52 +177,58 @@ export default class GameContainer extends Component<IProps, any> {
           startRecording={this.startRecording}
           stopRecording={this.stopRecording}
         >
-          <GameJavascriptContext.Consumer>{context => {
-
+          <GraphQlContext.Consumer>{gqlContext => {
             return (
-              <GameScene
-                drizzle={drizzle}
-                tournamentId={tournamentId}
-                playerAddress={address}
-                accountValidated={accountValidated}
-                connectAndValidateAccount={connectAndValidateAccount}
-                setRoute={setRoute}
-              >
-                <Router>
-                  <Game
-                    path=":roomId"
-                    drizzle={drizzle}
-                    drizzleState={drizzleState}
-                    contractMethodSendWrapper={contractMethodSendWrapper}
-                    gameJavascriptContext={context}
-                  />
+              <GameJavascriptContext.Consumer>{context => {
 
-                  <GameUnity
-                    path="wom"
-                    startRecording={this.startRecording}
-                    stopRecording={this.stopRecording}
+                return (
+                  <GameScene
                     drizzle={drizzle}
-                    drizzleState={drizzleState}
-                    contractMethodSendWrapper={contractMethodSendWrapper}
                     tournamentId={tournamentId}
-                    address={address}
-                  />
+                    playerAddress={address}
+                    accountValidated={accountValidated}
+                    connectAndValidateAccount={connectAndValidateAccount}
+                    setRoute={setRoute}
+                    gqlContext={gqlContext}
+                  >
+                    <Router>
+                      <Game
+                        path=":roomId"
+                        drizzle={drizzle}
+                        drizzleState={drizzleState}
+                        contractMethodSendWrapper={contractMethodSendWrapper}
+                        gameJavascriptContext={context}
+                      />
 
-                  <GameUnity
-                    path="flappybird"
-                    startRecording={this.startRecording}
-                    stopRecording={this.stopRecording}
-                    drizzle={drizzle}
-                    drizzleState={drizzleState}
-                    contractMethodSendWrapper={contractMethodSendWrapper}
-                    tournamentId={tournamentId}
-                    address={address}
-                  />
-                </Router>
-              </GameScene>
+                      <GameUnity
+                        path="wom"
+                        startRecording={this.startRecording}
+                        stopRecording={this.stopRecording}
+                        drizzle={drizzle}
+                        drizzleState={drizzleState}
+                        contractMethodSendWrapper={contractMethodSendWrapper}
+                        tournamentId={tournamentId}
+                        address={address}
+                      />
+
+                      <GameUnity
+                        path="flappybird"
+                        startRecording={this.startRecording}
+                        stopRecording={this.stopRecording}
+                        drizzle={drizzle}
+                        drizzleState={drizzleState}
+                        contractMethodSendWrapper={contractMethodSendWrapper}
+                        tournamentId={tournamentId}
+                        address={address}
+                      />
+                    </Router>
+                  </GameScene>
+                )
+              }}
+              </GameJavascriptContext.Consumer>
             )
           }}
-          </GameJavascriptContext.Consumer>
+          </GraphQlContext.Consumer>
         </GameJavascript>
       </>
     );

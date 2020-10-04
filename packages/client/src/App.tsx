@@ -1,6 +1,7 @@
 
 import * as React from "react";
 import Web3 from "web3";
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 
 import { Router } from '@reach/router';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,7 +19,7 @@ import RimbleWeb3 from "./rimble/RimbleWeb3";
 // @ts-ignore
 import WalletConnectProvider from "@walletconnect/web3-provider";
 
-import { Database } from '@game3js/common';
+import { Database, Constants } from '@game3js/common';
 
 import RimbleContainer from './components/RimbleContainer';
 
@@ -42,8 +43,25 @@ import Replay from './scenes/Replay';
 import { Slide, ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
+import GraphQlProvider from './helpers/graphql/GraphQlProvider';
+
 // app settings
 const CREATE_WALLET_ON_GUEST_ACCOUNT = false;
+
+
+// GraphQL Apollo Client
+// import {  } from '@game3js/common';
+
+const host = window.document.location.host.replace(/:.*/, '');
+const port = process.env.NODE_ENV !== 'production' ? Constants.WS_PORT : window.location.port;
+const url = window.location.protocol + "//" + host + (port ? ':' + port : '');
+
+const client = new ApolloClient({
+  uri: `${url}/graphql`,
+  cache: new InMemoryCache()
+})
+
+console.log("The URL: ", url);
 
 export interface IAppState {
   playerProfile: Database.PlayerProfile;
@@ -160,38 +178,34 @@ class App extends React.Component<any, any> {
   public workerProxy: any;
 
   private getGuestConfigCallback = async (result) => {
- 
+
     let id = "";
 
     console.log(result)
 
-    if (result)
-    {
-        if (result.length > 0)
-        {
-          id = result[0].id
-        }
+    if (result) {
+      if (result.length > 0) {
+        id = result[0].id
+      }
 
-        else 
-        {
-          id = result.id;
-        }
-        console.log("previous guest account found: " + id);
+      else {
+        id = result.id;
+      }
+      console.log("previous guest account found: " + id);
     }
 
-    else 
-    {
-        const guestConfig: Database.GuestConfig = {
-            id: uuidv4()
-        }
+    else {
+      const guestConfig: Database.GuestConfig = {
+        id: uuidv4()
+      }
 
-        await this.dbManager.saveGuestConfig(guestConfig)
+      await this.dbManager.saveGuestConfig(guestConfig)
 
-        console.log("created account: " + guestConfig.id)
-        id = guestConfig.id
+      console.log("created account: " + guestConfig.id)
+      id = guestConfig.id
     }
-  
-  
+
+
     const playerProfile = {
       username: id && `Guest-${id.substr(id.length - 4)}`,
       dbid: id
@@ -199,7 +213,7 @@ class App extends React.Component<any, any> {
 
     await this.setState({
       playerProfile
-    })  
+    })
   }
 
   public initDatabase = async () => {
@@ -307,7 +321,7 @@ class App extends React.Component<any, any> {
 
   public getProviderOptions = () => {
     const infuraId = (process.env.NODE_ENV === "production" ? "b71d4cce6c0c4f2ebaecc118a35dfaf5" : process.env.REACT_APP_INFURA_ID)
-        
+
     const providerOptions = {
       walletconnect: {
         package: WalletConnectProvider,
@@ -328,7 +342,7 @@ class App extends React.Component<any, any> {
     }
 
     if (newBalance !== balance) {
-      this.setState({ balance : newBalance })
+      this.setState({ balance: newBalance })
     }
   }
 
@@ -357,91 +371,94 @@ class App extends React.Component<any, any> {
     } = this.state;
 
     return (
-    <RimbleWeb3 config={RIMBLE_CONFIG}>
-      <RimbleWeb3.Consumer>
-          {({
-            web3,
-            account,
-            accountBalance,
-            accountBalanceLow,
-            accountValidated,
-            connectAndValidateAccount,
-            contractMethodSendWrapper           
-          }) => ( 
-        <DrizzleContext.Provider drizzle={this.props.drizzle}>
-            <ToastContainer
-              position="bottom-right"
-              transition={ Slide }
-              pauseOnHover={ false } />
-            <DrizzleContext.Consumer>
-            {({ drizzleState }) => {
-                return (
-                  <>
+      <ApolloProvider client={client}>
+        <RimbleWeb3 config={RIMBLE_CONFIG}>
+          <RimbleWeb3.Consumer>
+            {({
+              web3,
+              account,
+              accountBalance,
+              accountBalanceLow,
+              accountValidated,
+              connectAndValidateAccount,
+              contractMethodSendWrapper
+            }) => (
+                <DrizzleContext.Provider drizzle={this.props.drizzle}>
+                  <ToastContainer
+                    position="bottom-right"
+                    transition={Slide}
+                    pauseOnHover={false} />
+                  <DrizzleContext.Consumer>
+                    {({ drizzleState }) => {
+                      return (
+                        <>
 
 
-                  <RimbleContainer
-                        drizzle={this.props.drizzle}
-                        drizzleState={drizzleState}
-                        account={account}
-                        accountBalance={accountBalance}
-                        accountBalanceLow={accountBalanceLow}
-                        accountValidated={accountValidated}
-                        connectAndValidateAccount={connectAndValidateAccount}    
-                        onConnect={this.onConnect}
-                        killSession={this.resetApp}  
-                        address={address}
-                        connected={connected}
-                        balance={balance}
-                  />
+                          <RimbleContainer
+                            drizzle={this.props.drizzle}
+                            drizzleState={drizzleState}
+                            account={account}
+                            accountBalance={accountBalance}
+                            accountBalanceLow={accountBalanceLow}
+                            accountValidated={accountValidated}
+                            connectAndValidateAccount={connectAndValidateAccount}
+                            onConnect={this.onConnect}
+                            killSession={this.resetApp}
+                            address={address}
+                            connected={connected}
+                            balance={balance}
+                          />
+                          <GraphQlProvider>
+                            <Router>
+                              <Home
+                                default={true}
+                                playerProfile={playerProfile}
+                                connected={connected}
+                                path="/"
+                                drizzle={this.props.drizzle}
+                                drizzleState={drizzleState}
+                                contractMethodSendWrapper={contractMethodSendWrapper}
+                                account={account}
+                                accountValidated={accountValidated}
+                                connectAndValidateAccount={connectAndValidateAccount}
+                                route={this.state.route}
+                                setRoute={this.setRoute}
+                                address={address}
+                                web3={this.state.web3}
+                                networkId={networkId}
+                              />
 
-                    <Router>
-                      <Home
-                        default={true}
-                        playerProfile={playerProfile}
-                        connected={connected}
-                        path="/"
-                        drizzle={this.props.drizzle}
-                        drizzleState={drizzleState}
-                        contractMethodSendWrapper={contractMethodSendWrapper}
-                        account={account}
-                        accountValidated={accountValidated}
-                        connectAndValidateAccount={connectAndValidateAccount}
-                        route={this.state.route}
-                        setRoute={this.setRoute}
-                        address={address}
-                        web3={this.state.web3}
-                        networkId={networkId}
-                      />
+                              <GameContainer
+                                path="game/*"
+                                address={account}
+                                accountValidated={accountValidated}
+                                connectAndValidateAccount={connectAndValidateAccount}
+                                drizzle={this.props.drizzle}
+                                drizzleState={drizzleState}
+                                contractMethodSendWrapper={contractMethodSendWrapper}
+                                setRoute={this.setRoute}
+                              >
+                              </GameContainer>
 
-                      <GameContainer
-                        path="game/*"
-                        address={account}
-                        accountValidated={accountValidated}
-                        connectAndValidateAccount={connectAndValidateAccount}
-                        drizzle={this.props.drizzle}
-                        drizzleState={drizzleState}
-                        contractMethodSendWrapper={contractMethodSendWrapper}
-                        setRoute={this.setRoute}
-                        >
-                      </GameContainer>
-
-                      <Replay
-                        path="/replay"
-                        playerProfile={ playerProfile }
-                      />
-                      <Recorder
-                        path="/recorder"
-                        propVar={ connected }
-                      />
-                    </Router>
-                  </>
-                  );
-              }}
-              </DrizzleContext.Consumer>
-          </DrizzleContext.Provider>
-            )}
-        </RimbleWeb3.Consumer>       
-    </RimbleWeb3>
+                              <Replay
+                                path="/replay"
+                                playerProfile={playerProfile}
+                              />
+                              <Recorder
+                                path="/recorder"
+                                propVar={connected}
+                              />
+                            </Router>
+                          </GraphQlProvider>
+                        </>
+                      );
+                    }}
+                  </DrizzleContext.Consumer>
+                </DrizzleContext.Provider>
+              )}
+          </RimbleWeb3.Consumer>
+        </RimbleWeb3>
+      </ApolloProvider>
     );
   };
 }

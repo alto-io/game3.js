@@ -48,6 +48,7 @@ export const typeDef = gql`
     sessionId: ID
     tournamentId: ID
     gameName: String
+    playerData: JSON
   }
   type NewSessionId {
     success: Boolean
