@@ -25,29 +25,31 @@ function GameCard({
     switch (game.name) {
       case "World of Mines":
         navigate(`/game/wom`);
-      break;
+        break;
       case "Flappy Bird Open-Source":
         navigate(`/game/flappybird`);
-      break;
+        break;
 
       case "TOSIOS":
         game.options.playerName = "You";
         navigate(`/game/new${qs.stringify(game.options, true)}`);
-      break;
+        break;
     }
   };
 
   return (
-    <Box width={[1, 1/2, 1/2, 1/3 ]} p={3}>
+    <Box width={[1, 1 / 2, 1 / 2, 1 / 3]} p={3}>
       <StyledGameCard>
         <Flex justifyContent={"center"} mt={3} mb={4}>
-          <RainbowImage src={"images/" + game.image} />
+          <div onClick={handleCreateRoomClick}>
+            <RainbowImage src={"images/" + game.image} />
+          </div>
         </Flex>
 
         <Flex justifyContent={"center"} mt={3} mb={4}>
-            <Text fontWeight={600} lineHeight={"1em"} fontSize={[4, 3, 3]}>
-                {game.name}
-            </Text>
+          <Text fontWeight={600} lineHeight={"1em"} fontSize={[4, 3, 3]}>
+            {game.name}
+          </Text>
         </Flex>
 
         <Button
@@ -57,7 +59,7 @@ function GameCard({
           my={"1.625rem"}
           className="btn-custom"
         >
-            {game.button}
+          {game.button}
         </Button>
       </StyledGameCard>
     </Box>
