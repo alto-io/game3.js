@@ -498,7 +498,12 @@ export class GameUnity extends React.Component<IProps, any> {
               >
                 {'⛶'}
               </Button>
-              <DynamicMobileFab func={this.onPlayGame} icon="faPlay" />
+              <DynamicMobileFab
+                func={this.onPlayGame}
+                icon="faPlay"
+                readyWhen={gameReady}
+                hideWhen={isGameRunning}
+               />
             </>
           }
         </div>
