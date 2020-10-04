@@ -8,6 +8,8 @@ import { Card } from "rimble-ui";
 import { DEFAULT_GAME_DIMENSION } from '../constants'
 import { Constants } from '@game3js/common';
 import { makeNewGameSession, getGameNo, getGameSessionId, updateSessionScore, updateGameNo, createSessionId } from '../helpers/database';
+import DynamicMobileFab from '../components/DynamicMobileFab';
+import MediaQuery from 'react-responsive'
 
 const StyledBoxStyle = {
   position: 'relative',
@@ -39,7 +41,7 @@ interface IProps extends RouteComponentProps {
 }
 
 export class GameUnity extends React.Component<IProps, any> {
-  componentDidMount () {
+  componentDidMount() {
     window.addEventListener('resize', this.handleResize, false);
     window.addEventListener('orientationchange', this.handleResize, false);
   }
@@ -82,7 +84,7 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   handleResize = () => {
-    const widthToHeight =  DEFAULT_GAME_DIMENSION.width / DEFAULT_GAME_DIMENSION.height;
+    const widthToHeight = DEFAULT_GAME_DIMENSION.width / DEFAULT_GAME_DIMENSION.height;
     let newWidth = window.innerWidth;
     let newHeight = window.innerHeight;
     let newWidthToHeight = newWidth / newHeight;
@@ -93,7 +95,7 @@ export class GameUnity extends React.Component<IProps, any> {
       width = window.screen.width;
       height = window.screen.height;
       this.setState({
-        height,width
+        height, width
       })
     } else {
       if (newWidthToHeight > widthToHeight) {
@@ -101,14 +103,14 @@ export class GameUnity extends React.Component<IProps, any> {
         height = newHeight * 0.85;
         width = newWidth * 0.85;
         this.setState({
-          height,width
+          height, width
         })
       } else {
         newHeight = newWidth / widthToHeight;
         width = newWidth * 0.85;
         height = newHeight * 0.85;
         this.setState({
-          height,width
+          height, width
         })
       }
     }
@@ -434,11 +436,11 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   render() {
-    const { isGameRunning, gameReady, playBtnText, progression, 
+    const { isGameRunning, gameReady, playBtnText, progression,
       width, height, pseudoFullscreen } = this.state;
     const { tournamentId } = this.props;
 
-    let canvasWidth =  (window.innerWidth <= 950 ? `${width}px` : "100%");
+    let canvasWidth = (window.innerWidth <= 950 ? `${width}px` : "100%");
     let canvasHeight = (window.innerWidth <= 950 ? `${height}px` : "100%");
 
     if (pseudoFullscreen) {
@@ -467,38 +469,39 @@ export class GameUnity extends React.Component<IProps, any> {
           }
         </Button>
 
-          <div ref={this.unityElement} p={0} width={`${width}px`} height={`${height}px`} style={boxStyle} >
-            {
-              <>
-                {this.state.unityShouldBeMounted === true && (
-                  <Unity
-                    unityContent={this.unityContent}
-                    width={canvasWidth}
-                    height={canvasHeight}
-                    style={{
-                      position: 'relative',
-                      top: '0px',
-                      left: '0px'
-                    }}
-                  />
-                )}
-                <Button
-                  color="primary"
-                  type="button"
-                  onClick={this.onClickFullscreen}
-                  style={{ 
-                    position: 'absolute', 
-                    left: '16px', 
-                    bottom: '18px',
-                    width: '48px',
-                    padding: '4px'
+        <div ref={this.unityElement} p={0} width={`${width}px`} height={`${height}px`} style={boxStyle} >
+          {
+            <>
+              {this.state.unityShouldBeMounted === true && (
+                <Unity
+                  unityContent={this.unityContent}
+                  width={canvasWidth}
+                  height={canvasHeight}
+                  style={{
+                    position: 'relative',
+                    top: '0px',
+                    left: '0px'
                   }}
-                >
-                  {'⛶'}
-                </Button>
-              </>
-            }
-          </div>
+                />
+              )}
+              <Button
+                color="primary"
+                type="button"
+                onClick={this.onClickFullscreen}
+                style={{
+                  position: 'absolute',
+                  left: '16px',
+                  bottom: '18px',
+                  width: '48px',
+                  padding: '4px'
+                }}
+              >
+                {'⛶'}
+              </Button>
+              <DynamicMobileFab func={this.onPlayGame} icon="faPlay" />
+            </>
+          }
+        </div>
       </GameSceneContainer>
     );
   }
