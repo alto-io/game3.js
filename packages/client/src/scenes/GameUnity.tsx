@@ -102,20 +102,27 @@ export class GameUnity extends React.Component<IProps, any> {
         height,width
       })
     } else {
-      if (newWidthToHeight > widthToHeight) {
-        newWidth = newHeight * widthToHeight;
-        height = newHeight * 0.85;
-        width = newWidth * 0.85;
+      const { pseudoFullscreen } = this.state
+      if (pseudoFullscreen) {
         this.setState({
           height,width
         })
       } else {
-        newHeight = newWidth / widthToHeight;
-        width = newWidth * 0.85;
-        height = newHeight * 0.85;
-        this.setState({
-          height,width
-        })
+        if (newWidthToHeight > widthToHeight) {
+          newWidth = newHeight * widthToHeight;
+          height = newHeight * 0.85;
+          width = newWidth * 0.85;
+          this.setState({
+            height,width
+          })
+        } else {
+          newHeight = newWidth / widthToHeight;
+          width = newWidth * 0.85;
+          height = newHeight * 0.85;
+          this.setState({
+            height,width
+          })
+        }
       }
     }
   }
@@ -432,7 +439,7 @@ export class GameUnity extends React.Component<IProps, any> {
 
   onClickFullscreen = () => {
     const { pseudoFullscreen, neededOrientation } = this.state
-    if (fscreen.fullscreenEnabled) {
+    if (false) {
       if (fscreen.fullscreenElement) {
         fscreen.exitFullscreen();
       } else {
@@ -441,7 +448,7 @@ export class GameUnity extends React.Component<IProps, any> {
     } else {
       this.setState({
         pseudoFullscreen: !pseudoFullscreen
-      })
+      }, this.handleResize)
     }
 
     if (neededOrientation !== ORIENTATION_ANY) {
