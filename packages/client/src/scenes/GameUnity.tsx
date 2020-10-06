@@ -1,11 +1,9 @@
 import React from "react";
 import Unity, { UnityContent } from "react-unity-webgl";
 import fscreen from 'fscreen'
-import { Box, Button, IListItem, Inline, Input, Room, Replay, Select, Separator, Space, View } from '../components';
+import { Button } from '../components';
 import GameSceneContainer from '../components/GameSceneContainer';
-import styled from 'styled-components';
-import { Card } from "rimble-ui";
-import { DEFAULT_GAME_DIMENSION } from '../constants'
+import { DEFAULT_GAME_DIMENSION, GAME_DETAILS, ORIENTATION_ANY } from '../constants'
 import { Constants } from '@game3js/common';
 import { makeNewGameSession, getGameNo, getGameSessionId, updateSessionScore, updateGameNo, createSessionId } from '../helpers/database';
 
@@ -26,7 +24,7 @@ const FullscreenBoxStyle = {
   zIndex: '1',
 }
 
-interface IProps extends RouteComponentProps {
+interface IProps {
   path: string;
   roomId?: string;
   drizzle?: any;
@@ -40,8 +38,15 @@ interface IProps extends RouteComponentProps {
 
 export class GameUnity extends React.Component<IProps, any> {
   componentDidMount () {
+    const screen = window.screen as any
+    screen.lockOrientationUniversal = screen.lockOrientation ||
+      screen.mozLockOrientation ||
+      screen.msLockOrientation;
+
     window.addEventListener('resize', this.handleResize, false);
     window.addEventListener('orientationchange', this.handleResize, false);
+
+    this.preInitialize();
   }
 
   componentWillUnmount() {
@@ -72,6 +77,7 @@ export class GameUnity extends React.Component<IProps, any> {
       gameId: '',
       width: '',
       height: '',
+      neededOrientation: ORIENTATION_ANY,
       pseudoFullscreen: false,
     };
 
@@ -96,20 +102,27 @@ export class GameUnity extends React.Component<IProps, any> {
         height,width
       })
     } else {
-      if (newWidthToHeight > widthToHeight) {
-        newWidth = newHeight * widthToHeight;
-        height = newHeight * 0.85;
-        width = newWidth * 0.85;
+      const { pseudoFullscreen } = this.state
+      if (pseudoFullscreen) {
         this.setState({
           height,width
         })
       } else {
-        newHeight = newWidth / widthToHeight;
-        width = newWidth * 0.85;
-        height = newHeight * 0.85;
-        this.setState({
-          height,width
-        })
+        if (newWidthToHeight > widthToHeight) {
+          newWidth = newHeight * widthToHeight;
+          height = newHeight * 0.85;
+          width = newWidth * 0.85;
+          this.setState({
+            height,width
+          })
+        } else {
+          newHeight = newWidth / widthToHeight;
+          width = newWidth * 0.85;
+          height = newHeight * 0.85;
+          this.setState({
+            height,width
+          })
+        }
       }
     }
   }
@@ -129,6 +142,17 @@ export class GameUnity extends React.Component<IProps, any> {
 
   }
 
+  preInitialize = async () => {
+    const gameId = this.props.path;
+    const gameDetails = GAME_DETAILS.find(detail => detail.route === gameId)
+    if (!gameDetails) {
+      return
+    }
+    this.setState({
+      neededOrientation: gameDetails.screenOrientation
+    })
+  }
+
   initializeGame = async (playerAddress, tournamentId) => {
     let sessionId = await createSessionId(playerAddress, tournamentId);
     this.setState({
@@ -139,7 +163,6 @@ export class GameUnity extends React.Component<IProps, any> {
     await updateGameNo(sessionId, playerAddress, tournamentId);
 
     console.log("GAME NAME FROM STATE", this.state.gameName)
-
   }
 
   getBlockchainInfo = async (props) => {
@@ -415,8 +438,8 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   onClickFullscreen = () => {
-    const { pseudoFullscreen } = this.state
-    if (fscreen.fullscreenEnabled) {
+    const { pseudoFullscreen, neededOrientation } = this.state
+    if (false) {
       if (fscreen.fullscreenElement) {
         fscreen.exitFullscreen();
       } else {
@@ -425,7 +448,28 @@ export class GameUnity extends React.Component<IProps, any> {
     } else {
       this.setState({
         pseudoFullscreen: !pseudoFullscreen
+      }, this.handleResize)
+    }
+
+    if (neededOrientation !== ORIENTATION_ANY) {
+      this.lockOrientation(neededOrientation);
+    }
+  }
+
+  lockOrientation = (orientation) => {
+    const screen = window.screen as any
+    if (screen.orientation && typeof screen.orientation.lock === 'function') {
+      return window.screen.orientation.lock(orientation)
+    } else if (screen.lockOrientationUniversal) {
+      return new Promise((resolve, reject) => {
+        if (screen.lockOrientationUniversal(orientation)) {
+          resolve()
+        } else {
+            reject()
+        }
       })
+    } else {
+      return new Promise((resolve, reject) => reject())
     }
   }
 

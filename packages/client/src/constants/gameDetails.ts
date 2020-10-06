@@ -12,6 +12,10 @@ export const DEFAULT_GAME_DIMENSION = {
   height: 550
 }
 
+export const ORIENTATION_ANY = 'any'
+export const ORIENTATION_PORTRAIT = 'portrait'
+export const ORIENTATION_LANDSCAPE = 'landscape'
+
 export const GAME_DETAILS = [
   {
     name: "World of Mines",
@@ -19,7 +23,8 @@ export const GAME_DETAILS = [
     color: cardBg.colors.yellow,
     type: "unity",
     button: "Play",
-    route: "wom"
+    route: "wom",
+    screenOrientation: ORIENTATION_LANDSCAPE,
   },
   {
     name: "TOSIOS",
@@ -28,6 +33,7 @@ export const GAME_DETAILS = [
     type: "pixijs",
     button: "Play",
     route: "new",
+    screenOrientation: ORIENTATION_ANY,
     options: {
       mode: "score attack",
       roomMap: "small",
@@ -40,7 +46,8 @@ export const GAME_DETAILS = [
     image: "br.gif",
     color: cardBg.colors.purple,
     button: "Coming Soon",
-    type: "teaser"
+    type: "teaser",
+    screenOrientation: ORIENTATION_ANY,
   },
   {
     name: "Flappy Bird Open-Source",
@@ -48,7 +55,8 @@ export const GAME_DETAILS = [
     color: cardBg.colors.seaGreen,
     type: "unity",
     button: "Play",
-    route: "flappybird"
+    route: "flappybird",
+    screenOrientation: ORIENTATION_PORTRAIT,
   },
 
 ];
