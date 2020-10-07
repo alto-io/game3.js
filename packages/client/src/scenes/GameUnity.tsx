@@ -1,5 +1,5 @@
 import React from "react";
-import Unity, { UnityContent } from "react-unity-webgl";
+import Unity, { UnityContext } from "react-unity-webgl";
 import fscreen from 'fscreen'
 import { Button } from '../components';
 import GameSceneContainer from '../components/GameSceneContainer';
@@ -128,7 +128,7 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   speed = 30;
-  unityContent = null as any;
+  unityContext = null as any;
   gameEnd = new Event('gameend');
 
   preparePlayButton = async () => {
@@ -220,14 +220,14 @@ export class GameUnity extends React.Component<IProps, any> {
 
     switch (gameId) {
       case "wom":
-        this.unityContent.send("Game3JsManager", "SetLevel",
+        this.unityContext.send("Game3JsManager", "SetLevel",
           this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
-        this.unityContent.send("Game3JsManager", "StartGame", "start");
+        this.unityContext.send("Game3JsManager", "StartGame", "start");
         this.setState({ gameName: Constants.WOM });
         break;
       case "flappybird":
-        this.unityContent.send("FlappyColyseusGameServerManager", "Connect", gameServerUrl);
-        this.unityContent.send("Game3JsManager", "StartGame", "start");
+        this.unityContext.send("FlappyColyseusGameServerManager", "Connect", gameServerUrl);
+        this.unityContext.send("Game3JsManager", "StartGame", "start");
         this.setState({ gameName: Constants.FP });
         break;
     }
@@ -244,29 +244,7 @@ export class GameUnity extends React.Component<IProps, any> {
         isGameRunning: true
       }
     );
-
-    // const updateUser = this.context.updateUser;
-    // const response = await this.nakamaServiceInstance.PlayGame();
-    // if (response.payload.response)
-    // {
-    //   updateUser(await this.nakamaServiceInstance.updateAccountDetails());
-    //   this.unityContent.send("OutplayManager", "SetLevel",
-    //     this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
-    //   this.unityContent.send("OutplayManager", "StartGame", "start");
-    //   this.eventDispatcher.dispatch(events.game.start);
-    // }
-    // else {
-    //   this.eventDispatcher.dispatch(events.error.insufficientFunds);
-    // }
   }
-
-  //   onChangeLevel = async (e) => {
-  //     this.setState(
-  //       {
-  //         selectedLevel: e.target.innerText
-  //       }
-  //     )
-  //   }
 
   produceGamePayload = (type: string, didWin?: boolean) => {
     const { gameName, score, playerAddress, doubleTime } = this.state
@@ -370,76 +348,76 @@ export class GameUnity extends React.Component<IProps, any> {
     // load unity from the same server (public folder)
     const path = this.props.path;
 
-    this.unityContent = new UnityContent(
-      "/" + path + "/unitygame.json",
-      "/" + path + "/UnityLoader.js"
-    );
+    this.unityContext = new UnityContext({
+      loaderUrl: "/" + path + "/unitygame.loader.js",
+      dataUrl: "/" + path + "/unitygame.data",
+      frameworkUrl: "/" + path + "/unitygame.framework.js",
+      codeUrl: "/" + path + "/unitygame.wasm",
+    });
 
-    this.unityContent.on("progress", progression => {
+    this.unityContext.on("progress", progression => {
       this.setState({ progression })
       console.log("Unity progress", progression);
     });
 
-    this.unityContent.on("loaded", () => {
+    this.unityContext.on("loaded", () => {
       console.log("Yay! Unity is loaded!");
     });
 
-    this.unityContent.on("SendEvent", outplayEvent => {
+    this.unityContext.on("SendEvent", outplayEvent => {
       this.processOutplayEvent(outplayEvent);
     });
 
-    this.unityContent.on("SendString", message => {
+    this.unityContext.on("SendString", message => {
       window.alert(message);
       console.log(message);
     });
 
-    this.unityContent.on("SendNumber", rotation => {
+    this.unityContext.on("SendNumber", rotation => {
       this.setState({ rotation: Math.round(rotation) });
     });
 
-    this.unityContent.on("SendScore", score => {
+    this.unityContext.on("SendScore", score => {
       this.setState({ score });
 
       console.log(score)
     });
 
-    this.unityContent.on("SendDoubleTime", doubleTime => {
+    this.unityContext.on("SendDoubleTime", doubleTime => {
       this.setState({ doubleTime });
 
       console.log(doubleTime)
     });
 
-
-
-    this.unityContent.on("quitted", () => {
+    this.unityContext.on("quitted", () => {
       this.setState({ isGameRunning: false })
     });
 
-    this.unityContent.on("error", () => {
+    this.unityContext.on("error", () => {
       this.setState({ isGameRunning: false })
     })
   }
 
   onClickSendToJS() {
-    this.unityContent.send("OutplayManager", "ConsoleLog", "Receive Message from Javascript!");
+    this.unityContext.send("OutplayManager", "ConsoleLog", "Receive Message from Javascript!");
   }
 
   onClickStart() {
-    this.unityContent.send("Cube", "StartRotation");
+    this.unityContext.send("Cube", "StartRotation");
   }
 
   onClickStop() {
-    this.unityContent.send("Cube", "StopRotation");
+    this.unityContext.send("Cube", "StopRotation");
   }
 
   onClickUpdateSpeed(speed) {
     this.speed += speed;
-    this.unityContent.send("Cube", "SetRotationSpeed", this.speed);
+    this.unityContext.send("Cube", "SetRotationSpeed", this.speed);
   }
 
   onClickFullscreen = () => {
     const { pseudoFullscreen, neededOrientation } = this.state
-    if (false) {
+    if (fscreen.fullscreenEnabled) {
       if (fscreen.fullscreenElement) {
         fscreen.exitFullscreen();
       } else {
@@ -516,7 +494,7 @@ export class GameUnity extends React.Component<IProps, any> {
               <>
                 {this.state.unityShouldBeMounted === true && (
                   <Unity
-                    unityContent={this.unityContent}
+                    unityContext={this.unityContext}
                     width={canvasWidth}
                     height={canvasHeight}
                     style={{

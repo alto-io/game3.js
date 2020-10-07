@@ -41,7 +41,7 @@
     "react-responsive": "^8.1.0",
     "react-scripts": "3.4.0",
     "react-toastify": "^5.5.0",
-    "react-unity-webgl": "^7.1.10",
+    "react-unity-webgl": "^8.0.2",
     "rimble-ui": "^0.14.0",
     "styled-components": "4.2.0",
     "threads": "^1.4.1",
