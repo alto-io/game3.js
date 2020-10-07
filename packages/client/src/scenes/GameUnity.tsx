@@ -1,11 +1,15 @@
 import React from "react";
-import Unity, { UnityContent } from "react-unity-webgl";
+import Unity, { UnityContext } from "react-unity-webgl";
 import fscreen from 'fscreen'
 import { Button } from '../components';
 import GameSceneContainer from '../components/GameSceneContainer';
-import { DEFAULT_GAME_DIMENSION, GAME_DETAILS, ORIENTATION_ANY } from '../constants'
+import { DEFAULT_GAME_DIMENSION, GAME_DETAILS, 
+  ORIENTATION_ANY, ORIENTATION_PORTRAIT, ORIENTATION_LANDSCAPE } from '../constants'
 import { Constants } from '@game3js/common';
 import { makeNewGameSession, getGameNo, getGameSessionId, updateSessionScore, updateGameNo, createSessionId } from '../helpers/database';
+import {ReactComponent as ScreeRotateIcon} from "../images/screen_rotation.svg";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faExpand } from '@fortawesome/free-solid-svg-icons'
 
 const StyledBoxStyle = {
   position: 'relative',
@@ -44,17 +48,19 @@ export class GameUnity extends React.Component<IProps, any> {
       screen.msLockOrientation;
 
     window.addEventListener('resize', this.handleResize, false);
-    window.addEventListener('orientationchange', this.handleResize, false);
+    window.addEventListener('orientationchange', this.handleOrienationChange, false);
 
     this.preInitialize();
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize, false);
-    window.removeEventListener('orientationchange', this.handleResize, false);
+    window.removeEventListener('orientationchange', this.handleOrienationChange, false);
   }
 
   unityElement: any = null
+  orientationLockSupported: boolean = false
+  neededOrientation: string = ORIENTATION_ANY
 
   constructor(props) {
     super(props);
@@ -77,14 +83,58 @@ export class GameUnity extends React.Component<IProps, any> {
       gameId: '',
       width: '',
       height: '',
-      neededOrientation: ORIENTATION_ANY,
       pseudoFullscreen: false,
+      orientationOk: true,
     };
 
+    this.orientationLockSupported = false;
     this.unityElement = React.createRef();
 
     this.initializeUnity();
     this.preparePlayButton();
+  }
+
+  handleOrienationChange = () => {
+    let orientationOk = false
+    // can be locked no need to ask user
+    if (!orientationOk && this.orientationLockSupported) {
+      orientationOk = true
+    }
+
+    const screen = window.screen as any
+    let orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation 
+      || window.orientation;
+    if (orientation === 0 || orientation === 180) {
+      orientation = ORIENTATION_PORTRAIT
+    }
+    if (orientation === 90 || orientation === -90) {
+      orientation = ORIENTATION_LANDSCAPE
+    }
+
+    // can't check it, nothing we can do, allow play
+    if (!orientationOk && orientation === undefined) {
+      orientationOk = true
+    }
+
+    let orientationVal = '';
+    if (!orientationOk) {
+      [orientationVal] = orientation.split('-');
+      // unexpected value, nothing we can do, allow play
+      if (orientationVal !== ORIENTATION_PORTRAIT && orientationVal !== ORIENTATION_LANDSCAPE) {
+        orientationOk = true
+      }
+    }
+
+    // actual check
+    if (!orientationOk) {
+      orientationOk = this.neededOrientation === ORIENTATION_ANY
+        || orientationVal === this.neededOrientation
+    }
+
+    this.setState({
+      orientationOk
+    })
+    this.handleResize();
   }
 
   handleResize = () => {
@@ -128,7 +178,7 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   speed = 30;
-  unityContent = null as any;
+  unityContext = null as any;
   gameEnd = new Event('gameend');
 
   preparePlayButton = async () => {
@@ -148,9 +198,13 @@ export class GameUnity extends React.Component<IProps, any> {
     if (!gameDetails) {
       return
     }
-    this.setState({
-      neededOrientation: gameDetails.screenOrientation
-    })
+
+    const screen = window.screen as any;
+    this.orientationLockSupported = !!((screen.orientation && typeof screen.orientation.lock === 'function')
+      || screen.lockOrientationUniversal);
+
+    this.neededOrientation = gameDetails.screenOrientation;
+    this.handleOrienationChange();
   }
 
   initializeGame = async (playerAddress, tournamentId) => {
@@ -220,14 +274,14 @@ export class GameUnity extends React.Component<IProps, any> {
 
     switch (gameId) {
       case "wom":
-        this.unityContent.send("Game3JsManager", "SetLevel",
+        this.unityContext.send("Game3JsManager", "SetLevel",
           this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
-        this.unityContent.send("Game3JsManager", "StartGame", "start");
+        this.unityContext.send("Game3JsManager", "StartGame", "start");
         this.setState({ gameName: Constants.WOM });
         break;
       case "flappybird":
-        this.unityContent.send("FlappyColyseusGameServerManager", "Connect", gameServerUrl);
-        this.unityContent.send("Game3JsManager", "StartGame", "start");
+        this.unityContext.send("FlappyColyseusGameServerManager", "Connect", gameServerUrl);
+        this.unityContext.send("Game3JsManager", "StartGame", "start");
         this.setState({ gameName: Constants.FP });
         break;
     }
@@ -244,29 +298,7 @@ export class GameUnity extends React.Component<IProps, any> {
         isGameRunning: true
       }
     );
-
-    // const updateUser = this.context.updateUser;
-    // const response = await this.nakamaServiceInstance.PlayGame();
-    // if (response.payload.response)
-    // {
-    //   updateUser(await this.nakamaServiceInstance.updateAccountDetails());
-    //   this.unityContent.send("OutplayManager", "SetLevel",
-    //     this.state.selectedLevel ? this.state.selectedLevel : "French Southern and Antarctic Lands");
-    //   this.unityContent.send("OutplayManager", "StartGame", "start");
-    //   this.eventDispatcher.dispatch(events.game.start);
-    // }
-    // else {
-    //   this.eventDispatcher.dispatch(events.error.insufficientFunds);
-    // }
   }
-
-  //   onChangeLevel = async (e) => {
-  //     this.setState(
-  //       {
-  //         selectedLevel: e.target.innerText
-  //       }
-  //     )
-  //   }
 
   produceGamePayload = (type: string, didWin?: boolean) => {
     const { gameName, score, playerAddress, doubleTime } = this.state
@@ -370,76 +402,76 @@ export class GameUnity extends React.Component<IProps, any> {
     // load unity from the same server (public folder)
     const path = this.props.path;
 
-    this.unityContent = new UnityContent(
-      "/" + path + "/unitygame.json",
-      "/" + path + "/UnityLoader.js"
-    );
+    this.unityContext = new UnityContext({
+      loaderUrl: "/" + path + "/unitygame.loader.js",
+      dataUrl: "/" + path + "/unitygame.data",
+      frameworkUrl: "/" + path + "/unitygame.framework.js",
+      codeUrl: "/" + path + "/unitygame.wasm",
+    });
 
-    this.unityContent.on("progress", progression => {
+    this.unityContext.on("progress", progression => {
       this.setState({ progression })
       console.log("Unity progress", progression);
     });
 
-    this.unityContent.on("loaded", () => {
+    this.unityContext.on("loaded", () => {
       console.log("Yay! Unity is loaded!");
     });
 
-    this.unityContent.on("SendEvent", outplayEvent => {
+    this.unityContext.on("SendEvent", outplayEvent => {
       this.processOutplayEvent(outplayEvent);
     });
 
-    this.unityContent.on("SendString", message => {
+    this.unityContext.on("SendString", message => {
       window.alert(message);
       console.log(message);
     });
 
-    this.unityContent.on("SendNumber", rotation => {
+    this.unityContext.on("SendNumber", rotation => {
       this.setState({ rotation: Math.round(rotation) });
     });
 
-    this.unityContent.on("SendScore", score => {
+    this.unityContext.on("SendScore", score => {
       this.setState({ score });
 
       console.log(score)
     });
 
-    this.unityContent.on("SendDoubleTime", doubleTime => {
+    this.unityContext.on("SendDoubleTime", doubleTime => {
       this.setState({ doubleTime });
 
       console.log(doubleTime)
     });
 
-
-
-    this.unityContent.on("quitted", () => {
+    this.unityContext.on("quitted", () => {
       this.setState({ isGameRunning: false })
     });
 
-    this.unityContent.on("error", () => {
+    this.unityContext.on("error", () => {
       this.setState({ isGameRunning: false })
     })
   }
 
   onClickSendToJS() {
-    this.unityContent.send("OutplayManager", "ConsoleLog", "Receive Message from Javascript!");
+    this.unityContext.send("OutplayManager", "ConsoleLog", "Receive Message from Javascript!");
   }
 
   onClickStart() {
-    this.unityContent.send("Cube", "StartRotation");
+    this.unityContext.send("Cube", "StartRotation");
   }
 
   onClickStop() {
-    this.unityContent.send("Cube", "StopRotation");
+    this.unityContext.send("Cube", "StopRotation");
   }
 
   onClickUpdateSpeed(speed) {
     this.speed += speed;
-    this.unityContent.send("Cube", "SetRotationSpeed", this.speed);
+    this.unityContext.send("Cube", "SetRotationSpeed", this.speed);
   }
 
   onClickFullscreen = () => {
-    const { pseudoFullscreen, neededOrientation } = this.state
-    if (false) {
+    const { pseudoFullscreen } = this.state
+    if (fscreen.fullscreenEnabled) {
       if (fscreen.fullscreenElement) {
         fscreen.exitFullscreen();
       } else {
@@ -451,8 +483,8 @@ export class GameUnity extends React.Component<IProps, any> {
       }, this.handleResize)
     }
 
-    if (neededOrientation !== ORIENTATION_ANY) {
-      this.lockOrientation(neededOrientation);
+    if (this.neededOrientation !== ORIENTATION_ANY) {
+      this.lockOrientation(this.neededOrientation);
     }
   }
 
@@ -479,7 +511,7 @@ export class GameUnity extends React.Component<IProps, any> {
 
   render() {
     const { isGameRunning, gameReady, playBtnText, progression, 
-      width, height, pseudoFullscreen } = this.state;
+      width, height, pseudoFullscreen, orientationOk } = this.state;
     const { tournamentId } = this.props;
 
     let canvasWidth =  (window.innerWidth <= 950 ? `${width}px` : "100%");
@@ -494,7 +526,7 @@ export class GameUnity extends React.Component<IProps, any> {
       <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
         <Button
           block
-          disabled={!gameReady}
+          disabled={!gameReady || !orientationOk}
           className="mb-3"
           color="primary"
           type="button"
@@ -516,7 +548,7 @@ export class GameUnity extends React.Component<IProps, any> {
               <>
                 {this.state.unityShouldBeMounted === true && (
                   <Unity
-                    unityContent={this.unityContent}
+                    unityContext={this.unityContext}
                     width={canvasWidth}
                     height={canvasHeight}
                     style={{
@@ -538,8 +570,34 @@ export class GameUnity extends React.Component<IProps, any> {
                     padding: '4px'
                   }}
                 >
-                  {'⛶'}
+                  <FontAwesomeIcon icon={faExpand} />
                 </Button>
+                {!orientationOk && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '0px',
+                      left: '0px',
+                      right: '0px',
+                      bottom: '0px',
+                      backgroundColor: 'rgb(55, 90, 127)',
+                      opacity: 0.5,
+                    }}>
+                      <ScreeRotateIcon
+                        fill={'white'}
+                        height={48}
+                        width={48}
+                        style={{
+                          position: 'absolute',
+                          margin: 0,
+                          top: '50%',
+                          left: '50%',
+                          marginRight: '-50%',
+                          transform: 'translate(-50%, -50%)',
+                        }}
+                      />
+                    </div>
+                )}
               </>
             }
           </div>
