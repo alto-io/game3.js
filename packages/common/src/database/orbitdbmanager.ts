@@ -229,7 +229,7 @@ export class OrbitDBManager implements DBManager {
       console.log("UPDATE_SCORE: Function Invoked...");
       console.log("UPDATE_SCORE: Session ID", sessionId);
 
-      const params = {sessionId, playerAddress, tournamentId}
+      const params = { sessionId, playerAddress, tournamentId }
       const data = await this.gameSessions.query(data =>
         data.id === sessionId && data.sessionData.tournamentId === tournamentId
       );
@@ -405,7 +405,7 @@ export class OrbitDBManager implements DBManager {
       if (data.length > 0) {
         console.log("SID: DATA FOUND!", data);
         console.log("SID: Returning...", data[0].id);
-        return {success: true, sessionIdData: data[0]};
+        return { success: true, sessionIdData: data[0] };
       } else {
         console.log("SID: DATA NOT FOUND!", data);
         console.log("SID: Creating new one...");
@@ -420,23 +420,37 @@ export class OrbitDBManager implements DBManager {
         await this.gameSessionIds.put(sessionIdData);
         console.log("SID: Saved!");
         console.log("SID: Returning...");
-        return {success: true, sessionIdData};
+        return { success: true, sessionIdData };
       }
     } else {
       console.log("SID: You're not in a tournament");
       console.log("SID: Returning...");
-      return {success: true, sessionIdData: null};
+      return { success: true, sessionIdData: null };
     }
   }
 
   async getGameSessionId(playerAddress, tournamentId) {
+    console.log("GET_SID: Initialized...");
+    console.log("GET_SID: Is tournamentId valid... ");
     if (tournamentId || tournamentId === 0) {
+      console.log("GET_SID: Valid! tId: ", tournamentId);
+      console.log("GET_SID: Valid! PlayerAddress: ", playerAddress);
+      console.log("GET_SID: Fetching data...");
       let data = await this.gameSessionIds.query(sessionId =>
-        sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId === tournamentId)
+        sessionId.playerAddress === playerAddress.toLowerCase() && sessionId.tournamentId ===  tournamentId)
+      console.log("GET_SID: Data fetched! data: ", data);
       if (data.length > 0) {
+        console.log("GET_SID: Data: ", data);
+        console.log("GET_SID: Returning... ");
         return { success: true, sessionIdData: data[0] }
       } else {
-        return { success: false, sessionIdData: data[0] }
+        let nodataObj = {
+          id: false,
+          playerAddress,
+          tournamentId
+        }
+        console.log("GET_SID: No data, returning... ");
+        return { success: false, sessionIdData: nodataObj }
       }
     } else {
       console.log("GET_SID: You're not in a tournament");
@@ -455,11 +469,11 @@ export class OrbitDBManager implements DBManager {
       console.log("GET_TOURNEYRESULT: Sample playerData", sessions[0].sessionData.playerData);
       console.log("GET_TOURNEYRESULT: Sessions fetched!", sessions);
       console.log("GET_TOURNEYRESULT: Returning...", sessions);
-      return {session: sessions[0], sessions};
+      return { session: sessions[0], sessions };
     } else {
       console.log("GET_TOURNEYRESULT: No data");
       console.log("GET_TOURNEYRESULT: Returning...", sessions);
-      return {session: sessions};
+      return { session: sessions };
     }
   }
 
@@ -721,12 +735,12 @@ export class OrbitDBManager implements DBManager {
       await this.serverPutGameSession(sessionId, sessionData);
       console.log("NEW-score_type: Session Data created!!!");
       console.log("NEW-score_type: Function Finished...");
-      return {success: true,  sessionData};
+      return { success: true, sessionData };
     } else {
       console.log("NEW-score_type: Session Exist!!");
       console.log("NEW-score_type: No need to create new one...")
       console.log("NEW-score_type: Returning...")
-      return {success: true,  sessionData};
+      return { success: true, sessionData };
     }
   }
 
@@ -766,7 +780,7 @@ export class OrbitDBManager implements DBManager {
       await this.serverPutGameSession(sessionId, sessionData);
       console.log("NEW-tosios: Session Data created!!!");
       console.log("NEW-tosios: Function Finished...");
-      return {success: true,  sessionData};
+      return { success: true, sessionData };
     } else {
       console.log("NEW-tosios: Session Exist!!");
       console.log("NEW-tosios: Updating playerData...")
@@ -782,7 +796,7 @@ export class OrbitDBManager implements DBManager {
       await this.gameSessions.put(data[0]);
       console.log("NEW-tosios: Updated!");
       console.log("NEW-tosios: Finished...");
-      return {success: true, sessionData: data[0].sessionData};
+      return { success: true, sessionData: data[0].sessionData };
     }
   }
 

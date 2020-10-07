@@ -37,6 +37,7 @@ export const typeDef = gql`
   }
   type TournamentResults {
     session: TournamentSession
+    sessions: [TournamentSession]
   }
   type TournamentSession {
     id: ID

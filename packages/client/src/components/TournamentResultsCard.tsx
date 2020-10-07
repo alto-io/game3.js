@@ -203,6 +203,8 @@ class TournamentResultsCard extends Component<IProps, IState> {
   }
 
   async componentDidMount() {
+    await this.getBlockchainInfo(this.props)
+    
     window.addEventListener('gameend', await this.refreshResults)
   }
 
@@ -227,50 +229,58 @@ class TournamentResultsCard extends Component<IProps, IState> {
   refreshResults = async () => {
     console.log("REFRESHING RESULTS");
     const { tournamentId } = this.state;
-    const { getTournamentResults } = this.props.gqlContext;
+    const { getTournamentResults, getTournamentData } = this.props.gqlContext;
     let results = []; 
-    let sessionsData = await getTournamentResult(tournamentId);
-    console.log("PLAYER ADD: sessionsData", sessionsData);
+    // let result = await getTournamentResult(tournamentId);
+    // let sessionsData = result.sessions;
+    console.log("TOURNAMENT ID", tournamentId);
 
-    if (sessionsData.length > 0) {
-      for (let resultIdx = 0; resultIdx < (sessionsData.length > 10 ? 10 : sessionsData.length); resultIdx++) {
-        let playerAddress = Object.keys(sessionsData[resultIdx].sessionData.playerData)[0];
-        console.log("PLAYER ADD: address", playerAddress);
+    getTournamentData(tournamentId).then(data => console.log("TOURNAMENT DATA", data));
 
-        results.push({
-          gameName: sessionsData[resultIdx].sessionData.gameName,
-          tournamentId: tournamentId,
-          timeIsUp: false,
-          playerAddress,
-          sessionId: sessionsData[resultIdx].id,
-          sessionData: sessionsData[resultIdx].sessionData.playerData[playerAddress]
-        })
+    getTournamentResults(tournamentId).then(result => {
+      console.log("RESULT FROM GRAPHQL", result);
+      let sessionsData = result.sessions;
+
+      if (sessionsData.length > 0) {
+        for (let resultIdx = 0; resultIdx < (sessionsData.length > 10 ? 10 : sessionsData.length); resultIdx++) {
+          let playerAddress = Object.keys(sessionsData[resultIdx].sessionData.playerData)[0];
+          console.log("PLAYER ADD: address", playerAddress);
+  
+          results.push({
+            gameName: sessionsData[resultIdx].sessionData.gameName,
+            tournamentId: tournamentId,
+            timeIsUp: false,
+            playerAddress,
+            sessionId: sessionsData[resultIdx].id,
+            sessionData: sessionsData[resultIdx].sessionData.playerData[playerAddress]
+          })
+        }
+  
+        console.log("RESULTS:", results)
+        results = results.filter(result => !!result.sessionData)
+        if (results.length > 1) {
+          // Sorts in ascending order
+          results.sort((el1, el2) => {
+            switch (el1.gameName) {
+              case Constants.FP:
+                if (el1.sessionData.highScore === 0) return 1;
+                if (el2.sessionData.highScore === 0) return -1;
+                return el2.sessionData.highScore - el1.sessionData.highScore;
+              case Constants.TOSIOS:
+                if (el1.sessionData.currentHighestNumber === 0) return -1;
+                if (el2.sessionData.currentHighestNumber === 0) return 1;
+                return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
+              case Constants.WOM:
+                if (el1.sessionData.highScore === 0) return 1;
+                if (el2.sessionData.highScore === 0) return -1;
+                return el1.sessionData.highScore - el2.sessionData.highScore
+              default:
+                break;
+            }
+          })
+        }
       }
-
-      console.log("RESULTS:", results)
-      results = results.filter(result => !!result.sessionData)
-      if (results.length > 1) {
-        // Sorts in ascending order
-        results.sort((el1, el2) => {
-          switch (el1.gameName) {
-            case Constants.FP:
-              if (el1.sessionData.highScore === 0) return 1;
-              if (el2.sessionData.highScore === 0) return -1;
-              return el2.sessionData.highScore - el1.sessionData.highScore;
-            case Constants.TOSIOS:
-              if (el1.sessionData.currentHighestNumber === 0) return -1;
-              if (el2.sessionData.currentHighestNumber === 0) return 1;
-              return el1.sessionData.currentHighestNumber - el2.sessionData.currentHighestNumber
-            case Constants.WOM:
-              if (el1.sessionData.highScore === 0) return 1;
-              if (el2.sessionData.highScore === 0) return -1;
-              return el1.sessionData.highScore - el2.sessionData.highScore
-            default:
-              break;
-          }
-        })
-      }
-    }
+    })
     this.setState({
       results
     })

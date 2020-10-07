@@ -19,7 +19,9 @@ export default function GraphQlProvider(props) {
 
       if (!tournamentResults.loading) {
         console.log("RESOLVED");
-        resolve(tournamentResults.data);
+        const {data} = tournamentResults;
+        console.log("THE DATA", data);
+        resolve(data);
       }
       if (tournamentResults.error) {
         reject(tournamentResults.error);

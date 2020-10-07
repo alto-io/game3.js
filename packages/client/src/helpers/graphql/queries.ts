@@ -14,7 +14,7 @@ export const GET_TOURNAMENT = gql`
 export const GET_TOURNAMENT_RESULTS = gql`
   query GetTournamentResults($id: ID!) {
     getTournamentResults(id: $id) {
-      session {
+      sessions {
         id
         sessionData {
           sessionId
