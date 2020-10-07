@@ -3,9 +3,13 @@ import Unity, { UnityContext } from "react-unity-webgl";
 import fscreen from 'fscreen'
 import { Button } from '../components';
 import GameSceneContainer from '../components/GameSceneContainer';
-import { DEFAULT_GAME_DIMENSION, GAME_DETAILS, ORIENTATION_ANY } from '../constants'
+import { DEFAULT_GAME_DIMENSION, GAME_DETAILS, 
+  ORIENTATION_ANY, ORIENTATION_PORTRAIT, ORIENTATION_LANDSCAPE } from '../constants'
 import { Constants } from '@game3js/common';
 import { makeNewGameSession, getGameNo, getGameSessionId, updateSessionScore, updateGameNo, createSessionId } from '../helpers/database';
+import {ReactComponent as ScreeRotateIcon} from "../images/screen_rotation.svg";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faExpand } from '@fortawesome/free-solid-svg-icons'
 
 const StyledBoxStyle = {
   position: 'relative',
@@ -44,17 +48,19 @@ export class GameUnity extends React.Component<IProps, any> {
       screen.msLockOrientation;
 
     window.addEventListener('resize', this.handleResize, false);
-    window.addEventListener('orientationchange', this.handleResize, false);
+    window.addEventListener('orientationchange', this.handleOrienationChange, false);
 
     this.preInitialize();
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize, false);
-    window.removeEventListener('orientationchange', this.handleResize, false);
+    window.removeEventListener('orientationchange', this.handleOrienationChange, false);
   }
 
   unityElement: any = null
+  orientationLockSupported: boolean = false
+  neededOrientation: string = ORIENTATION_ANY
 
   constructor(props) {
     super(props);
@@ -77,14 +83,58 @@ export class GameUnity extends React.Component<IProps, any> {
       gameId: '',
       width: '',
       height: '',
-      neededOrientation: ORIENTATION_ANY,
       pseudoFullscreen: false,
+      orientationOk: true,
     };
 
+    this.orientationLockSupported = false;
     this.unityElement = React.createRef();
 
     this.initializeUnity();
     this.preparePlayButton();
+  }
+
+  handleOrienationChange = () => {
+    let orientationOk = false
+    // can be locked no need to ask user
+    if (!orientationOk && this.orientationLockSupported) {
+      orientationOk = true
+    }
+
+    const screen = window.screen as any
+    let orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation 
+      || window.orientation;
+    if (orientation === 0 || orientation === 180) {
+      orientation = ORIENTATION_PORTRAIT
+    }
+    if (orientation === 90 || orientation === -90) {
+      orientation = ORIENTATION_LANDSCAPE
+    }
+
+    // can't check it, nothing we can do, allow play
+    if (!orientationOk && orientation === undefined) {
+      orientationOk = true
+    }
+
+    let orientationVal = '';
+    if (!orientationOk) {
+      [orientationVal] = orientation.split('-');
+      // unexpected value, nothing we can do, allow play
+      if (orientationVal !== ORIENTATION_PORTRAIT && orientationVal !== ORIENTATION_LANDSCAPE) {
+        orientationOk = true
+      }
+    }
+
+    // actual check
+    if (!orientationOk) {
+      orientationOk = this.neededOrientation === ORIENTATION_ANY
+        || orientationVal === this.neededOrientation
+    }
+
+    this.setState({
+      orientationOk
+    })
+    this.handleResize();
   }
 
   handleResize = () => {
@@ -148,9 +198,13 @@ export class GameUnity extends React.Component<IProps, any> {
     if (!gameDetails) {
       return
     }
-    this.setState({
-      neededOrientation: gameDetails.screenOrientation
-    })
+
+    const screen = window.screen as any;
+    this.orientationLockSupported = !!((screen.orientation && typeof screen.orientation.lock === 'function')
+      || screen.lockOrientationUniversal);
+
+    this.neededOrientation = gameDetails.screenOrientation;
+    this.handleOrienationChange();
   }
 
   initializeGame = async (playerAddress, tournamentId) => {
@@ -416,7 +470,7 @@ export class GameUnity extends React.Component<IProps, any> {
   }
 
   onClickFullscreen = () => {
-    const { pseudoFullscreen, neededOrientation } = this.state
+    const { pseudoFullscreen } = this.state
     if (fscreen.fullscreenEnabled) {
       if (fscreen.fullscreenElement) {
         fscreen.exitFullscreen();
@@ -429,8 +483,8 @@ export class GameUnity extends React.Component<IProps, any> {
       }, this.handleResize)
     }
 
-    if (neededOrientation !== ORIENTATION_ANY) {
-      this.lockOrientation(neededOrientation);
+    if (this.neededOrientation !== ORIENTATION_ANY) {
+      this.lockOrientation(this.neededOrientation);
     }
   }
 
@@ -457,7 +511,7 @@ export class GameUnity extends React.Component<IProps, any> {
 
   render() {
     const { isGameRunning, gameReady, playBtnText, progression, 
-      width, height, pseudoFullscreen } = this.state;
+      width, height, pseudoFullscreen, orientationOk } = this.state;
     const { tournamentId } = this.props;
 
     let canvasWidth =  (window.innerWidth <= 950 ? `${width}px` : "100%");
@@ -472,7 +526,7 @@ export class GameUnity extends React.Component<IProps, any> {
       <GameSceneContainer when={isGameRunning} tournamentId={tournamentId}>
         <Button
           block
-          disabled={!gameReady}
+          disabled={!gameReady || !orientationOk}
           className="mb-3"
           color="primary"
           type="button"
@@ -516,8 +570,34 @@ export class GameUnity extends React.Component<IProps, any> {
                     padding: '4px'
                   }}
                 >
-                  {'⛶'}
+                  <FontAwesomeIcon icon={faExpand} />
                 </Button>
+                {!orientationOk && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '0px',
+                      left: '0px',
+                      right: '0px',
+                      bottom: '0px',
+                      backgroundColor: 'rgb(55, 90, 127)',
+                      opacity: 0.5,
+                    }}>
+                      <ScreeRotateIcon
+                        fill={'white'}
+                        height={48}
+                        width={48}
+                        style={{
+                          position: 'absolute',
+                          margin: 0,
+                          top: '50%',
+                          left: '50%',
+                          marginRight: '-50%',
+                          transform: 'translate(-50%, -50%)',
+                        }}
+                      />
+                    </div>
+                )}
               </>
             }
           </div>
