@@ -8,10 +8,10 @@
     "url": "git+https://github.com/alto-io/game3.js.git"
   },
   "license": "MIT",
-  "main": "dist/index.js",
-  "unpkg": "dist/index.js",
+  "main": "dist/booter.js",
+  "unpkg": "dist/booter.js",
   "files": [
-    "dist/index.js"
+    "dist/booter.js"
   ],
   "scripts": {
     "serve": "serve docs",
