@@ -29,7 +29,7 @@ From inside project directory:
 
 ## 🕹 Playing A Game
 
- ![World of Mines](packages/client/public/images/wom.gif?raw=true "World of Mines")
+ ![World of Mines](images/wom.gif?raw=true "World of Mines")
 
  * Once the app is running, the homepage will contain a list of all integrated games
  * Press the `Play` button to start!
@@ -81,7 +81,7 @@ Game3.js currently does not have a web dashboard for integrating games yet, and 
   * Play around with the TOSIOS Example to understand how Colyseus and Pixi.js work. Most of the game-related code is in `packages/client` and `packages/common`. The vanilla [TOSIOS](https://github.com/halftheopposite/tosios) repo is also a great reference.
   * Explore the [Game3.js Unity SDK](https://github.com/alto-io/game3js-unity-sdk) if you're building using Unity 3D. The SDK includes the Flappy Bird Example integrated with game3.js.
 
- ![Flappy Bird](packages/client/public/images/flappybird.gif?raw=true "Flappy Bird")
+ ![Flappy Bird](images/flappybird.gif?raw=true "Flappy Bird")
 
 
 Do [reach out to us](https://gitter.im/game3-js/community) if you want to integrate your games with OP Arcade, the upcoming live version of Game3.js!
