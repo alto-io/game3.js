@@ -1,8 +1,0 @@
-.editorconfig
-.gitignore
-README.
-yarn-error.log
-node_modules
-*/*/node_modules
-*/*/build
-*/*/dist
