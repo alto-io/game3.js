@@ -2,7 +2,11 @@
 
 👋 Thank you for checking out Game3.js! 
 
-Please take note that this project is still under heavy development. 
+### **Heads up! ⚠** 
+
+Please take note that this project is still under heavy development, and we're currently refactoring it to be an NPM package.
+
+
 Don't hesitate to file a Github issue or reach out to us on Gitter 👇 if you have any questions. 
 
  
@@ -23,6 +27,8 @@ Don't hesitate to file a Github issue or reach out to us on Gitter 👇 if you h
 ### 3. Run the app
 
 From inside project directory:
+
+* Switch to the **develop** branch, which is the last branch where this Readme is applicable
 * Install dependencies with `yarn`.
 * Start game with `yarn start`.
 * The game is available at http://localhost:3000.
