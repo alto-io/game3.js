@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+      "target": "ES6",
+      "module": "commonjs",
+      "lib": ["DOM", "ESNext", "ScriptHost"],
+      "declaration": true,
+      "declarationMap": true,
+      "sourceMap": true,
+      "strict": true,
+      "strictNullChecks": true,
+      "strictPropertyInitialization": false,
+      "moduleResolution": "node",
+      "removeComments": false,
+      "noUnusedParameters": true,
+      "noUnusedLocals": false,
+      "noImplicitThis": true,
+      "noImplicitAny": true,
+      "noImplicitReturns": true,
+      "allowJs": true,
+      "outDir": "./.tmp",
+      "rootDir": "./src"
+
+    },
+    "include": ["./src/**/*", "./types/**/*"],
+    "exclude": ["./node_modules/*", "**/node_modules/*", "**/dist/*", "**/*.spec.ts"]
+}

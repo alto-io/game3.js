@@ -1,0 +1,42 @@
+{
+  "name": "game3js",
+  "version": "0.0.2",
+  "description": "The Web 3.0 Game Framework",
+  "author": "Paul Gadi <paul@outplay.games>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alto-io/game3.js.git"
+  },
+  "license": "MIT",
+  "main": "dist/index.js",
+  "unpkg": "dist/index.js",
+  "files": [
+    "dist/index.js"
+  ],
+  "scripts": {
+    "serve": "serve docs",
+    "dev": "concurrently --kill-others-on-fail \"webpack --watch\" \"npm run serve\"",
+    "build": "webpack",
+    "np": "np"
+  },
+  "devDependencies": {
+    "concurrently": "^5.3.0",
+    "dotenv": "^8.2.0",
+    "html-replace-webpack-plugin": "^2.6.0",
+    "html-webpack-plugin": "^4.5.0",
+    "np": "^7.0.0",
+    "serve": "^11.3.2",
+    "ts-loader": "^8.0.11",
+    "typescript": "^4.1.2",
+    "webpack": "^5.9.0",
+    "webpack-cli": "^4.2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/alto-io/game3.js/issues"
+  },
+  "homepage": "https://github.com/alto-io/game3.js#readme",
+  "directories": {
+    "doc": "docs"
+  },
+  "keywords": []
+}
