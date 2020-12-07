@@ -93,6 +93,15 @@ Game3.js currently does not have a web dashboard for integrating games yet, and 
 Do [reach out to us](https://gitter.im/game3-js/community) if you want to integrate your games with OP Arcade, the upcoming live version of Game3.js!
 
 
+## Packages
+
+Game3.js is dependent on these other standalone packages:
+
+![Package Diagram](https://docs.google.com/drawings/d/e/2PACX-1vTQXwQMVheGfXrSmmr6PYsByHdHcF5_vZ4itwFB70-PhkL0BCXzRNv8-vuvQSyn8FuCHToKU-kWnjEZ/pub?w=553&amp;h=450)
+
+* [**booter**](https://github.com/polats/booter) - Zero-config project template to create open-source web games, with Web Monetization and PWA support
+* [**nft-minter**](https://github.com/polats/nft-minter) - A Heroku web server to easily mint Ethereum non-fungible tokens via an API
+
 ## 🎭 Live Demo
 
 -- This is bleeding edge: here be dragons! 🐲🐉 --
