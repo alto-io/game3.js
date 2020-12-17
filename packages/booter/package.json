@@ -1,6 +1,6 @@
 {
   "name": "@polats/booter",
-  "version": "0.1.0-0",
+  "version": "0.1.0",
   "description": "Created by Booter 🥾: A zero-config project template to deploy and publish open-source web games",
   "author": "Paul Gadi <paul@outplay.games>",
   "repository": {
