@@ -33,10 +33,10 @@ var config = {
 
 var configDist = Object.assign({}, config, {
     output: {
-        library: 'game3js',
+        library: 'booter',
         libraryTarget: 'umd',
         umdNamedDefine: true,
-        filename: 'game3.js',
+        filename: 'booter.js',
         path: path.resolve(__dirname, 'dist'),
     }
 });
@@ -44,11 +44,11 @@ var configDist = Object.assign({}, config, {
 
 var configGithubPages = Object.assign({}, config, {
     output: {
-        library: 'game3js',
+        library: 'booter',
         libraryTarget: 'umd',
         umdNamedDefine: true,
-        filename: 'lib/game3.js',
-        path: path.resolve(__dirname, 'docs'),
+        filename: 'lib/booter.js',
+        path: path.resolve(__dirname, '../../docs/booter'),
     },
     plugins: [
         new HtmlWebpackPlugin({
@@ -60,7 +60,7 @@ var configGithubPages = Object.assign({}, config, {
             chunksSortMode: 'auto'
           }),
           new HtmlWebpackPlugin({
-            filename: 'game3js.webmanifest',
+            filename: 'booter.webmanifest',
             template: 'src/template.webmanifest',
             inject: false,
             minify: false,
@@ -71,5 +71,27 @@ var configGithubPages = Object.assign({}, config, {
     ]
 });
 
+var configDev = Object.assign({}, config, {
+    output: {
+        library: 'booter',
+        libraryTarget: 'umd',
+        umdNamedDefine: true,
+        filename: 'lib/booter.js',
+        path: path.resolve(__dirname, '../../docs'),
+    },
+    plugins: [
+          new HtmlWebpackPlugin({
+            filename: 'booter.webmanifest',
+            template: 'src/template.webmanifest',
+            inject: false,
+            minify: false,
+            chunks: 'all',
+            chunksSortMode: 'auto'
+          }),
+          new HtmlReplaceWebpackPlugin(htmlReplaceConfig)
+    ]    
+});
 
-module.exports = [configDist, configGithubPages];
+
+
+module.exports = [configDist, configGithubPages, configDev];

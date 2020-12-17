@@ -12,27 +12,27 @@
         <meta property="og:description" content="@@description" />
         <meta property="og:type" content="website" />
         <link rel="shortcut icon" href="favicon.ico" />
-        <link rel="manifest" href="game3js.webmanifest" />
+        <link rel="manifest" href="booter.webmanifest" />
 
         <script async src="https://www.googletagmanager.com/gtag/js?id=@@gtag_id"></script>
         <script src="./lib/phaser.3.24.1.min.js"></script>
-        <script src="./lib/game3.js"></script>
+        <script src="./lib/booter.js"></script>
         <script src="pwa.js"></script>
 
         <script>
 
         var gameScenes =
         [
-          game3js.ExampleMainMenuScene
+          booter.ExampleMainMenuScene
         ];
   
-        game3js.GameManager.startGame(
+        booter.GameManager.startGame(
           null,
           null,
           gameScenes);
   
         // We can override the Phaser config like:
-        // game3js.GameManager.startGame(null,
+        // booter.GameManager.startGame(null,
         //   {
         //     scale: {
         //     mode: Phaser.Scale.FIT,
@@ -47,7 +47,6 @@
 
         </head>
         <body>
-
             <div id="phaser3"></div>            
         </body>
 </html>

@@ -1,20 +1,20 @@
 {
-  "name": "game3js",
-  "version": "0.0.3",
-  "description": "The Web 3.0 Game Framework",
+  "name": "@polats/booter",
+  "version": "0.0.2",
+  "description": "Created by Booter 🥾: A zero-config project template to deploy and publish open-source web games",
   "author": "Paul Gadi <paul@outplay.games>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alto-io/game3.js.git"
+    "url": "git+https://github.com/polats/booter.git"
   },
   "license": "MIT",
-  "main": "dist/game3.js",
-  "unpkg": "dist/game3.js",
+  "main": "dist/index.js",
+  "unpkg": "dist/index.js",
   "files": [
-    "dist/game3.js"
+    "dist/index.js"
   ],
   "scripts": {
-    "serve": "serve docs",
+    "serve": "serve ../../docs/booter",
     "dev": "concurrently --kill-others-on-fail \"webpack --watch\" \"npm run serve\"",
     "build": "webpack",
     "np": "np"
@@ -32,9 +32,9 @@
     "webpack-cli": "^4.2.0"
   },
   "bugs": {
-    "url": "https://github.com/alto-io/game3.js/issues"
+    "url": "https://github.com/polats/booter/issues"
   },
-  "homepage": "https://github.com/alto-io/game3.js#readme",
+  "homepage": "https://github.com/polats/booter#readme",
   "directories": {
     "doc": "docs"
   },

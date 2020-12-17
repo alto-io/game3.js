@@ -1,7 +1,7 @@
 {
-    "name": "@@title",
-    "short_name": "@@short_name",
-    "description": "@@description",
+    "name": "Game3.js Example Page",
+    "short_name": "G3JS",
+    "description": "Create Web 3 Games using Game3.js.",
     "icons": [
         {
             "src": "assets/icons/icon-72x72.png",
@@ -46,6 +46,6 @@
     ],
     "start_url": "@@start_url",
     "display": "fullscreen",
-    "theme_color": "@@theme_color",
-    "background_color": "@@background_color"
+    "theme_color": "#e7e7e7",
+    "background_color": "#fdb535"
 }

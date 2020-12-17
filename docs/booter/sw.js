@@ -12,7 +12,7 @@ var appShellFiles = [
   './assets/icons/icon-384x384.png',
   './assets/icons/icon-512x512.png',
   './pwa.js',
-  './lib/game3.js',
+  './lib/booter.js',
   './lib/phaser.3.24.1.min.js'
 ];
 

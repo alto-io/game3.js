@@ -11,7 +11,7 @@ export class ExampleMainMenuScene extends Phaser.Scene {
         var mg = new MinesweeperGame(30, 10, 20);
         console.log(MinesweeperGame)
         console.log(mg.width)
-        console.log("game3js")
+        console.log("SDFD")
     }
 
     create() {
