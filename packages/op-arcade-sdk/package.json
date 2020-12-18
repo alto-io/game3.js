@@ -1,12 +1,12 @@
 {
-  "name": "@polats/booter",
-  "version": "0.1.0",
-  "description": "Created by Booter 🥾: A zero-config project template to deploy and publish open-source web games",
+  "name": "op-arcade-sdk",
+  "version": "0.0.1",
+  "description": "Monetize your game with tournaments on OP Arcade (play.outplay.games)",
   "author": "Paul Gadi <paul@outplay.games>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alto-io/game3.js.git",
-    "directory": "packages/booter"
+    "directory": "packages/op-arcade-sdk"
   },
   "license": "MIT",
   "main": "dist/index.js",
@@ -15,7 +15,7 @@
     "dist/index.js"
   ],
   "scripts": {
-    "serve": "serve ../../docs/booter",
+    "serve": "serve ../../docs/op-arcade-sdk",
     "dev": "concurrently --kill-others-on-fail \"webpack --watch\" \"npm run serve\"",
     "build": "webpack",
     "np": "np"
@@ -35,7 +35,7 @@
   "bugs": {
     "url": "https://github.com/alto-io/game3.js/issues"
   },
-  "homepage": "https://github.com/alto-io/game3.js/tree/main/packages/booter",
+  "homepage": "https://github.com/alto-io/game3.js/tree/main/packages/op-arcade-sdk",
   "directories": {
     "doc": "docs"
   },
