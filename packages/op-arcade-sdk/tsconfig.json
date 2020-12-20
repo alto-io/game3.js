@@ -18,8 +18,15 @@
       "noImplicitReturns": true,
       "allowJs": true,
       "outDir": "./.tmp",
-      "rootDir": "./src"
-
+      "rootDir": "./src",
+      "types": [
+        "svelte",
+        "svelte/store",
+        "svelte/motion",
+        "svelte/transition",
+        "svelte/animate",
+        "svelte/easing"
+      ]      
     },
     "include": ["./src/**/*", "./types/**/*"],
     "exclude": ["./node_modules/*", "**/node_modules/*", "**/dist/*", "**/*.spec.ts"]

@@ -15,21 +15,39 @@ var config = {
     {
         dist: './src/index.ts'
     },    
-    resolve: {
-        extensions: ['.ts', '.js']
-      },
-    module: {
-        rules: [
-            {
-                test: /\.tsx?$/,
-                loader: 'ts-loader',
+  resolve: {
+    alias: {
+      svelte: path.resolve('node_modules', 'svelte')
+    },
+      extensions: ['.mjs', '.ts', '.js', '.svelte'],
+      mainFields: ['svelte', 'browser', 'module', 'main']      
+    },
+  module: {
+      rules: [
+          {
+            test: /\.svelte$/,
+            exclude: /node_modules/,
+            use: [
+                {
+                loader: 'svelte-loader-hot',
                 options: {
-                  configFile: 'tsconfig.json'
+                    customElement: true
+                    }
                 }
-            }
-        ],
-    }
+            ]
+          },
+          {
+              test: /\.tsx?$/,
+              loader: 'ts-loader',
+              options: {
+                configFile: 'tsconfig.json'
+              }
+          }
+      ],
+  }
 }
+
+
 
 var configDist = Object.assign({}, config, {
     output: {
