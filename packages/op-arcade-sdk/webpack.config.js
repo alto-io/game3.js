@@ -1,10 +1,5 @@
 const path = require('path');
 
-var HtmlWebpackPlugin = require('html-webpack-plugin')
-var HtmlReplaceWebpackPlugin = require('html-replace-webpack-plugin')
-var htmlReplaceConfig = require('./conf/html-replace')
-
-
 /* ---------------
  * Main config
  * We will place here all the common settings
@@ -66,19 +61,8 @@ var configLocalDev = Object.assign({}, config, {
         libraryTarget: 'umd',
         umdNamedDefine: true,
         filename: 'lib/op.js',
-        path: path.resolve(__dirname, 'temp'),
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: 'src/template.index.html',
-            inject: false,
-            minify: false,
-            chunks: 'all',
-            chunksSortMode: 'auto'
-          }),
-          new HtmlReplaceWebpackPlugin(htmlReplaceConfig)
-    ]
+        path: path.resolve(__dirname, '../../docs'),
+    }
 });
 
 

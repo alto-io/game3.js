@@ -1,4 +1,4 @@
-<svelte:options tag="my-element" />
+<svelte:options tag="op-arcade-sdk" />
 
 <script>
 	export let name;

@@ -18,7 +18,8 @@
     "dev": "concurrently --kill-others-on-fail \"webpack --watch\" \"npm run serve\"",
     "build": "npm-run-all --parallel build:*",
     "build:dev": "webpack",
-    "build:booter": "cd packages/booter && webpack",
+    "build:booter": "cd packages/booter && npm run build",
+    "build:op-arcade-sdk": "cd packages/op-arcade-sdk && npm run build",
     "np": "np"
   },
   "devDependencies": {
