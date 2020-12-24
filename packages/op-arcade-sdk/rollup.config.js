@@ -46,10 +46,14 @@ export default {
     sourcemap: true,
     format: "iife",
     name: "app",
-    file: "dist/bundle.js",
+    file: "dist/op.js",
   },
   plugins: [
-    svelte({
+    production && svelte({
+      preprocess
+    }),
+
+    !production && svelte({
       // enable run-time checks when not in production
       dev: !production,
       // we'll extract any component CSS out into
@@ -73,8 +77,7 @@ export default {
 
     production && copy({
       targets: [
-          {src: 'dist/bundle.css', dest: '../../docs/lib', rename: 'op.css'},
-          {src: 'dist/bundle.js', dest: '../../docs/lib', rename: 'op.js'}
+          {src: 'dist/op.js', dest: '../../docs/lib', overwrite: true}
       ]
     }),
 

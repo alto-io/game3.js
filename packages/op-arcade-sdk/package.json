@@ -8,6 +8,11 @@
     "url": "git+https://github.com/alto-io/game3.js.git",
     "directory": "packages/op-arcade-sdk"
   },
+  "main": "dist/op.js",
+  "unpkg": "dist/op.js",
+  "files": [
+    "dist/op.js"
+  ],  
   "license": "MIT",
   "scripts": {
     "build": "rollup -c",
