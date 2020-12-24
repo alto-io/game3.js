@@ -1,10 +1,14 @@
-import App from './App.svelte';
+import Op from './Op.svelte';
 
-const app = new App({
+const op = new Op({
 	target: document.body,
 	props: {
 		name: 'world'
 	}
 });
 
-export default app;
+
+// attach to window
+window.op = op;
+
+export default op;
