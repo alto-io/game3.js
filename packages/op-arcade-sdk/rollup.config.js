@@ -49,10 +49,11 @@ export default {
     file: "dist/op.js",
   },
   plugins: [
-    production && svelte({
+    svelte({
       preprocess
     }),
 
+    /*
     !production && svelte({
       // enable run-time checks when not in production
       dev: !production,
@@ -63,7 +64,8 @@ export default {
       },
       preprocess,
     }),
-
+    */
+   
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In
     // some cases you'll need additional configuration -
