@@ -13,6 +13,7 @@
         <meta property="og:type" content="website" />
         <link rel="shortcut icon" href="favicon.ico" />
         <link rel="manifest" href="game3js.webmanifest" />       
+        <link rel='stylesheet' href='/lib/op.css'>
 
       <!-- Global site tag (gtag.js) - Google Analytics -->
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-B2BFCP70EY"></script>
@@ -26,7 +27,7 @@
 
         <script src="./lib/phaser.3.24.1.min.js"></script>
         <script src="./lib/game3.js"></script>
-        <script src="./lib/op.js"></script>
+        <script defer src="./lib/op.js"></script>
         <script src="pwa.js"></script>
 
         <script>
@@ -57,7 +58,6 @@
 
         </head>
         <body>  
-            <op-arcade-sdk name="world"></op-arcade-sdk>
             <div id="phaser3"></div>            
         </body>
 </html>

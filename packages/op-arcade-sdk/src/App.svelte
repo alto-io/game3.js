@@ -1,13 +1,13 @@
 <svelte:options tag="op-arcade-sdk" />
 
 <script>
-	export let name;
+import TailwindCss from './TailwindCss.svelte'
+
+export let name;
 </script>
+<TailwindCss></TailwindCss>
 
-<style>
-	h1 {
-		color: purple;
-	}
-</style>
 
-<h1>Hello {name}!</h1>
+<main>
+  <h1 class="bg-green-500">Hello {name} from op-arcade-sdk!</h1>
+</main>
