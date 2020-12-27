@@ -8,7 +8,6 @@ const op = new Op({
 });
 
 op.id = 500;
-
 // attach to window
 window.op = op;
 
