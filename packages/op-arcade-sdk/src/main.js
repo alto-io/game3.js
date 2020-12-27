@@ -1,5 +1,7 @@
 import Op from './Op.svelte';
 
+import { url } from './stores.js'
+
 const op = new Op({
 	target: document.body,
 	props: {
@@ -7,7 +9,6 @@ const op = new Op({
 	}
 });
 
-op.id = 500;
 // attach to window
 window.op = op;
 
