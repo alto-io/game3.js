@@ -1,56 +1,28 @@
-import { readable, writable } from 'svelte/store';
+import { readable, writable, get } from 'svelte/store';
 
 export const SDK_STATES = {
-    NOT_CONNECTED: 1,
-    CONNECTING: 2,
-    CONNECTED: 3
+    NOT_CONNECTED: "not connected",
+    CONNECTING: "connecting",
+    CONNECTED: "connected"
 }
 
-function createApiKey() {
-    const { subscribe, set, update } = writable("");
-    
+function createSdk() {
+    const { subscribe, set } = writable({
+        state: SDK_STATES.NOT_CONNECTED
+    });
+
     return {
         subscribe,
         connect: () => {
-            update(key =>
-                {
-                    sdkState.connect(key);
-                    return key;
-                }
-            );
-        },
-
-        disconnect: () => {
-            update(key =>
-                console.log(key + " disconnect")
-            );
-        },
-
-        set
-    }
-}
-
-function createSdkState() {
-    const { subscribe } = readable(SDK_STATES.NOT_CONNECTED,
-        set => {
-            console.log(set);
-        }
-
-        );
-
-    return {
-        subscribe,
-        connect: (key) => {
-            console.log(key)
-            set(key);
-            return SDK_STATES.CONNECTING;
+            console.log(get(apiKey))
+            set(SDK_STATES.CONNECTING);
         }
 
     }
 }
 
-export const apiKey = createApiKey();
-export const sdkState = createSdkState();
+export const apiKey = writable("")
+export const opSdk = createSdk();
 
 export const url = readable(window.location.href);
 

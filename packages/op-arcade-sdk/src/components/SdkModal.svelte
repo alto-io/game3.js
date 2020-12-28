@@ -1,5 +1,5 @@
 <script>
-    import { url, apiKey, sdkState, SDK_STATES } from '../stores.js'
+    import { url, apiKey, opSdk, SDK_STATES } from '../stores.js'
 </script>
 
 <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center">
@@ -30,13 +30,13 @@
         <p>{$url}</p>
 
         <div class="flex pt-2">
-        <input class="mr-2 py-2 px-4 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" 
+        {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}    
+          <input class="mr-2 py-2 px-4 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" 
             placeholder="API key"
             bind:value={$apiKey}>
-        {#if $sdkState == SDK_STATES.NOT_CONNECTED}    
             <button class="flex-shrink-0 bg-purple-600 text-white text-base font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
-                on:click={apiKey.connect}>
-                Connect {$sdkState}
+                on:click={opSdk.connect}>
+                Connect
             </button>
         {/if}
         </div>
