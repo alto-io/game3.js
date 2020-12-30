@@ -17,14 +17,17 @@
 	}
 
     async function initialize() {
-        authStore = await G3JSAuth().state;
+        authStore = await G3JSAuth();
+        var sdkState = authStore.getSdkState();
 
         var sdkStateLabel = document.getElementById('sdkStateLabel');
-        sdkStateLabel.innerHTML = authStore;
+        sdkStateLabel.innerHTML = sdkState;
 
-        // enable login
-        document.getElementById('initButton').disabled = true;
-        document.getElementById('loginButton').disabled = false;
+        if (sdkState == authStore.SDK_STATES.INITIALIZED)
+        {
+            document.getElementById('initButton').disabled = true;
+            document.getElementById('loginButton').disabled = false;
+        }
     }
 
     async function login() {
@@ -47,6 +50,7 @@
 
     <button id="initButton" onclick="initialize()">INITIALIZE game3js-auth</button>
     <button id="loginButton" disabled onclick="login()">LOGIN</button>
+    <button id="logoutButton" disabled onclick="logout()">LOGOUT</button>
     
 </body>
 </html>
