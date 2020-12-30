@@ -5,12 +5,19 @@
 	<meta name='viewport' content='width=device-width,initial-scale=1'>
 
 	<title>OP Arcade SDK Example</title>
-	<script defer src='/dist/game3js-auth.js'></script> <!-- load sdk as op -->
+	<script defer src='/dist/game3js-auth.js'></script>
 </head>
 
 <script>
+	// const authStore = G3JSAuth();
+
+	let loginDetails = {
+    username: "johnny@silverhand.com",
+    password: "samurai"
+	}
+
 	function checkSdk() {
-		console.log(op.props())
+        console.log(G3JSAuth);
 	}
 </script>
 
