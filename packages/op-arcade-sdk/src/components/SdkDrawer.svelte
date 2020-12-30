@@ -19,7 +19,7 @@ on:click={() => visible = !visible}>
     <div transition:fade={{duration: 100}} class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50" on:click={() => visible = !visible}/>
 
     <aside
-    in:fade out:fly={{duration:400, x:-100}}
+    transition:fly={{duration:400, x:-100}}
     class="transform top-0 left-0 w-64 bg-white fixed h-full overflow-auto ease-in-out duration-300 z-30"
     >
     <span          
