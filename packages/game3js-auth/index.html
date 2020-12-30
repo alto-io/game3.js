@@ -9,19 +9,44 @@
 </head>
 
 <script>
-	// const authStore = G3JSAuth();
+    let authStore, loginState;
 
 	let loginDetails = {
     username: "johnny@silverhand.com",
     password: "samurai"
 	}
 
-	function checkSdk() {
-        console.log(G3JSAuth);
-	}
+    async function initialize() {
+        authStore = await G3JSAuth().state;
+
+        var sdkStateLabel = document.getElementById('sdkStateLabel');
+        sdkStateLabel.innerHTML = authStore;
+
+        // enable login
+        document.getElementById('initButton').disabled = true;
+        document.getElementById('loginButton').disabled = false;
+    }
+
+    async function login() {
+        loginState = authStore.connect();
+
+        var loginStateLabel = document.getElementById('loginStateLabel');
+        loginStateLabel.innerHTML = loginState;
+    }
+
+    
 </script>
 
 <body>
-	<button onclick="checkSdk()">CLICK FOR SDK</button>
+    <p>SDK STATE: </p>
+    <p id="sdkStateLabel">waiting for initialize</p>
+    <br/>
+    <p>LOGIN STATE: </p>
+    <p id="loginStateLabel">waiting for initialize</p>
+    <br/>
+
+    <button id="initButton" onclick="initialize()">INITIALIZE game3js-auth</button>
+    <button id="loginButton" disabled onclick="login()">LOGIN</button>
+    
 </body>
 </html>

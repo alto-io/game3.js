@@ -1,6 +1,6 @@
 # game3js-auth
 
-Backend agnostic authentication state management library for multiplayer servers. 
+Backend agnostic authentication state management library for multiplayer servers
 
 Currently supports:
 
@@ -51,19 +51,15 @@ const session = await authStore.connect(loginDetails)
 Calling ```G3JSAuth()``` without any parameters initializes it with default settings. To change the options you can do:
 
 ```
-import G3JSAuth, { NakamaConfig } from 'game3js-auth'
+import G3JSAuth from 'game3js-auth'
 
+// replace with your settings
 const authStore = G3JSAuth(
     {
-        options: [
-            new NakamaConfig(
-                {
-                    url: "http://127.0.0.1",
-                    port: 7350,
-                    key: "defaultkey"
-                }
-            )
-        ]
+        type: G3JSAuth.SERVER_TYPE.NAKAMA,
+        url: "http://127.0.0.1",
+        port: 7350,
+        key: "defaultkey"
     }
 )
 
