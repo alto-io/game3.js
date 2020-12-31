@@ -1,24 +1,20 @@
-import Auth from './Auth.svelte';
+import Auth from './Auth.svelte'
+import { NakamaConfig, DEFAULT_NAKAMA_CONFIG } from './nakama.js'
 
-const DEFAULT_CONFIG = {
-	type: "nakama",
-	url: "http://127.0.0.1",
-	port: 7350,
-	key: "defaultkey"
-}
+const init = (options) => {
 
-
-const G3JSAuth = (options) => {
+	if (options === undefined)
+		options = DEFAULT_NAKAMA_CONFIG;
 
 	return new Auth({
 		target: document.body,
 		props: {
-			options: DEFAULT_CONFIG
+			options
 		}
 	});
 }
 
-// attach to window
-window.G3JSAuth = G3JSAuth;
-
-export default G3JSAuth;
+export {
+	NakamaConfig,
+	init
+};

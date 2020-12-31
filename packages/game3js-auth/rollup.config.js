@@ -46,7 +46,7 @@ export default {
   output: {
     sourcemap: true,
     format: "iife",
-    name: "app",
+    name: "G3JSAuth",
     file: "dist/game3js-auth.js",
   },
   plugins: [

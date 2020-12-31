@@ -17,7 +17,10 @@
 	}
 
     async function initialize() {
-        authStore = await G3JSAuth();
+
+        authStore = await G3JSAuth.init();
+
+
         var sdkState = authStore.getSdkState();
 
         var sdkStateLabel = document.getElementById('sdkStateLabel');

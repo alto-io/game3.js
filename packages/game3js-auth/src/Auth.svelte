@@ -7,7 +7,7 @@ import { onMount } from "svelte";
   }
 
   export const SDK_STATES = {
-    READY: "ready",
+    UNINITIALIZED: "uninitialized",
     INITIALIZED: "initialized"
   }
 
@@ -16,7 +16,7 @@ import { onMount } from "svelte";
     LOGGED_OUT: "logged out"
   }
 
-  export let sdkState = SDK_STATES.READY;
+  export let sdkState = SDK_STATES.UNINITIALIZED;
 
   export let options;
 
@@ -28,8 +28,9 @@ import { onMount } from "svelte";
     return LOGIN_STATES.LOGGED_IN;
   }
 
+  
   onMount(() => {
-    console.log(options);
+    console.log(options)
     sdkState = SDK_STATES.INITIALIZED;
   });
   

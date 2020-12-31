@@ -35,7 +35,7 @@ Then:
 
 
 ```
-const authStore = G3JSAuth(); 
+const authStore = G3JSAuth.init(); 
 
 let loginDetails = {
     username: "johnny@silverhand.com",
@@ -48,20 +48,24 @@ const session = await authStore.connect(loginDetails)
 
 ## Customizing Auth Options
 
-Calling ```G3JSAuth()``` without any parameters initializes it with default settings. To change the options you can do:
+Calling ```G3JSAuth.init()``` without any parameters initializes it with default settings. To change the options you can do:
 
 ```
 import G3JSAuth from 'game3js-auth'
 
 // replace with your settings
-const authStore = G3JSAuth(
-    {
-        type: G3JSAuth.SERVER_TYPE.NAKAMA,
-        url: "http://127.0.0.1",
-        port: 7350,
-        key: "defaultkey"
-    }
-)
+const authStore = G3JSAuth.init
+    (
+        G3JSAuth.NakamaConfig
+            (
+                {
+                type: authStore.SERVER_TYPES.NAKAMA,
+                url: "http://127.0.0.1",
+                port: 7350,
+                key: "defaultkey"   
+                }
+            )  
+    )
 
 ```
 
