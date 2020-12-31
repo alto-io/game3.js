@@ -20,13 +20,12 @@
 
         authStore = await G3JSAuth.init();
 
-
         var sdkState = authStore.getSdkState();
 
         var sdkStateLabel = document.getElementById('sdkStateLabel');
         sdkStateLabel.innerHTML = sdkState;
 
-        if (sdkState == authStore.SDK_STATES.INITIALIZED)
+        if (sdkState == G3JSAuth.CONSTANTS.SDK_STATES.INITIALIZED)
         {
             document.getElementById('initButton').disabled = true;
             document.getElementById('loginButton').disabled = false;

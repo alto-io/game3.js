@@ -59,7 +59,7 @@ const authStore = G3JSAuth.init
         G3JSAuth.NakamaConfig
             (
                 {
-                type: authStore.SERVER_TYPES.NAKAMA,
+                type: G3JSAuth.CONSTANTS.SERVER_TYPES.NAKAMA,
                 url: "http://127.0.0.1",
                 port: 7350,
                 key: "defaultkey"   
