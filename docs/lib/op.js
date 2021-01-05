@@ -1,7 +1,10 @@
 
 (function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(window.document);
-var app = (function () {
-    'use strict';
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.op = factory());
+}(this, (function () { 'use strict';
 
     function noop() { }
     const identity = x => x;
@@ -1092,5 +1095,5 @@ var app = (function () {
 
     return op;
 
-}());
+})));
 //# sourceMappingURL=op.js.map

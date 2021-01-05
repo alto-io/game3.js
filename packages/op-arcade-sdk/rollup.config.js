@@ -45,8 +45,8 @@ export default {
   input: "src/main.js",
   output: {
     sourcemap: true,
-    format: "iife",
-    name: "app",
+    format: "umd",
+    name: "op",
     file: "dist/op.js",
   },
   plugins: [
