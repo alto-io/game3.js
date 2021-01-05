@@ -6,7 +6,16 @@ import logo from '../assets/game3js.png'
 
 let visible = false;
 
+function handleKeydown(event) {
+    let keyCode = event.keyCode;
+    
+    if (keyCode == 192) // for ~ key
+      visible = !visible;
+}
+
 </script>
+
+<svelte:window on:keydown={handleKeydown}/>
 
 <button class="m-3 fixed top-0 left-0 inline-flex items-center justify-center w-12 h-12 mr-2 transition-colors duration-300 bg-indigo-700 rounded-full hover:bg-indigo-900"
 on:click={() => visible = !visible}>

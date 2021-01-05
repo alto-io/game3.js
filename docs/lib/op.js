@@ -804,7 +804,7 @@
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(div0, "click", /*click_handler_1*/ ctx[5]);
+    				dispose = listen(div0, "click", /*click_handler_1*/ ctx[6]);
     				mounted = true;
     			}
     		},
@@ -857,7 +857,7 @@
     	};
     }
 
-    // (148:8) {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}
+    // (157:8) {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}
     function create_if_block_1(ctx) {
     	let input;
     	let t;
@@ -883,7 +883,7 @@
 
     			if (!mounted) {
     				dispose = [
-    					listen(input, "input", /*input_input_handler*/ ctx[6]),
+    					listen(input, "input", /*input_input_handler*/ ctx[7]),
     					listen(button, "click", opSdk.connect)
     				];
 
@@ -937,7 +937,11 @@
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(button, "click", /*click_handler*/ ctx[4]);
+    				dispose = [
+    					listen(window, "keydown", /*handleKeydown*/ ctx[4]),
+    					listen(button, "click", /*click_handler*/ ctx[5])
+    				];
+
     				mounted = true;
     			}
     		},
@@ -980,7 +984,7 @@
     			if (if_block) if_block.d(detaching);
     			if (detaching) detach(if_block_anchor);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
     }
@@ -993,6 +997,12 @@
     	component_subscribe($$self, opSdk, $$value => $$invalidate(2, $opSdk = $$value));
     	component_subscribe($$self, apiKey, $$value => $$invalidate(3, $apiKey = $$value));
     	let visible = false;
+
+    	function handleKeydown(event) {
+    		let keyCode = event.keyCode;
+    		if (keyCode == 192) $$invalidate(0, visible = !visible); // for ~ key
+    	}
+
     	const click_handler = () => $$invalidate(0, visible = !visible);
     	const click_handler_1 = () => $$invalidate(0, visible = !visible);
 
@@ -1006,6 +1016,7 @@
     		$url,
     		$opSdk,
     		$apiKey,
+    		handleKeydown,
     		click_handler,
     		click_handler_1,
     		input_input_handler
