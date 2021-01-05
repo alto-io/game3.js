@@ -45,7 +45,7 @@ export default {
   input: "src/main.js",
   output: {
     sourcemap: true,
-    format: "iife",
+    format: "umd",
     name: "G3JSAuth",
     file: "dist/game3js-auth.js",
   },

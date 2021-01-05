@@ -1,44 +1,43 @@
 {
-    "name": "game3js-auth",
-    "version": "0.0.1",
-    "description": "Backend agnostic authentication state management library for multiplayer servers",
-    "author": "Paul Gadi <paul@outplay.games>",
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/alto-io/game3.js.git",
-      "directory": "packages/game3js-auth"
-    },
-    "main": "dist/game3js-auth.js",
-    "unpkg": "dist/game3js-auth.js",
-    "files": [
-      "dist/game3js-auth.js"
-    ],
-    "license": "MIT",
-    "scripts": {
-      "build": "rollup -c",
-      "dev": "rollup -c -w",
-      "start": "sirv"
-    },
-    "devDependencies": {
-      "@fullhuman/postcss-purgecss": "^2.3.0",
-      "@rollup/plugin-commonjs": "^14.0.0",
-      "@rollup/plugin-image": "^2.0.6",
-      "@rollup/plugin-node-resolve": "^8.0.0",
-      "autoprefixer": "^9.8.6",
-      "rollup": "^2.3.4",
-      "rollup-plugin-copy": "^3.3.0",
-      "rollup-plugin-livereload": "^2.0.0",
-      "rollup-plugin-svelte": "^6.0.0",
-      "rollup-plugin-terser": "^7.0.0",
-      "sirv-cli": "^1.0.0",
-      "svelte": "^3.0.0",
-      "svelte-preprocess": "^4.2.1",
-      "tailwindcss": "^1.8.5"
-    },
-    "bugs": {
-      "url": "https://github.com/alto-io/game3.js/issues"
-    },
-    "homepage": "https://github.com/alto-io/game3.js/tree/main/packages/game3js-auth",
-    "keywords": []
-  }
-  
+  "name": "game3js-auth",
+  "version": "0.0.1",
+  "description": "Backend agnostic authentication state management library for multiplayer servers",
+  "author": "Paul Gadi <paul@outplay.games>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alto-io/game3.js.git",
+    "directory": "packages/game3js-auth"
+  },
+  "main": "dist/game3js-auth.js",
+  "unpkg": "dist/game3js-auth.js",
+  "files": [
+    "dist/game3js-auth.js"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "start": "sirv"
+  },
+  "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^2.3.0",
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-image": "^2.0.6",
+    "@rollup/plugin-node-resolve": "^8.0.0",
+    "autoprefixer": "^9.8.6",
+    "rollup": "^2.3.4",
+    "rollup-plugin-copy": "^3.3.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-svelte": "^6.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "sirv-cli": "^1.0.0",
+    "svelte": "^3.0.0",
+    "svelte-preprocess": "^4.2.1",
+    "tailwindcss": "^1.8.5"
+  },
+  "bugs": {
+    "url": "https://github.com/alto-io/game3.js/issues"
+  },
+  "homepage": "https://github.com/alto-io/game3.js/tree/main/packages/game3js-auth",
+  "keywords": []
+}
