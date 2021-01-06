@@ -20,6 +20,14 @@
 		console.log(op.props())
 	}
 
+	function connect() {
+		let id = document.getElementById("input-tourney-id").value;
+		Toastify({
+			text: "Connecting to OP, tourney id: " + id
+		}).showToast();
+
+	}
+
 	function attemptTourney() {
 		// 		Toastify({
 		// text: "This is a toast",
@@ -46,8 +54,26 @@
 
 <body>
 
-	<div class="grid grid-cols-3 gap-4 h-80">
-		<div class="bg-green-600 col-span-3"></div>
+	<div class="grid grid-cols-2 gap-4 h-80">
+		<div class="bg-green-600 col-span-2"></div>
+
+		<div>
+			<div class="flex items-center p-1 w-full">			
+				<input id="input-tourney-id" class="py-2 px-1 bg-white text-gray-700 
+				placeholder-gray-500 shadow-md rounded-lg text-base 
+				focus:outline-none focus:ring-2 
+				focus:ring-purple-600 focus:border-transparent"
+				
+				placeholder="tourney-id (xxxx-xx...)">			
+				<button 
+				class="m-2.5 px-10 py-1 text-sm text-purple-600 
+				font-semibold rounded-full border border-purple-200 
+				hover:text-white hover:bg-purple-600 hover:border-transparent 
+				focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+				onclick="connect()">CONNECT</button>	  
+			</div>
+		</div>
+		
 		<div>
 			<button 
 			class="m-2.5 px-4 py-1 text-sm text-purple-600 
@@ -56,7 +82,6 @@
 			focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
 			onclick="attemptTourney()">ATTEMPT</button>	  
 		</div>
-		<div class="...">5</div>
 		<div class="...">6</div>
 		<div class="col-span-2 ...">7</div>
 	  </div>
