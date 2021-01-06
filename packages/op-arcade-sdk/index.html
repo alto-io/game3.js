@@ -6,15 +6,63 @@
 
 	<title>OP Arcade SDK Example</title>
 	<script defer src='/dist/op.js'></script> <!-- load sdk as op -->
+
+	<!-- tailwind css -->
+	<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+
+	<!-- toastify -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
 </head>
 
 <script>
 	function checkSdk() {
 		console.log(op.props())
 	}
+
+	function attemptTourney() {
+		// 		Toastify({
+		// text: "This is a toast",
+		// duration: 3000,
+		// destination: "https://github.com/apvarun/toastify-js",
+		// newWindow: true,
+		// close: true,
+		// gravity: "top", // `top` or `bottom`
+		// position: "right", // `left`, `center` or `right`
+		// backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+		// stopOnFocus: true, // Prevents dismissing of toast on hover
+		// onClick: function(){} // Callback after click
+		// }).showToast();
+
+		Toastify({
+			text: "attempt"
+		}).showToast();
+	}
 </script>
 
+<style>
+	
+</style>
+
 <body>
-	<button onclick="checkSdk()">CLICK FOR SDK</button>
+
+	<div class="grid grid-cols-3 gap-4 h-80">
+		<div class="bg-green-600 col-span-3"></div>
+		<div>
+			<button 
+			class="m-2.5 px-4 py-1 text-sm text-purple-600 
+			font-semibold rounded-full border border-purple-200 
+			hover:text-white hover:bg-purple-600 hover:border-transparent 
+			focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+			onclick="attemptTourney()">ATTEMPT</button>	  
+		</div>
+		<div class="...">5</div>
+		<div class="...">6</div>
+		<div class="col-span-2 ...">7</div>
+	  </div>
+
+
 </body>
 </html>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
