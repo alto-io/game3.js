@@ -8,6 +8,7 @@ const CONSTANTS =
     SDK_STATES: 
     {
         UNINITIALIZED: "uninitialized",
+        INITIALIZING: "initializing",
         INITIALIZED: "initialized"
     },
     
