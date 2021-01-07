@@ -12,15 +12,22 @@
 
 <body>
     <p>SDK STATE: </p>
-    <p id="sdkStateLabel">waiting for initialize</p>
+    <p id="sdkStateLabel">not_ready</p>
     <br/>
     <p>LOGIN STATE: </p>
-    <p id="loginStateLabel">waiting for initialize</p>
+    <p id="loginStateLabel">logged_out</p>
     <br/>
 
     <button id="initButton" onclick="initialize()">INITIALIZE game3js-auth</button>
     <button id="loginButton" disabled onclick="login()">LOGIN</button>
     <button id="logoutButton" disabled onclick="logout()">LOGOUT</button>
+
+    <div id="loginDiv" style="margin: 10px; display:none">
+        <label for="usernameInput">Username</label>
+        <input id="usernameInput" type="email" value="johnny@silverhand.com">
+        <label for="passwordInput">Password</label>
+        <input id="passwordInput" type="password" value="samurai">
+    </div>
     
 </body>
 
@@ -66,17 +73,17 @@ function Binding(b) {
 </script>
 
 <script>
-    let authStore, loginState;
-
-	let loginDetails = {
-    username: "johnny@silverhand.com",
-    password: "samurai"
-    }
+    // stores used for auth states
+    let authStore, loginStore;
 
     let sdkStateLabel = document.getElementById('sdkStateLabel');
+    let loginStateLabel = document.getElementById('loginStateLabel');
     let initButton = document.getElementById('initButton');
     let loginButton = document.getElementById('loginButton');
-    
+    let logoutButton = document.getElementById('logoutButton');
+    let loginDiv = document.getElementById('loginDiv');
+
+    // change the button states depending on sdkState
     let sdkStateObserver = new MutationObserver( (mutations) =>
     {
         mutations.forEach( (mutation) => 
@@ -89,10 +96,12 @@ function Binding(b) {
                 case G3JSAuth.CONSTANTS.SDK_STATES.READY:
                     initButton.disabled = true;
                     loginButton.disabled = false;
+                    loginDiv.style.display = "block";
                 break;
                 default:
                     initButton.disabled = false;
                     loginButton.disabled = true;
+                    loginDiv.style.display = "none";
                 break;
             }
 
@@ -102,6 +111,41 @@ function Binding(b) {
 
     sdkStateObserver.observe(sdkStateLabel, {subtree: true, childList: true});
 
+    // change the login display according to loginState
+    let loginStateObserver = new MutationObserver( (mutations) =>
+    {
+        mutations.forEach( (mutation) => 
+        {
+            // assume that it's a change via the UI bind
+            let newText = mutation.addedNodes[0].data;
+
+            switch (newText)
+            {
+                case G3JSAuth.CONSTANTS.LOGIN_STATES.LOGIN_IN_PROGRESS:
+                    loginButton.disabled = true;
+                    loginDiv.style.display = "none";
+                break;
+                case G3JSAuth.CONSTANTS.LOGIN_STATES.LOGGED_IN:
+                    loginButton.disabled = true;
+                    logoutButton.disabled = false;
+                    loginDiv.style.display = "none";
+                break;
+                case G3JSAuth.CONSTANTS.LOGIN_STATES.LOGGED_OUT:
+                    loginButton.disabled = false;
+                    logoutButton.disabled = true;
+                    loginDiv.style.display = "block";
+                break;
+            }
+
+        })
+
+    })    
+
+    loginStateObserver.observe(loginStateLabel, {subtree: true, childList: true});
+
+
+
+    
     async function initialize() {
 
         authStore = await G3JSAuth.init();
@@ -113,22 +157,24 @@ function Binding(b) {
                 property: "sdkState"
             })
             .addBinding(sdkStateLabel, "innerHTML")
-            .addBinding(loginButton, "disabled")
-
-        var sdkState = authStore.sdkState;
-
-        if (sdkState == G3JSAuth.CONSTANTS.SDK_STATES.INITIALIZED)
-        {
-            disabled = true;
-            document.getElementById('loginButton').disabled = false;
-        }
     }
 
     async function login() {
-        loginState = authStore.connect();
 
-        var loginStateLabel = document.getElementById('loginStateLabel');
-        loginStateLabel.innerHTML = loginState;
+        let loginObject = {
+            username:  document.getElementById('usernameInput').value,
+            password:  document.getElementById('passwordInput').value
+        }
+
+        loginState = authStore.connect(loginObject);
+
+       // bind the sdkState to the UI element
+       new Binding(
+            {
+                object: authStore,
+                property: "loginState"
+            })
+            .addBinding(loginStateLabel, "innerHTML")
     }
 
     

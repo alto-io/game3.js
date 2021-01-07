@@ -54,11 +54,11 @@ const nakamaInitSdk = async (options) => {
 }
 
 
-const nakamaLogin = (options) => {
+const nakamaLogin = async (loginObject) => {
 
-    return {
-        user: "hello"
-    }
+    let session = null;
+
+    return loginObject
 }
 
 

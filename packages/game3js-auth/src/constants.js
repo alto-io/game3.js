@@ -14,8 +14,9 @@ const CONSTANTS =
     
     LOGIN_STATES:
     {
-        LOGGED_IN: "logged in",
-        LOGGED_OUT: "logged out"
+        LOGGED_OUT: "logged_out",
+        LOGIN_IN_PROGRESS: "login_in_progress",
+        LOGGED_IN: "logged_in",
     }
 }
 
