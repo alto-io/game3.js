@@ -17,54 +17,72 @@ const NakamaConfig = (options) => {
         return DEFAULT_NAKAMA_CONFIG;
 }
 
+// return a login provider on success
 const nakamaInitSdk = async (options) => {
 
-    let session = null;
-
-    let sdkContext = {
-        sdkState: CONSTANTS.SDK_STATES.NOT_READY
-    }
-
     // initialize sdk    
-    let client = new nakamajs.Client(
+     let client = new nakamajs.Client(
         options.key,
         options.url,
         options.port
     )
 
     // do a test authenticate
-    session = await client.authenticateCustom({
+    let session = await client.authenticateCustom({
         id: TEST_ID,
         create: true
     });
 
     if (session != null) {
 
+        let lp = new NakamaLoginProvider(client);
+
         console.log('%c%s',
         'color: blue; background: white;',
         "Nakama client SDK initialized: --- " 
         + options.url + ":" + options.port + " ---"
         )
-
-        sdkContext.sdkClient = client;
-        sdkContext.sdkState = CONSTANTS.SDK_STATES.READY;
+        
+        return lp;
     }
 
-    return sdkContext;
+    return null;
 }
 
+class NakamaLoginProvider {
 
-const nakamaLogin = async (loginObject) => {
+    client = null;
+    session = null;
+    
+    constructor(client) {
+        this.client = client;
+    }
 
-    let session = null;
+    login = async (loginObject) => {
 
-    return loginObject
+        try {
+            this.session = await this.client.authenticateEmail(
+                {
+                email: loginObject.username,
+                password: loginObject.password,
+                create: true   
+                }
+            )
+        } catch (e) {
+            console.error("Login failed [" + e.status + ":" + e.statusText + "]"); 
+         }
+    
+        return this.session
+    }    
+
+    logout = () => {
+        this.session = null;
+    }
 }
-
 
 export {
     DEFAULT_NAKAMA_CONFIG,
     nakamaInitSdk,
-    nakamaLogin,
-    NakamaConfig
+    NakamaConfig,
+    NakamaLoginProvider
 };

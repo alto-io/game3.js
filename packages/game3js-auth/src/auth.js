@@ -1,14 +1,12 @@
 import CONSTANTS from './constants.js'
-import { nakamaInitSdk, nakamaLogin } from './nakama.js'
+import { nakamaInitSdk, NakamaLoginProvider } from './nakama.js'
 
 export class Auth {
 
   sdkState = CONSTANTS.SDK_STATES.INITIALIZING
   loginState = CONSTANTS.SDK_STATES.NOT_READY
-  sdkClient = null
-  userContext = null;
   
-  // functions replaced depending on serverType
+  // provider depends on serverType
   loginProvider = null;
 
   constructor(options) {
@@ -18,13 +16,15 @@ export class Auth {
       case CONSTANTS.SERVER_TYPES.NAKAMA:
 
         nakamaInitSdk(options).then(
-          sdkContext => {
-            this.sdkState = sdkContext.sdkState;
-            this.sdkClient = sdkContext.sdkClient;
+          loginProvider => {
+            if (loginProvider != null)
+            {
+              this.loginProvider = loginProvider;
+              this.sdkState = CONSTANTS.SDK_STATES.READY;
+            }
           }
         ); 
 
-        this.loginProvider = nakamaLogin;
 
         break;
 
@@ -35,9 +35,24 @@ export class Auth {
 
   }
 
-  connect(loginObject) {
+  login(loginCreds) {
     this.loginState = CONSTANTS.LOGIN_STATES.LOGIN_IN_PROGRESS;
-    console.log(loginObject);
+
+    this.loginProvider.login(loginCreds).then(
+      token => {
+        if (token != null)
+        {
+          this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_IN;
+        }
+
+        else {
+          this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
+        }
+      })
   }
 
+  logout() {
+    this.loginProvider.logout();
+    this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
+  }
 }

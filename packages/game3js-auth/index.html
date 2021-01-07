@@ -26,7 +26,8 @@
         <label for="usernameInput">Username</label>
         <input id="usernameInput" type="email" value="johnny@silverhand.com">
         <label for="passwordInput">Password</label>
-        <input id="passwordInput" type="password" value="samurai">
+        <input id="passwordInput" type="password" value="samurai1">
+        <div> IMPORTANT: Nakama expects at least an 8 character password </div>
     </div>
     
 </body>
@@ -74,7 +75,7 @@ function Binding(b) {
 
 <script>
     // stores used for auth states
-    let authStore, loginStore;
+    let authStore;
 
     let sdkStateLabel = document.getElementById('sdkStateLabel');
     let loginStateLabel = document.getElementById('loginStateLabel');
@@ -166,7 +167,7 @@ function Binding(b) {
             password:  document.getElementById('passwordInput').value
         }
 
-        loginState = authStore.connect(loginObject);
+        loginState = authStore.login(loginObject);
 
        // bind the sdkState to the UI element
        new Binding(
@@ -175,6 +176,10 @@ function Binding(b) {
                 property: "loginState"
             })
             .addBinding(loginStateLabel, "innerHTML")
+    }
+
+    async function logout() {
+        loginState = authStore.logout();
     }
 
     
