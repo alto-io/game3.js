@@ -7,9 +7,9 @@ const CONSTANTS =
     
     SDK_STATES: 
     {
-        UNINITIALIZED: "uninitialized",
+        NOT_READY: "not_ready",
         INITIALIZING: "initializing",
-        INITIALIZED: "initialized"
+        READY: "ready"
     },
     
     LOGIN_STATES:

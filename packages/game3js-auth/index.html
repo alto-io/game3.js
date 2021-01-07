@@ -10,6 +10,20 @@
     <script defer src='/dist/game3js-auth.js'></script>
 </head>
 
+<body>
+    <p>SDK STATE: </p>
+    <p id="sdkStateLabel">waiting for initialize</p>
+    <br/>
+    <p>LOGIN STATE: </p>
+    <p id="loginStateLabel">waiting for initialize</p>
+    <br/>
+
+    <button id="initButton" onclick="initialize()">INITIALIZE game3js-auth</button>
+    <button id="loginButton" disabled onclick="login()">LOGIN</button>
+    <button id="logoutButton" disabled onclick="logout()">LOGOUT</button>
+    
+</body>
+
 <!-- a script to help with updating ui components -->    
 <script> 
 function Binding(b) {
@@ -51,35 +65,61 @@ function Binding(b) {
 }
 </script>
 
-
 <script>
     let authStore, loginState;
 
 	let loginDetails = {
     username: "johnny@silverhand.com",
     password: "samurai"
-	}
+    }
+
+    let sdkStateLabel = document.getElementById('sdkStateLabel');
+    let initButton = document.getElementById('initButton');
+    let loginButton = document.getElementById('loginButton');
+    
+    let sdkStateObserver = new MutationObserver( (mutations) =>
+    {
+        mutations.forEach( (mutation) => 
+        {
+            // assume that it's a change via the UI bind
+            let newText = mutation.addedNodes[0].data;
+
+            switch (newText)
+            {
+                case G3JSAuth.CONSTANTS.SDK_STATES.READY:
+                    initButton.disabled = true;
+                    loginButton.disabled = false;
+                break;
+                default:
+                    initButton.disabled = false;
+                    loginButton.disabled = true;
+                break;
+            }
+
+        })
+
+    })    
+
+    sdkStateObserver.observe(sdkStateLabel, {subtree: true, childList: true});
 
     async function initialize() {
 
         authStore = await G3JSAuth.init();
-
-        var sdkStateLabel = document.getElementById('sdkStateLabel');
-
+        
         // bind the sdkState to the UI element
         new Binding(
             {
                 object: authStore,
                 property: "sdkState"
             })
-            .addBinding(sdkStateLabel, "innerHTML");
+            .addBinding(sdkStateLabel, "innerHTML")
+            .addBinding(loginButton, "disabled")
 
         var sdkState = authStore.sdkState;
 
-
         if (sdkState == G3JSAuth.CONSTANTS.SDK_STATES.INITIALIZED)
         {
-            document.getElementById('initButton').disabled = true;
+            disabled = true;
             document.getElementById('loginButton').disabled = false;
         }
     }
@@ -93,18 +133,5 @@ function Binding(b) {
 
     
 </script>
-
-<body>
-    <p>SDK STATE: </p>
-    <p id="sdkStateLabel">waiting for initialize</p>
-    <br/>
-    <p>LOGIN STATE: </p>
-    <p id="loginStateLabel">waiting for initialize</p>
-    <br/>
-
-    <button id="initButton" onclick="initialize()">INITIALIZE game3js-auth</button>
-    <button id="loginButton" disabled onclick="login()">LOGIN</button>
-    <button id="logoutButton" disabled onclick="logout()">LOGOUT</button>
-    
-</body>
 </html>
+

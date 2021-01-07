@@ -22,7 +22,7 @@ const nakamaInitSdk = async (options) => {
     let session = null;
 
     let sdkContext = {
-        sdkState: CONSTANTS.SDK_STATES.UNINITIALIZED
+        sdkState: CONSTANTS.SDK_STATES.NOT_READY
     }
 
     // initialize sdk    
@@ -39,8 +39,15 @@ const nakamaInitSdk = async (options) => {
     });
 
     if (session != null) {
+
+        console.log('%c%s',
+        'color: blue; background: white;',
+        "Nakama client SDK initialized: --- " 
+        + options.url + ":" + options.port + " ---"
+        )
+
         sdkContext.sdkClient = client;
-        sdkContext.sdkState = CONSTANTS.SDK_STATES.INITIALIZED;
+        sdkContext.sdkState = CONSTANTS.SDK_STATES.READY;
     }
 
     return sdkContext;
