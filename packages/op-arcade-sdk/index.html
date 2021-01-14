@@ -21,10 +21,17 @@
 	}
 
 	function connect() {
-		let id = document.getElementById("input-tourney-id").value;
+		let tourney_id = document.getElementById("input-tourney-id").value;
 		Toastify({
-			text: "Connecting to OP, tourney id: " + id
+			text: "Connecting to OP..."
 		}).showToast();
+
+		op.connect(tourney_id).then
+		(
+			() => {
+				console.log("DFD")
+			}
+		)
 
 	}
 

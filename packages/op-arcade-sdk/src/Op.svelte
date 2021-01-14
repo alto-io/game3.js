@@ -14,6 +14,11 @@ export function props() {
   }
 }
 
+export async function connect(tourney_id) {
+  return tourney_id
+}
+
+
 </script>
 
 <TailwindCss></TailwindCss>
