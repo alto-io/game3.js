@@ -24,15 +24,22 @@ npm install game3js-auth
 ```
 
 ```
-import G3JSAuth from 'game3js-auth'
+import 'game3js-auth'
 ```
 
 ## Quickstart
+
+An example implementation is found at /index.html.
 
 [First set up a local Nakama docker instance with the default settings]((https://heroiclabs.com/docs/install-docker-quickstart)).
 
 Then:
 
+```
+npm run dev
+```
+
+## Example Implementation
 
 ```
 const authStore = G3JSAuth.init(); 
@@ -42,7 +49,7 @@ let loginDetails = {
     password: "samurai"
 }
 
-const session = await authStore.connect(loginDetails)
+const session = await authStore.login(loginDetails)
 
 ```
 
