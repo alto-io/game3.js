@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^2.3.0",
-    "@heroiclabs/nakama-js": "^2.0.1",
+    "@heroiclabs/nakama-js": "2.0.1",
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-image": "^2.0.6",
     "@rollup/plugin-node-resolve": "^8.0.0",
