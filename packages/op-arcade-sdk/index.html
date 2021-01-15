@@ -16,22 +16,27 @@
 </head>
 
 <script>
-	function checkSdk() {
-		console.log(op.props())
-	}
-
 	function connect() {
+		// op.initialize(config)
+
+		console.log(op.props());
+
 		let tourney_id = document.getElementById("input-tourney-id").value;
+
+		let options = {
+			tourney_id
+		}
+
+		op.getTourney(options).then
+		(
+			(result) => {
+				console.log(result)
+			}
+		)
+
 		Toastify({
 			text: "Connecting to OP..."
 		}).showToast();
-
-		op.connect(tourney_id).then
-		(
-			() => {
-				console.log("DFD")
-			}
-		)
 
 	}
 

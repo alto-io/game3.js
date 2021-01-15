@@ -1,7 +1,5 @@
 import Op from './Op.svelte';
 
-import { url } from './stores.js'
-
 const op = new Op({
 	target: document.body,
 	props: {

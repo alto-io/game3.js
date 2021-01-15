@@ -3,21 +3,32 @@
 -->
 
 <script>
+import CONSTANTS from './constants.js'
+
 import TailwindCss from './TailwindCss.svelte'
 import SdkDrawer from './components/SdkDrawer.svelte'
 
-import { url } from './stores.js'
+import { config, tourneyStore, url } from './stores.js'
 
-export function props() {
+ function props() {
   return {
-    url: $url
+    url: $url,
+    config: $config
   }
 }
 
-export async function connect(tourney_id) {
-  return tourney_id
+async function getTourney(options) {
+
+  let result = await $tourneyStore.getTourney(options);
+  return result;
+  
 }
 
+export {
+  CONSTANTS,
+  props,
+  getTourney
+}
 
 </script>
 

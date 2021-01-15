@@ -1,4 +1,30 @@
+import CONSTANTS from './constants.js'
 import { readable, writable, get } from 'svelte/store';
+import { getTourneyStore } from './tourney';
+
+export const DEFAULT_CONFIG = {
+    tourney_server: {
+        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+        url: "localhost",
+        port: "7350",
+        key: "defaultkey"
+    },
+    auth_server: {
+        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+        url: "localhost",
+        port: "7350",
+        key: "defaultkey"
+    }
+}
+
+export const apiKey = writable("");
+export const config = writable(DEFAULT_CONFIG);
+export const url = readable(window.location.href);
+
+export const tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
+
+
+
 
 export const SDK_STATES = {
     NOT_CONNECTED: "not connected",
@@ -21,8 +47,5 @@ function createSdk() {
     }
 }
 
-export const apiKey = writable("")
 export const opSdk = createSdk();
-
-export const url = readable(window.location.href);
 
