@@ -1,5 +1,5 @@
 import CONSTANTS from './constants.js'
-import { nakamaInitSdk, NakamaLoginProvider } from './nakama.js'
+import { nakamaInitSdk } from './nakama.js'
 
 export class Auth {
 

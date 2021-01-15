@@ -167,7 +167,7 @@ function Binding(b) {
             password:  document.getElementById('passwordInput').value
         }
 
-        loginState = authStore.login(loginObject);
+        authStore.login(loginObject);
 
        // bind the sdkState to the UI element
        new Binding(
@@ -179,7 +179,7 @@ function Binding(b) {
     }
 
     async function logout() {
-        loginState = authStore.logout();
+        authStore.logout();
     }
 
     
