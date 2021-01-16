@@ -69,16 +69,39 @@ class NakamaProvider {
         this.session = null;
     }
 
+    refreshSession = async () => {
+        if (this.session == null)
+        {
+            this.session = await this.client.authenticateCustom({
+                id: TEST_ID,
+                create: true
+            }); 
+        }
+
+        // if session has expired
+        else if ( (this.session.expires_at * 1000) < Date.now())
+        {
+            // recreate client
+            this.client = new nakamajs.Client(
+                this.client.serverkey,
+                this.client.host,
+                this.client.port
+            )
+
+            this.session = await this.client.authenticateCustom({
+                id: TEST_ID,
+                create: true
+            }); 
+
+        }
+
+    }
+
+
     getTourney = async (options) => {
 
         try {
-            if (this.session == null)
-            {
-                this.session = await this.client.authenticateCustom({
-                    id: TEST_ID,
-                    create: true
-                }); 
-            }
+            await this.refreshSession();
 
             let tourneyInfo = await this.client.listLeaderboardRecords(
                 this.session,
