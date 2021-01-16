@@ -25,7 +25,7 @@ const getAuthProvider = async (options) => {
 
         console.log('%c%s',
         'color: blue; background: white;',
-        "Nakama client SDK initialized: --- " 
+        "Nakama Auth Provider : --- " 
         + options.url + ":" + options.port + " ---"
         )
         

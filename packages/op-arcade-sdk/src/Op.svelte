@@ -8,7 +8,7 @@ import CONSTANTS from './constants.js'
 import TailwindCss from './TailwindCss.svelte'
 import SdkDrawer from './components/SdkDrawer.svelte'
 
-import { config, tourneyStore, url } from './stores.js'
+import { config, tourneyStore, authStore, url } from './stores.js'
 
  function props() {
   return {

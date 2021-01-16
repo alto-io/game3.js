@@ -9,13 +9,13 @@ export class Auth {
     loginState = CONSTANTS.SDK_STATES.NOT_READY
 
     // provider depends on serverType
-    loginProvider = null;
+    authProvider = null;
 
     constructor(options) {
         let serverType = options.type;
 
         switch (serverType) {
-            case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
+            case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
 
                 getAuthProvider(options).then(
                     authProvider => {
@@ -37,10 +37,10 @@ export class Auth {
     }
 
 
-    login(loginCreds) {
+    login = async (loginCreds) => {
         this.loginState = CONSTANTS.LOGIN_STATES.LOGIN_IN_PROGRESS;
     
-        this.loginProvider.login(loginCreds).then(
+        this.authProvider.login(loginCreds).then(
           token => {
             if (token != null)
             {
@@ -53,12 +53,26 @@ export class Auth {
           })
       }
     
-      logout() {
-        this.loginProvider.logout();
+      logout = () => {
+        this.authProvider.logout();
         this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
       }
     
 }
+
+export function getAuthStoreForSvelte(options) {
+    const { subscribe, get } = writable({
+        store: new Auth(options)
+    });
+
+    return {
+        subscribe,
+        login: () => {
+            console.log(get(store))
+        }
+    }
+}
+
 
 export function getAuthStore(options) {
     return writable(new Auth(options))

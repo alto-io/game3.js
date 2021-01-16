@@ -24,7 +24,7 @@ const getTourneyProvider = async (options) => {
 
         console.log('%c%s',
         'color: blue; background: white;',
-        "Nakama client SDK initialized: --- " 
+        "Nakama Tourney Provider : --- " 
         + options.url + ":" + options.port + " ---"
         )
         

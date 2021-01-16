@@ -1,6 +1,7 @@
 import CONSTANTS from './constants.js'
 import { readable, writable, get } from 'svelte/store';
 import { getTourneyStore } from './tourney';
+import { getAuthStore, getAuthStoreForSvelte } from './auth';
 
 export const DEFAULT_CONFIG = {
     tourney_server: {
@@ -17,13 +18,16 @@ export const DEFAULT_CONFIG = {
     }
 }
 
+export const username = writable("");
+export const password = writable("");
+
 export const apiKey = writable("");
 export const config = writable(DEFAULT_CONFIG);
 export const url = readable(window.location.href);
 
 export const tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
-
-
+export const authStore = getAuthStore(DEFAULT_CONFIG.auth_server);
+export const authStoreForSvelte = getAuthStoreForSvelte(DEFAULT_CONFIG.tourney_server);
 
 
 export const SDK_STATES = {

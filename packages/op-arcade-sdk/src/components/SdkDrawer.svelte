@@ -1,5 +1,6 @@
 <script>
-    import { url, apiKey, opSdk, SDK_STATES } from '../stores.js'
+    import { username, password, authStore, url, apiKey, opSdk, SDK_STATES } from '../stores.js'
+
     import { fade, fly } from 'svelte/transition'
     
 import logo from '../assets/game3js.png'
@@ -38,13 +39,27 @@ on:click={() => visible = !visible}>
     </span>
 
     <span>
-      <div class="flex items-center p-4 bg-blue-500 w-full">
+      <div class="flex items-center p-3 bg-blue-500 w-full">
         {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}    
-            <input class="mr-2 py-2 px-1 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-            placeholder="tourney-id (xxxx-xxxx-..)"
-            bind:value={$apiKey}>
+            <div>
+              <input class="py-2 px-1 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+              placeholder="username"
+              bind:value={$username}>
+            </div>
+        {/if}
+      </div>
+    </span>
+
+    <span>
+      <div class="flex items-center p-3 bg-blue-500 w-full space-x-2">
+        {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}    
+            <div>
+              <input class="py-2 px-1 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            placeholder="password"
+            bind:value={$password}>
+          </div>
             <button class="bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
-                on:click={opSdk.connect}>
+                on:click={authStore.login}>
                 <span >
                     <svg
                       fill="none"
@@ -55,16 +70,16 @@ on:click={() => visible = !visible}>
                       viewBox="0 0 24 24"
                       class="w-6 h-6"
                     >
-                      <path
-                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      ></path>
+                    <path fill="none" d="M15.608,6.262h-2.338v0.935h2.338c0.516,0,0.934,0.418,0.934,0.935v8.879c0,0.517-0.418,0.935-0.934,0.935H4.392c-0.516,0-0.935-0.418-0.935-0.935V8.131c0-0.516,0.419-0.935,0.935-0.935h2.336V6.262H4.392c-1.032,0-1.869,0.837-1.869,1.869v8.879c0,1.031,0.837,1.869,1.869,1.869h11.216c1.031,0,1.869-0.838,1.869-1.869V8.131C17.478,7.099,16.64,6.262,15.608,6.262z M9.513,11.973c0.017,0.082,0.047,0.162,0.109,0.226c0.104,0.106,0.243,0.143,0.378,0.126c0.135,0.017,0.274-0.02,0.377-0.126c0.064-0.065,0.097-0.147,0.115-0.231l1.708-1.751c0.178-0.183,0.178-0.479,0-0.662c-0.178-0.182-0.467-0.182-0.645,0l-1.101,1.129V1.588c0-0.258-0.204-0.467-0.456-0.467c-0.252,0-0.456,0.209-0.456,0.467v9.094L8.443,9.553c-0.178-0.182-0.467-0.182-0.645,0c-0.178,0.184-0.178,0.479,0,0.662L9.513,11.973z">
+                      
+                    </path>
                     </svg>
                   </span>
-            </button>
+            </button>          
         {/if}
       </div>
     </span>
-    
+   
     <span
       class="flex items-center p-4 hover:bg-indigo-500 hover:text-white "
       ><span class="mr-2">
