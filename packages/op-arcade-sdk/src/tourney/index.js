@@ -1,7 +1,7 @@
 import CONSTANTS from '../constants.js'
 
 import { writable } from 'svelte/store';
-import { nakamaInitSdk } from './nakama.js'
+import { getTourneyProvider } from './nakama.js'
 
 export class Tourney {
 
@@ -16,7 +16,7 @@ export class Tourney {
         switch (serverType) {
             case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
 
-                nakamaInitSdk(options).then(
+                getTourneyProvider(options).then(
                     tourneyProvider => {
                       if (tourneyProvider != null)
                       {

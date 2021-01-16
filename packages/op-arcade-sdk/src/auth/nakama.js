@@ -3,7 +3,8 @@ import * as nakamajs from '@heroiclabs/nakama-js';
 
 const TEST_ID = "test_id"
 
-const getTourneyProvider = async (options) => {
+// return a login provider on success
+const getAuthProvider = async (options) => {
 
     // initialize sdk    
      let client = new nakamajs.Client(
@@ -20,7 +21,7 @@ const getTourneyProvider = async (options) => {
 
     if (session != null) {
 
-        let provider = new NakamaTourneyProvider(client);
+        let provider = new NakamaAuthProvider(client);
 
         console.log('%c%s',
         'color: blue; background: white;',
@@ -35,13 +36,37 @@ const getTourneyProvider = async (options) => {
     return null;
 }
 
-class NakamaTourneyProvider {
+class NakamaAuthProvider {
 
     client = null;
     session = null;
     
     constructor(client) {
         this.client = client;
+    }
+
+    login = async (loginObject) => {
+
+        try {
+            this.session = await this.client.authenticateEmail(
+                {
+                email: loginObject.username,
+                password: loginObject.password,
+                create: true   
+                }
+            )
+
+            return this.session
+            
+        } catch (e) {
+            console.error("Login failed [" + e.status + ":" + e.statusText + "]"); 
+         }
+    
+         return null;
+    }    
+
+    logout = () => {
+        this.session = null;
     }
 
     refreshSession = async () => {
@@ -71,26 +96,9 @@ class NakamaTourneyProvider {
         }
 
     }
-
-
-    getTourney = async (options) => {
-
-        try {
-            await this.refreshSession();
-
-            let tourneyInfo = await this.client.listLeaderboardRecords(
-                this.session,
-                options.tourney_id);
-
-            return tourneyInfo;
-
-        } catch (e) {
-            console.error("getTourney failed [" + e.status + ":" + e.statusText + "]"); 
-            return(e);
-         }
-    }    
+ 
 }
 
 export {
-    getTourneyProvider
+    getAuthProvider
 };

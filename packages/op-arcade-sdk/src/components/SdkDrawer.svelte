@@ -36,6 +36,35 @@ on:click={() => visible = !visible}>
     >
       <img src={logo} alt="Logo" class="h-auto w-16 mx-auto" />
     </span>
+
+    <span>
+      <div class="flex items-center p-4 bg-blue-500 w-full">
+        {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}    
+            <input class="mr-2 py-2 px-1 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            placeholder="tourney-id (xxxx-xxxx-..)"
+            bind:value={$apiKey}>
+            <button class="bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
+                on:click={opSdk.connect}>
+                <span >
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      class="w-6 h-6"
+                    >
+                      <path
+                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                  </span>
+            </button>
+        {/if}
+      </div>
+    </span>
+    
     <span
       class="flex items-center p-4 hover:bg-indigo-500 hover:text-white "
       ><span class="mr-2">
@@ -53,8 +82,9 @@ on:click={() => visible = !visible}>
           ></path>
         </svg>
       </span>
-      <span>Home</span></span
-    >
+      <span>Home</span>
+    </span>
+
     <span
       class="flex items-center p-4 hover:bg-indigo-500 hover:text-white "
       ><span class="mr-2">
