@@ -32,6 +32,7 @@ const nakamaInitSdk = async (options) => {
         return lp;
     }
 
+    console.error("unable to initialize SDK")
     return null;
 }
 
@@ -54,11 +55,14 @@ class NakamaProvider {
                 create: true   
                 }
             )
+
+            return this.session
+            
         } catch (e) {
             console.error("Login failed [" + e.status + ":" + e.statusText + "]"); 
          }
     
-        return this.session
+         return null;
     }    
 
     logout = () => {
@@ -67,10 +71,25 @@ class NakamaProvider {
 
     getTourney = async (options) => {
 
-        return {
-            options
-        }
+        try {
+            if (this.session == null)
+            {
+                this.session = await this.client.authenticateCustom({
+                    id: TEST_ID,
+                    create: true
+                }); 
+            }
 
+            let tourneyInfo = await this.client.listLeaderboardRecords(
+                this.session,
+                options.tourney_id);
+
+            return tourneyInfo;
+
+        } catch (e) {
+            console.error("getTourney failed [" + e.status + ":" + e.statusText + "]"); 
+            return(e);
+         }
     }    
 }
 

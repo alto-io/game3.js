@@ -30,7 +30,22 @@
 		op.getTourney(options).then
 		(
 			(result) => {
-				console.log(result)
+				// catch error
+				if (result instanceof Response) {
+					Toastify({
+						text: "Unable to Connect:  " + result.statusText,
+						backgroundColor: "#ff4444"
+					}).showToast();
+				}
+
+				else {
+
+					console.log(result)
+
+					Toastify({
+						text: "Results Found:  " + result.records.length
+					}).showToast();
+				}
 			}
 		)
 
