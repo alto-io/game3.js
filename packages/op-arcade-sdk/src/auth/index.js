@@ -3,12 +3,10 @@ import CONSTANTS from '../constants.js';
 import { writable } from 'svelte/store';
 import { getAuthProvider } from './nakama.js';
 
-import { username, password } from '../stores.js'
-
 export class Auth {
 
     sdkState = CONSTANTS.SDK_STATES.INITIALIZING
-    loginState = CONSTANTS.SDK_STATES.NOT_READY
+    loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT
 
     // provider depends on serverType
     authProvider = null;
@@ -52,6 +50,8 @@ export class Auth {
             else {
               this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
             }
+
+            return this;
           })
       }
     

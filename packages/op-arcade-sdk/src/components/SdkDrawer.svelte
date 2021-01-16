@@ -1,5 +1,8 @@
 <script>
-    import { username, password, authStore, url, apiKey, opSdk, SDK_STATES } from '../stores.js'
+    import CONSTANTS from '../constants.js';
+
+    import { username, password, loginState, authStore } from '../stores.js';
+    import { url, apiKey, opSdk, SDK_STATES } from '../stores.js';
 
     import { fade, fly } from 'svelte/transition'
     
@@ -40,7 +43,7 @@ on:click={() => visible = !visible}>
 
     <span>
       <div class="flex items-center p-3 bg-blue-500 w-full">
-        {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}    
+        {#if $authStore.loginState == CONSTANTS.LOGIN_STATES.LOGGED_OUT}    
             <div>
               <input class="py-2 px-1 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               placeholder="username"
@@ -52,14 +55,16 @@ on:click={() => visible = !visible}>
 
     <span>
       <div class="flex items-center p-3 bg-blue-500 w-full space-x-2">
-        {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}    
+        {#if $authStore.loginState == CONSTANTS.LOGIN_STATES.LOGGED_OUT}    
             <div>
               <input class="py-2 px-1 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-            placeholder="password"
+            placeholder="password" type="password"
             bind:value={$password}>
           </div>
             <button class="bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
-                on:click={$authStore.login()`}>
+                on:click={$authStore.login({username: $username, password: $password})}
+                on:click={() => visible = !visible}
+                >
                 <span >
                     <svg
                       fill="none"
@@ -77,6 +82,49 @@ on:click={() => visible = !visible}>
                   </span>
             </button>          
         {/if}
+        {#if $authStore.loginState == CONSTANTS.LOGIN_STATES.LOGGED_IN}    
+        <span
+        class="flex items-center p-4 text-white"
+        ><span class="mr-2">
+          <svg
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            class="w-6 h-6"
+          >
+            <path
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            ></path>
+          </svg>
+        </span>
+        <span>{$username}</span></span
+      >        
+            <button class="bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
+                on:click={$authStore.logout()}
+                on:click={() => visible = !visible}
+                >
+                <span >
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      class="w-6 h-6"
+                    >
+                    <path fill="none" d="M8.416,3.943l1.12-1.12v9.031c0,0.257,0.208,0.464,0.464,0.464c0.256,0,0.464-0.207,0.464-0.464V2.823l1.12,1.12c0.182,0.182,0.476,0.182,0.656,0c0.182-0.181,0.182-0.475,0-0.656l-1.744-1.745c-0.018-0.081-0.048-0.16-0.112-0.224C10.279,1.214,10.137,1.177,10,1.194c-0.137-0.017-0.279,0.02-0.384,0.125C9.551,1.384,9.518,1.465,9.499,1.548L7.76,3.288c-0.182,0.181-0.182,0.475,0,0.656C7.941,4.125,8.234,4.125,8.416,3.943z M15.569,6.286h-2.32v0.928h2.32c0.512,0,0.928,0.416,0.928,0.928v8.817c0,0.513-0.416,0.929-0.928,0.929H4.432c-0.513,0-0.928-0.416-0.928-0.929V8.142c0-0.513,0.416-0.928,0.928-0.928h2.32V6.286h-2.32c-1.025,0-1.856,0.831-1.856,1.856v8.817c0,1.025,0.832,1.856,1.856,1.856h11.138c1.024,0,1.855-0.831,1.855-1.856V8.142C17.425,7.117,16.594,6.286,15.569,6.286z">
+                      
+                    </path>
+                    </svg>
+                  </span>
+            </button>          
+        {/if}
+
+
       </div>
     </span>
    
