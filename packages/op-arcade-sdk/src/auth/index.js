@@ -3,6 +3,8 @@ import CONSTANTS from '../constants.js';
 import { writable } from 'svelte/store';
 import { getAuthProvider } from './nakama.js';
 
+import { username, password } from '../stores.js'
+
 export class Auth {
 
     sdkState = CONSTANTS.SDK_STATES.INITIALIZING
@@ -59,20 +61,6 @@ export class Auth {
       }
     
 }
-
-export function getAuthStoreForSvelte(options) {
-    const { subscribe, get } = writable({
-        store: new Auth(options)
-    });
-
-    return {
-        subscribe,
-        login: () => {
-            console.log(get(store))
-        }
-    }
-}
-
 
 export function getAuthStore(options) {
     return writable(new Auth(options))

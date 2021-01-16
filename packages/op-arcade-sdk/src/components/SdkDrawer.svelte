@@ -59,7 +59,7 @@ on:click={() => visible = !visible}>
             bind:value={$password}>
           </div>
             <button class="bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
-                on:click={authStore.login}>
+                on:click={$authStore.login()`}>
                 <span >
                     <svg
                       fill="none"
