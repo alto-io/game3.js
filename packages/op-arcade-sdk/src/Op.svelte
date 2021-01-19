@@ -24,10 +24,19 @@ async function getTourney(options) {
   
 }
 
+async function loginPrompt() {
+
+return "Hello!";
+
+}
+
+
+
 export {
   CONSTANTS,
   props,
-  getTourney
+  getTourney,
+  loginPrompt
 }
 
 </script>
