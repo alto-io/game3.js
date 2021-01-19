@@ -1,10 +1,17 @@
 <script>
 
-    export let toggleSidebar;
-
     import CONSTANTS from '../constants.js';
 
     import { username, password, loginState, authStore } from '../stores.js';
+
+    async function login(options) {
+        $loginState = await $authStore.login({username: $username, password: $password})
+    }
+
+    function logout() {
+        $loginState = $authStore.logout()
+    }
+
 </script>
 
 <span>
@@ -28,8 +35,7 @@
           bind:value={$password}>
         </div>
           <button class="bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
-              on:click={$authStore.login({username: $username, password: $password})}
-              on:click={toggleSidebar}
+              on:click={login}
               >
               <span >
                   <svg
@@ -69,8 +75,7 @@
       <span>{$username}</span></span
     >        
           <button class="bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
-              on:click={$authStore.logout()}
-              on:click={toggleSidebar}
+              on:click={logout}
               >
               <span >
                   <svg

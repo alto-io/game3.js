@@ -1,5 +1,6 @@
 <script>
-  import { url, apiKey, opSdk, SDK_STATES } from '../stores.js';
+  import CONSTANTS from '../constants.js';
+  import { url, apiKey, opSdk, loginState, SDK_STATES } from '../stores.js';
   import { fade, fly } from 'svelte/transition'
 
   import LoginPrompt from './LoginPrompt.svelte';
@@ -15,15 +16,19 @@
         visible = !visible;
   }
 
-  function toggleSidebar() {
-    visible = !visible;
+</script>
+
+<style>
+  .logged-in {
+		background-color: #00c3ff;
   }
 
-</script>
+</style>
 
 <svelte:window on:keydown={handleKeydown}/>
 
 <button class="m-3 fixed top-0 left-0 inline-flex items-center justify-center w-12 h-12 mr-2 transition-colors duration-300 bg-indigo-700 rounded-full hover:bg-indigo-900"
+class:logged-in={$loginState == CONSTANTS.LOGIN_STATES.LOGGED_IN}
 on:click={() => visible = !visible}>
 <img class="w-10 h-10 fill-current" alt="g3js logo" src={logo}>
 </button>
@@ -43,7 +48,7 @@ on:click={() => visible = !visible}>
       <img src={logo} alt="Logo" class="h-auto w-16 mx-auto" />
     </span>
 
-    <LoginPrompt toggleSidebar={toggleSidebar}/>
+    <LoginPrompt/>
 
     <span
       class="flex items-center p-4 hover:bg-indigo-500 hover:text-white "

@@ -40,24 +40,25 @@ export class Auth {
     login = async (loginCreds) => {
         this.loginState = CONSTANTS.LOGIN_STATES.LOGIN_IN_PROGRESS;
     
-        this.authProvider.login(loginCreds).then(
-          token => {
-            if (token != null)
-            {
-              this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_IN;
-            }
-    
-            else {
-              this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
-            }
+        let token = await this.authProvider.login(loginCreds);
+        if (token != null)
+        {
+          this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_IN;
+        }
 
-            return this;
-          })
+        else {
+          this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
+        }
+
+        return this.loginState;
+
       }
     
       logout = () => {
         this.authProvider.logout();
         this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
+
+        return this.loginState;
       }
     
 }
