@@ -7,6 +7,9 @@ import CONSTANTS from './constants.js'
 
 import TailwindCss from './TailwindCss.svelte'
 import SdkDrawer from './components/SdkDrawer.svelte'
+import Content from './components/Content.svelte';
+import Modal from './components/Modal.svelte';
+
 
 import { config, tourneyStore, authStore, url } from './stores.js'
 
@@ -24,12 +27,11 @@ async function getTourney(options) {
   
 }
 
+let showPopup; // bound to content
+
 async function loginPrompt() {
-
-return "Hello!";
-
+  showPopup();
 }
-
 
 
 export {
@@ -43,3 +45,7 @@ export {
 
 <TailwindCss></TailwindCss>
 <SdkDrawer/>
+
+<Modal>
+	<Content bind:showPopup={showPopup}/>
+</Modal>
