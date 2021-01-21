@@ -41,6 +41,10 @@ export class Tourney {
         return result
 
     }
+
+    attemptTourney = async () => {
+      return "attempting"
+    }
     
 }
 

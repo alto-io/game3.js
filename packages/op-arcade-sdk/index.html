@@ -48,28 +48,14 @@
 				}
 			}
 		)
-
-		Toastify({
-			text: "Connecting to OP..."
-		}).showToast();
-
 	}
 
 	function playerLogin() {
-
-		op.loginPrompt().then
-		(
-			(result) => {
-				Toastify({
-					text: result
-				}).showToast();				
-			}
-		)
-
+		op.loginPrompt();
 	}
 
 
-	function attemptTourney() {
+	async function attemptTourney() {
 		// 		Toastify({
 		// text: "This is a toast",
 		// duration: 3000,
@@ -83,8 +69,10 @@
 		// onClick: function(){} // Callback after click
 		// }).showToast();
 
+		
+
 		Toastify({
-			text: "attempt"
+			text: await op.attemptTourney()
 		}).showToast();
 	}
 </script>

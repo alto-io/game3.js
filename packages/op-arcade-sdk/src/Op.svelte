@@ -33,12 +33,17 @@ async function loginPrompt() {
   showPopup();
 }
 
+async function attemptTourney() {
+  let result = await $tourneyStore.attemptTourney();
+  return result;
+}
 
 export {
   CONSTANTS,
   props,
   getTourney,
-  loginPrompt
+  loginPrompt,
+  attemptTourney
 }
 
 </script>
