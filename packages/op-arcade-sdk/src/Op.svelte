@@ -33,8 +33,8 @@ async function loginPrompt() {
   showPopup();
 }
 
-async function attemptTourney() {
-  let result = await $tourneyStore.attemptTourney();
+async function attemptTourney(options) {
+  let result = await $tourneyStore.attemptTourney(options);
   return result;
 }
 

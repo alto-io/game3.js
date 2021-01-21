@@ -42,8 +42,9 @@ export class Tourney {
 
     }
 
-    attemptTourney = async () => {
-      return "attempting"
+    attemptTourney = async (tournament_id) => {
+      let result = await this.tourneyProvider.attemptTourney(tournament_id)
+      return result
     }
     
 }

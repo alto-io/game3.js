@@ -14,7 +14,7 @@ const getAuthProvider = async (options) => {
     )
 
     // do a test authenticate
-    let session = await client.authenticateCustom({
+    let session = await client.apiClient.authenticateCustom({
         id: TEST_ID,
         create: true
     });
@@ -48,7 +48,7 @@ class NakamaAuthProvider {
     login = async (loginObject) => {
 
         try {
-            this.session = await this.client.authenticateEmail(
+            this.session = await this.client.apiClient.authenticateEmail(
                 {
                 email: loginObject.username,
                 password: loginObject.password,
@@ -72,7 +72,7 @@ class NakamaAuthProvider {
     refreshSession = async () => {
         if (this.session == null)
         {
-            this.session = await this.client.authenticateCustom({
+            this.session = await this.client.apiClient.authenticateCustom({
                 id: TEST_ID,
                 create: true
             }); 
@@ -88,7 +88,7 @@ class NakamaAuthProvider {
                 this.client.port
             )
 
-            this.session = await this.client.authenticateCustom({
+            this.session = await this.client.apiClient.authenticateCustom({
                 id: TEST_ID,
                 create: true
             }); 

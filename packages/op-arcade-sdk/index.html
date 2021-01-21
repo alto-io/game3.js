@@ -69,10 +69,15 @@
 		// onClick: function(){} // Callback after click
 		// }).showToast();
 
+		let tourney_id = document.getElementById("input-tourney-id").value;
+
+		let options = {
+			tourney_id
+		}
 		
 
 		Toastify({
-			text: await op.attemptTourney()
+			text: await op.attemptTourney(options)
 		}).showToast();
 	}
 </script>
@@ -83,12 +88,22 @@
 
 <body>
 
-	<div class="grid grid-cols-2 gap-4 h-80">
-		<div class="bg-green-600 col-span-2"></div>
+	<h2 class="mb-4 bg-green-600 col-span-3 h-10 text-right">Demo Test Page</h2>
 
-		<div>
-			<div class="flex items-center p-1 w-full">			
-				<input id="input-tourney-id" class="py-2 px-1 bg-white text-gray-700 
+	<div class="flex flex-wrap -mx-2 mb-8">
+		<div class="w-full md:w-1/2 px-2">
+			<div class="h-12 text-sm text-grey-dark flex items-center">
+				<button 
+				class="m-2.5 px-4 py-1 text-sm text-purple-600 
+				font-semibold rounded-full border border-purple-200 
+				hover:text-white hover:bg-purple-600 hover:border-transparent 
+				focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+				onclick="playerLogin()">LOGIN</button>	  
+			</div>
+		 </div>
+		 <div class="w-full md:w-1/2 px-2">
+		  <div class="h-12 text-sm text-grey-dark flex items-center">
+			<input id="input-tourney-id" class="py-2 px-1 bg-white text-gray-700 
 				placeholder-gray-500 shadow-md rounded-lg text-base 
 				focus:outline-none focus:ring-2 
 				focus:ring-purple-600 focus:border-transparent"
@@ -99,29 +114,9 @@
 				font-semibold rounded-full border border-purple-200 
 				hover:text-white hover:bg-purple-600 hover:border-transparent 
 				focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
-				onclick="connect()">CONNECT</button>	  
-			</div>
-		</div>
-		
-		<div>
-			<button 
-			class="m-2.5 px-4 py-1 text-sm text-purple-600 
-			font-semibold rounded-full border border-purple-200 
-			hover:text-white hover:bg-purple-600 hover:border-transparent 
-			focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
-			onclick="attemptTourney()">ATTEMPT</button>	  
-		</div>
-		<div class="...">
-			<button 
-			class="m-2.5 px-4 py-1 text-sm text-purple-600 
-			font-semibold rounded-full border border-purple-200 
-			hover:text-white hover:bg-purple-600 hover:border-transparent 
-			focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
-			onclick="playerLogin()">LOGIN</button>	  
-		</div>
-		<div class="col-span-2 ...">7</div>
-	  </div>
-
+				onclick="attemptTourney()">ATTEMPT</button>	  
+	   </div>
+	</div>
 
 </body>
 </html>

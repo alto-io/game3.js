@@ -13,7 +13,7 @@ const getTourneyProvider = async (options) => {
     )
 
     // do a test authenticate
-    let session = await client.authenticateCustom({
+    let session = await client.apiClient.authenticateCustom({
         id: TEST_ID,
         create: true
     });
@@ -47,7 +47,7 @@ class NakamaTourneyProvider {
     refreshSession = async () => {
         if (this.session == null)
         {
-            this.session = await this.client.authenticateCustom({
+            this.session = await this.client.apiClient.authenticateCustom({
                 id: TEST_ID,
                 create: true
             }); 
@@ -63,7 +63,7 @@ class NakamaTourneyProvider {
                 this.client.port
             )
 
-            this.session = await this.client.authenticateCustom({
+            this.session = await this.client.apiClient.authenticateCustom({
                 id: TEST_ID,
                 create: true
             }); 
@@ -78,7 +78,7 @@ class NakamaTourneyProvider {
         try {
             await this.refreshSession();
 
-            let tourneyInfo = await this.client.listLeaderboardRecords(
+            let tourneyInfo = await this.client.apiClient.listLeaderboardRecords(
                 this.session,
                 options.tourney_id);
 
@@ -89,6 +89,28 @@ class NakamaTourneyProvider {
             return(e);
          }
     }    
+
+    attemptTourney = async (options) => {
+
+        try {
+
+            await this.refreshSession();
+
+            let socket = await this.client.createSocket(false, false);
+            let socketSession = await  socket.connect(this.session, false);
+
+            let response = await socket.createMatch()
+
+            console.log(response)
+
+            return response;
+
+        } catch (e) {
+            console.error("attemptTourney failed [" + e.status + ":" + e.statusText + "]"); 
+            return(e);
+         }
+    }    
+
 }
 
 export {
