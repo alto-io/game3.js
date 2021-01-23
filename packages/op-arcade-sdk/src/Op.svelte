@@ -38,12 +38,18 @@ async function attemptTourney(options) {
   return result;
 }
 
+async function postScore(options) {
+  let result = await $tourneyStore.postScore(options);
+  return result;
+}
+
 export {
   CONSTANTS,
   props,
   getTourney,
   loginPrompt,
-  attemptTourney
+  attemptTourney,
+  postScore
 }
 
 </script>

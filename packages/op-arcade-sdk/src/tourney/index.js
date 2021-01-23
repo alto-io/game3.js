@@ -46,6 +46,11 @@ export class Tourney {
       let result = await this.tourneyProvider.attemptTourney(tournament_id)
       return result
     }
+
+    postScore = async (options) => {
+      let result = await this.tourneyProvider.postScore(options)
+      return result
+    }
     
 }
 

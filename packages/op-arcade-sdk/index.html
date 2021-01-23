@@ -16,10 +16,7 @@
 </head>
 
 <script>
-	function connect() {
-		// op.initialize(config)
-
-		console.log(op.props());
+	function getTourney() {
 
 		let tourney_id = document.getElementById("input-tourney-id").value;
 
@@ -54,6 +51,36 @@
 		op.loginPrompt();
 	}
 
+	function postScore() {
+
+		let tournament_id = document.getElementById("input-tourney-id").value;
+		let score = Number(document.getElementById("input-score").value);
+
+		let options = {
+			tournament_id,
+			score
+		}
+
+		op.postScore(options).then
+		(
+			(result) => {
+				// catch error
+				if (result instanceof Response) {
+					Toastify({
+						text: "Unable to Connect:  " + result.statusText,
+						backgroundColor: "#ff4444"
+					}).showToast();
+				}
+
+				else {
+
+					Toastify({
+						text: result
+					}).showToast();
+				}
+			}
+		)
+	}
 
 	async function attemptTourney() {
 		// 		Toastify({
@@ -103,19 +130,41 @@
 		 </div>
 		 <div class="w-full md:w-1/2 px-2">
 		  <div class="h-12 text-sm text-grey-dark flex items-center">
-			<input id="input-tourney-id" class="py-2 px-1 bg-white text-gray-700 
-				placeholder-gray-500 shadow-md rounded-lg text-base 
-				focus:outline-none focus:ring-2 
-				focus:ring-purple-600 focus:border-transparent"
-				
-				placeholder="tourney-id (xxxx-xx...)">			
 				<button 
 				class="m-2.5 px-10 py-1 text-sm text-purple-600 
 				font-semibold rounded-full border border-purple-200 
 				hover:text-white hover:bg-purple-600 hover:border-transparent 
 				focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
-				onclick="attemptTourney()">ATTEMPT</button>	  
+				onclick="attemptTourney()">CREATE MATCH</button>	  
+		  </div>
 	   </div>
+
+	   <div class="w-full md:w-1/2 px-2">
+		<div class="h-12 text-sm text-grey-dark flex items-center">
+		  <input id="input-tourney-id" class="py-2 px-2 bg-white text-gray-700 
+			  placeholder-gray-500 shadow-md rounded-lg text-base 
+			  focus:outline-none focus:ring-2 
+			  focus:ring-purple-600 focus:border-transparent"
+			  
+			  placeholder="tourney-id (xxxx-xx...)">			
+			  <input id="input-score" class="py-2 px-2 bg-white text-gray-700 
+			  placeholder-gray-500 shadow-md rounded-lg text-base 
+			  focus:outline-none focus:ring-2 
+			  focus:ring-purple-600 focus:border-transparent"
+			  
+			  placeholder="score (integer)">			
+
+			  <button 
+			  class="m-2.5 px-10 py-1 text-sm text-purple-600 
+			  font-semibold rounded-full border border-purple-200 
+			  hover:text-white hover:bg-purple-600 hover:border-transparent 
+			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+			  onclick="postScore()">POST SCORE</button>	  
+		</div>
+	 </div>
+
+	   
+	   
 	</div>
 
 </body>

@@ -111,6 +111,33 @@ class NakamaTourneyProvider {
          }
     }    
 
+    postScore = async (options) => {
+
+        try {
+
+            await this.refreshSession();
+
+            let result = await this.client.rpc(
+                this.session,
+                "clientrpc.post_tourney_score",
+                options);
+
+            let payload = result.payload;
+            let success = payload.result;
+
+            if (success)
+                return "Score posted!"
+            
+            else {
+                return "Error: " + payload.msg
+            }
+            
+        } catch (e) {
+            console.error("postScore failed [" + e.status + ":" + e.statusText + "]"); 
+            return(e);
+         }
+    }    
+
 }
 
 export {
