@@ -128,7 +128,24 @@ class NakamaTourneyProvider {
             console.error("postScore failed [" + e.status + ":" + e.statusText + "]"); 
             return(e);
          }
-    }    
+    } 
+    
+    joinTourney = async (options) => {
+
+        try {
+            await this.refreshSession();
+
+            let tourneyInfo = await this.client.joinTournament(
+                this.session,
+                options.tournament_id);
+
+            return tourneyInfo;
+
+        } catch (e) {
+            console.error("joinTourney failed [" + e.status + ":" + e.statusText + "]"); 
+            return(e);
+         }
+    }        
 
 }
 
