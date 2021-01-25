@@ -1,0 +1,14 @@
+2020/10/02-10:11:20.419 4d88 Recovering log #144
+2020/10/02-10:11:20.419 4d88 Level-0 table #146: started
+2020/10/02-10:11:20.429 4d88 Level-0 table #146: 1772 bytes OK
+2020/10/02-10:11:20.436 4d88 Delete type=0 #144
+2020/10/02-10:11:20.437 4d88 Delete type=3 #142
+2020/10/02-10:11:20.444 4da4 Compacting 4@0 + 1@1 files
+2020/10/02-10:11:20.450 4da4 Generated table #148@0: 4 keys, 1827 bytes
+2020/10/02-10:11:20.450 4da4 Compacted 4@0 + 1@1 files => 1827 bytes
+2020/10/02-10:11:20.451 4da4 compacted to: files[ 0 1 0 0 0 0 0 ]
+2020/10/02-10:11:20.451 4da4 Delete type=2 #135
+2020/10/02-10:11:20.451 4da4 Delete type=2 #137
+2020/10/02-10:11:20.451 4da4 Delete type=2 #140
+2020/10/02-10:11:20.451 4da4 Delete type=2 #143
+2020/10/02-10:11:20.452 4da4 Delete type=2 #146
