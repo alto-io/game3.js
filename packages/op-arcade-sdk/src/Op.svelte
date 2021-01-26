@@ -48,6 +48,11 @@ async function joinTourney(options) {
   return result;
 }
 
+function getSessionToken() {
+  let session = $authStore.getSessionToken();
+  return session;
+}
+
 
 export {
   CONSTANTS,
@@ -56,7 +61,8 @@ export {
   loginPrompt,
   attemptTourney,
   postScore,
-  joinTourney
+  joinTourney,
+  getSessionToken
 }
 
 </script>

@@ -60,6 +60,10 @@ export class Auth {
 
         return this.loginState;
       }
+
+      getSessionToken = () => {
+        return this.authProvider.getSessionToken();
+      }
     
 }
 
