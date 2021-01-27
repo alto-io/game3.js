@@ -3567,28 +3567,31 @@
         tourneyProvider = null;
 
         constructor(options) {
-            let serverType = options.type;
+          this.useServer(options);
+        }
 
-            switch (serverType) {
-                case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
+        useServer = (options) => {
+          let serverType = options.type;
 
-                    getTourneyProvider(options).then(
-                        tourneyProvider => {
-                          if (tourneyProvider != null)
-                          {
-                            this.tourneyProvider = tourneyProvider;
-                            this.sdkState = CONSTANTS.SDK_STATES.READY;
-                          }
+          switch (serverType) {
+              case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
+
+                  getTourneyProvider(options).then(
+                      tourneyProvider => {
+                        if (tourneyProvider != null)
+                        {
+                          this.tourneyProvider = tourneyProvider;
+                          this.sdkState = CONSTANTS.SDK_STATES.READY;
                         }
-                      );           
-              
-                    break;
-              
-                    default:
-                      console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
-                    break;
-            }
-
+                      }
+                    );           
+            
+                  break;
+            
+                  default:
+                    console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
+                  break;
+          }
         }
 
         getTourney = async (tournament_id) => {
@@ -3731,28 +3734,31 @@
         authProvider = null;
 
         constructor(options) {
-            let serverType = options.type;
+          this.useServer(options);
+        }
 
-            switch (serverType) {
-                case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
+        useServer = (options) => {
+          let serverType = options.type;
 
-                    getAuthProvider(options).then(
-                        authProvider => {
-                          if (authProvider != null)
-                          {
-                            this.authProvider = authProvider;
-                            this.sdkState = CONSTANTS.SDK_STATES.READY;
-                          }
+          switch (serverType) {
+              case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
+
+                  getAuthProvider(options).then(
+                      authProvider => {
+                        if (authProvider != null)
+                        {
+                          this.authProvider = authProvider;
+                          this.sdkState = CONSTANTS.SDK_STATES.READY;
                         }
-                      );           
-              
-                    break;
-              
-                    default:
-                      console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.AUTH_SERVER_TYPES));
-                    break;
-            }
-
+                      }
+                    );           
+            
+                  break;
+            
+                  default:
+                    console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.AUTH_SERVER_TYPES));
+                  break;
+          }      
         }
 
 
@@ -3813,13 +3819,15 @@
     const config = writable(DEFAULT_CONFIG);
     const url = readable(window.location.href);
 
-    var tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
-    var authStore = getAuthStore(DEFAULT_CONFIG.auth_server);
+    const tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
+    const authStore = getAuthStore(DEFAULT_CONFIG.auth_server);
 
     function useServers(options) {
-        authStore = getAuthStore(options.auth_server);
-        tourneyStore = getTourneyStore(options.tourney_server);
+        
+        get_store_value(authStore).useServer(options.auth_server);
+        get_store_value(tourneyStore).useServer(options.tourney_server);
     }
+
 
 
     const SDK_STATES = {

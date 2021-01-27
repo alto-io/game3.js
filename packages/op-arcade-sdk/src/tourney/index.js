@@ -11,28 +11,31 @@ export class Tourney {
     tourneyProvider = null;
 
     constructor(options) {
-        let serverType = options.type;
+      this.useServer(options)
+    }
 
-        switch (serverType) {
-            case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
+    useServer = (options) => {
+      let serverType = options.type;
 
-                getTourneyProvider(options).then(
-                    tourneyProvider => {
-                      if (tourneyProvider != null)
-                      {
-                        this.tourneyProvider = tourneyProvider;
-                        this.sdkState = CONSTANTS.SDK_STATES.READY;
-                      }
+      switch (serverType) {
+          case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
+
+              getTourneyProvider(options).then(
+                  tourneyProvider => {
+                    if (tourneyProvider != null)
+                    {
+                      this.tourneyProvider = tourneyProvider;
+                      this.sdkState = CONSTANTS.SDK_STATES.READY;
                     }
-                  );           
-          
-                break;
-          
-                default:
-                  console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
-                break;
-        }
-
+                  }
+                );           
+        
+              break;
+        
+              default:
+                console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
+              break;
+      }
     }
 
     getTourney = async (tournament_id) => {
