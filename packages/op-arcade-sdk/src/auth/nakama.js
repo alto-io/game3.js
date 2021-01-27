@@ -96,6 +96,10 @@ class NakamaAuthProvider {
         }
 
     }
+
+    getSessionToken = () => {
+        return this.session;
+    }
  
 }
 

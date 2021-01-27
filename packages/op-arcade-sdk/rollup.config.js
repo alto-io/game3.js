@@ -47,7 +47,7 @@ export default {
     sourcemap: true,
     format: "umd",
     name: "op",
-    file: "dist/op.js",
+    file: "lib/op.js",
   },
   plugins: [
     image(),
@@ -81,7 +81,8 @@ export default {
 
     production && copy({
       targets: [
-          {src: 'dist/op.js', dest: '../../docs/lib', overwrite: true}
+          {src: 'lib/op.js', dest: '../../docs/lib', overwrite: true},
+          {src: 'index.html', dest: '../../docs', overwrite: true},
       ]
     }),
 

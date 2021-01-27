@@ -11,7 +11,7 @@ import Content from './components/Content.svelte';
 import Modal from './components/Modal.svelte';
 
 
-import { config, tourneyStore, authStore, url } from './stores.js'
+import { config, tourneyStore, authStore, url, useServers } from './stores.js'
 
  function props() {
   return {
@@ -48,6 +48,10 @@ async function joinTourney(options) {
   return result;
 }
 
+function getSessionToken() {
+  let session = $authStore.getSessionToken();
+  return session;
+}
 
 export {
   CONSTANTS,
@@ -56,7 +60,9 @@ export {
   loginPrompt,
   attemptTourney,
   postScore,
-  joinTourney
+  joinTourney,
+  getSessionToken,
+  useServers
 }
 
 </script>

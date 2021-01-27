@@ -8,6 +8,12 @@
 
     function noop() { }
     const identity = x => x;
+    function assign(tar, src) {
+        // @ts-ignore
+        for (const k in src)
+            tar[k] = src[k];
+        return tar;
+    }
     function run(fn) {
         return fn();
     }
@@ -40,6 +46,46 @@
     }
     function component_subscribe(component, store, callback) {
         component.$$.on_destroy.push(subscribe(store, callback));
+    }
+    function create_slot(definition, ctx, $$scope, fn) {
+        if (definition) {
+            const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
+            return definition[0](slot_ctx);
+        }
+    }
+    function get_slot_context(definition, ctx, $$scope, fn) {
+        return definition[1] && fn
+            ? assign($$scope.ctx.slice(), definition[1](fn(ctx)))
+            : $$scope.ctx;
+    }
+    function get_slot_changes(definition, $$scope, dirty, fn) {
+        if (definition[2] && fn) {
+            const lets = definition[2](fn(dirty));
+            if ($$scope.dirty === undefined) {
+                return lets;
+            }
+            if (typeof lets === 'object') {
+                const merged = [];
+                const len = Math.max($$scope.dirty.length, lets.length);
+                for (let i = 0; i < len; i += 1) {
+                    merged[i] = $$scope.dirty[i] | lets[i];
+                }
+                return merged;
+            }
+            return $$scope.dirty | lets;
+        }
+        return $$scope.dirty;
+    }
+    function update_slot(slot, slot_definition, ctx, $$scope, dirty, get_slot_changes_fn, get_slot_context_fn) {
+        const slot_changes = get_slot_changes(slot_definition, $$scope, dirty, get_slot_changes_fn);
+        if (slot_changes) {
+            const slot_context = get_slot_context(slot_definition, ctx, $$scope, get_slot_context_fn);
+            slot.p(slot_context, slot_changes);
+        }
+    }
+    function set_store_value(store, ret, value = ret) {
+        store.set(value);
+        return ret;
     }
 
     const is_client = typeof window !== 'undefined';
@@ -119,6 +165,9 @@
     function set_input_value(input, value) {
         input.value = value == null ? '' : value;
     }
+    function toggle_class(element, name, toggle) {
+        element.classList[toggle ? 'add' : 'remove'](name);
+    }
     function custom_event(type, detail) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, false, false, detail);
@@ -190,6 +239,17 @@
     function set_current_component(component) {
         current_component = component;
     }
+    function get_current_component() {
+        if (!current_component)
+            throw new Error('Function called outside component initialization');
+        return current_component;
+    }
+    function setContext(key, context) {
+        get_current_component().$$.context.set(key, context);
+    }
+    function getContext(key) {
+        return get_current_component().$$.context.get(key);
+    }
 
     const dirty_components = [];
     const binding_callbacks = [];
@@ -205,6 +265,9 @@
     }
     function add_render_callback(fn) {
         render_callbacks.push(fn);
+    }
+    function add_flush_callback(fn) {
+        flush_callbacks.push(fn);
     }
     let flushing = false;
     const seen_callbacks = new Set();
@@ -411,6 +474,57 @@
             }
         };
     }
+
+    const globals = (typeof window !== 'undefined'
+        ? window
+        : typeof globalThis !== 'undefined'
+            ? globalThis
+            : global);
+
+    function get_spread_update(levels, updates) {
+        const update = {};
+        const to_null_out = {};
+        const accounted_for = { $$scope: 1 };
+        let i = levels.length;
+        while (i--) {
+            const o = levels[i];
+            const n = updates[i];
+            if (n) {
+                for (const key in o) {
+                    if (!(key in n))
+                        to_null_out[key] = 1;
+                }
+                for (const key in n) {
+                    if (!accounted_for[key]) {
+                        update[key] = n[key];
+                        accounted_for[key] = 1;
+                    }
+                }
+                levels[i] = n;
+            }
+            else {
+                for (const key in o) {
+                    accounted_for[key] = 1;
+                }
+            }
+        }
+        for (const key in to_null_out) {
+            if (!(key in update))
+                update[key] = undefined;
+        }
+        return update;
+    }
+    function get_spread_object(spread_props) {
+        return typeof spread_props === 'object' && spread_props !== null ? spread_props : {};
+    }
+
+    function bind(component, name, callback) {
+        const index = component.$$.props[name];
+        if (index !== undefined) {
+            component.$$.bound[index] = callback;
+            callback(component.$$.ctx[index]);
+        }
+    }
     function create_component(block) {
         block && block.c();
     }
@@ -535,6 +649,52 @@
             }
         }
     }
+    /**
+     * Base class for Svelte components with some minor dev-enhancements. Used when dev=true.
+     */
+    class SvelteComponentDev extends SvelteComponent {
+        constructor(options) {
+            if (!options || (!options.target && !options.$$inline)) {
+                throw new Error("'target' is a required option");
+            }
+            super();
+        }
+        $destroy() {
+            super.$destroy();
+            this.$destroy = () => {
+                console.warn('Component was already destroyed'); // eslint-disable-line no-console
+            };
+        }
+        $capture_state() { }
+        $inject_state() { }
+    }
+
+    const CONSTANTS = 
+    { 
+        AUTH_SERVER_TYPES : 
+        {
+            NAKAMA: "nakama"
+        }, 
+
+        TOURNEY_SERVER_TYPES : 
+        {
+            NAKAMA: "nakama"
+        },     
+        
+        SDK_STATES: 
+        {
+            NOT_READY: "not_ready",
+            INITIALIZING: "initializing",
+            READY: "ready"
+        },
+        
+        LOGIN_STATES:
+        {
+            LOGGED_OUT: "logged_out",
+            LOGIN_IN_PROGRESS: "login_in_progress",
+            LOGGED_IN: "logged_in",
+        }
+    };
 
     /* src\TailwindCss.svelte generated by Svelte v3.31.0 */
 
@@ -615,6 +775,3053 @@
         return { set, update, subscribe };
     }
 
+    var __create = Object.create;
+    var __defProp = Object.defineProperty;
+    var __getProtoOf = Object.getPrototypeOf;
+    var __hasOwnProp = Object.prototype.hasOwnProperty;
+    var __getOwnPropNames = Object.getOwnPropertyNames;
+    var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+    var __assign = Object.assign;
+    var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+    var __commonJS = (callback, module) => () => {
+      if (!module) {
+        module = {exports: {}};
+        callback(module.exports, module);
+      }
+      return module.exports;
+    };
+    var __exportStar = (target, module, desc) => {
+      __markAsModule(target);
+      if (module && typeof module === "object" || typeof module === "function") {
+        for (let key of __getOwnPropNames(module))
+          if (!__hasOwnProp.call(target, key) && key !== "default")
+            __defProp(target, key, {get: () => module[key], enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable});
+      }
+      return target;
+    };
+    var __toModule = (module) => {
+      if (module && module.__esModule)
+        return module;
+      return __exportStar(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", {value: module, enumerable: true}), module);
+    };
+    var __async = (__this, __arguments, generator) => {
+      return new Promise((resolve, reject) => {
+        var fulfilled = (value) => {
+          try {
+            step(generator.next(value));
+          } catch (e) {
+            reject(e);
+          }
+        };
+        var rejected = (value) => {
+          try {
+            step(generator.throw(value));
+          } catch (e) {
+            reject(e);
+          }
+        };
+        var step = (result) => {
+          return result.done ? resolve(result.value) : Promise.resolve(result.value).then(fulfilled, rejected);
+        };
+        step((generator = generator.apply(__this, __arguments)).next());
+      });
+    };
+
+    // ../../node_modules/Base64/base64.js
+    var require_base64 = __commonJS((exports) => {
+      (function() {
+        var object = typeof exports != "undefined" ? exports : typeof self != "undefined" ? self : $.global;
+        var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+        function InvalidCharacterError(message) {
+          this.message = message;
+        }
+        InvalidCharacterError.prototype = new Error();
+        InvalidCharacterError.prototype.name = "InvalidCharacterError";
+        object.btoa || (object.btoa = function(input) {
+          var str = String(input);
+          for (var block, charCode, idx = 0, map = chars, output = ""; str.charAt(idx | 0) || (map = "=", idx % 1); output += map.charAt(63 & block >> 8 - idx % 1 * 8)) {
+            charCode = str.charCodeAt(idx += 3 / 4);
+            if (charCode > 255) {
+              throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
+            }
+            block = block << 8 | charCode;
+          }
+          return output;
+        });
+        object.atob || (object.atob = function(input) {
+          var str = String(input).replace(/[=]+$/, "");
+          if (str.length % 4 == 1) {
+            throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
+          }
+          for (var bc = 0, bs, buffer, idx = 0, output = ""; buffer = str.charAt(idx++); ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer, bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0) {
+            buffer = chars.indexOf(buffer);
+          }
+          return output;
+        });
+      })();
+    });
+
+    // ../../node_modules/whatwg-fetch/fetch.js
+    var require_fetch = __commonJS((exports) => {
+      (function(self2) {
+        if (self2.fetch) {
+          return;
+        }
+        var support = {
+          searchParams: "URLSearchParams" in self2,
+          iterable: "Symbol" in self2 && "iterator" in Symbol,
+          blob: "FileReader" in self2 && "Blob" in self2 && function() {
+            try {
+              new Blob();
+              return true;
+            } catch (e) {
+              return false;
+            }
+          }(),
+          formData: "FormData" in self2,
+          arrayBuffer: "ArrayBuffer" in self2
+        };
+        if (support.arrayBuffer) {
+          var viewClasses = [
+            "[object Int8Array]",
+            "[object Uint8Array]",
+            "[object Uint8ClampedArray]",
+            "[object Int16Array]",
+            "[object Uint16Array]",
+            "[object Int32Array]",
+            "[object Uint32Array]",
+            "[object Float32Array]",
+            "[object Float64Array]"
+          ];
+          var isDataView = function(obj) {
+            return obj && DataView.prototype.isPrototypeOf(obj);
+          };
+          var isArrayBufferView = ArrayBuffer.isView || function(obj) {
+            return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1;
+          };
+        }
+        function normalizeName(name) {
+          if (typeof name !== "string") {
+            name = String(name);
+          }
+          if (/[^a-z0-9\-#$%&'*+.\^_`|~]/i.test(name)) {
+            throw new TypeError("Invalid character in header field name");
+          }
+          return name.toLowerCase();
+        }
+        function normalizeValue(value) {
+          if (typeof value !== "string") {
+            value = String(value);
+          }
+          return value;
+        }
+        function iteratorFor(items) {
+          var iterator = {
+            next: function() {
+              var value = items.shift();
+              return {done: value === void 0, value};
+            }
+          };
+          if (support.iterable) {
+            iterator[Symbol.iterator] = function() {
+              return iterator;
+            };
+          }
+          return iterator;
+        }
+        function Headers(headers) {
+          this.map = {};
+          if (headers instanceof Headers) {
+            headers.forEach(function(value, name) {
+              this.append(name, value);
+            }, this);
+          } else if (Array.isArray(headers)) {
+            headers.forEach(function(header) {
+              this.append(header[0], header[1]);
+            }, this);
+          } else if (headers) {
+            Object.getOwnPropertyNames(headers).forEach(function(name) {
+              this.append(name, headers[name]);
+            }, this);
+          }
+        }
+        Headers.prototype.append = function(name, value) {
+          name = normalizeName(name);
+          value = normalizeValue(value);
+          var oldValue = this.map[name];
+          this.map[name] = oldValue ? oldValue + "," + value : value;
+        };
+        Headers.prototype["delete"] = function(name) {
+          delete this.map[normalizeName(name)];
+        };
+        Headers.prototype.get = function(name) {
+          name = normalizeName(name);
+          return this.has(name) ? this.map[name] : null;
+        };
+        Headers.prototype.has = function(name) {
+          return this.map.hasOwnProperty(normalizeName(name));
+        };
+        Headers.prototype.set = function(name, value) {
+          this.map[normalizeName(name)] = normalizeValue(value);
+        };
+        Headers.prototype.forEach = function(callback, thisArg) {
+          for (var name in this.map) {
+            if (this.map.hasOwnProperty(name)) {
+              callback.call(thisArg, this.map[name], name, this);
+            }
+          }
+        };
+        Headers.prototype.keys = function() {
+          var items = [];
+          this.forEach(function(value, name) {
+            items.push(name);
+          });
+          return iteratorFor(items);
+        };
+        Headers.prototype.values = function() {
+          var items = [];
+          this.forEach(function(value) {
+            items.push(value);
+          });
+          return iteratorFor(items);
+        };
+        Headers.prototype.entries = function() {
+          var items = [];
+          this.forEach(function(value, name) {
+            items.push([name, value]);
+          });
+          return iteratorFor(items);
+        };
+        if (support.iterable) {
+          Headers.prototype[Symbol.iterator] = Headers.prototype.entries;
+        }
+        function consumed(body) {
+          if (body.bodyUsed) {
+            return Promise.reject(new TypeError("Already read"));
+          }
+          body.bodyUsed = true;
+        }
+        function fileReaderReady(reader) {
+          return new Promise(function(resolve, reject) {
+            reader.onload = function() {
+              resolve(reader.result);
+            };
+            reader.onerror = function() {
+              reject(reader.error);
+            };
+          });
+        }
+        function readBlobAsArrayBuffer(blob) {
+          var reader = new FileReader();
+          var promise = fileReaderReady(reader);
+          reader.readAsArrayBuffer(blob);
+          return promise;
+        }
+        function readBlobAsText(blob) {
+          var reader = new FileReader();
+          var promise = fileReaderReady(reader);
+          reader.readAsText(blob);
+          return promise;
+        }
+        function readArrayBufferAsText(buf) {
+          var view = new Uint8Array(buf);
+          var chars = new Array(view.length);
+          for (var i = 0; i < view.length; i++) {
+            chars[i] = String.fromCharCode(view[i]);
+          }
+          return chars.join("");
+        }
+        function bufferClone(buf) {
+          if (buf.slice) {
+            return buf.slice(0);
+          } else {
+            var view = new Uint8Array(buf.byteLength);
+            view.set(new Uint8Array(buf));
+            return view.buffer;
+          }
+        }
+        function Body() {
+          this.bodyUsed = false;
+          this._initBody = function(body) {
+            this._bodyInit = body;
+            if (!body) {
+              this._bodyText = "";
+            } else if (typeof body === "string") {
+              this._bodyText = body;
+            } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
+              this._bodyBlob = body;
+            } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
+              this._bodyFormData = body;
+            } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+              this._bodyText = body.toString();
+            } else if (support.arrayBuffer && support.blob && isDataView(body)) {
+              this._bodyArrayBuffer = bufferClone(body.buffer);
+              this._bodyInit = new Blob([this._bodyArrayBuffer]);
+            } else if (support.arrayBuffer && (ArrayBuffer.prototype.isPrototypeOf(body) || isArrayBufferView(body))) {
+              this._bodyArrayBuffer = bufferClone(body);
+            } else {
+              throw new Error("unsupported BodyInit type");
+            }
+            if (!this.headers.get("content-type")) {
+              if (typeof body === "string") {
+                this.headers.set("content-type", "text/plain;charset=UTF-8");
+              } else if (this._bodyBlob && this._bodyBlob.type) {
+                this.headers.set("content-type", this._bodyBlob.type);
+              } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+                this.headers.set("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+              }
+            }
+          };
+          if (support.blob) {
+            this.blob = function() {
+              var rejected = consumed(this);
+              if (rejected) {
+                return rejected;
+              }
+              if (this._bodyBlob) {
+                return Promise.resolve(this._bodyBlob);
+              } else if (this._bodyArrayBuffer) {
+                return Promise.resolve(new Blob([this._bodyArrayBuffer]));
+              } else if (this._bodyFormData) {
+                throw new Error("could not read FormData body as blob");
+              } else {
+                return Promise.resolve(new Blob([this._bodyText]));
+              }
+            };
+            this.arrayBuffer = function() {
+              if (this._bodyArrayBuffer) {
+                return consumed(this) || Promise.resolve(this._bodyArrayBuffer);
+              } else {
+                return this.blob().then(readBlobAsArrayBuffer);
+              }
+            };
+          }
+          this.text = function() {
+            var rejected = consumed(this);
+            if (rejected) {
+              return rejected;
+            }
+            if (this._bodyBlob) {
+              return readBlobAsText(this._bodyBlob);
+            } else if (this._bodyArrayBuffer) {
+              return Promise.resolve(readArrayBufferAsText(this._bodyArrayBuffer));
+            } else if (this._bodyFormData) {
+              throw new Error("could not read FormData body as text");
+            } else {
+              return Promise.resolve(this._bodyText);
+            }
+          };
+          if (support.formData) {
+            this.formData = function() {
+              return this.text().then(decode);
+            };
+          }
+          this.json = function() {
+            return this.text().then(JSON.parse);
+          };
+          return this;
+        }
+        var methods = ["DELETE", "GET", "HEAD", "OPTIONS", "POST", "PUT"];
+        function normalizeMethod(method) {
+          var upcased = method.toUpperCase();
+          return methods.indexOf(upcased) > -1 ? upcased : method;
+        }
+        function Request(input, options) {
+          options = options || {};
+          var body = options.body;
+          if (input instanceof Request) {
+            if (input.bodyUsed) {
+              throw new TypeError("Already read");
+            }
+            this.url = input.url;
+            this.credentials = input.credentials;
+            if (!options.headers) {
+              this.headers = new Headers(input.headers);
+            }
+            this.method = input.method;
+            this.mode = input.mode;
+            if (!body && input._bodyInit != null) {
+              body = input._bodyInit;
+              input.bodyUsed = true;
+            }
+          } else {
+            this.url = String(input);
+          }
+          this.credentials = options.credentials || this.credentials || "omit";
+          if (options.headers || !this.headers) {
+            this.headers = new Headers(options.headers);
+          }
+          this.method = normalizeMethod(options.method || this.method || "GET");
+          this.mode = options.mode || this.mode || null;
+          this.referrer = null;
+          if ((this.method === "GET" || this.method === "HEAD") && body) {
+            throw new TypeError("Body not allowed for GET or HEAD requests");
+          }
+          this._initBody(body);
+        }
+        Request.prototype.clone = function() {
+          return new Request(this, {body: this._bodyInit});
+        };
+        function decode(body) {
+          var form = new FormData();
+          body.trim().split("&").forEach(function(bytes) {
+            if (bytes) {
+              var split = bytes.split("=");
+              var name = split.shift().replace(/\+/g, " ");
+              var value = split.join("=").replace(/\+/g, " ");
+              form.append(decodeURIComponent(name), decodeURIComponent(value));
+            }
+          });
+          return form;
+        }
+        function parseHeaders(rawHeaders) {
+          var headers = new Headers();
+          var preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, " ");
+          preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+            var parts = line.split(":");
+            var key = parts.shift().trim();
+            if (key) {
+              var value = parts.join(":").trim();
+              headers.append(key, value);
+            }
+          });
+          return headers;
+        }
+        Body.call(Request.prototype);
+        function Response(bodyInit, options) {
+          if (!options) {
+            options = {};
+          }
+          this.type = "default";
+          this.status = options.status === void 0 ? 200 : options.status;
+          this.ok = this.status >= 200 && this.status < 300;
+          this.statusText = "statusText" in options ? options.statusText : "OK";
+          this.headers = new Headers(options.headers);
+          this.url = options.url || "";
+          this._initBody(bodyInit);
+        }
+        Body.call(Response.prototype);
+        Response.prototype.clone = function() {
+          return new Response(this._bodyInit, {
+            status: this.status,
+            statusText: this.statusText,
+            headers: new Headers(this.headers),
+            url: this.url
+          });
+        };
+        Response.error = function() {
+          var response = new Response(null, {status: 0, statusText: ""});
+          response.type = "error";
+          return response;
+        };
+        var redirectStatuses = [301, 302, 303, 307, 308];
+        Response.redirect = function(url, status) {
+          if (redirectStatuses.indexOf(status) === -1) {
+            throw new RangeError("Invalid status code");
+          }
+          return new Response(null, {status, headers: {location: url}});
+        };
+        self2.Headers = Headers;
+        self2.Request = Request;
+        self2.Response = Response;
+        self2.fetch = function(input, init) {
+          return new Promise(function(resolve, reject) {
+            var request = new Request(input, init);
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+              var options = {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                headers: parseHeaders(xhr.getAllResponseHeaders() || "")
+              };
+              options.url = "responseURL" in xhr ? xhr.responseURL : options.headers.get("X-Request-URL");
+              var body = "response" in xhr ? xhr.response : xhr.responseText;
+              resolve(new Response(body, options));
+            };
+            xhr.onerror = function() {
+              reject(new TypeError("Network request failed"));
+            };
+            xhr.ontimeout = function() {
+              reject(new TypeError("Network request failed"));
+            };
+            xhr.open(request.method, request.url, true);
+            if (request.credentials === "include") {
+              xhr.withCredentials = true;
+            } else if (request.credentials === "omit") {
+              xhr.withCredentials = false;
+            }
+            if ("responseType" in xhr && support.blob) {
+              xhr.responseType = "blob";
+            }
+            request.headers.forEach(function(value, name) {
+              xhr.setRequestHeader(name, value);
+            });
+            xhr.send(typeof request._bodyInit === "undefined" ? null : request._bodyInit);
+          });
+        };
+        self2.fetch.polyfill = true;
+      })(typeof self !== "undefined" ? self : exports);
+    });
+
+    // index.ts
+    var import_Base64 = __toModule(require_base64());
+    var import_whatwg_fetch = __toModule(require_fetch());
+
+    // api.gen.ts
+    var NakamaApi = class {
+      constructor(configuration) {
+        this.configuration = configuration;
+      }
+      doFetch(urlPath, method, queryParams, body, options) {
+        const urlQuery = "?" + Object.keys(queryParams).map((k) => {
+          if (queryParams[k] instanceof Array) {
+            return queryParams[k].reduce((prev, curr) => {
+              return prev + encodeURIComponent(k) + "=" + encodeURIComponent(curr) + "&";
+            }, "");
+          } else {
+            if (queryParams[k] != null) {
+              return encodeURIComponent(k) + "=" + encodeURIComponent(queryParams[k]) + "&";
+            }
+          }
+        }).join("");
+        const fetchOptions = __assign(__assign({}, {method}), options);
+        fetchOptions.headers = __assign({}, options.headers);
+        const descriptor = Object.getOwnPropertyDescriptor(XMLHttpRequest.prototype, "withCredentials");
+        if (!(descriptor == null ? void 0 : descriptor.set)) {
+          fetchOptions.credentials = "cocos-ignore";
+        }
+        if (this.configuration.bearerToken) {
+          fetchOptions.headers["Authorization"] = "Bearer " + this.configuration.bearerToken;
+        } else if (this.configuration.username) {
+          fetchOptions.headers["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!Object.keys(fetchOptions.headers).includes("Accept")) {
+          fetchOptions.headers["Accept"] = "application/json";
+        }
+        if (!Object.keys(fetchOptions.headers).includes("Content-Type")) {
+          fetchOptions.headers["Content-Type"] = "application/json";
+        }
+        Object.keys(fetchOptions.headers).forEach((key) => {
+          if (!fetchOptions.headers[key]) {
+            delete fetchOptions.headers[key];
+          }
+        });
+        fetchOptions.body = body;
+        return Promise.race([
+          fetch(this.configuration.basePath + urlPath + urlQuery, fetchOptions).then((response) => {
+            if (response.status == 204) {
+              return response;
+            } else if (response.status >= 200 && response.status < 300) {
+              return response.json();
+            } else {
+              throw response;
+            }
+          }),
+          new Promise((_, reject) => setTimeout(reject, this.configuration.timeoutMs, "Request timed out."))
+        ]);
+      }
+      healthcheck(options = {}) {
+        const urlPath = "/healthcheck";
+        const queryParams = {};
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      getAccount(options = {}) {
+        const urlPath = "/v2/account";
+        const queryParams = {};
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      updateAccount(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "PUT", queryParams, _body, options);
+      }
+      authenticateApple(body, create, username, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/authenticate/apple";
+        const queryParams = {
+          create,
+          username
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      authenticateCustom(body, create, username, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/authenticate/custom";
+        const queryParams = {
+          create,
+          username
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      authenticateDevice(body, create, username, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/authenticate/device";
+        const queryParams = {
+          create,
+          username
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      authenticateEmail(body, create, username, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/authenticate/email";
+        const queryParams = {
+          create,
+          username
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      authenticateFacebook(body, create, username, sync, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/authenticate/facebook";
+        const queryParams = {
+          create,
+          username,
+          sync
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      authenticateFacebookInstantGame(body, create, username, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/authenticate/facebookinstantgame";
+        const queryParams = {
+          create,
+          username
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      authenticateGameCenter(body, create, username, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/authenticate/gamecenter";
+        const queryParams = {
+          create,
+          username
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      authenticateGoogle(body, create, username, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/authenticate/google";
+        const queryParams = {
+          create,
+          username
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      authenticateSteam(body, create, username, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/authenticate/steam";
+        const queryParams = {
+          create,
+          username
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      linkApple(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/link/apple";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      linkCustom(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/link/custom";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      linkDevice(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/link/device";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      linkEmail(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/link/email";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      linkFacebook(body, sync, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/link/facebook";
+        const queryParams = {
+          sync
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      linkFacebookInstantGame(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/link/facebookinstantgame";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      linkGameCenter(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/link/gamecenter";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      linkGoogle(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/link/google";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      linkSteam(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/link/steam";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      unlinkApple(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/unlink/apple";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      unlinkCustom(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/unlink/custom";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      unlinkDevice(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/unlink/device";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      unlinkEmail(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/unlink/email";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      unlinkFacebook(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/unlink/facebook";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      unlinkFacebookInstantGame(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/unlink/facebookinstantgame";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      unlinkGameCenter(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/unlink/gamecenter";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      unlinkGoogle(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/unlink/google";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      unlinkSteam(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/account/unlink/steam";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      listChannelMessages(channelId, limit, forward, cursor, options = {}) {
+        if (channelId === null || channelId === void 0) {
+          throw new Error("'channelId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/channel/{channelId}".replace("{channelId}", encodeURIComponent(String(channelId)));
+        const queryParams = {
+          limit,
+          forward,
+          cursor
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      event(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/event";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      deleteFriends(ids, usernames, options = {}) {
+        const urlPath = "/v2/friend";
+        const queryParams = {
+          ids,
+          usernames
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "DELETE", queryParams, _body, options);
+      }
+      listFriends(limit, state, cursor, options = {}) {
+        const urlPath = "/v2/friend";
+        const queryParams = {
+          limit,
+          state,
+          cursor
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      addFriends(ids, usernames, options = {}) {
+        const urlPath = "/v2/friend";
+        const queryParams = {
+          ids,
+          usernames
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      blockFriends(ids, usernames, options = {}) {
+        const urlPath = "/v2/friend/block";
+        const queryParams = {
+          ids,
+          usernames
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      importFacebookFriends(body, reset, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/friend/facebook";
+        const queryParams = {
+          reset
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      listGroups(name, cursor, limit, options = {}) {
+        const urlPath = "/v2/group";
+        const queryParams = {
+          name,
+          cursor,
+          limit
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      createGroup(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      deleteGroup(groupId, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {};
+        let _body = null;
+        return this.doFetch(urlPath, "DELETE", queryParams, _body, options);
+      }
+      updateGroup(groupId, body, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "PUT", queryParams, _body, options);
+      }
+      addGroupUsers(groupId, userIds, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}/add".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {
+          user_ids: userIds
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      banGroupUsers(groupId, userIds, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}/ban".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {
+          user_ids: userIds
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      demoteGroupUsers(groupId, userIds, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        if (userIds === null || userIds === void 0) {
+          throw new Error("'userIds' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}/demote".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {
+          user_ids: userIds
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      joinGroup(groupId, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}/join".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {};
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      kickGroupUsers(groupId, userIds, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}/kick".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {
+          user_ids: userIds
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      leaveGroup(groupId, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}/leave".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {};
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      promoteGroupUsers(groupId, userIds, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}/promote".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {
+          user_ids: userIds
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      listGroupUsers(groupId, limit, state, cursor, options = {}) {
+        if (groupId === null || groupId === void 0) {
+          throw new Error("'groupId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/group/{groupId}/user".replace("{groupId}", encodeURIComponent(String(groupId)));
+        const queryParams = {
+          limit,
+          state,
+          cursor
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      deleteLeaderboardRecord(leaderboardId, options = {}) {
+        if (leaderboardId === null || leaderboardId === void 0) {
+          throw new Error("'leaderboardId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/leaderboard/{leaderboardId}".replace("{leaderboardId}", encodeURIComponent(String(leaderboardId)));
+        const queryParams = {};
+        let _body = null;
+        return this.doFetch(urlPath, "DELETE", queryParams, _body, options);
+      }
+      listLeaderboardRecords(leaderboardId, ownerIds, limit, cursor, expiry, options = {}) {
+        if (leaderboardId === null || leaderboardId === void 0) {
+          throw new Error("'leaderboardId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/leaderboard/{leaderboardId}".replace("{leaderboardId}", encodeURIComponent(String(leaderboardId)));
+        const queryParams = {
+          ownerIds,
+          limit,
+          cursor,
+          expiry
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      writeLeaderboardRecord(leaderboardId, body, options = {}) {
+        if (leaderboardId === null || leaderboardId === void 0) {
+          throw new Error("'leaderboardId' is a required parameter but is null or undefined.");
+        }
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/leaderboard/{leaderboardId}".replace("{leaderboardId}", encodeURIComponent(String(leaderboardId)));
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      listLeaderboardRecordsAroundOwner(leaderboardId, ownerId, limit, expiry, options = {}) {
+        if (leaderboardId === null || leaderboardId === void 0) {
+          throw new Error("'leaderboardId' is a required parameter but is null or undefined.");
+        }
+        if (ownerId === null || ownerId === void 0) {
+          throw new Error("'ownerId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/leaderboard/{leaderboardId}/owner/{ownerId}".replace("{leaderboardId}", encodeURIComponent(String(leaderboardId))).replace("{ownerId}", encodeURIComponent(String(ownerId)));
+        const queryParams = {
+          limit,
+          expiry
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      listMatches(limit, authoritative, label, minSize, maxSize, query, options = {}) {
+        const urlPath = "/v2/match";
+        const queryParams = {
+          limit,
+          authoritative,
+          label,
+          minSize,
+          maxSize,
+          query
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      deleteNotifications(ids, options = {}) {
+        const urlPath = "/v2/notification";
+        const queryParams = {
+          ids
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "DELETE", queryParams, _body, options);
+      }
+      listNotifications(limit, cacheableCursor, options = {}) {
+        const urlPath = "/v2/notification";
+        const queryParams = {
+          limit,
+          cacheableCursor
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      rpcFunc2(id, payload, httpKey, options = {}) {
+        if (id === null || id === void 0) {
+          throw new Error("'id' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/rpc/{id}".replace("{id}", encodeURIComponent(String(id)));
+        const queryParams = {
+          payload,
+          httpKey
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      rpcFunc(id, body, httpKey, options = {}) {
+        if (id === null || id === void 0) {
+          throw new Error("'id' is a required parameter but is null or undefined.");
+        }
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/rpc/{id}".replace("{id}", encodeURIComponent(String(id)));
+        const queryParams = {
+          httpKey
+        };
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      readStorageObjects(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/storage";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      writeStorageObjects(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/storage";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "PUT", queryParams, _body, options);
+      }
+      deleteStorageObjects(body, options = {}) {
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/storage/delete";
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "PUT", queryParams, _body, options);
+      }
+      listStorageObjects(collection, userId, limit, cursor, options = {}) {
+        if (collection === null || collection === void 0) {
+          throw new Error("'collection' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/storage/{collection}".replace("{collection}", encodeURIComponent(String(collection)));
+        const queryParams = {
+          userId,
+          limit,
+          cursor
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      listStorageObjects2(collection, userId, limit, cursor, options = {}) {
+        if (collection === null || collection === void 0) {
+          throw new Error("'collection' is a required parameter but is null or undefined.");
+        }
+        if (userId === null || userId === void 0) {
+          throw new Error("'userId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/storage/{collection}/{userId}".replace("{collection}", encodeURIComponent(String(collection))).replace("{userId}", encodeURIComponent(String(userId)));
+        const queryParams = {
+          limit,
+          cursor
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      listTournaments(categoryStart, categoryEnd, startTime, endTime, limit, cursor, options = {}) {
+        const urlPath = "/v2/tournament";
+        const queryParams = {
+          categoryStart,
+          categoryEnd,
+          startTime,
+          endTime,
+          limit,
+          cursor
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      listTournamentRecords(tournamentId, ownerIds, limit, cursor, expiry, options = {}) {
+        if (tournamentId === null || tournamentId === void 0) {
+          throw new Error("'tournamentId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/tournament/{tournamentId}".replace("{tournamentId}", encodeURIComponent(String(tournamentId)));
+        const queryParams = {
+          ownerIds,
+          limit,
+          cursor,
+          expiry
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      writeTournamentRecord(tournamentId, body, options = {}) {
+        if (tournamentId === null || tournamentId === void 0) {
+          throw new Error("'tournamentId' is a required parameter but is null or undefined.");
+        }
+        if (body === null || body === void 0) {
+          throw new Error("'body' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/tournament/{tournamentId}".replace("{tournamentId}", encodeURIComponent(String(tournamentId)));
+        const queryParams = {};
+        let _body = null;
+        _body = JSON.stringify(body || {});
+        return this.doFetch(urlPath, "PUT", queryParams, _body, options);
+      }
+      joinTournament(tournamentId, options = {}) {
+        if (tournamentId === null || tournamentId === void 0) {
+          throw new Error("'tournamentId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/tournament/{tournamentId}/join".replace("{tournamentId}", encodeURIComponent(String(tournamentId)));
+        const queryParams = {};
+        let _body = null;
+        return this.doFetch(urlPath, "POST", queryParams, _body, options);
+      }
+      listTournamentRecordsAroundOwner(tournamentId, ownerId, limit, expiry, options = {}) {
+        if (tournamentId === null || tournamentId === void 0) {
+          throw new Error("'tournamentId' is a required parameter but is null or undefined.");
+        }
+        if (ownerId === null || ownerId === void 0) {
+          throw new Error("'ownerId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/tournament/{tournamentId}/owner/{ownerId}".replace("{tournamentId}", encodeURIComponent(String(tournamentId))).replace("{ownerId}", encodeURIComponent(String(ownerId)));
+        const queryParams = {
+          limit,
+          expiry
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      getUsers(ids, usernames, facebookIds, options = {}) {
+        const urlPath = "/v2/user";
+        const queryParams = {
+          ids,
+          usernames,
+          facebookIds
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+      listUserGroups(userId, limit, state, cursor, options = {}) {
+        if (userId === null || userId === void 0) {
+          throw new Error("'userId' is a required parameter but is null or undefined.");
+        }
+        const urlPath = "/v2/user/{userId}/group".replace("{userId}", encodeURIComponent(String(userId)));
+        const queryParams = {
+          limit,
+          state,
+          cursor
+        };
+        let _body = null;
+        return this.doFetch(urlPath, "GET", queryParams, _body, options);
+      }
+    };
+
+    // session.ts
+    var Session = class {
+      constructor(token, created_at, expires_at, username, user_id, vars) {
+        this.token = token;
+        this.created_at = created_at;
+        this.expires_at = expires_at;
+        this.username = username;
+        this.user_id = user_id;
+        this.vars = vars;
+      }
+      isexpired(currenttime) {
+        return this.expires_at - currenttime < 0;
+      }
+      static restore(jwt) {
+        const createdAt = Math.floor(new Date().getTime() / 1e3);
+        const parts = jwt.split(".");
+        if (parts.length != 3) {
+          throw "jwt is not valid.";
+        }
+        const decoded = JSON.parse(atob(parts[1]));
+        const expiresAt = Math.floor(parseInt(decoded["exp"]));
+        return new Session(jwt, createdAt, expiresAt, decoded["usn"], decoded["uid"], decoded["vrs"]);
+      }
+    };
+
+    // web_socket_adapter.ts
+    var WebSocketAdapterText = class {
+      constructor() {
+        this._isConnected = false;
+      }
+      get onClose() {
+        return this._socket.onclose;
+      }
+      set onClose(value) {
+        this._socket.onclose = value;
+      }
+      get onError() {
+        return this._socket.onerror;
+      }
+      set onError(value) {
+        this._socket.onerror = value;
+      }
+      get onMessage() {
+        return this._socket.onmessage;
+      }
+      set onMessage(value) {
+        if (value) {
+          this._socket.onmessage = (evt) => {
+            const message = JSON.parse(evt.data);
+            value(message);
+          };
+        } else {
+          value = null;
+        }
+      }
+      get onOpen() {
+        return this._socket.onopen;
+      }
+      set onOpen(value) {
+        this._socket.onopen = value;
+      }
+      get isConnected() {
+        return this._isConnected;
+      }
+      connect(scheme, host, port, createStatus, token) {
+        const url = `${scheme}${host}:${port}/ws?lang=en&status=${encodeURIComponent(createStatus.toString())}&token=${encodeURIComponent(token)}`;
+        this._socket = new WebSocket(url);
+        this._isConnected = true;
+      }
+      close() {
+        this._isConnected = false;
+        this._socket.close();
+        this._socket = void 0;
+      }
+      send(msg) {
+        if (msg.match_data_send) {
+          msg.match_data_send.op_code = msg.match_data_send.op_code.toString();
+        }
+        this._socket.send(JSON.stringify(msg));
+      }
+    };
+
+    // utils.ts
+    function b64EncodeUnicode(str) {
+      return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function toSolidBytes(_match, p1) {
+        return String.fromCharCode(Number("0x" + p1));
+      }));
+    }
+    function b64DecodeUnicode(str) {
+      return decodeURIComponent(atob(str).split("").map(function(c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(""));
+    }
+
+    // socket.ts
+    var DefaultSocket = class {
+      constructor(host, port, useSSL = false, verbose = false, adapter = new WebSocketAdapterText()) {
+        this.host = host;
+        this.port = port;
+        this.useSSL = useSSL;
+        this.verbose = verbose;
+        this.adapter = adapter;
+        this.cIds = {};
+        this.nextCid = 1;
+      }
+      generatecid() {
+        const cid = this.nextCid.toString();
+        ++this.nextCid;
+        return cid;
+      }
+      connect(session, createStatus = false) {
+        if (this.adapter.isConnected) {
+          return Promise.resolve(session);
+        }
+        const scheme = this.useSSL ? "wss://" : "ws://";
+        this.adapter.connect(scheme, this.host, this.port, createStatus, session.token);
+        this.adapter.onClose = (evt) => {
+          this.ondisconnect(evt);
+        };
+        this.adapter.onError = (evt) => {
+          this.onerror(evt);
+        };
+        this.adapter.onMessage = (message) => {
+          if (this.verbose && window && window.console) {
+            console.log("Response: %o", message);
+          }
+          if (message.cid == void 0) {
+            if (message.notifications) {
+              message.notifications.notifications.forEach((n) => {
+                n.content = n.content ? JSON.parse(n.content) : void 0;
+                this.onnotification(n);
+              });
+            } else if (message.match_data) {
+              message.match_data.data = message.match_data.data != null ? JSON.parse(b64DecodeUnicode(message.match_data.data)) : null;
+              message.match_data.op_code = parseInt(message.match_data.op_code);
+              this.onmatchdata(message.match_data);
+            } else if (message.match_presence_event) {
+              this.onmatchpresence(message.match_presence_event);
+            } else if (message.matchmaker_matched) {
+              this.onmatchmakermatched(message.matchmaker_matched);
+            } else if (message.status_presence_event) {
+              this.onstatuspresence(message.status_presence_event);
+            } else if (message.stream_presence_event) {
+              this.onstreampresence(message.stream_presence_event);
+            } else if (message.stream_data) {
+              this.onstreamdata(message.stream_data);
+            } else if (message.channel_message) {
+              message.channel_message.content = JSON.parse(message.channel_message.content);
+              this.onchannelmessage(message.channel_message);
+            } else if (message.channel_presence_event) {
+              this.onchannelpresence(message.channel_presence_event);
+            } else {
+              if (this.verbose && window && window.console) {
+                console.log("Unrecognized message received: %o", message);
+              }
+            }
+          } else {
+            const executor = this.cIds[message.cid];
+            if (!executor) {
+              if (this.verbose && window && window.console) {
+                console.error("No promise executor for message: %o", message);
+              }
+              return;
+            }
+            delete this.cIds[message.cid];
+            if (message.error) {
+              executor.reject(message.error);
+            } else {
+              executor.resolve(message);
+            }
+          }
+        };
+        return new Promise((resolve, reject) => {
+          this.adapter.onOpen = (evt) => {
+            if (this.verbose && window && window.console) {
+              console.log(evt);
+            }
+            resolve(session);
+          };
+          this.adapter.onError = (evt) => {
+            reject(evt);
+            this.adapter.close();
+          };
+        });
+      }
+      disconnect(fireDisconnectEvent = true) {
+        if (this.adapter.isConnected) {
+          this.adapter.close();
+        }
+        if (fireDisconnectEvent) {
+          this.ondisconnect({});
+        }
+      }
+      ondisconnect(evt) {
+        if (this.verbose && window && window.console) {
+          console.log(evt);
+        }
+      }
+      onerror(evt) {
+        if (this.verbose && window && window.console) {
+          console.log(evt);
+        }
+      }
+      onchannelmessage(channelMessage) {
+        if (this.verbose && window && window.console) {
+          console.log(channelMessage);
+        }
+      }
+      onchannelpresence(channelPresence) {
+        if (this.verbose && window && window.console) {
+          console.log(channelPresence);
+        }
+      }
+      onnotification(notification) {
+        if (this.verbose && window && window.console) {
+          console.log(notification);
+        }
+      }
+      onmatchdata(matchData) {
+        if (this.verbose && window && window.console) {
+          console.log(matchData);
+        }
+      }
+      onmatchpresence(matchPresence) {
+        if (this.verbose && window && window.console) {
+          console.log(matchPresence);
+        }
+      }
+      onmatchmakermatched(matchmakerMatched) {
+        if (this.verbose && window && window.console) {
+          console.log(matchmakerMatched);
+        }
+      }
+      onstatuspresence(statusPresence) {
+        if (this.verbose && window && window.console) {
+          console.log(statusPresence);
+        }
+      }
+      onstreampresence(streamPresence) {
+        if (this.verbose && window && window.console) {
+          console.log(streamPresence);
+        }
+      }
+      onstreamdata(streamData) {
+        if (this.verbose && window && window.console) {
+          console.log(streamData);
+        }
+      }
+      send(message) {
+        const untypedMessage = message;
+        return new Promise((resolve, reject) => {
+          if (!this.adapter.isConnected) {
+            reject("Socket connection has not been established yet.");
+          } else {
+            if (untypedMessage.match_data_send) {
+              untypedMessage.match_data_send.data = b64EncodeUnicode(JSON.stringify(untypedMessage.match_data_send.data));
+              this.adapter.send(untypedMessage);
+              resolve();
+            } else {
+              if (untypedMessage.channel_message_send) {
+                untypedMessage.channel_message_send.content = JSON.stringify(untypedMessage.channel_message_send.content);
+              } else if (untypedMessage.channel_message_update) {
+                untypedMessage.channel_message_update.content = JSON.stringify(untypedMessage.channel_message_update.content);
+              }
+              const cid = this.generatecid();
+              this.cIds[cid] = {resolve, reject};
+              untypedMessage.cid = cid;
+              this.adapter.send(untypedMessage);
+            }
+          }
+          if (this.verbose && window && window.console) {
+            console.log("Sent message: %o", untypedMessage);
+          }
+        });
+      }
+      addMatchmaker(query, minCount, maxCount, stringProperties, numericProperties) {
+        return __async(this, null, function* () {
+          const matchMakerAdd = {
+            matchmaker_add: {
+              min_count: minCount,
+              max_count: maxCount,
+              query,
+              string_properties: stringProperties,
+              numeric_properties: numericProperties
+            }
+          };
+          const response = yield this.send(matchMakerAdd);
+          return response.matchmaker_ticket;
+        });
+      }
+      createMatch() {
+        return __async(this, null, function* () {
+          const response = yield this.send({match_create: {}});
+          return response.match;
+        });
+      }
+      followUsers(userIds) {
+        return __async(this, null, function* () {
+          const response = yield this.send({status_follow: {user_ids: userIds}});
+          return response.status;
+        });
+      }
+      joinChat(target, type, persistence, hidden) {
+        return __async(this, null, function* () {
+          const response = yield this.send({
+            channel_join: {
+              target,
+              type,
+              persistence,
+              hidden
+            }
+          });
+          return response.channel;
+        });
+      }
+      joinMatch(match_id, token, metadata) {
+        return __async(this, null, function* () {
+          const join = {match_join: {metadata}};
+          if (token) {
+            join.match_join.token = token;
+          } else {
+            join.match_join.match_id = match_id;
+          }
+          const response = yield this.send(join);
+          return response.match;
+        });
+      }
+      leaveChat(channel_id) {
+        return this.send({channel_leave: {channel_id}});
+      }
+      leaveMatch(matchId) {
+        return this.send({match_leave: {match_id: matchId}});
+      }
+      removeChatMessage(channel_id, message_id) {
+        return __async(this, null, function* () {
+          const response = yield this.send({
+            channel_message_remove: {
+              channel_id,
+              message_id
+            }
+          });
+          return response.channel_message_ack;
+        });
+      }
+      removeMatchmaker(ticket) {
+        return this.send({matchmaker_remove: {ticket}});
+      }
+      rpc(id, payload, http_key) {
+        return __async(this, null, function* () {
+          const response = yield this.send({
+            rpc: {
+              id,
+              payload,
+              http_key
+            }
+          });
+          return response.rpc;
+        });
+      }
+      sendMatchState(matchId, opCode, data, presences) {
+        return __async(this, null, function* () {
+          return this.send({
+            match_data_send: {
+              match_id: matchId,
+              op_code: opCode,
+              data,
+              presences: presences != null ? presences : []
+            }
+          });
+        });
+      }
+      unfollowUsers(user_ids) {
+        return this.send({status_unfollow: {user_ids}});
+      }
+      updateChatMessage(channel_id, message_id, content) {
+        return __async(this, null, function* () {
+          const response = yield this.send({channel_message_update: {channel_id, message_id, content}});
+          return response.channel_message_ack;
+        });
+      }
+      updateStatus(status) {
+        return this.send({status_update: {status}});
+      }
+      writeChatMessage(channel_id, content) {
+        return __async(this, null, function* () {
+          const response = yield this.send({channel_message_send: {channel_id, content}});
+          return response.channel_message_ack;
+        });
+      }
+    };
+
+    // client.ts
+    var DEFAULT_HOST = "127.0.0.1";
+    var DEFAULT_PORT = "7350";
+    var DEFAULT_SERVER_KEY = "defaultkey";
+    var DEFAULT_TIMEOUT_MS = 7e3;
+    var Client = class {
+      constructor(serverkey = DEFAULT_SERVER_KEY, host = DEFAULT_HOST, port = DEFAULT_PORT, useSSL = false, timeout = DEFAULT_TIMEOUT_MS) {
+        this.serverkey = serverkey;
+        this.host = host;
+        this.port = port;
+        this.useSSL = useSSL;
+        this.timeout = timeout;
+        const scheme = useSSL ? "https://" : "http://";
+        const basePath = `${scheme}${host}:${port}`;
+        this.configuration = {
+          basePath,
+          username: serverkey,
+          password: "",
+          timeoutMs: timeout
+        };
+        this.apiClient = new NakamaApi(this.configuration);
+      }
+      addGroupUsers(session, groupId, ids) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.addGroupUsers(groupId, ids).then((response) => {
+          return response !== void 0;
+        });
+      }
+      addFriends(session, ids, usernames) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.addFriends(ids, usernames).then((response) => {
+          return response !== void 0;
+        });
+      }
+      authenticateApple(token, create, username, vars = new Map(), options = {}) {
+        const request = {
+          token,
+          vars
+        };
+        return this.apiClient.authenticateApple(request, create, username, options).then((apiSession) => {
+          return Session.restore(apiSession.token || "");
+        });
+      }
+      authenticateCustom(id, create, username, vars = new Map(), options = {}) {
+        const request = {
+          id,
+          vars
+        };
+        return this.apiClient.authenticateCustom(request, create, username, options).then((apiSession) => {
+          return Session.restore(apiSession.token || "");
+        });
+      }
+      authenticateDevice(id, vars) {
+        const request = {
+          id,
+          vars
+        };
+        return this.apiClient.authenticateDevice(request).then((apiSession) => {
+          return Session.restore(apiSession.token || "");
+        });
+      }
+      authenticateEmail(email, password, vars) {
+        const request = {
+          email,
+          password,
+          vars
+        };
+        return this.apiClient.authenticateEmail(request).then((apiSession) => {
+          return Session.restore(apiSession.token || "");
+        });
+      }
+      authenticateFacebookInstantGame(signedPlayerInfo, create, username, vars, options = {}) {
+        const request = {
+          signed_player_info: signedPlayerInfo,
+          vars
+        };
+        return this.apiClient.authenticateFacebookInstantGame({signed_player_info: request.signed_player_info, vars: request.vars}, create, username, options).then((apiSession) => {
+          return Session.restore(apiSession.token || "");
+        });
+      }
+      authenticateFacebook(token, create, username, sync, vars, options = {}) {
+        const request = {
+          token,
+          vars
+        };
+        return this.apiClient.authenticateFacebook(request, create, username, sync, options).then((apiSession) => {
+          return Session.restore(apiSession.token || "");
+        });
+      }
+      authenticateGoogle(token, create, username, vars, options = {}) {
+        const request = {
+          token,
+          vars
+        };
+        return this.apiClient.authenticateGoogle(request, create, username, options).then((apiSession) => {
+          return Session.restore(apiSession.token || "");
+        });
+      }
+      authenticateGameCenter(token, vars) {
+        const request = {
+          token,
+          vars
+        };
+        return this.apiClient.authenticateGameCenter(request).then((apiSession) => {
+          return Session.restore(apiSession.token || "");
+        });
+      }
+      authenticateSteam(token, vars) {
+        const request = {
+          token,
+          vars
+        };
+        return this.apiClient.authenticateSteam(request).then((apiSession) => {
+          return Session.restore(apiSession.token || "");
+        });
+      }
+      banGroupUsers(session, groupId, ids) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.banGroupUsers(groupId, ids).then((response) => {
+          return response !== void 0;
+        });
+      }
+      blockFriends(session, ids, usernames) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.blockFriends(ids, usernames).then((response) => {
+          return Promise.resolve(response != void 0);
+        });
+      }
+      createGroup(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.createGroup(request).then((response) => {
+          return Promise.resolve({
+            avatar_url: response.avatar_url,
+            create_time: response.create_time,
+            creator_id: response.creator_id,
+            description: response.description,
+            edge_count: response.edge_count ? Number(response.edge_count) : 0,
+            id: response.id,
+            lang_tag: response.lang_tag,
+            max_count: response.max_count ? Number(response.max_count) : 0,
+            metadata: response.metadata ? JSON.parse(response.metadata) : void 0,
+            name: response.name,
+            open: response.open,
+            update_time: response.update_time
+          });
+        });
+      }
+      createSocket(useSSL = false, verbose = false, adapter = new WebSocketAdapterText()) {
+        return new DefaultSocket(this.host, this.port, useSSL, verbose, adapter);
+      }
+      deleteFriends(session, ids, usernames) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.deleteFriends(ids, usernames).then((response) => {
+          return response !== void 0;
+        });
+      }
+      deleteGroup(session, groupId) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.deleteGroup(groupId).then((response) => {
+          return response !== void 0;
+        });
+      }
+      deleteNotifications(session, ids) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.deleteNotifications(ids).then((response) => {
+          return Promise.resolve(response != void 0);
+        });
+      }
+      deleteStorageObjects(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.deleteStorageObjects(request).then((response) => {
+          return Promise.resolve(response != void 0);
+        });
+      }
+      demoteGroupUsers(session, groupId, ids) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.demoteGroupUsers(groupId, ids);
+      }
+      emitEvent(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.event(request).then((response) => {
+          return Promise.resolve(response != void 0);
+        });
+      }
+      getAccount(session) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.getAccount();
+      }
+      importFacebookFriends(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.importFacebookFriends(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      getUsers(session, ids, usernames, facebookIds) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.getUsers(ids, usernames, facebookIds).then((response) => {
+          var result = {
+            users: []
+          };
+          if (response.users == null) {
+            return Promise.resolve(result);
+          }
+          response.users.forEach((u) => {
+            result.users.push({
+              avatar_url: u.avatar_url,
+              create_time: u.create_time,
+              display_name: u.display_name,
+              edge_count: u.edge_count ? Number(u.edge_count) : 0,
+              facebook_id: u.facebook_id,
+              gamecenter_id: u.gamecenter_id,
+              google_id: u.google_id,
+              id: u.id,
+              lang_tag: u.lang_tag,
+              location: u.location,
+              online: u.online,
+              steam_id: u.steam_id,
+              timezone: u.timezone,
+              update_time: u.update_time,
+              username: u.username,
+              metadata: u.metadata ? JSON.parse(u.metadata) : void 0
+            });
+          });
+          return Promise.resolve(result);
+        });
+      }
+      joinGroup(session, groupId) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.joinGroup(groupId, {}).then((response) => {
+          return response !== void 0;
+        });
+      }
+      joinTournament(session, tournamentId) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.joinTournament(tournamentId, {}).then((response) => {
+          return response !== void 0;
+        });
+      }
+      kickGroupUsers(session, groupId, ids) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.kickGroupUsers(groupId, ids).then((response) => {
+          return Promise.resolve(response != void 0);
+        });
+      }
+      leaveGroup(session, groupId) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.leaveGroup(groupId, {}).then((response) => {
+          return response !== void 0;
+        });
+      }
+      listChannelMessages(session, channelId, limit, forward, cursor) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listChannelMessages(channelId, limit, forward, cursor).then((response) => {
+          var result = {
+            messages: [],
+            next_cursor: response.next_cursor,
+            prev_cursor: response.prev_cursor
+          };
+          if (response.messages == null) {
+            return Promise.resolve(result);
+          }
+          response.messages.forEach((m) => {
+            result.messages.push({
+              channel_id: m.channel_id,
+              code: m.code ? Number(m.code) : 0,
+              create_time: m.create_time,
+              message_id: m.message_id,
+              persistent: m.persistent,
+              sender_id: m.sender_id,
+              update_time: m.update_time,
+              username: m.username,
+              content: m.content ? JSON.parse(m.content) : void 0,
+              group_id: m.group_id,
+              room_name: m.room_name,
+              user_id_one: m.user_id_one,
+              user_id_two: m.user_id_two
+            });
+          });
+          return Promise.resolve(result);
+        });
+      }
+      listGroupUsers(session, groupId, state, limit, cursor) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listGroupUsers(groupId, limit, state, cursor).then((response) => {
+          var result = {
+            group_users: [],
+            cursor: response.cursor
+          };
+          if (response.group_users == null) {
+            return Promise.resolve(result);
+          }
+          response.group_users.forEach((gu) => {
+            result.group_users.push({
+              user: {
+                avatar_url: gu.user.avatar_url,
+                create_time: gu.user.create_time,
+                display_name: gu.user.display_name,
+                edge_count: gu.user.edge_count ? Number(gu.user.edge_count) : 0,
+                facebook_id: gu.user.facebook_id,
+                gamecenter_id: gu.user.gamecenter_id,
+                google_id: gu.user.google_id,
+                id: gu.user.id,
+                lang_tag: gu.user.lang_tag,
+                location: gu.user.location,
+                online: gu.user.online,
+                steam_id: gu.user.steam_id,
+                timezone: gu.user.timezone,
+                update_time: gu.user.update_time,
+                username: gu.user.username,
+                metadata: gu.user.metadata ? JSON.parse(gu.user.metadata) : void 0
+              },
+              state: gu.state ? Number(gu.state) : 0
+            });
+          });
+          return Promise.resolve(result);
+        });
+      }
+      listUserGroups(session, userId, state, limit, cursor) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listUserGroups(userId, state, limit, cursor).then((response) => {
+          var result = {
+            user_groups: [],
+            cursor: response.cursor
+          };
+          if (response.user_groups == null) {
+            return Promise.resolve(result);
+          }
+          response.user_groups.forEach((ug) => {
+            result.user_groups.push({
+              group: {
+                avatar_url: ug.group.avatar_url,
+                create_time: ug.group.create_time,
+                creator_id: ug.group.creator_id,
+                description: ug.group.description,
+                edge_count: ug.group.edge_count ? Number(ug.group.edge_count) : 0,
+                id: ug.group.id,
+                lang_tag: ug.group.lang_tag,
+                max_count: ug.group.max_count,
+                metadata: ug.group.metadata ? JSON.parse(ug.group.metadata) : void 0,
+                name: ug.group.name,
+                open: ug.group.open,
+                update_time: ug.group.update_time
+              },
+              state: ug.state ? Number(ug.state) : 0
+            });
+          });
+          return Promise.resolve(result);
+        });
+      }
+      listGroups(session, name, cursor, limit) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listGroups(name, cursor, limit).then((response) => {
+          var result = {
+            groups: []
+          };
+          if (response.groups == null) {
+            return Promise.resolve(result);
+          }
+          result.cursor = response.cursor;
+          response.groups.forEach((ug) => {
+            result.groups.push({
+              avatar_url: ug.avatar_url,
+              create_time: ug.create_time,
+              creator_id: ug.creator_id,
+              description: ug.description,
+              edge_count: ug.edge_count ? Number(ug.edge_count) : 0,
+              id: ug.id,
+              lang_tag: ug.lang_tag,
+              max_count: ug.max_count,
+              metadata: ug.metadata ? JSON.parse(ug.metadata) : void 0,
+              name: ug.name,
+              open: ug.open,
+              update_time: ug.update_time
+            });
+          });
+          return Promise.resolve(result);
+        });
+      }
+      linkApple(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.linkApple(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      linkCustom(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.linkCustom(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      linkDevice(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.linkDevice(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      linkEmail(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.linkEmail(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      linkFacebook(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.linkFacebook(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      linkFacebookInstantGame(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.linkFacebookInstantGame(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      linkGoogle(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.linkGoogle(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      linkGameCenter(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.linkGameCenter(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      linkSteam(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.linkSteam(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      listFriends(session, state, limit, cursor) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listFriends(limit, state, cursor).then((response) => {
+          var result = {
+            friends: [],
+            cursor: response.cursor
+          };
+          if (response.friends == null) {
+            return Promise.resolve(result);
+          }
+          response.friends.forEach((f) => {
+            result.friends.push({
+              user: {
+                avatar_url: f.user.avatar_url,
+                create_time: f.user.create_time,
+                display_name: f.user.display_name,
+                edge_count: f.user.edge_count ? Number(f.user.edge_count) : 0,
+                facebook_id: f.user.facebook_id,
+                gamecenter_id: f.user.gamecenter_id,
+                google_id: f.user.google_id,
+                id: f.user.id,
+                lang_tag: f.user.lang_tag,
+                location: f.user.location,
+                online: f.user.online,
+                steam_id: f.user.steam_id,
+                timezone: f.user.timezone,
+                update_time: f.user.update_time,
+                username: f.user.username,
+                metadata: f.user.metadata ? JSON.parse(f.user.metadata) : void 0
+              },
+              state: f.state
+            });
+          });
+          return Promise.resolve(result);
+        });
+      }
+      listLeaderboardRecords(session, leaderboardId, ownerIds, limit, cursor, expiry) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listLeaderboardRecords(leaderboardId, ownerIds, limit, cursor, expiry).then((response) => {
+          var list = {
+            next_cursor: response.next_cursor,
+            prev_cursor: response.prev_cursor,
+            owner_records: [],
+            records: []
+          };
+          if (response.owner_records != null) {
+            response.owner_records.forEach((o) => {
+              list.owner_records.push({
+                expiry_time: o.expiry_time,
+                leaderboard_id: o.leaderboard_id,
+                metadata: o.metadata ? JSON.parse(o.metadata) : void 0,
+                num_score: o.num_score ? Number(o.num_score) : 0,
+                owner_id: o.owner_id,
+                rank: o.rank ? Number(o.rank) : 0,
+                score: o.score ? Number(o.score) : 0,
+                subscore: o.subscore ? Number(o.subscore) : 0,
+                update_time: o.update_time,
+                username: o.username,
+                max_num_score: o.max_num_score ? Number(o.max_num_score) : 0
+              });
+            });
+          }
+          if (response.records != null) {
+            response.records.forEach((o) => {
+              list.records.push({
+                expiry_time: o.expiry_time,
+                leaderboard_id: o.leaderboard_id,
+                metadata: o.metadata ? JSON.parse(o.metadata) : void 0,
+                num_score: o.num_score ? Number(o.num_score) : 0,
+                owner_id: o.owner_id,
+                rank: o.rank ? Number(o.rank) : 0,
+                score: o.score ? Number(o.score) : 0,
+                subscore: o.subscore ? Number(o.subscore) : 0,
+                update_time: o.update_time,
+                username: o.username,
+                max_num_score: o.max_num_score ? Number(o.max_num_score) : 0
+              });
+            });
+          }
+          return Promise.resolve(list);
+        });
+      }
+      listLeaderboardRecordsAroundOwner(session, leaderboardId, ownerId, limit, expiry) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listLeaderboardRecordsAroundOwner(leaderboardId, ownerId, limit, expiry).then((response) => {
+          var list = {
+            next_cursor: response.next_cursor,
+            prev_cursor: response.prev_cursor,
+            owner_records: [],
+            records: []
+          };
+          if (response.owner_records != null) {
+            response.owner_records.forEach((o) => {
+              list.owner_records.push({
+                expiry_time: o.expiry_time,
+                leaderboard_id: o.leaderboard_id,
+                metadata: o.metadata ? JSON.parse(o.metadata) : void 0,
+                num_score: o.num_score ? Number(o.num_score) : 0,
+                owner_id: o.owner_id,
+                rank: o.rank ? Number(o.rank) : 0,
+                score: o.score ? Number(o.score) : 0,
+                subscore: o.subscore ? Number(o.subscore) : 0,
+                update_time: o.update_time,
+                username: o.username,
+                max_num_score: o.max_num_score ? Number(o.max_num_score) : 0
+              });
+            });
+          }
+          if (response.records != null) {
+            response.records.forEach((o) => {
+              list.records.push({
+                expiry_time: o.expiry_time,
+                leaderboard_id: o.leaderboard_id,
+                metadata: o.metadata ? JSON.parse(o.metadata) : void 0,
+                num_score: o.num_score ? Number(o.num_score) : 0,
+                owner_id: o.owner_id,
+                rank: o.rank ? Number(o.rank) : 0,
+                score: o.score ? Number(o.score) : 0,
+                subscore: o.subscore ? Number(o.subscore) : 0,
+                update_time: o.update_time,
+                username: o.username,
+                max_num_score: o.max_num_score ? Number(o.max_num_score) : 0
+              });
+            });
+          }
+          return Promise.resolve(list);
+        });
+      }
+      listMatches(session, limit, authoritative, label, minSize, maxSize, query) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listMatches(limit, authoritative, label, minSize, maxSize, query);
+      }
+      listNotifications(session, limit, cacheableCursor) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listNotifications(limit, cacheableCursor).then((response) => {
+          var result = {
+            cacheable_cursor: response.cacheable_cursor,
+            notifications: []
+          };
+          if (response.notifications == null) {
+            return Promise.resolve(result);
+          }
+          response.notifications.forEach((n) => {
+            result.notifications.push({
+              code: n.code ? Number(n.code) : 0,
+              create_time: n.create_time,
+              id: n.id,
+              persistent: n.persistent,
+              sender_id: n.sender_id,
+              subject: n.subject,
+              content: n.content ? JSON.parse(n.content) : void 0
+            });
+          });
+          return Promise.resolve(result);
+        });
+      }
+      listStorageObjects(session, collection, userId, limit, cursor) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listStorageObjects(collection, userId, limit, cursor).then((response) => {
+          var result = {
+            objects: [],
+            cursor: response.cursor
+          };
+          if (response.objects == null) {
+            return Promise.resolve(result);
+          }
+          response.objects.forEach((o) => {
+            result.objects.push({
+              collection: o.collection,
+              key: o.key,
+              permission_read: o.permission_read ? Number(o.permission_read) : 0,
+              permission_write: o.permission_write ? Number(o.permission_write) : 0,
+              value: o.value ? JSON.parse(o.value) : void 0,
+              version: o.version,
+              user_id: o.user_id,
+              create_time: o.create_time,
+              update_time: o.update_time
+            });
+          });
+          return Promise.resolve(result);
+        });
+      }
+      listTournaments(session, categoryStart, categoryEnd, startTime, endTime, limit, cursor) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listTournaments(categoryStart, categoryEnd, startTime, endTime, limit, cursor).then((response) => {
+          var list = {
+            cursor: response.cursor,
+            tournaments: []
+          };
+          if (response.tournaments != null) {
+            response.tournaments.forEach((o) => {
+              list.tournaments.push({
+                id: o.id,
+                title: o.title,
+                description: o.description,
+                duration: o.duration ? Number(o.duration) : 0,
+                category: o.category ? Number(o.category) : 0,
+                sort_order: o.sort_order ? Number(o.sort_order) : 0,
+                size: o.size ? Number(o.size) : 0,
+                max_size: o.max_size ? Number(o.max_size) : 0,
+                max_num_score: o.max_num_score ? Number(o.max_num_score) : 0,
+                can_enter: o.can_enter,
+                end_active: o.end_active ? Number(o.end_active) : 0,
+                next_reset: o.next_reset ? Number(o.next_reset) : 0,
+                metadata: o.metadata ? JSON.parse(o.metadata) : void 0,
+                create_time: o.create_time,
+                start_time: o.start_time,
+                end_time: o.end_time,
+                start_active: o.start_active
+              });
+            });
+          }
+          return Promise.resolve(list);
+        });
+      }
+      listTournamentRecords(session, tournamentId, ownerIds, limit, cursor, expiry) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listTournamentRecords(tournamentId, ownerIds, limit, cursor, expiry).then((response) => {
+          var list = {
+            next_cursor: response.next_cursor,
+            prev_cursor: response.prev_cursor,
+            owner_records: [],
+            records: []
+          };
+          if (response.owner_records != null) {
+            response.owner_records.forEach((o) => {
+              list.owner_records.push({
+                expiry_time: o.expiry_time,
+                leaderboard_id: o.leaderboard_id,
+                metadata: o.metadata ? JSON.parse(o.metadata) : void 0,
+                num_score: o.num_score ? Number(o.num_score) : 0,
+                owner_id: o.owner_id,
+                rank: o.rank ? Number(o.rank) : 0,
+                score: o.score ? Number(o.score) : 0,
+                subscore: o.subscore ? Number(o.subscore) : 0,
+                update_time: o.update_time,
+                username: o.username,
+                max_num_score: o.max_num_score ? Number(o.max_num_score) : 0
+              });
+            });
+          }
+          if (response.records != null) {
+            response.records.forEach((o) => {
+              list.records.push({
+                expiry_time: o.expiry_time,
+                leaderboard_id: o.leaderboard_id,
+                metadata: o.metadata ? JSON.parse(o.metadata) : void 0,
+                num_score: o.num_score ? Number(o.num_score) : 0,
+                owner_id: o.owner_id,
+                rank: o.rank ? Number(o.rank) : 0,
+                score: o.score ? Number(o.score) : 0,
+                subscore: o.subscore ? Number(o.subscore) : 0,
+                update_time: o.update_time,
+                username: o.username,
+                max_num_score: o.max_num_score ? Number(o.max_num_score) : 0
+              });
+            });
+          }
+          return Promise.resolve(list);
+        });
+      }
+      listTournamentRecordsAroundOwner(session, tournamentId, ownerId, limit, expiry) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.listTournamentRecordsAroundOwner(tournamentId, ownerId, limit, expiry).then((response) => {
+          var list = {
+            next_cursor: response.next_cursor,
+            prev_cursor: response.prev_cursor,
+            owner_records: [],
+            records: []
+          };
+          if (response.owner_records != null) {
+            response.owner_records.forEach((o) => {
+              list.owner_records.push({
+                expiry_time: o.expiry_time,
+                leaderboard_id: o.leaderboard_id,
+                metadata: o.metadata ? JSON.parse(o.metadata) : void 0,
+                num_score: o.num_score ? Number(o.num_score) : 0,
+                owner_id: o.owner_id,
+                rank: o.rank ? Number(o.rank) : 0,
+                score: o.score ? Number(o.score) : 0,
+                subscore: o.subscore ? Number(o.subscore) : 0,
+                update_time: o.update_time,
+                username: o.username,
+                max_num_score: o.max_num_score ? Number(o.max_num_score) : 0
+              });
+            });
+          }
+          if (response.records != null) {
+            response.records.forEach((o) => {
+              list.records.push({
+                expiry_time: o.expiry_time,
+                leaderboard_id: o.leaderboard_id,
+                metadata: o.metadata ? JSON.parse(o.metadata) : void 0,
+                num_score: o.num_score ? Number(o.num_score) : 0,
+                owner_id: o.owner_id,
+                rank: o.rank ? Number(o.rank) : 0,
+                score: o.score ? Number(o.score) : 0,
+                subscore: o.subscore ? Number(o.subscore) : 0,
+                update_time: o.update_time,
+                username: o.username,
+                max_num_score: o.max_num_score ? Number(o.max_num_score) : 0
+              });
+            });
+          }
+          return Promise.resolve(list);
+        });
+      }
+      promoteGroupUsers(session, groupId, ids) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.promoteGroupUsers(groupId, ids);
+      }
+      readStorageObjects(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.readStorageObjects(request).then((response) => {
+          var result = {objects: []};
+          if (response.objects == null) {
+            return Promise.resolve(result);
+          }
+          response.objects.forEach((o) => {
+            result.objects.push({
+              collection: o.collection,
+              key: o.key,
+              permission_read: o.permission_read ? Number(o.permission_read) : 0,
+              permission_write: o.permission_write ? Number(o.permission_write) : 0,
+              value: o.value ? JSON.parse(o.value) : void 0,
+              version: o.version,
+              user_id: o.user_id,
+              create_time: o.create_time,
+              update_time: o.update_time
+            });
+          });
+          return Promise.resolve(result);
+        });
+      }
+      rpc(session, id, input) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.rpcFunc(id, JSON.stringify(input)).then((response) => {
+          return Promise.resolve({
+            id: response.id,
+            payload: !response.payload ? void 0 : JSON.parse(response.payload)
+          });
+        });
+      }
+      rpcGet(id, session, httpKey, input) {
+        if (!httpKey || httpKey == "") {
+          this.configuration.bearerToken = session && session.token;
+        } else {
+          this.configuration.username = void 0;
+          this.configuration.bearerToken = void 0;
+        }
+        return this.apiClient.rpcFunc2(id, input && JSON.stringify(input) || "", httpKey).then((response) => {
+          this.configuration.username = this.serverkey;
+          return Promise.resolve({
+            id: response.id,
+            payload: !response.payload ? void 0 : JSON.parse(response.payload)
+          });
+        }).catch((err) => {
+          this.configuration.username = this.serverkey;
+          throw err;
+        });
+      }
+      unlinkApple(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.unlinkApple(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      unlinkCustom(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.unlinkCustom(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      unlinkDevice(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.unlinkDevice(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      unlinkEmail(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.unlinkEmail(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      unlinkFacebook(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.unlinkFacebook(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      unlinkFacebookInstantGame(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.unlinkFacebookInstantGame(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      unlinkGoogle(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.unlinkGoogle(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      unlinkGameCenter(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.unlinkGameCenter(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      unlinkSteam(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.unlinkSteam(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      updateAccount(session, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.updateAccount(request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      updateGroup(session, groupId, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.updateGroup(groupId, request).then((response) => {
+          return response !== void 0;
+        });
+      }
+      writeLeaderboardRecord(session, leaderboardId, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.writeLeaderboardRecord(leaderboardId, {
+          metadata: request.metadata ? JSON.stringify(request.metadata) : void 0,
+          score: request.score,
+          subscore: request.subscore
+        }).then((response) => {
+          return Promise.resolve({
+            expiry_time: response.expiry_time,
+            leaderboard_id: response.leaderboard_id,
+            metadata: response.metadata ? JSON.parse(response.metadata) : void 0,
+            num_score: response.num_score ? Number(response.num_score) : 0,
+            owner_id: response.owner_id,
+            score: response.score ? Number(response.score) : 0,
+            subscore: response.subscore ? Number(response.subscore) : 0,
+            update_time: response.update_time,
+            username: response.username,
+            max_num_score: response.max_num_score ? Number(response.max_num_score) : 0,
+            rank: response.rank ? Number(response.rank) : 0
+          });
+        });
+      }
+      writeStorageObjects(session, objects) {
+        this.configuration.bearerToken = session && session.token;
+        var request = {objects: []};
+        objects.forEach((o) => {
+          request.objects.push({
+            collection: o.collection,
+            key: o.key,
+            permission_read: o.permission_read,
+            permission_write: o.permission_write,
+            value: JSON.stringify(o.value),
+            version: o.version
+          });
+        });
+        return this.apiClient.writeStorageObjects(request);
+      }
+      writeTournamentRecord(session, tournamentId, request) {
+        this.configuration.bearerToken = session && session.token;
+        return this.apiClient.writeTournamentRecord(tournamentId, {
+          metadata: request.metadata ? JSON.stringify(request.metadata) : void 0,
+          score: request.score,
+          subscore: request.subscore
+        }).then((response) => {
+          return Promise.resolve({
+            expiry_time: response.expiry_time,
+            leaderboard_id: response.leaderboard_id,
+            metadata: response.metadata ? JSON.parse(response.metadata) : void 0,
+            num_score: response.num_score ? Number(response.num_score) : 0,
+            owner_id: response.owner_id,
+            score: response.score ? Number(response.score) : 0,
+            subscore: response.subscore ? Number(response.subscore) : 0,
+            update_time: response.update_time,
+            username: response.username,
+            max_num_score: response.max_num_score ? Number(response.max_num_score) : 0,
+            rank: response.rank ? Number(response.rank) : 0
+          });
+        });
+      }
+    };
+
+    const TEST_ID = "test_id";
+
+    const getTourneyProvider = async (options) => {
+
+        // initialize sdk    
+         let client = new Client(
+            options.key,
+            options.url,
+            options.port
+        );
+
+        // do a test authenticate
+        let session = await client.apiClient.authenticateCustom({
+            id: TEST_ID,
+            create: true
+        });
+
+        if (session != null) {
+
+            let provider = new NakamaTourneyProvider(client);
+
+            console.log('%c%s',
+            'color: blue; background: white;',
+            "Nakama Tourney Provider : --- " 
+            + options.url + ":" + options.port + " ---"
+            );
+            
+            return provider;
+        }
+
+        console.error("unable to initialize SDK");
+        return null;
+    };
+
+    class NakamaTourneyProvider {
+
+        client = null;
+        session = null;
+        
+        constructor(client) {
+            this.client = client;
+        }
+
+        refreshSession = async () => {
+            if (this.session == null)
+            {
+                this.session = await this.client.apiClient.authenticateCustom({
+                    id: TEST_ID,
+                    create: true
+                }); 
+            }
+
+            // if session has expired
+            else if ( (this.session.expires_at * 1000) < Date.now())
+            {
+                // recreate client
+                this.client = new Client(
+                    this.client.serverkey,
+                    this.client.host,
+                    this.client.port
+                );
+
+                this.session = await this.client.apiClient.authenticateCustom({
+                    id: TEST_ID,
+                    create: true
+                }); 
+
+            }
+
+        }
+
+
+        getTourney = async (options) => {
+
+            try {
+                await this.refreshSession();
+
+                let tourneyInfo = await this.client.apiClient.listLeaderboardRecords(
+                    this.session,
+                    options.tourney_id);
+
+                return tourneyInfo;
+
+            } catch (e) {
+                console.error("getTourney failed [" + e.status + ":" + e.statusText + "]"); 
+                return(e);
+             }
+        }    
+
+        attemptTourney = async (options) => {
+
+            try {
+
+                await this.refreshSession();
+
+                let socket = await this.client.createSocket(false, false);
+                let socketSession = await  socket.connect(this.session, false);
+
+                let response = await socket.createMatch();
+
+                console.log(response);
+
+                return response;
+
+            } catch (e) {
+                console.error("attemptTourney failed [" + e.status + ":" + e.statusText + "]"); 
+                return(e);
+             }
+        }    
+
+        postScore = async (options) => {
+
+            try {
+
+                await this.refreshSession();
+
+                let result = await this.client.rpc(
+                    this.session,
+                    "clientrpc.post_tourney_score",
+                    options);
+
+                return result.payload;
+
+            } catch (e) {
+                console.error("postScore failed [" + e.status + ":" + e.statusText + "]"); 
+                return(e);
+             }
+        } 
+        
+        joinTourney = async (options) => {
+
+            try {
+                await this.refreshSession();
+
+                let tourneyInfo = await this.client.joinTournament(
+                    this.session,
+                    options.tournament_id);
+
+                return tourneyInfo;
+
+            } catch (e) {
+                console.error("joinTourney failed [" + e.status + ":" + e.statusText + "]"); 
+                return(e);
+             }
+        }        
+
+    }
+
+    class Tourney {
+
+        sdkState = CONSTANTS.SDK_STATES.INITIALIZING
+
+        // provider depends on serverType
+        tourneyProvider = null;
+
+        constructor(options) {
+            let serverType = options.type;
+
+            switch (serverType) {
+                case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
+
+                    getTourneyProvider(options).then(
+                        tourneyProvider => {
+                          if (tourneyProvider != null)
+                          {
+                            this.tourneyProvider = tourneyProvider;
+                            this.sdkState = CONSTANTS.SDK_STATES.READY;
+                          }
+                        }
+                      );           
+              
+                    break;
+              
+                    default:
+                      console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
+                    break;
+            }
+
+        }
+
+        getTourney = async (tournament_id) => {
+
+            let result = await this.tourneyProvider.getTourney(tournament_id);
+            return result
+
+        }
+
+        attemptTourney = async (tournament_id) => {
+          let result = await this.tourneyProvider.attemptTourney(tournament_id);
+          return result
+        }
+
+        postScore = async (options) => {
+          let result = await this.tourneyProvider.postScore(options);
+          return result
+        }
+
+        joinTourney = async (options) => {
+          let result = await this.tourneyProvider.joinTourney(options);
+          return result
+        }
+
+        
+    }
+
+    function getTourneyStore(options) {
+        return writable(new Tourney(options))
+    }
+
+    const TEST_ID$1 = "test_id";
+
+    // return a login provider on success
+    const getAuthProvider = async (options) => {
+
+        // initialize sdk    
+         let client = new Client(
+            options.key,
+            options.url,
+            options.port
+        );
+
+        // do a test authenticate
+        let session = await client.apiClient.authenticateCustom({
+            id: TEST_ID$1,
+            create: true
+        });
+
+        if (session != null) {
+
+            let provider = new NakamaAuthProvider(client);
+
+            console.log('%c%s',
+            'color: blue; background: white;',
+            "Nakama Auth Provider : --- " 
+            + options.url + ":" + options.port + " ---"
+            );
+            
+            return provider;
+        }
+
+        console.error("unable to initialize SDK");
+        return null;
+    };
+
+    class NakamaAuthProvider {
+
+        client = null;
+        session = null;
+        
+        constructor(client) {
+            this.client = client;
+        }
+
+        login = async (loginObject) => {
+
+            try {
+                this.session = await this.client.apiClient.authenticateEmail(
+                    {
+                    email: loginObject.username,
+                    password: loginObject.password,
+                    create: true   
+                    }
+                );
+
+                return this.session
+                
+            } catch (e) {
+                console.error("Login failed [" + e.status + ":" + e.statusText + "]"); 
+             }
+        
+             return null;
+        }    
+
+        logout = () => {
+            this.session = null;
+        }
+
+        refreshSession = async () => {
+            if (this.session == null)
+            {
+                this.session = await this.client.apiClient.authenticateCustom({
+                    id: TEST_ID$1,
+                    create: true
+                }); 
+            }
+
+            // if session has expired
+            else if ( (this.session.expires_at * 1000) < Date.now())
+            {
+                // recreate client
+                this.client = new Client(
+                    this.client.serverkey,
+                    this.client.host,
+                    this.client.port
+                );
+
+                this.session = await this.client.apiClient.authenticateCustom({
+                    id: TEST_ID$1,
+                    create: true
+                }); 
+
+            }
+
+        }
+
+        getSessionToken = () => {
+            return this.session;
+        }
+     
+    }
+
+    class Auth {
+
+        sdkState = CONSTANTS.SDK_STATES.INITIALIZING
+        loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT
+
+        // provider depends on serverType
+        authProvider = null;
+
+        constructor(options) {
+            let serverType = options.type;
+
+            switch (serverType) {
+                case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
+
+                    getAuthProvider(options).then(
+                        authProvider => {
+                          if (authProvider != null)
+                          {
+                            this.authProvider = authProvider;
+                            this.sdkState = CONSTANTS.SDK_STATES.READY;
+                          }
+                        }
+                      );           
+              
+                    break;
+              
+                    default:
+                      console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.AUTH_SERVER_TYPES));
+                    break;
+            }
+
+        }
+
+
+        login = async (loginCreds) => {
+            this.loginState = CONSTANTS.LOGIN_STATES.LOGIN_IN_PROGRESS;
+        
+            let token = await this.authProvider.login(loginCreds);
+            if (token != null)
+            {
+              this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_IN;
+            }
+
+            else {
+              this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
+            }
+
+            return this.loginState;
+
+          }
+        
+          logout = () => {
+            this.authProvider.logout();
+            this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
+
+            return this.loginState;
+          }
+
+          getSessionToken = () => {
+            return this.authProvider.getSessionToken();
+          }
+        
+    }
+
+    function getAuthStore(options) {
+        return writable(new Auth(options))
+    }
+
+    const DEFAULT_CONFIG = {
+        tourney_server: {
+            type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+            url: "localhost",
+            port: "7350",
+            key: "defaultkey"
+        },
+        auth_server: {
+            type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+            url: "localhost",
+            port: "7350",
+            key: "defaultkey"
+        }
+    };
+
+    const username = writable("");
+    const password = writable("");
+    const loginState = writable(CONSTANTS.LOGIN_STATES.LOGGED_OUT);
+
+    const apiKey = writable("");
+    const config = writable(DEFAULT_CONFIG);
+    const url = readable(window.location.href);
+
+    var tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
+    var authStore = getAuthStore(DEFAULT_CONFIG.auth_server);
+
+    function useServers(options) {
+        authStore = getAuthStore(options.auth_server);
+        tourneyStore = getTourneyStore(options.tourney_server);
+    }
+
+
     const SDK_STATES = {
         NOT_CONNECTED: "not connected",
         CONNECTING: "connecting",
@@ -636,10 +3843,8 @@
         }
     }
 
-    const apiKey = writable("");
-    const opSdk = createSdk();
 
-    const url = readable(window.location.href);
+    const opSdk = createSdk();
 
     function cubicOut(t) {
         const f = t - 1.0;
@@ -670,11 +3875,298 @@
         };
     }
 
+    /* src\components\LoginPrompt.svelte generated by Svelte v3.31.0 */
+
+    function create_if_block_2(ctx) {
+    	let div;
+    	let input;
+    	let mounted;
+    	let dispose;
+
+    	return {
+    		c() {
+    			div = element("div");
+    			input = element("input");
+    			attr(input, "class", "py-2 px-1 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent");
+    			attr(input, "placeholder", "username");
+    		},
+    		m(target, anchor) {
+    			insert(target, div, anchor);
+    			append(div, input);
+    			set_input_value(input, /*$username*/ ctx[1]);
+
+    			if (!mounted) {
+    				dispose = listen(input, "input", /*input_input_handler*/ ctx[5]);
+    				mounted = true;
+    			}
+    		},
+    		p(ctx, dirty) {
+    			if (dirty & /*$username*/ 2 && input.value !== /*$username*/ ctx[1]) {
+    				set_input_value(input, /*$username*/ ctx[1]);
+    			}
+    		},
+    		d(detaching) {
+    			if (detaching) detach(div);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+    }
+
+    // (31:6) {#if $authStore.loginState == CONSTANTS.LOGIN_STATES.LOGGED_OUT}
+    function create_if_block_1(ctx) {
+    	let div;
+    	let input;
+    	let t;
+    	let button;
+    	let mounted;
+    	let dispose;
+
+    	return {
+    		c() {
+    			div = element("div");
+    			input = element("input");
+    			t = space();
+    			button = element("button");
+    			button.innerHTML = `<span><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path fill="none" d="M15.608,6.262h-2.338v0.935h2.338c0.516,0,0.934,0.418,0.934,0.935v8.879c0,0.517-0.418,0.935-0.934,0.935H4.392c-0.516,0-0.935-0.418-0.935-0.935V8.131c0-0.516,0.419-0.935,0.935-0.935h2.336V6.262H4.392c-1.032,0-1.869,0.837-1.869,1.869v8.879c0,1.031,0.837,1.869,1.869,1.869h11.216c1.031,0,1.869-0.838,1.869-1.869V8.131C17.478,7.099,16.64,6.262,15.608,6.262z M9.513,11.973c0.017,0.082,0.047,0.162,0.109,0.226c0.104,0.106,0.243,0.143,0.378,0.126c0.135,0.017,0.274-0.02,0.377-0.126c0.064-0.065,0.097-0.147,0.115-0.231l1.708-1.751c0.178-0.183,0.178-0.479,0-0.662c-0.178-0.182-0.467-0.182-0.645,0l-1.101,1.129V1.588c0-0.258-0.204-0.467-0.456-0.467c-0.252,0-0.456,0.209-0.456,0.467v9.094L8.443,9.553c-0.178-0.182-0.467-0.182-0.645,0c-0.178,0.184-0.178,0.479,0,0.662L9.513,11.973z"></path></svg></span>`;
+    			attr(input, "class", "py-2 px-1 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent");
+    			attr(input, "placeholder", "password");
+    			attr(input, "type", "password");
+    			attr(button, "class", "bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200");
+    		},
+    		m(target, anchor) {
+    			insert(target, div, anchor);
+    			append(div, input);
+    			set_input_value(input, /*$password*/ ctx[2]);
+    			insert(target, t, anchor);
+    			insert(target, button, anchor);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen(input, "input", /*input_input_handler_1*/ ctx[6]),
+    					listen(button, "click", /*login*/ ctx[3])
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p(ctx, dirty) {
+    			if (dirty & /*$password*/ 4 && input.value !== /*$password*/ ctx[2]) {
+    				set_input_value(input, /*$password*/ ctx[2]);
+    			}
+    		},
+    		d(detaching) {
+    			if (detaching) detach(div);
+    			if (detaching) detach(t);
+    			if (detaching) detach(button);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+    }
+
+    // (57:6) {#if $authStore.loginState == CONSTANTS.LOGIN_STATES.LOGGED_IN}
+    function create_if_block(ctx) {
+    	let span2;
+    	let span0;
+    	let t0;
+    	let span1;
+    	let t1;
+    	let t2;
+    	let button;
+    	let mounted;
+    	let dispose;
+
+    	return {
+    		c() {
+    			span2 = element("span");
+    			span0 = element("span");
+    			span0.innerHTML = `<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>`;
+    			t0 = space();
+    			span1 = element("span");
+    			t1 = text(/*$username*/ ctx[1]);
+    			t2 = space();
+    			button = element("button");
+    			button.innerHTML = `<span><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path fill="none" d="M8.416,3.943l1.12-1.12v9.031c0,0.257,0.208,0.464,0.464,0.464c0.256,0,0.464-0.207,0.464-0.464V2.823l1.12,1.12c0.182,0.182,0.476,0.182,0.656,0c0.182-0.181,0.182-0.475,0-0.656l-1.744-1.745c-0.018-0.081-0.048-0.16-0.112-0.224C10.279,1.214,10.137,1.177,10,1.194c-0.137-0.017-0.279,0.02-0.384,0.125C9.551,1.384,9.518,1.465,9.499,1.548L7.76,3.288c-0.182,0.181-0.182,0.475,0,0.656C7.941,4.125,8.234,4.125,8.416,3.943z M15.569,6.286h-2.32v0.928h2.32c0.512,0,0.928,0.416,0.928,0.928v8.817c0,0.513-0.416,0.929-0.928,0.929H4.432c-0.513,0-0.928-0.416-0.928-0.929V8.142c0-0.513,0.416-0.928,0.928-0.928h2.32V6.286h-2.32c-1.025,0-1.856,0.831-1.856,1.856v8.817c0,1.025,0.832,1.856,1.856,1.856h11.138c1.024,0,1.855-0.831,1.855-1.856V8.142C17.425,7.117,16.594,6.286,15.569,6.286z"></path></svg></span>`;
+    			attr(span0, "class", "mr-2");
+    			attr(span2, "class", "flex items-center p-4 text-white");
+    			attr(button, "class", "bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200");
+    		},
+    		m(target, anchor) {
+    			insert(target, span2, anchor);
+    			append(span2, span0);
+    			append(span2, t0);
+    			append(span2, span1);
+    			append(span1, t1);
+    			insert(target, t2, anchor);
+    			insert(target, button, anchor);
+
+    			if (!mounted) {
+    				dispose = listen(button, "click", /*logout*/ ctx[4]);
+    				mounted = true;
+    			}
+    		},
+    		p(ctx, dirty) {
+    			if (dirty & /*$username*/ 2) set_data(t1, /*$username*/ ctx[1]);
+    		},
+    		d(detaching) {
+    			if (detaching) detach(span2);
+    			if (detaching) detach(t2);
+    			if (detaching) detach(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+    }
+
+    function create_fragment(ctx) {
+    	let span0;
+    	let div0;
+    	let t0;
+    	let span1;
+    	let div1;
+    	let t1;
+    	let if_block0 = /*$authStore*/ ctx[0].loginState == CONSTANTS.LOGIN_STATES.LOGGED_OUT && create_if_block_2(ctx);
+    	let if_block1 = /*$authStore*/ ctx[0].loginState == CONSTANTS.LOGIN_STATES.LOGGED_OUT && create_if_block_1(ctx);
+    	let if_block2 = /*$authStore*/ ctx[0].loginState == CONSTANTS.LOGIN_STATES.LOGGED_IN && create_if_block(ctx);
+
+    	return {
+    		c() {
+    			span0 = element("span");
+    			div0 = element("div");
+    			if (if_block0) if_block0.c();
+    			t0 = space();
+    			span1 = element("span");
+    			div1 = element("div");
+    			if (if_block1) if_block1.c();
+    			t1 = space();
+    			if (if_block2) if_block2.c();
+    			attr(div0, "class", "flex items-center p-3 bg-blue-500 w-full");
+    			attr(div1, "class", "flex items-center p-3 bg-blue-500 w-full space-x-2");
+    		},
+    		m(target, anchor) {
+    			insert(target, span0, anchor);
+    			append(span0, div0);
+    			if (if_block0) if_block0.m(div0, null);
+    			insert(target, t0, anchor);
+    			insert(target, span1, anchor);
+    			append(span1, div1);
+    			if (if_block1) if_block1.m(div1, null);
+    			append(div1, t1);
+    			if (if_block2) if_block2.m(div1, null);
+    		},
+    		p(ctx, [dirty]) {
+    			if (/*$authStore*/ ctx[0].loginState == CONSTANTS.LOGIN_STATES.LOGGED_OUT) {
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
+    				} else {
+    					if_block0 = create_if_block_2(ctx);
+    					if_block0.c();
+    					if_block0.m(div0, null);
+    				}
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
+    			}
+
+    			if (/*$authStore*/ ctx[0].loginState == CONSTANTS.LOGIN_STATES.LOGGED_OUT) {
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+    				} else {
+    					if_block1 = create_if_block_1(ctx);
+    					if_block1.c();
+    					if_block1.m(div1, t1);
+    				}
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
+    			}
+
+    			if (/*$authStore*/ ctx[0].loginState == CONSTANTS.LOGIN_STATES.LOGGED_IN) {
+    				if (if_block2) {
+    					if_block2.p(ctx, dirty);
+    				} else {
+    					if_block2 = create_if_block(ctx);
+    					if_block2.c();
+    					if_block2.m(div1, null);
+    				}
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d(detaching) {
+    			if (detaching) detach(span0);
+    			if (if_block0) if_block0.d();
+    			if (detaching) detach(t0);
+    			if (detaching) detach(span1);
+    			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
+    		}
+    	};
+    }
+
+    function instance($$self, $$props, $$invalidate) {
+    	let $loginState;
+    	let $authStore;
+    	let $username;
+    	let $password;
+    	component_subscribe($$self, loginState, $$value => $$invalidate(7, $loginState = $$value));
+    	component_subscribe($$self, authStore, $$value => $$invalidate(0, $authStore = $$value));
+    	component_subscribe($$self, username, $$value => $$invalidate(1, $username = $$value));
+    	component_subscribe($$self, password, $$value => $$invalidate(2, $password = $$value));
+
+    	async function login(options) {
+    		set_store_value(loginState, $loginState = await $authStore.login({ username: $username, password: $password }), $loginState);
+    	}
+
+    	function logout() {
+    		set_store_value(loginState, $loginState = $authStore.logout(), $loginState);
+    	}
+
+    	function input_input_handler() {
+    		$username = this.value;
+    		username.set($username);
+    	}
+
+    	function input_input_handler_1() {
+    		$password = this.value;
+    		password.set($password);
+    	}
+
+    	return [
+    		$authStore,
+    		$username,
+    		$password,
+    		login,
+    		logout,
+    		input_input_handler,
+    		input_input_handler_1
+    	];
+    }
+
+    class LoginPrompt extends SvelteComponent {
+    	constructor(options) {
+    		super();
+    		init(this, options, instance, create_fragment, safe_not_equal, {});
+    	}
+    }
+
     var img = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAcFSURBVHhe7ZsLbFNVGMe/c/tcuxfrYGN0GwwIbwlgVAbRgBGUDbMBYgIChoA8fAQNr4VEiJiIGAQDyiMBM8Qo4bXpGLjIYzAEJRDeQx4FBsjGxp7dunZtj99p7wjIgNvbc9ti+kv+O3dft/Z8/3ue995CmDBhwigNLYRuqK9RPcRQyEDEUhEwYQMW80VFoOyob1FLySioxTLoKGYAJj8ai1WoNE/gYSpQn6I2ohEuTyRIcDcAE++KBUs8A/W09z+J+gRNKPb+Gni4GYCJsya+ADUPxZq+VChqG2oBGnHdEwkgXAwQm/tKFDv7cmlCrUA7lpMMsHpDyuOXAWJzZ4kzA3hxE5UDbviJZOJPhRHE0ifolHQNLRAW4+EZFM/kGcmoLc2a+ENbL57L9oaUQ5YBkDusE8ybtBhKzazfc4WCCi7FTIJfUg8MaVaZxolhxZBnAKPUTGDuZALLsimUx7KBzG/KI9Jhd8peONZhOTSr4sWossg3gEFxCDnUm8DMGQQ2DafQqBdf8A2rJgWKEzdAkXk7VOv6itHA4J8BrTjUANsHE5g2i0LBIAouaW/bIhjhlGk+5KcchBtRbCjhNitLho8BrdQZCHz3OoHZ0yn81Y16Zvg2oPixlqixkJ96CM7EfYx+cR9KJMPXgFZuxhNY8jaBRRMoWBIesqFKPwD2mvOhJHENNKmTxGjwUMaAVk51IfDRVAKrMqmtPo0eSfgG9iQXQGXE8+IfBB9lDWC48SOK+pMrxSvo1ejxnuYfSoRWbYJA2ACxDEnI46YRjoSkAWw1kBYVAWO0+7Jww/U5Ktr7Cn9CzoCECC2MMptgaEIMGFVOdl1hEeoimvAe3Q244uJLyBgQpVHBK4mxMKJTHJj0GjF6n46o9dg0TqARI70hPgTdAK1AYFB8FLyZEg+pkfqnLYafQ+1BEwpRXDYNQTMA84YeMQbISm0PfWKNoCKS9wHsD99AnUQT1mG3SPREZRIUAzoZdJCZHA8vto8GvUp2FVg/mYF2sPFhIcqX65D3CagBsVo1vJrUziN2zIkY1BeoC2jCBJTkpsQIiAFuQQWCKQFeS4rznH0lwCW2+XLMOysLkwvMYkgSihtQntyLHhj9AT2X0g/yyyrhfE0juCjfBQ7uMBsKUooaj3b4qkOVfpBKDEtCMQNq45LokRFT6bFhE0lDTHtPs3S4KZy41wD5N6rA0mDze53XrDK14A6zcU/ybmONro+sxRJ3A2yGaHpyyFhanDGTVCamtdkfrU4XlFTUQeHNe1Buc4hR6VBQu0tjpznyOv9BcIdppEBk58HNAKdaCxf7D6f7suZAWdcBhEqo0z17CxTdrob9d2qg1uEUo0+mIuIld0HKb/R4+6VahxDt90jqtwEs0bJuA+nvWXMoGkDQCJ9GYcatRjsUlFXBsbv1YHO2fS/Epk6gJYmr3UXmHUKNrrdP/fxJ+GVAZceu9GDGLHoyfQxpNkT7nPiDsLQv1TdBHg6Up6ut4MTxwhMnGiiNnU7zUg8TS9Q4gfcFFVmVvtZ9V+fy5J6WcnNPyf9vH2p124dZJdc+AhdIidVn3bU6gdToe/lSzy5TuneUfJNVlp2nBmeBL8n7iqXOSZccraNLfu0l2HcMcRGroNg9Qr7tyU/KG110zSkr/exoPblQ3eIxWG3RqiPXx4P6sk6RBylCwoBau5vmXmiki47UkePlDvLf9QFpEgTD1nYq/d5oFzgfedkvgmqAzUlh52UbnX+ojuwvs5PHTABeMG3tcYPKuNFEhUo1ty4RFANasPpFN5ox8Vqaf9VG7C7pJ1V1Vy1EbjQRzQmDm8clw4AawGa2o3ccNOdwLf2xtInUO9jdVRm0EBJRGC0YtsW6iQ1nRj8ImAHX6p3ARvZ1p62k0ubmMoOo/9YLxg0mUF3XyjYhYAacrmqBG/Uu7lOnUK8ixi1xRHcg0i3ngbugDoLcwPOvK4kUjLkmJ7aKFjEqif+HAd6VdJ7qlmbgxMx2t70haTzrBrC+X4RKz95MsrN/IGc9UR94lg0oQQ3HxEei/vSGfOdZNOAEKgOH05cx8YPekHyeJQMuoN7C3v4CJl44LpfPkliuAVWo3d5DxbGg3sXE+2Pi27O3EK47Q1kGYEWsqEw8zEKxCipB2T96x2w8zb3xs3IxcWnXzHzEry6AFcvHoh9qKcrGYhwoQ83GAb7HxZwua8dsJuxLForBbWW2azLthgX7nsAo1CPvuzWp0v1zp8onGc4SX4b6Hj7s0+yJBABugyC2hivE5Xlwmj3gfM0TlAZL/H12xjHxtYFMnsF9bc7YOYkaCIGFeDgX5XkKso0WwBL/ErUp0Ek/iCIGtILdojsW7PsEGQ8YICZOMfG+QUs8oKARWeNzKkpg9fnZsPqcvCeqw4QJE4Y7AP8C+bZU4dOLphoAAAAASUVORK5CYII=";
 
     /* src\components\SdkDrawer.svelte generated by Svelte v3.31.0 */
 
-    function create_if_block(ctx) {
+    function add_css$1() {
+    	var style = element("style");
+    	style.id = "svelte-155o5zv-style";
+    	style.textContent = ".logged-in.svelte-155o5zv{background-color:#00c3ff}";
+    	append(document.head, style);
+    }
+
+    // (35:0) {#if visible}
+    function create_if_block$1(ctx) {
     	let div3;
     	let div0;
     	let div0_transition;
@@ -684,29 +4176,32 @@
     	let img$1;
     	let img_src_value;
     	let t1;
+    	let loginprompt;
+    	let t2;
     	let span3;
-    	let t4;
+    	let t5;
     	let span6;
-    	let t7;
+    	let t8;
     	let span9;
-    	let t10;
+    	let t11;
     	let span12;
-    	let t13;
+    	let t14;
     	let span15;
-    	let t16;
+    	let t17;
     	let div2;
     	let span18;
     	let span16;
-    	let t17;
-    	let span17;
     	let t18;
+    	let span17;
     	let t19;
+    	let t20;
     	let div1;
     	let aside_transition;
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block = /*$opSdk*/ ctx[2].state == SDK_STATES.NOT_CONNECTED && create_if_block_1(ctx);
+    	loginprompt = new LoginPrompt({});
+    	let if_block = /*$opSdk*/ ctx[3].state == SDK_STATES.NOT_CONNECTED && create_if_block_1$1(ctx);
 
     	return {
     		c() {
@@ -717,44 +4212,46 @@
     			span0 = element("span");
     			img$1 = element("img");
     			t1 = space();
+    			create_component(loginprompt.$$.fragment);
+    			t2 = space();
     			span3 = element("span");
 
     			span3.innerHTML = `<span class="mr-2"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></span> 
       <span>Home</span>`;
 
-    			t4 = space();
+    			t5 = space();
     			span6 = element("span");
 
     			span6.innerHTML = `<span class="mr-2"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span> 
       <span>Trending Globally</span>`;
 
-    			t7 = space();
+    			t8 = space();
     			span9 = element("span");
 
     			span9.innerHTML = `<span class="mr-2"><svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" class="w-6 h-6"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg></span> 
       <span>Wishlist</span>`;
 
-    			t10 = space();
+    			t11 = space();
     			span12 = element("span");
 
     			span12.innerHTML = `<span class="mr-2"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span> 
       <span>About</span>`;
 
-    			t13 = space();
+    			t14 = space();
     			span15 = element("span");
 
     			span15.innerHTML = `<span class="mr-2"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></span> 
       <span>Contact</span>`;
 
-    			t16 = space();
+    			t17 = space();
     			div2 = element("div");
     			span18 = element("span");
     			span16 = element("span");
     			span16.innerHTML = `<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-    			t17 = space();
+    			t18 = space();
     			span17 = element("span");
-    			t18 = text(/*$url*/ ctx[1]);
-    			t19 = space();
+    			t19 = text(/*$url*/ ctx[2]);
+    			t20 = space();
     			div1 = element("div");
     			if (if_block) if_block.c();
     			attr(div0, "class", "modal-overlay absolute w-full h-full bg-gray-900 opacity-50");
@@ -782,40 +4279,42 @@
     			append(aside, span0);
     			append(span0, img$1);
     			append(aside, t1);
+    			mount_component(loginprompt, aside, null);
+    			append(aside, t2);
     			append(aside, span3);
-    			append(aside, t4);
+    			append(aside, t5);
     			append(aside, span6);
-    			append(aside, t7);
+    			append(aside, t8);
     			append(aside, span9);
-    			append(aside, t10);
+    			append(aside, t11);
     			append(aside, span12);
-    			append(aside, t13);
+    			append(aside, t14);
     			append(aside, span15);
-    			append(aside, t16);
+    			append(aside, t17);
     			append(aside, div2);
     			append(div2, span18);
     			append(span18, span16);
-    			append(span18, t17);
+    			append(span18, t18);
     			append(span18, span17);
-    			append(span17, t18);
-    			append(div2, t19);
+    			append(span17, t19);
+    			append(div2, t20);
     			append(div2, div1);
     			if (if_block) if_block.m(div1, null);
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(div0, "click", /*click_handler_1*/ ctx[6]);
+    				dispose = listen(div0, "click", /*click_handler_1*/ ctx[7]);
     				mounted = true;
     			}
     		},
     		p(ctx, dirty) {
-    			if (!current || dirty & /*$url*/ 2) set_data(t18, /*$url*/ ctx[1]);
+    			if (!current || dirty & /*$url*/ 4) set_data(t19, /*$url*/ ctx[2]);
 
-    			if (/*$opSdk*/ ctx[2].state == SDK_STATES.NOT_CONNECTED) {
+    			if (/*$opSdk*/ ctx[3].state == SDK_STATES.NOT_CONNECTED) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1(ctx);
+    					if_block = create_if_block_1$1(ctx);
     					if_block.c();
     					if_block.m(div1, null);
     				}
@@ -832,6 +4331,8 @@
     				div0_transition.run(1);
     			});
 
+    			transition_in(loginprompt.$$.fragment, local);
+
     			add_render_callback(() => {
     				if (!aside_transition) aside_transition = create_bidirectional_transition(aside, fly, { duration: 400, x: -100 }, true);
     				aside_transition.run(1);
@@ -842,6 +4343,7 @@
     		o(local) {
     			if (!div0_transition) div0_transition = create_bidirectional_transition(div0, fade, { duration: 100 }, false);
     			div0_transition.run(0);
+    			transition_out(loginprompt.$$.fragment, local);
     			if (!aside_transition) aside_transition = create_bidirectional_transition(aside, fly, { duration: 400, x: -100 }, false);
     			aside_transition.run(0);
     			current = false;
@@ -849,6 +4351,7 @@
     		d(detaching) {
     			if (detaching) detach(div3);
     			if (detaching && div0_transition) div0_transition.end();
+    			destroy_component(loginprompt);
     			if (if_block) if_block.d();
     			if (detaching && aside_transition) aside_transition.end();
     			mounted = false;
@@ -857,8 +4360,8 @@
     	};
     }
 
-    // (157:8) {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}
-    function create_if_block_1(ctx) {
+    // (170:8) {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}
+    function create_if_block_1$1(ctx) {
     	let input;
     	let t;
     	let button;
@@ -872,18 +4375,18 @@
     			button = element("button");
     			button.innerHTML = `<span><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>`;
     			attr(input, "class", "mr-2 py-2 px-1 bg-white text-gray-700 placeholder-gray-500 shadow-md rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent");
-    			attr(input, "placeholder", "API key");
+    			attr(input, "placeholder", "tourney-id (xxxx-xxxx-..)");
     			attr(button, "class", "bg-purple-600 text-white text-base font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200");
     		},
     		m(target, anchor) {
     			insert(target, input, anchor);
-    			set_input_value(input, /*$apiKey*/ ctx[3]);
+    			set_input_value(input, /*$apiKey*/ ctx[4]);
     			insert(target, t, anchor);
     			insert(target, button, anchor);
 
     			if (!mounted) {
     				dispose = [
-    					listen(input, "input", /*input_input_handler*/ ctx[7]),
+    					listen(input, "input", /*input_input_handler*/ ctx[8]),
     					listen(button, "click", opSdk.connect)
     				];
 
@@ -891,8 +4394,8 @@
     			}
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*$apiKey*/ 8 && input.value !== /*$apiKey*/ ctx[3]) {
-    				set_input_value(input, /*$apiKey*/ ctx[3]);
+    			if (dirty & /*$apiKey*/ 16 && input.value !== /*$apiKey*/ ctx[4]) {
+    				set_input_value(input, /*$apiKey*/ ctx[4]);
     			}
     		},
     		d(detaching) {
@@ -905,7 +4408,7 @@
     	};
     }
 
-    function create_fragment(ctx) {
+    function create_fragment$1(ctx) {
     	let button;
     	let img$1;
     	let img_src_value;
@@ -914,7 +4417,7 @@
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block = /*visible*/ ctx[0] && create_if_block(ctx);
+    	let if_block = /*visible*/ ctx[0] && create_if_block$1(ctx);
 
     	return {
     		c() {
@@ -926,7 +4429,8 @@
     			attr(img$1, "class", "w-10 h-10 fill-current");
     			attr(img$1, "alt", "g3js logo");
     			if (img$1.src !== (img_src_value = img)) attr(img$1, "src", img_src_value);
-    			attr(button, "class", "m-3 fixed top-0 left-0 inline-flex items-center justify-center w-12 h-12 mr-2 transition-colors duration-300 bg-indigo-700 rounded-full hover:bg-indigo-900");
+    			attr(button, "class", "m-3 fixed top-0 left-0 inline-flex items-center justify-center w-12 h-12 mr-2 transition-colors duration-300 bg-indigo-700 rounded-full hover:bg-indigo-900 svelte-155o5zv");
+    			toggle_class(button, "logged-in", /*$loginState*/ ctx[1] == CONSTANTS.LOGIN_STATES.LOGGED_IN);
     		},
     		m(target, anchor) {
     			insert(target, button, anchor);
@@ -938,14 +4442,18 @@
 
     			if (!mounted) {
     				dispose = [
-    					listen(window, "keydown", /*handleKeydown*/ ctx[4]),
-    					listen(button, "click", /*click_handler*/ ctx[5])
+    					listen(window, "keydown", /*handleKeydown*/ ctx[5]),
+    					listen(button, "click", /*click_handler*/ ctx[6])
     				];
 
     				mounted = true;
     			}
     		},
     		p(ctx, [dirty]) {
+    			if (dirty & /*$loginState, CONSTANTS*/ 2) {
+    				toggle_class(button, "logged-in", /*$loginState*/ ctx[1] == CONSTANTS.LOGIN_STATES.LOGGED_IN);
+    			}
+
     			if (/*visible*/ ctx[0]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
@@ -954,7 +4462,7 @@
     						transition_in(if_block, 1);
     					}
     				} else {
-    					if_block = create_if_block(ctx);
+    					if_block = create_if_block$1(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
@@ -989,13 +4497,15 @@
     	};
     }
 
-    function instance($$self, $$props, $$invalidate) {
+    function instance$1($$self, $$props, $$invalidate) {
+    	let $loginState;
     	let $url;
     	let $opSdk;
     	let $apiKey;
-    	component_subscribe($$self, url, $$value => $$invalidate(1, $url = $$value));
-    	component_subscribe($$self, opSdk, $$value => $$invalidate(2, $opSdk = $$value));
-    	component_subscribe($$self, apiKey, $$value => $$invalidate(3, $apiKey = $$value));
+    	component_subscribe($$self, loginState, $$value => $$invalidate(1, $loginState = $$value));
+    	component_subscribe($$self, url, $$value => $$invalidate(2, $url = $$value));
+    	component_subscribe($$self, opSdk, $$value => $$invalidate(3, $opSdk = $$value));
+    	component_subscribe($$self, apiKey, $$value => $$invalidate(4, $apiKey = $$value));
     	let visible = false;
 
     	function handleKeydown(event) {
@@ -1013,6 +4523,7 @@
 
     	return [
     		visible,
+    		$loginState,
     		$url,
     		$opSdk,
     		$apiKey,
@@ -1026,71 +4537,970 @@
     class SdkDrawer extends SvelteComponent {
     	constructor(options) {
     		super();
-    		init(this, options, instance, create_fragment, safe_not_equal, {});
+    		if (!document.getElementById("svelte-155o5zv-style")) add_css$1();
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+    	}
+    }
+
+    /* src\components\Content.svelte generated by Svelte v3.31.0 */
+
+    function instance$2($$self, $$props, $$invalidate) {
+    	const { open } = getContext("simple-modal");
+
+    	const showPopup = () => {
+    		open(LoginPrompt);
+    	};
+
+    	return [showPopup];
+    }
+
+    class Content extends SvelteComponent {
+    	constructor(options) {
+    		super();
+    		init(this, options, instance$2, null, safe_not_equal, { showPopup: 0 });
+    	}
+
+    	get showPopup() {
+    		return this.$$.ctx[0];
+    	}
+    }
+
+    /* src\components\Modal.svelte generated by Svelte v3.31.0 */
+
+    const { document: document_1 } = globals;
+
+    function add_css$2() {
+    	var style = element("style");
+    	style.id = "svelte-yrtr4z-style";
+    	style.textContent = ".svelte-yrtr4z{box-sizing:border-box}.bg.svelte-yrtr4z{position:fixed;z-index:1000;display:flex;flex-direction:column;justify-content:center;width:100vw;height:100vh;background:rgba(0, 0, 0, 0.66)}.window-wrap.svelte-yrtr4z{position:relative;margin:2rem;max-height:100%}.window.svelte-yrtr4z{position:relative;width:40rem;max-width:100%;max-height:100%;margin:2rem auto;color:black;border-radius:0.5rem;background:white}.content.svelte-yrtr4z{position:relative;padding:1rem;max-height:calc(100vh - 4rem);overflow:auto}.close.svelte-yrtr4z{display:block;box-sizing:border-box;position:absolute;z-index:1000;top:1rem;right:1rem;margin:0;padding:0;width:1.5rem;height:1.5rem;border:0;color:black;border-radius:1.5rem;background:white;box-shadow:0 0 0 1px black;transition:transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),\r\n                background 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);-webkit-appearance:none}.close.svelte-yrtr4z:before,.close.svelte-yrtr4z:after{content:'';display:block;box-sizing:border-box;position:absolute;top:50%;width:1rem;height:1px;background:black;transform-origin:center;transition:height 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),\r\n                background 0.2s cubic-bezier(0.25, 0.1, 0.25, 1)}.close.svelte-yrtr4z:before{transform:translate(0, -50%) rotate(45deg);left:0.25rem}.close.svelte-yrtr4z:after{transform:translate(0, -50%) rotate(-45deg);left:0.25rem}.close.svelte-yrtr4z:hover{background:black}.close.svelte-yrtr4z:hover:before,.close.svelte-yrtr4z:hover:after{height:2px;background:white}.close.svelte-yrtr4z:focus{border-color:#3399ff;box-shadow:0 0 0 2px #3399ff}.close.svelte-yrtr4z:active{transform:scale(0.9)}.close.svelte-yrtr4z:hover,.close.svelte-yrtr4z:focus,.close.svelte-yrtr4z:active{outline:none}";
+    	append(document_1.head, style);
+    }
+
+    // (233:0) {#if Component}
+    function create_if_block$2(ctx) {
+    	let div3;
+    	let div2;
+    	let div1;
+    	let t;
+    	let div0;
+    	let switch_instance;
+    	let div1_transition;
+    	let div3_transition;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	let if_block = /*state*/ ctx[0].closeButton && create_if_block_1$2(ctx);
+    	const switch_instance_spread_levels = [/*props*/ ctx[2]];
+    	var switch_value = /*Component*/ ctx[1];
+
+    	function switch_props(ctx) {
+    		let switch_instance_props = {};
+
+    		for (let i = 0; i < switch_instance_spread_levels.length; i += 1) {
+    			switch_instance_props = assign(switch_instance_props, switch_instance_spread_levels[i]);
+    		}
+
+    		return { props: switch_instance_props };
+    	}
+
+    	if (switch_value) {
+    		switch_instance = new switch_value(switch_props());
+    	}
+
+    	return {
+    		c() {
+    			div3 = element("div");
+    			div2 = element("div");
+    			div1 = element("div");
+    			if (if_block) if_block.c();
+    			t = space();
+    			div0 = element("div");
+    			if (switch_instance) create_component(switch_instance.$$.fragment);
+    			attr(div0, "class", "content svelte-yrtr4z");
+    			attr(div0, "style", /*cssContent*/ ctx[12]);
+    			attr(div1, "class", "window svelte-yrtr4z");
+    			attr(div1, "role", "dialog");
+    			attr(div1, "aria-modal", "true");
+    			attr(div1, "style", /*cssWindow*/ ctx[11]);
+    			attr(div2, "class", "window-wrap svelte-yrtr4z");
+    			attr(div3, "class", "bg svelte-yrtr4z");
+    			attr(div3, "style", /*cssBg*/ ctx[10]);
+    		},
+    		m(target, anchor) {
+    			insert(target, div3, anchor);
+    			append(div3, div2);
+    			append(div2, div1);
+    			if (if_block) if_block.m(div1, null);
+    			append(div1, t);
+    			append(div1, div0);
+
+    			if (switch_instance) {
+    				mount_component(switch_instance, div0, null);
+    			}
+
+    			/*div1_binding*/ ctx[35](div1);
+    			/*div2_binding*/ ctx[36](div2);
+    			/*div3_binding*/ ctx[37](div3);
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					listen(div1, "introstart", function () {
+    						if (is_function(/*onOpen*/ ctx[6])) /*onOpen*/ ctx[6].apply(this, arguments);
+    					}),
+    					listen(div1, "outrostart", function () {
+    						if (is_function(/*onClose*/ ctx[7])) /*onClose*/ ctx[7].apply(this, arguments);
+    					}),
+    					listen(div1, "introend", function () {
+    						if (is_function(/*onOpened*/ ctx[8])) /*onOpened*/ ctx[8].apply(this, arguments);
+    					}),
+    					listen(div1, "outroend", function () {
+    						if (is_function(/*onClosed*/ ctx[9])) /*onClosed*/ ctx[9].apply(this, arguments);
+    					}),
+    					listen(div3, "click", /*handleOuterClick*/ ctx[19])
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p(new_ctx, dirty) {
+    			ctx = new_ctx;
+
+    			if (/*state*/ ctx[0].closeButton) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+
+    					if (dirty[0] & /*state*/ 1) {
+    						transition_in(if_block, 1);
+    					}
+    				} else {
+    					if_block = create_if_block_1$2(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(div1, t);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			const switch_instance_changes = (dirty[0] & /*props*/ 4)
+    			? get_spread_update(switch_instance_spread_levels, [get_spread_object(/*props*/ ctx[2])])
+    			: {};
+
+    			if (switch_value !== (switch_value = /*Component*/ ctx[1])) {
+    				if (switch_instance) {
+    					group_outros();
+    					const old_component = switch_instance;
+
+    					transition_out(old_component.$$.fragment, 1, 0, () => {
+    						destroy_component(old_component, 1);
+    					});
+
+    					check_outros();
+    				}
+
+    				if (switch_value) {
+    					switch_instance = new switch_value(switch_props());
+    					create_component(switch_instance.$$.fragment);
+    					transition_in(switch_instance.$$.fragment, 1);
+    					mount_component(switch_instance, div0, null);
+    				} else {
+    					switch_instance = null;
+    				}
+    			} else if (switch_value) {
+    				switch_instance.$set(switch_instance_changes);
+    			}
+
+    			if (!current || dirty[0] & /*cssContent*/ 4096) {
+    				attr(div0, "style", /*cssContent*/ ctx[12]);
+    			}
+
+    			if (!current || dirty[0] & /*cssWindow*/ 2048) {
+    				attr(div1, "style", /*cssWindow*/ ctx[11]);
+    			}
+
+    			if (!current || dirty[0] & /*cssBg*/ 1024) {
+    				attr(div3, "style", /*cssBg*/ ctx[10]);
+    			}
+    		},
+    		i(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			if (switch_instance) transition_in(switch_instance.$$.fragment, local);
+
+    			add_render_callback(() => {
+    				if (!div1_transition) div1_transition = create_bidirectional_transition(div1, /*currentTransitionWindow*/ ctx[15], /*state*/ ctx[0].transitionWindowProps, true);
+    				div1_transition.run(1);
+    			});
+
+    			add_render_callback(() => {
+    				if (!div3_transition) div3_transition = create_bidirectional_transition(div3, /*currentTransitionBg*/ ctx[14], /*state*/ ctx[0].transitionBgProps, true);
+    				div3_transition.run(1);
+    			});
+
+    			current = true;
+    		},
+    		o(local) {
+    			transition_out(if_block);
+    			if (switch_instance) transition_out(switch_instance.$$.fragment, local);
+    			if (!div1_transition) div1_transition = create_bidirectional_transition(div1, /*currentTransitionWindow*/ ctx[15], /*state*/ ctx[0].transitionWindowProps, false);
+    			div1_transition.run(0);
+    			if (!div3_transition) div3_transition = create_bidirectional_transition(div3, /*currentTransitionBg*/ ctx[14], /*state*/ ctx[0].transitionBgProps, false);
+    			div3_transition.run(0);
+    			current = false;
+    		},
+    		d(detaching) {
+    			if (detaching) detach(div3);
+    			if (if_block) if_block.d();
+    			if (switch_instance) destroy_component(switch_instance);
+    			/*div1_binding*/ ctx[35](null);
+    			if (detaching && div1_transition) div1_transition.end();
+    			/*div2_binding*/ ctx[36](null);
+    			/*div3_binding*/ ctx[37](null);
+    			if (detaching && div3_transition) div3_transition.end();
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+    }
+
+    // (254:8) {#if state.closeButton}
+    function create_if_block_1$2(ctx) {
+    	let show_if;
+    	let current_block_type_index;
+    	let if_block;
+    	let if_block_anchor;
+    	let current;
+    	const if_block_creators = [create_if_block_2$1, create_else_block];
+    	const if_blocks = [];
+
+    	function select_block_type(ctx, dirty) {
+    		if (dirty[0] & /*state*/ 1) show_if = !!/*isSvelteComponent*/ ctx[16](/*state*/ ctx[0].closeButton);
+    		if (show_if) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index = select_block_type(ctx, [-1]);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+
+    	return {
+    		c() {
+    			if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m(target, anchor) {
+    			if_blocks[current_block_type_index].m(target, anchor);
+    			insert(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p(ctx, dirty) {
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx, dirty);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    			}
+    		},
+    		i(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d(detaching) {
+    			if_blocks[current_block_type_index].d(detaching);
+    			if (detaching) detach(if_block_anchor);
+    		}
+    	};
+    }
+
+    // (257:5) {:else}
+    function create_else_block(ctx) {
+    	let button;
+    	let mounted;
+    	let dispose;
+
+    	return {
+    		c() {
+    			button = element("button");
+    			attr(button, "class", "close svelte-yrtr4z");
+    			attr(button, "style", /*cssCloseButton*/ ctx[13]);
+    		},
+    		m(target, anchor) {
+    			insert(target, button, anchor);
+
+    			if (!mounted) {
+    				dispose = listen(button, "click", /*close*/ ctx[17]);
+    				mounted = true;
+    			}
+    		},
+    		p(ctx, dirty) {
+    			if (dirty[0] & /*cssCloseButton*/ 8192) {
+    				attr(button, "style", /*cssCloseButton*/ ctx[13]);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d(detaching) {
+    			if (detaching) detach(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+    }
+
+    // (255:5) {#if isSvelteComponent(state.closeButton)}
+    function create_if_block_2$1(ctx) {
+    	let switch_instance;
+    	let switch_instance_anchor;
+    	let current;
+    	var switch_value = /*state*/ ctx[0].closeButton;
+
+    	function switch_props(ctx) {
+    		return { props: { onClose: /*close*/ ctx[17] } };
+    	}
+
+    	if (switch_value) {
+    		switch_instance = new switch_value(switch_props(ctx));
+    	}
+
+    	return {
+    		c() {
+    			if (switch_instance) create_component(switch_instance.$$.fragment);
+    			switch_instance_anchor = empty();
+    		},
+    		m(target, anchor) {
+    			if (switch_instance) {
+    				mount_component(switch_instance, target, anchor);
+    			}
+
+    			insert(target, switch_instance_anchor, anchor);
+    			current = true;
+    		},
+    		p(ctx, dirty) {
+    			if (switch_value !== (switch_value = /*state*/ ctx[0].closeButton)) {
+    				if (switch_instance) {
+    					group_outros();
+    					const old_component = switch_instance;
+
+    					transition_out(old_component.$$.fragment, 1, 0, () => {
+    						destroy_component(old_component, 1);
+    					});
+
+    					check_outros();
+    				}
+
+    				if (switch_value) {
+    					switch_instance = new switch_value(switch_props(ctx));
+    					create_component(switch_instance.$$.fragment);
+    					transition_in(switch_instance.$$.fragment, 1);
+    					mount_component(switch_instance, switch_instance_anchor.parentNode, switch_instance_anchor);
+    				} else {
+    					switch_instance = null;
+    				}
+    			}
+    		},
+    		i(local) {
+    			if (current) return;
+    			if (switch_instance) transition_in(switch_instance.$$.fragment, local);
+    			current = true;
+    		},
+    		o(local) {
+    			if (switch_instance) transition_out(switch_instance.$$.fragment, local);
+    			current = false;
+    		},
+    		d(detaching) {
+    			if (detaching) detach(switch_instance_anchor);
+    			if (switch_instance) destroy_component(switch_instance, detaching);
+    		}
+    	};
+    }
+
+    function create_fragment$2(ctx) {
+    	let t;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	let if_block = /*Component*/ ctx[1] && create_if_block$2(ctx);
+    	const default_slot_template = /*#slots*/ ctx[34].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[33], null);
+
+    	return {
+    		c() {
+    			if (if_block) if_block.c();
+    			t = space();
+    			if (default_slot) default_slot.c();
+    		},
+    		m(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert(target, t, anchor);
+
+    			if (default_slot) {
+    				default_slot.m(target, anchor);
+    			}
+
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = listen(window, "keydown", /*handleKeydown*/ ctx[18]);
+    				mounted = true;
+    			}
+    		},
+    		p(ctx, dirty) {
+    			if (/*Component*/ ctx[1]) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+
+    					if (dirty[0] & /*Component*/ 2) {
+    						transition_in(if_block, 1);
+    					}
+    				} else {
+    					if_block = create_if_block$2(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(t.parentNode, t);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (default_slot) {
+    				if (default_slot.p && dirty[1] & /*$$scope*/ 4) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[33], dirty, null, null);
+    				}
+    			}
+    		},
+    		i(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			transition_in(default_slot, local);
+    			current = true;
+    		},
+    		o(local) {
+    			transition_out(if_block);
+    			transition_out(default_slot, local);
+    			current = false;
+    		},
+    		d(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach(t);
+    			if (default_slot) default_slot.d(detaching);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+    }
+
+    function instance$3($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	const baseSetContext = setContext;
+    	const SvelteComponent = SvelteComponentDev;
+    	let { key = "simple-modal" } = $$props;
+    	let { closeButton = true } = $$props;
+    	let { closeOnEsc = true } = $$props;
+    	let { closeOnOuterClick = true } = $$props;
+    	let { styleBg = { top: 0, left: 0 } } = $$props;
+    	let { styleWindow = {} } = $$props;
+    	let { styleContent = {} } = $$props;
+    	let { styleCloseButton = {} } = $$props;
+    	let { setContext: setContext$1 = baseSetContext } = $$props;
+    	let { transitionBg = fade } = $$props;
+    	let { transitionBgProps = { duration: 250 } } = $$props;
+    	let { transitionWindow = transitionBg } = $$props;
+    	let { transitionWindowProps = transitionBgProps } = $$props;
+
+    	const defaultState = {
+    		closeButton,
+    		closeOnEsc,
+    		closeOnOuterClick,
+    		styleBg,
+    		styleWindow,
+    		styleContent,
+    		styleCloseButton,
+    		transitionBg,
+    		transitionBgProps,
+    		transitionWindow,
+    		transitionWindowProps
+    	};
+
+    	let state = { ...defaultState };
+    	let Component = null;
+    	let props = null;
+    	let background;
+    	let wrap;
+    	let modalWindow;
+    	const camelCaseToDash = str => str.replace(/([a-zA-Z])(?=[A-Z])/g, "$1-").toLowerCase();
+    	const toCssString = props => Object.keys(props).reduce((str, key) => `${str}; ${camelCaseToDash(key)}: ${props[key]}`, "");
+    	const isSvelteComponent = component => SvelteComponent && SvelteComponent.isPrototypeOf(component);
+
+    	const toVoid = () => {
+    		
+    	};
+
+    	let onOpen = toVoid;
+    	let onClose = toVoid;
+    	let onOpened = toVoid;
+    	let onClosed = toVoid;
+
+    	const open = (NewComponent, newProps = {}, options = {}, callback = {}) => {
+    		$$invalidate(1, Component = NewComponent);
+    		$$invalidate(2, props = newProps);
+    		$$invalidate(0, state = { ...defaultState, ...options });
+    		$$invalidate(6, onOpen = callback.onOpen || toVoid);
+    		$$invalidate(7, onClose = callback.onClose || toVoid);
+    		$$invalidate(8, onOpened = callback.onOpened || toVoid);
+    		$$invalidate(9, onClosed = callback.onClosed || toVoid);
+    	};
+
+    	const close = (callback = {}) => {
+    		$$invalidate(7, onClose = callback.onClose || onClose);
+    		$$invalidate(9, onClosed = callback.onClosed || onClosed);
+    		$$invalidate(1, Component = null);
+    		$$invalidate(2, props = null);
+    	};
+
+    	const handleKeydown = event => {
+    		if (state.closeOnEsc && Component && event.key === "Escape") {
+    			event.preventDefault();
+    			close();
+    		}
+
+    		if (Component && event.key === "Tab") {
+    			// trap focus
+    			const nodes = modalWindow.querySelectorAll("*");
+
+    			const tabbable = Array.from(nodes).filter(node => node.tabIndex >= 0);
+    			let index = tabbable.indexOf(document.activeElement);
+    			if (index === -1 && event.shiftKey) index = 0;
+    			index += tabbable.length + (event.shiftKey ? -1 : 1);
+    			index %= tabbable.length;
+    			tabbable[index].focus();
+    			event.preventDefault();
+    		}
+    	};
+
+    	const handleOuterClick = event => {
+    		if (state.closeOnOuterClick && (event.target === background || event.target === wrap)) {
+    			event.preventDefault();
+    			close();
+    		}
+    	};
+
+    	setContext$1(key, { open, close });
+
+    	function div1_binding($$value) {
+    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    			modalWindow = $$value;
+    			$$invalidate(5, modalWindow);
+    		});
+    	}
+
+    	function div2_binding($$value) {
+    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    			wrap = $$value;
+    			$$invalidate(4, wrap);
+    		});
+    	}
+
+    	function div3_binding($$value) {
+    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    			background = $$value;
+    			$$invalidate(3, background);
+    		});
+    	}
+
+    	$$self.$$set = $$props => {
+    		if ("key" in $$props) $$invalidate(20, key = $$props.key);
+    		if ("closeButton" in $$props) $$invalidate(21, closeButton = $$props.closeButton);
+    		if ("closeOnEsc" in $$props) $$invalidate(22, closeOnEsc = $$props.closeOnEsc);
+    		if ("closeOnOuterClick" in $$props) $$invalidate(23, closeOnOuterClick = $$props.closeOnOuterClick);
+    		if ("styleBg" in $$props) $$invalidate(24, styleBg = $$props.styleBg);
+    		if ("styleWindow" in $$props) $$invalidate(25, styleWindow = $$props.styleWindow);
+    		if ("styleContent" in $$props) $$invalidate(26, styleContent = $$props.styleContent);
+    		if ("styleCloseButton" in $$props) $$invalidate(27, styleCloseButton = $$props.styleCloseButton);
+    		if ("setContext" in $$props) $$invalidate(28, setContext$1 = $$props.setContext);
+    		if ("transitionBg" in $$props) $$invalidate(29, transitionBg = $$props.transitionBg);
+    		if ("transitionBgProps" in $$props) $$invalidate(30, transitionBgProps = $$props.transitionBgProps);
+    		if ("transitionWindow" in $$props) $$invalidate(31, transitionWindow = $$props.transitionWindow);
+    		if ("transitionWindowProps" in $$props) $$invalidate(32, transitionWindowProps = $$props.transitionWindowProps);
+    		if ("$$scope" in $$props) $$invalidate(33, $$scope = $$props.$$scope);
+    	};
+
+    	let cssBg;
+    	let cssWindow;
+    	let cssContent;
+    	let cssCloseButton;
+    	let currentTransitionBg;
+    	let currentTransitionWindow;
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty[0] & /*state*/ 1) {
+    			 $$invalidate(10, cssBg = toCssString(state.styleBg));
+    		}
+
+    		if ($$self.$$.dirty[0] & /*state*/ 1) {
+    			 $$invalidate(11, cssWindow = toCssString(state.styleWindow));
+    		}
+
+    		if ($$self.$$.dirty[0] & /*state*/ 1) {
+    			 $$invalidate(12, cssContent = toCssString(state.styleContent));
+    		}
+
+    		if ($$self.$$.dirty[0] & /*state*/ 1) {
+    			 $$invalidate(13, cssCloseButton = toCssString(state.styleCloseButton));
+    		}
+
+    		if ($$self.$$.dirty[0] & /*state*/ 1) {
+    			 $$invalidate(14, currentTransitionBg = state.transitionBg);
+    		}
+
+    		if ($$self.$$.dirty[0] & /*state*/ 1) {
+    			 $$invalidate(15, currentTransitionWindow = state.transitionWindow);
+    		}
+    	};
+
+    	return [
+    		state,
+    		Component,
+    		props,
+    		background,
+    		wrap,
+    		modalWindow,
+    		onOpen,
+    		onClose,
+    		onOpened,
+    		onClosed,
+    		cssBg,
+    		cssWindow,
+    		cssContent,
+    		cssCloseButton,
+    		currentTransitionBg,
+    		currentTransitionWindow,
+    		isSvelteComponent,
+    		close,
+    		handleKeydown,
+    		handleOuterClick,
+    		key,
+    		closeButton,
+    		closeOnEsc,
+    		closeOnOuterClick,
+    		styleBg,
+    		styleWindow,
+    		styleContent,
+    		styleCloseButton,
+    		setContext$1,
+    		transitionBg,
+    		transitionBgProps,
+    		transitionWindow,
+    		transitionWindowProps,
+    		$$scope,
+    		slots,
+    		div1_binding,
+    		div2_binding,
+    		div3_binding
+    	];
+    }
+
+    class Modal extends SvelteComponent {
+    	constructor(options) {
+    		super();
+    		if (!document_1.getElementById("svelte-yrtr4z-style")) add_css$2();
+
+    		init(
+    			this,
+    			options,
+    			instance$3,
+    			create_fragment$2,
+    			safe_not_equal,
+    			{
+    				key: 20,
+    				closeButton: 21,
+    				closeOnEsc: 22,
+    				closeOnOuterClick: 23,
+    				styleBg: 24,
+    				styleWindow: 25,
+    				styleContent: 26,
+    				styleCloseButton: 27,
+    				setContext: 28,
+    				transitionBg: 29,
+    				transitionBgProps: 30,
+    				transitionWindow: 31,
+    				transitionWindowProps: 32
+    			},
+    			[-1, -1]
+    		);
     	}
     }
 
     /* src\Op.svelte generated by Svelte v3.31.0 */
 
-    function create_fragment$1(ctx) {
+    function create_default_slot(ctx) {
+    	let content;
+    	let updating_showPopup;
+    	let current;
+
+    	function content_showPopup_binding(value) {
+    		/*content_showPopup_binding*/ ctx[10].call(null, value);
+    	}
+
+    	let content_props = {};
+
+    	if (/*showPopup*/ ctx[0] !== void 0) {
+    		content_props.showPopup = /*showPopup*/ ctx[0];
+    	}
+
+    	content = new Content({ props: content_props });
+    	binding_callbacks.push(() => bind(content, "showPopup", content_showPopup_binding));
+
+    	return {
+    		c() {
+    			create_component(content.$$.fragment);
+    		},
+    		m(target, anchor) {
+    			mount_component(content, target, anchor);
+    			current = true;
+    		},
+    		p(ctx, dirty) {
+    			const content_changes = {};
+
+    			if (!updating_showPopup && dirty & /*showPopup*/ 1) {
+    				updating_showPopup = true;
+    				content_changes.showPopup = /*showPopup*/ ctx[0];
+    				add_flush_callback(() => updating_showPopup = false);
+    			}
+
+    			content.$set(content_changes);
+    		},
+    		i(local) {
+    			if (current) return;
+    			transition_in(content.$$.fragment, local);
+    			current = true;
+    		},
+    		o(local) {
+    			transition_out(content.$$.fragment, local);
+    			current = false;
+    		},
+    		d(detaching) {
+    			destroy_component(content, detaching);
+    		}
+    	};
+    }
+
+    function create_fragment$3(ctx) {
     	let tailwindcss;
-    	let t;
+    	let t0;
     	let sdkdrawer;
+    	let t1;
+    	let modal;
     	let current;
     	tailwindcss = new TailwindCss({});
     	sdkdrawer = new SdkDrawer({});
 
+    	modal = new Modal({
+    			props: {
+    				$$slots: { default: [create_default_slot] },
+    				$$scope: { ctx }
+    			}
+    		});
+
     	return {
     		c() {
     			create_component(tailwindcss.$$.fragment);
-    			t = space();
+    			t0 = space();
     			create_component(sdkdrawer.$$.fragment);
+    			t1 = space();
+    			create_component(modal.$$.fragment);
     		},
     		m(target, anchor) {
     			mount_component(tailwindcss, target, anchor);
-    			insert(target, t, anchor);
+    			insert(target, t0, anchor);
     			mount_component(sdkdrawer, target, anchor);
+    			insert(target, t1, anchor);
+    			mount_component(modal, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p(ctx, [dirty]) {
+    			const modal_changes = {};
+
+    			if (dirty & /*$$scope, showPopup*/ 32769) {
+    				modal_changes.$$scope = { dirty, ctx };
+    			}
+
+    			modal.$set(modal_changes);
+    		},
     		i(local) {
     			if (current) return;
     			transition_in(tailwindcss.$$.fragment, local);
     			transition_in(sdkdrawer.$$.fragment, local);
+    			transition_in(modal.$$.fragment, local);
     			current = true;
     		},
     		o(local) {
     			transition_out(tailwindcss.$$.fragment, local);
     			transition_out(sdkdrawer.$$.fragment, local);
+    			transition_out(modal.$$.fragment, local);
     			current = false;
     		},
     		d(detaching) {
     			destroy_component(tailwindcss, detaching);
-    			if (detaching) detach(t);
+    			if (detaching) detach(t0);
     			destroy_component(sdkdrawer, detaching);
+    			if (detaching) detach(t1);
+    			destroy_component(modal, detaching);
     		}
     	};
     }
 
-    function instance$1($$self, $$props, $$invalidate) {
+    function instance$4($$self, $$props, $$invalidate) {
     	let $url;
-    	component_subscribe($$self, url, $$value => $$invalidate(1, $url = $$value));
+    	let $config;
+    	let $tourneyStore;
+    	let $authStore;
+    	component_subscribe($$self, url, $$value => $$invalidate(11, $url = $$value));
+    	component_subscribe($$self, config, $$value => $$invalidate(12, $config = $$value));
+    	component_subscribe($$self, tourneyStore, $$value => $$invalidate(13, $tourneyStore = $$value));
+    	component_subscribe($$self, authStore, $$value => $$invalidate(14, $authStore = $$value));
 
     	function props() {
-    		return { url: $url };
+    		return { url: $url, config: $config };
     	}
 
-    	return [props];
+    	async function getTourney(options) {
+    		let result = await $tourneyStore.getTourney(options);
+    		return result;
+    	}
+
+    	let showPopup; // bound to content
+
+    	async function loginPrompt() {
+    		showPopup();
+    	}
+
+    	async function attemptTourney(options) {
+    		let result = await $tourneyStore.attemptTourney(options);
+    		return result;
+    	}
+
+    	async function postScore(options) {
+    		let result = await $tourneyStore.postScore(options);
+    		return result;
+    	}
+
+    	async function joinTourney(options) {
+    		let result = await $tourneyStore.joinTourney(options);
+    		return result;
+    	}
+
+    	function getSessionToken() {
+    		let session = $authStore.getSessionToken();
+    		return session;
+    	}
+
+    	function content_showPopup_binding(value) {
+    		showPopup = value;
+    		$$invalidate(0, showPopup);
+    	}
+
+    	return [
+    		showPopup,
+    		CONSTANTS,
+    		useServers,
+    		props,
+    		getTourney,
+    		loginPrompt,
+    		attemptTourney,
+    		postScore,
+    		joinTourney,
+    		getSessionToken,
+    		content_showPopup_binding
+    	];
     }
 
     class Op extends SvelteComponent {
     	constructor(options) {
     		super();
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { props: 0 });
+
+    		init(this, options, instance$4, create_fragment$3, safe_not_equal, {
+    			CONSTANTS: 1,
+    			useServers: 2,
+    			props: 3,
+    			getTourney: 4,
+    			loginPrompt: 5,
+    			attemptTourney: 6,
+    			postScore: 7,
+    			joinTourney: 8,
+    			getSessionToken: 9
+    		});
+    	}
+
+    	get CONSTANTS() {
+    		return CONSTANTS;
+    	}
+
+    	get useServers() {
+    		return useServers;
     	}
 
     	get props() {
-    		return this.$$.ctx[0];
+    		return this.$$.ctx[3];
+    	}
+
+    	get getTourney() {
+    		return this.$$.ctx[4];
+    	}
+
+    	get loginPrompt() {
+    		return this.$$.ctx[5];
+    	}
+
+    	get attemptTourney() {
+    		return this.$$.ctx[6];
+    	}
+
+    	get postScore() {
+    		return this.$$.ctx[7];
+    	}
+
+    	get joinTourney() {
+    		return this.$$.ctx[8];
+    	}
+
+    	get getSessionToken() {
+    		return this.$$.ctx[9];
     	}
     }
 
