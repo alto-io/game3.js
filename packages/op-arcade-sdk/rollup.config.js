@@ -81,7 +81,8 @@ export default {
 
     production && copy({
       targets: [
-          {src: 'dist/op.js', dest: '../../docs/lib', overwrite: true}
+          {src: 'dist/op.js', dest: '../../docs/lib', overwrite: true},
+          {src: 'index.html', dest: '../../docs', overwrite: true},
       ]
     }),
 
