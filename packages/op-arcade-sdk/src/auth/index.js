@@ -12,28 +12,31 @@ export class Auth {
     authProvider = null;
 
     constructor(options) {
-        let serverType = options.type;
+      this.useServer(options);
+    }
 
-        switch (serverType) {
-            case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
+    useServer = (options) => {
+      let serverType = options.type;
 
-                getAuthProvider(options).then(
-                    authProvider => {
-                      if (authProvider != null)
-                      {
-                        this.authProvider = authProvider;
-                        this.sdkState = CONSTANTS.SDK_STATES.READY;
-                      }
+      switch (serverType) {
+          case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
+
+              getAuthProvider(options).then(
+                  authProvider => {
+                    if (authProvider != null)
+                    {
+                      this.authProvider = authProvider;
+                      this.sdkState = CONSTANTS.SDK_STATES.READY;
                     }
-                  );           
-          
-                break;
-          
-                default:
-                  console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.AUTH_SERVER_TYPES));
-                break;
-        }
-
+                  }
+                );           
+        
+              break;
+        
+              default:
+                console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.AUTH_SERVER_TYPES));
+              break;
+      }      
     }
 
 

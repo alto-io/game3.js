@@ -26,13 +26,15 @@ export const apiKey = writable("");
 export const config = writable(DEFAULT_CONFIG);
 export const url = readable(window.location.href);
 
-export var tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
-export var authStore = getAuthStore(DEFAULT_CONFIG.auth_server);
+export const tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
+export const authStore = getAuthStore(DEFAULT_CONFIG.auth_server);
 
 export function useServers(options) {
-    authStore = getAuthStore(options.auth_server);
-    tourneyStore = getTourneyStore(options.tourney_server);
+    
+    get(authStore).useServer(options.auth_server);
+    get(tourneyStore).useServer(options.tourney_server);
 }
+
 
 
 export const SDK_STATES = {
