@@ -3813,8 +3813,14 @@
     const config = writable(DEFAULT_CONFIG);
     const url = readable(window.location.href);
 
-    const tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
-    const authStore = getAuthStore(DEFAULT_CONFIG.auth_server);
+    var tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
+    var authStore = getAuthStore(DEFAULT_CONFIG.auth_server);
+
+    function useServers(options) {
+        authStore = getAuthStore(options.auth_server);
+        tourneyStore = getTourneyStore(options.tourney_server);
+    }
+
 
     const SDK_STATES = {
         NOT_CONNECTED: "not connected",
@@ -3836,6 +3842,7 @@
 
         }
     }
+
 
     const opSdk = createSdk();
 
@@ -5267,7 +5274,7 @@
     	let current;
 
     	function content_showPopup_binding(value) {
-    		/*content_showPopup_binding*/ ctx[9].call(null, value);
+    		/*content_showPopup_binding*/ ctx[10].call(null, value);
     	}
 
     	let content_props = {};
@@ -5349,7 +5356,7 @@
     		p(ctx, [dirty]) {
     			const modal_changes = {};
 
-    			if (dirty & /*$$scope, showPopup*/ 16385) {
+    			if (dirty & /*$$scope, showPopup*/ 32769) {
     				modal_changes.$$scope = { dirty, ctx };
     			}
 
@@ -5383,10 +5390,10 @@
     	let $config;
     	let $tourneyStore;
     	let $authStore;
-    	component_subscribe($$self, url, $$value => $$invalidate(10, $url = $$value));
-    	component_subscribe($$self, config, $$value => $$invalidate(11, $config = $$value));
-    	component_subscribe($$self, tourneyStore, $$value => $$invalidate(12, $tourneyStore = $$value));
-    	component_subscribe($$self, authStore, $$value => $$invalidate(13, $authStore = $$value));
+    	component_subscribe($$self, url, $$value => $$invalidate(11, $url = $$value));
+    	component_subscribe($$self, config, $$value => $$invalidate(12, $config = $$value));
+    	component_subscribe($$self, tourneyStore, $$value => $$invalidate(13, $tourneyStore = $$value));
+    	component_subscribe($$self, authStore, $$value => $$invalidate(14, $authStore = $$value));
 
     	function props() {
     		return { url: $url, config: $config };
@@ -5431,6 +5438,7 @@
     	return [
     		showPopup,
     		CONSTANTS,
+    		useServers,
     		props,
     		getTourney,
     		loginPrompt,
@@ -5448,13 +5456,14 @@
 
     		init(this, options, instance$4, create_fragment$3, safe_not_equal, {
     			CONSTANTS: 1,
-    			props: 2,
-    			getTourney: 3,
-    			loginPrompt: 4,
-    			attemptTourney: 5,
-    			postScore: 6,
-    			joinTourney: 7,
-    			getSessionToken: 8
+    			useServers: 2,
+    			props: 3,
+    			getTourney: 4,
+    			loginPrompt: 5,
+    			attemptTourney: 6,
+    			postScore: 7,
+    			joinTourney: 8,
+    			getSessionToken: 9
     		});
     	}
 
@@ -5462,32 +5471,36 @@
     		return CONSTANTS;
     	}
 
-    	get props() {
-    		return this.$$.ctx[2];
+    	get useServers() {
+    		return useServers;
     	}
 
-    	get getTourney() {
+    	get props() {
     		return this.$$.ctx[3];
     	}
 
-    	get loginPrompt() {
+    	get getTourney() {
     		return this.$$.ctx[4];
     	}
 
-    	get attemptTourney() {
+    	get loginPrompt() {
     		return this.$$.ctx[5];
     	}
 
-    	get postScore() {
+    	get attemptTourney() {
     		return this.$$.ctx[6];
     	}
 
-    	get joinTourney() {
+    	get postScore() {
     		return this.$$.ctx[7];
     	}
 
-    	get getSessionToken() {
+    	get joinTourney() {
     		return this.$$.ctx[8];
+    	}
+
+    	get getSessionToken() {
+    		return this.$$.ctx[9];
     	}
     }
 

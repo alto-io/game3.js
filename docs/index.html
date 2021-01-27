@@ -17,6 +17,26 @@
 
 <script>
 
+	// initialize with op-arcade server
+	window.onload = () => {
+		op.useServers(
+			{
+				tourney_server: {
+					type: op.CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+					url: "nakama1.outplay.games",
+					port: "7350",
+					key: "defaultkey"
+				},
+				auth_server: {
+					type: op.CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+					url: "nakama1.outplay.games",
+					port: "7350",
+					key: "defaultkey"
+					}
+			}
+		)
+	}
+
 	// onClick functions
 	function playerLogin() {
 		op.loginPrompt();
