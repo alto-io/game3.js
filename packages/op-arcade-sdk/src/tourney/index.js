@@ -11,7 +11,8 @@ export class Tourney {
     tourneyProvider = null;
 
     constructor(options) {
-      this.useServer(options)
+      if (options != null)
+        this.useServer(options)
     }
 
     useServer = (options) => {

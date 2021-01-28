@@ -3,22 +3,51 @@
 -->
 
 <script>
+
+export const DEFAULT_CONFIG = {
+    tourney_server: {
+        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+        url: "localhost",
+        port: "7350",
+        key: "defaultkey"
+    },
+    auth_server: {
+        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+        url: "localhost",
+        port: "7350",
+        key: "defaultkey"
+    }
+}
+
+export let config;
+export const configStore = writable(config);
+
 import CONSTANTS from './constants.js'
+import { writable, get } from 'svelte/store';
 
 import TailwindCss from './TailwindCss.svelte'
 import SdkDrawer from './components/SdkDrawer.svelte'
 import Content from './components/Content.svelte';
 import Modal from './components/Modal.svelte';
 
-
-import { config, tourneyStore, authStore, url, useServers } from './stores.js'
+import { tourneyStore, authStore, url, useServers } from './stores.js'
 
  function props() {
   return {
     url: $url,
-    config: $config
+    config
   }
 }
+
+async function connect() {
+  let serverConfig = get(configStore);
+
+  if (serverConfig == null)
+    serverConfig = DEFAULT_CONFIG;
+
+  useServers(serverConfig);
+}
+
 
 async function getTourney(options) {
 
@@ -53,6 +82,10 @@ function getSessionToken() {
   return session;
 }
 
+function getOPSessionToken() {
+
+}
+
 export {
   CONSTANTS,
   props,
@@ -62,7 +95,8 @@ export {
   postScore,
   joinTourney,
   getSessionToken,
-  useServers
+  useServers,
+  connect
 }
 
 </script>
