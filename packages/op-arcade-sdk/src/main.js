@@ -20,7 +20,7 @@ const op = new Op({
 	}
 });
 
-op.connect();
+op.initialize();
 
 // attach to window
 window.op = op;

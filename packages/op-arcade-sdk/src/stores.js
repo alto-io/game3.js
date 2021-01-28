@@ -8,7 +8,9 @@ export const password = writable("");
 export const loginState = writable(CONSTANTS.LOGIN_STATES.LOGGED_OUT);
 
 export const apiKey = writable("");
-export const url = readable(window.location.href);
+export const url = readable(document.referrer);
+
+export const onOpArcade = writable(false);
 
 export const tourneyStore = getTourneyStore();
 export const authStore = getAuthStore();

@@ -4,6 +4,8 @@
 
 <script>
 
+export const OP_ARCADE_URL = "http://localhost:5000/"
+
 export const DEFAULT_CONFIG = {
     tourney_server: {
         type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
@@ -30,7 +32,7 @@ import SdkDrawer from './components/SdkDrawer.svelte'
 import Content from './components/Content.svelte';
 import Modal from './components/Modal.svelte';
 
-import { tourneyStore, authStore, url, useServers } from './stores.js'
+import { tourneyStore, authStore, url, onOpArcade, useServers, set } from './stores.js'
 
  function props() {
   return {
@@ -39,11 +41,20 @@ import { tourneyStore, authStore, url, useServers } from './stores.js'
   }
 }
 
-async function connect() {
+async function initialize() {
   let serverConfig = get(configStore);
 
   if (serverConfig == null)
+  {
+    console.log('%c%s',
+        'color: blue; background: white;',
+        "-- Using default localhost config --"
+        )
     serverConfig = DEFAULT_CONFIG;
+  }
+
+  // check if we're on OP Arcade
+  onOpArcade.set($url === OP_ARCADE_URL);
 
   useServers(serverConfig);
 }
@@ -96,7 +107,7 @@ export {
   joinTourney,
   getSessionToken,
   useServers,
-  connect
+  initialize
 }
 
 </script>
