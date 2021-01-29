@@ -106,13 +106,10 @@ export {
   postScore,
   joinTourney,
   getSessionToken,
-<<<<<<< HEAD
   urlGameDetails,
   useServers
-=======
   useServers,
   initialize
->>>>>>> 5e6c1c320a5935eb9560a361e5f68a7bb6d64b44
 }
 
 </script>
