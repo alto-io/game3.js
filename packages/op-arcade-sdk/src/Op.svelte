@@ -56,7 +56,18 @@ async function initialize() {
   // check if we're on OP Arcade
   onOpArcade.set($url === OP_ARCADE_URL);
 
+  if (get(onOpArcade))
+  {
+    getSessionFromOpArcade();
+  }
+
+
   useServers(serverConfig);
+}
+
+function getSessionFromOpArcade()
+{
+  window.top.postMessage('getSession', '*')
 }
 
 
