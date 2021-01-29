@@ -3,22 +3,62 @@
 -->
 
 <script>
+
+export const OP_ARCADE_URL = "http://localhost:3000/"
+
+export const DEFAULT_CONFIG = {
+    tourney_server: {
+        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+        url: "localhost",
+        port: "7350",
+        key: "defaultkey"
+    },
+    auth_server: {
+        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+        url: "localhost",
+        port: "7350",
+        key: "defaultkey"
+    }
+}
+
+export let config;
+export const configStore = writable(config);
+
 import CONSTANTS from './constants.js'
+import { writable, get } from 'svelte/store';
 
 import TailwindCss from './TailwindCss.svelte'
 import SdkDrawer from './components/SdkDrawer.svelte'
 import Content from './components/Content.svelte';
 import Modal from './components/Modal.svelte';
 
-
-import { config, tourneyStore, authStore, url, useServers } from './stores.js'
+import { tourneyStore, authStore, url, onOpArcade, useServers, set } from './stores.js'
 
  function props() {
   return {
     url: $url,
-    config: $config
+    config
   }
 }
+
+async function initialize() {
+  let serverConfig = get(configStore);
+
+  if (serverConfig == null)
+  {
+    console.log('%c%s',
+        'color: blue; background: white;',
+        "-- Using default localhost config --"
+        )
+    serverConfig = DEFAULT_CONFIG;
+  }
+
+  // check if we're on OP Arcade
+  onOpArcade.set($url === OP_ARCADE_URL);
+
+  useServers(serverConfig);
+}
+
 
 async function getTourney(options) {
 
@@ -56,7 +96,6 @@ function getSessionToken() {
 async function urlGameDetails(options) {
   let result = await $tourneyStore.urlGameDetails(options);
   return result;
-}
 
 export {
   CONSTANTS,
@@ -67,8 +106,13 @@ export {
   postScore,
   joinTourney,
   getSessionToken,
+<<<<<<< HEAD
   urlGameDetails,
   useServers
+=======
+  useServers,
+  initialize
+>>>>>>> 5e6c1c320a5935eb9560a361e5f68a7bb6d64b44
 }
 
 </script>

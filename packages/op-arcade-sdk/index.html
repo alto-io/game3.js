@@ -4,6 +4,23 @@
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width,initial-scale=1'>
 
+	<!-- Configuration -->
+	<!-- <meta name="op-config"
+		content='{
+			"auth_server": {
+				"type": "nakama",
+				"url": "nakama1.outplay.games",
+				"port": 7350,
+				"key": "defaultkey"
+			},
+			"tourney_server": {
+				"type": "nakama",
+				"url": "nakama1.outplay.games",
+				"port": 7350,
+				"key": "defaultkey"
+			}
+		}'> -->
+
 	<title>OP Arcade SDK Example</title>
 	<script defer src='./lib/op.js'></script> <!-- load sdk as op -->
 
@@ -16,26 +33,6 @@
 </head>
 
 <script>
-
-	// initialize with op-arcade server
-	window.onload = () => {
-		op.useServers(
-			{
-				tourney_server: {
-					type: op.CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
-					url: "nakama1.outplay.games",
-					port: "7350",
-					key: "defaultkey"
-				},
-				auth_server: {
-					type: op.CONSTANTS.AUTH_SERVER_TYPES.NAKAMA,
-					url: "nakama1.outplay.games",
-					port: "7350",
-					key: "defaultkey"
-					}
-			}
-		)
-	}
 
 	// onClick functions
 	function playerLogin() {
@@ -210,7 +207,7 @@
 
 <body>
 
-	<h2 class="mb-4 bg-green-600 col-span-3 h-10 text-right">Demo Test Page</h2>
+	<h2 class="mb-4 bg-green-600 col-span-3 h-10 text-right">OP Arcade Demo Game</h2>
 
 	<div class="flex flex-wrap -mx-2 mb-8">
 		<div class="w-full md:w-1/2 px-2">

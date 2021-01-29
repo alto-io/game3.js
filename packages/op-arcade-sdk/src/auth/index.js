@@ -12,7 +12,8 @@ export class Auth {
     authProvider = null;
 
     constructor(options) {
-      this.useServer(options);
+      if (options != null)
+        this.useServer(options);
     }
 
     useServer = (options) => {
