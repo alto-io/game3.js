@@ -96,6 +96,7 @@ function getSessionToken() {
 async function urlGameDetails(options) {
   let result = await $tourneyStore.urlGameDetails(options);
   return result;
+}
 
 export {
   CONSTANTS,
@@ -107,7 +108,6 @@ export {
   joinTourney,
   getSessionToken,
   urlGameDetails,
-  useServers
   useServers,
   initialize
 }
