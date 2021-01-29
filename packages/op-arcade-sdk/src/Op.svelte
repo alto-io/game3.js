@@ -4,7 +4,7 @@
 
 <script>
 
-export const OP_ARCADE_URL = "http://localhost:5000/"
+export const OP_ARCADE_URL = "http://localhost:3000/"
 
 export const DEFAULT_CONFIG = {
     tourney_server: {
