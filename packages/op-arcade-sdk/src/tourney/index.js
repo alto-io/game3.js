@@ -60,6 +60,10 @@ export class Tourney {
       return result
     }
 
+    urlGameDetails = async (options) => {
+      let result = await this.tourneyProvider.urlGameDetails(options)
+      return result
+    }
     
 }
 

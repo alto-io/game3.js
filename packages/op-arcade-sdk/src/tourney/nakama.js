@@ -145,8 +145,24 @@ class NakamaTourneyProvider {
             console.error("joinTourney failed [" + e.status + ":" + e.statusText + "]"); 
             return(e);
          }
-    }        
+    }
 
+    urlGameDetails = async (options) => {
+      try {
+        await this.refreshSession();
+
+        console.log("Client rpc is", this.client.rpc);
+        let gameDetails = await this.client.rpc(
+          this.session,
+          "get_game",
+          options.game_url
+        );
+
+        return gameDetails;
+      } catch (e) {
+        console.error("urlGameDetails failed [" + e.status +  ":" + e.statusText + "]");
+      }
+    }
 }
 
 export {

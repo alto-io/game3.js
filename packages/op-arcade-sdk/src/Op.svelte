@@ -53,6 +53,11 @@ function getSessionToken() {
   return session;
 }
 
+async function urlGameDetails(options) {
+  let result = await $tourneyStore.urlGameDetails(options);
+  return result;
+}
+
 export {
   CONSTANTS,
   props,
@@ -62,6 +67,7 @@ export {
   postScore,
   joinTourney,
   getSessionToken,
+  urlGameDetails,
   useServers
 }
 
