@@ -148,6 +148,7 @@ class NakamaTourneyProvider {
     }
 
     urlGameDetails = async (options) => {
+      console.log("options in nakama.js", options)
       try {
         await this.refreshSession();
 
@@ -155,7 +156,7 @@ class NakamaTourneyProvider {
         let gameDetails = await this.client.rpc(
           this.session,
           "get_game",
-          options.game_url
+          {key: JSON.stringify(options.game_url)}
         );
 
         return gameDetails;

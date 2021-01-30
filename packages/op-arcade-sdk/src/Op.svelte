@@ -55,7 +55,12 @@ async function initialize() {
 
   // check if we're on OP Arcade
   onOpArcade.set($url === OP_ARCADE_URL);
-
+  
+  window.addEventListener("message", e => {
+    alert(JSON.stringify(e.data));
+  })
+  
+  // window.top.postMessage('hello', '*');
   useServers(serverConfig);
 }
 

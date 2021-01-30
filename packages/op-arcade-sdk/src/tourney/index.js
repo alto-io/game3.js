@@ -62,6 +62,7 @@ export class Tourney {
     }
 
     urlGameDetails = async (options) => {
+      console.log("options in index.js", options)
       let result = await this.tourneyProvider.urlGameDetails(options)
       return result
     }
