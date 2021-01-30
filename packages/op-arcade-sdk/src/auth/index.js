@@ -70,7 +70,10 @@ export class Auth {
       }
 
       saveSessionToken = (options) => {
-        return this.authProvider.saveSessionToken(options);
+        this.authProvider.saveSessionToken(options);
+
+        this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_IN;
+        return this.loginState;
       }
     
 }

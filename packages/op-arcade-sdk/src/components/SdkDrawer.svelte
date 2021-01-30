@@ -1,6 +1,6 @@
 <script>
   import CONSTANTS from '../constants.js';
-  import { url, apiKey, opSdk, loginState, onOpArcade, SDK_STATES } from '../stores.js';
+  import { url, apiKey, opSdk, loginState, onOpArcade, authStore, SDK_STATES } from '../stores.js';
   import { fade, fly } from 'svelte/transition'
 
   import LoginPrompt from './LoginPrompt.svelte';

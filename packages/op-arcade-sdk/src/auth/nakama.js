@@ -103,7 +103,6 @@ class NakamaAuthProvider {
 
     saveSessionToken = (options) => {
         this.session = options;
-        return this.getSessionToken();
     }
  
 }
