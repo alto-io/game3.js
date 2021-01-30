@@ -32,7 +32,7 @@ import SdkDrawer from './components/SdkDrawer.svelte'
 import Content from './components/Content.svelte';
 import Modal from './components/Modal.svelte';
 
-import { tourneyStore, authStore, url, onOpArcade, useServers, set } from './stores.js'
+import { tourneyStore, authStore, url, onOpArcade, passedSessionToken, useServers } from './stores.js'
 
  function props() {
   return {
@@ -61,15 +61,21 @@ async function initialize() {
   //   getSessionFromOpArcade();
   // }
 
-
-  useServers(serverConfig);
+  useServers(serverConfig).then(
+    (result) => {
+      if ($onOpArcade)
+      {
+        saveSessionToken($passedSessionToken);
+      }
+    }
+  );
 }
 
 // save session token
 window.onmessage = function(e){
   try {
     let session = JSON.parse(e.data);
-    console.log(session)
+    passedSessionToken.set(session);
   } catch (e) {}
 };
 
@@ -113,8 +119,8 @@ function getSessionToken() {
   return session;
 }
 
-function getOPSessionToken() {
-
+function saveSessionToken(options) {
+  $authStore.saveSessionToken(options);
 }
 
 export {

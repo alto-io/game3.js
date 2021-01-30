@@ -15,21 +15,19 @@ export class Tourney {
         this.useServer(options)
     }
 
-    useServer = (options) => {
+    useServer = async (options) => {
       let serverType = options.type;
 
       switch (serverType) {
           case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
 
-              getTourneyProvider(options).then(
-                  tourneyProvider => {
-                    if (tourneyProvider != null)
-                    {
-                      this.tourneyProvider = tourneyProvider;
-                      this.sdkState = CONSTANTS.SDK_STATES.READY;
-                    }
-                  }
-                );           
+              let tourneyProvider = await getTourneyProvider(options);
+              
+              if (tourneyProvider != null)
+                {
+                  this.tourneyProvider = tourneyProvider;
+                  this.sdkState = CONSTANTS.SDK_STATES.READY;
+                }
         
               break;
         
@@ -37,6 +35,8 @@ export class Tourney {
                 console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
               break;
       }
+
+      return this.tourneyProvider;
     }
 
     getTourney = async (tournament_id) => {

@@ -16,28 +16,28 @@ export class Auth {
         this.useServer(options);
     }
 
-    useServer = (options) => {
+    useServer = async (options) => {
       let serverType = options.type;
 
       switch (serverType) {
           case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
 
-              getAuthProvider(options).then(
-                  authProvider => {
-                    if (authProvider != null)
-                    {
-                      this.authProvider = authProvider;
-                      this.sdkState = CONSTANTS.SDK_STATES.READY;
-                    }
+              let authProvider = await getAuthProvider(options);
+
+              if (authProvider != null)
+                  {
+                    this.authProvider = authProvider;
+                    this.sdkState = CONSTANTS.SDK_STATES.READY;
                   }
-                );           
         
               break;
         
               default:
                 console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.AUTH_SERVER_TYPES));
               break;
-      }      
+      }
+      
+      return this.authProvider;
     }
 
 
@@ -67,6 +67,10 @@ export class Auth {
 
       getSessionToken = () => {
         return this.authProvider.getSessionToken();
+      }
+
+      saveSessionToken = (options) => {
+        return this.authProvider.saveSessionToken(options);
       }
     
 }
