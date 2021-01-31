@@ -4,7 +4,8 @@
 
 <script>
 
-export const OP_ARCADE_URL = "http://localhost:3000/"
+export const OP_ARCADE_URL_DEV = "http://localhost:3000/"
+export const OP_ARCADE_URL_PROD = "http://op-arcade-dev.herokuapp.com/"
 
 export const DEFAULT_CONFIG = {
     tourney_server: {
@@ -54,7 +55,7 @@ async function initialize() {
   }
 
   // check if we're on OP Arcade
-  onOpArcade.set($url === OP_ARCADE_URL);
+  onOpArcade.set($url == OP_ARCADE_URL_DEV || $url == OP_ARCADE_URL_PROD);
 
   // if (get(onOpArcade))
   // {
