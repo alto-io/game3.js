@@ -12,6 +12,7 @@ export const apiKey = writable("");
 export const url = readable(document.referrer);
 
 export const onOpArcade = writable(false);
+export const isProd = writable(false);
 
 export const tourneyStore = getTourneyStore();
 export const authStore = getAuthStore();

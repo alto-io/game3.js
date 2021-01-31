@@ -33,7 +33,14 @@ import SdkDrawer from './components/SdkDrawer.svelte'
 import Content from './components/Content.svelte';
 import Modal from './components/Modal.svelte';
 
-import { tourneyStore, loginState, authStore, url, onOpArcade, passedSessionToken, useServers } from './stores.js'
+import { tourneyStore, 
+        loginState, 
+        authStore, 
+        url, 
+        onOpArcade, 
+        isProd,
+        passedSessionToken, 
+        useServers } from './stores.js'
 
  function props() {
   return {
@@ -56,11 +63,21 @@ async function initialize() {
 
   // check if we're on OP Arcade
   onOpArcade.set($url == OP_ARCADE_URL_DEV || $url == OP_ARCADE_URL_PROD);
+  isProd.set($url == OP_ARCADE_URL_PROD);
 
-  // if (get(onOpArcade))
-  // {
-  //   getSessionFromOpArcade();
-  // }
+  if (get(isProd))
+  {
+    console.log('%c%s',
+        'color: orange; background: white;',
+        "-- Welcome to OP Arcade --"
+        )
+  }
+  else {
+    console.log('%c%s',
+        'color: orange; background: white;',
+        "-- development mode --"
+        )
+  }
 
   useServers(serverConfig).then(
     (result) => {
