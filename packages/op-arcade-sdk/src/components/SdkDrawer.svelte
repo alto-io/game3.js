@@ -1,6 +1,6 @@
 <script>
   import CONSTANTS from '../constants.js';
-  import { url, apiKey, opSdk, loginState, SDK_STATES } from '../stores.js';
+  import { url, apiKey, opSdk, loginState, onOpArcade, authStore, SDK_STATES } from '../stores.js';
   import { fade, fly } from 'svelte/transition'
 
   import LoginPrompt from './LoginPrompt.svelte';
@@ -23,16 +23,24 @@
 		background-color: #00c3ff;
   }
 
+  .on-op-arcade {
+    visibility: visible;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
 </style>
 
 <svelte:window on:keydown={handleKeydown}/>
 
+<div class="invisible m-3 fixed -top-0.5 -left-1 inline-flex items-center justify-center bg-yellow-500 w-12 h-12 rounded-full transition-transform"
+  class:on-op-arcade={$onOpArcade}>
+</div>
 <button class="m-3 fixed top-0 left-0 inline-flex items-center justify-center w-12 h-12 mr-2 transition-colors duration-300 bg-indigo-700 rounded-full hover:bg-indigo-900"
-class:logged-in={$loginState == CONSTANTS.LOGIN_STATES.LOGGED_IN}
-on:click={() => visible = !visible}>
-<img class="w-10 h-10 fill-current" alt="g3js logo" src={logo}>
-</button>
-
+  class:logged-in={$loginState == CONSTANTS.LOGIN_STATES.LOGGED_IN}
+  on:click={() => visible = !visible}>
+  <img class="w-10 h-10 fill-current" alt="g3js logo" src={logo}>
+  </button>
 
 {#if visible}
 <div class="modal fixed w-full h-full top-0 left-0 flex items-center justify-center">

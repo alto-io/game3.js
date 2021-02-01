@@ -11,28 +11,44 @@ export class Tourney {
     tourneyProvider = null;
 
     constructor(options) {
-        let serverType = options.type;
+      if (options != null)
+        this.useServer(options)
+    }
 
-        switch (serverType) {
-            case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
+    useServer = async (options, auth_provider = null) => {
+      let serverType = options.type;
 
-                getTourneyProvider(options).then(
-                    tourneyProvider => {
-                      if (tourneyProvider != null)
-                      {
-                        this.tourneyProvider = tourneyProvider;
-                        this.sdkState = CONSTANTS.SDK_STATES.READY;
-                      }
-                    }
-                  );           
-          
-                break;
-          
-                default:
-                  console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
-                break;
-        }
+      switch (serverType) {
+          case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
 
+              // nakama requires the authProvider
+              if (auth_provider == null)
+              {
+                console.error("no auth provider given. Nakama requires an auth provider.");
+              }
+
+              else {
+
+                let tourneyProvider = await getTourneyProvider(options, auth_provider);
+                
+                if (tourneyProvider != null) {
+                    this.tourneyProvider = tourneyProvider;
+                    this.sdkState = CONSTANTS.SDK_STATES.READY;
+                  }
+                else {
+                    console.error("unable to initialize nakama tourney provider.");
+                }
+
+              }
+              
+              break;
+        
+              default:
+                console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
+              break;
+      }
+
+      return this.tourneyProvider;
     }
 
     getTourney = async (tournament_id) => {

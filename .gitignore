@@ -1,6 +1,7 @@
 *.log
 .DS_Store
 node_modules
+packages/op-arcade-sdk/lib
 .tmp
 .env
 dist

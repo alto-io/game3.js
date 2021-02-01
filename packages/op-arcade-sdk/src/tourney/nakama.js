@@ -3,24 +3,12 @@ import * as nakamajs from '@heroiclabs/nakama-js';
 
 const TEST_ID = "test_id"
 
-const getTourneyProvider = async (options) => {
+const getTourneyProvider = async (options, auth_provider) => {
 
-    // initialize sdk    
-     let client = new nakamajs.Client(
-        options.key,
-        options.url,
-        options.port
-    )
+    let provider = new NakamaTourneyProvider(auth_provider);
 
-    // do a test authenticate
-    let session = await client.apiClient.authenticateCustom({
-        id: TEST_ID,
-        create: true
-    });
-
-    if (session != null) {
-
-        let provider = new NakamaTourneyProvider(client);
+    if (provider != null)
+    {
 
         console.log('%c%s',
         'color: blue; background: white;',
@@ -37,41 +25,19 @@ const getTourneyProvider = async (options) => {
 
 class NakamaTourneyProvider {
 
+    authProvider = null;
     client = null;
     session = null;
     
-    constructor(client) {
-        this.client = client;
+    constructor(auth_provider) {
+        this.authProvider = auth_provider;
     }
 
     refreshSession = async () => {
-        if (this.session == null)
-        {
-            this.session = await this.client.apiClient.authenticateCustom({
-                id: TEST_ID,
-                create: true
-            }); 
-        }
-
-        // if session has expired
-        else if ( (this.session.expires_at * 1000) < Date.now())
-        {
-            // recreate client
-            this.client = new nakamajs.Client(
-                this.client.serverkey,
-                this.client.host,
-                this.client.port
-            )
-
-            this.session = await this.client.apiClient.authenticateCustom({
-                id: TEST_ID,
-                create: true
-            }); 
-
-        }
-
+        this.authProvider.refreshSession();
+        this.client = this.authProvider.client;
+        this.session = this.authProvider.session;
     }
-
 
     getTourney = async (options) => {
 

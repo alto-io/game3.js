@@ -3,31 +3,29 @@ import { readable, writable, get } from 'svelte/store';
 import { getTourneyStore } from './tourney';
 import { getAuthStore } from './auth';
 
-export const DEFAULT_CONFIG = {
-    tourney_server: {
-        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
-        url: "localhost",
-        port: "7350",
-        key: "defaultkey"
-    },
-    auth_server: {
-        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
-        url: "localhost",
-        port: "7350",
-        key: "defaultkey"
-    }
-}
-
 export const username = writable("");
 export const password = writable("");
 export const loginState = writable(CONSTANTS.LOGIN_STATES.LOGGED_OUT);
+export const passedSessionToken = writable(null);
 
 export const apiKey = writable("");
-export const config = writable(DEFAULT_CONFIG);
-export const url = readable(window.location.href);
+export const url = readable(document.referrer);
 
-export const tourneyStore = getTourneyStore(DEFAULT_CONFIG.tourney_server);
-export const authStore = getAuthStore(DEFAULT_CONFIG.auth_server);
+export const onOpArcade = writable(false);
+export const isProd = writable(false);
+
+export const tourneyStore = getTourneyStore();
+export const authStore = getAuthStore();
+
+export async function useServers(options) {    
+    let auth_provider = await get(authStore).useServer(options.auth_server);
+    let tourney_provider = await get(tourneyStore).useServer(options.tourney_server, auth_provider);
+
+    return {
+        auth_provider,
+        tourney_provider
+    }
+}
 
 export const SDK_STATES = {
     NOT_CONNECTED: "not connected",
@@ -49,6 +47,7 @@ function createSdk() {
 
     }
 }
+
 
 export const opSdk = createSdk();
 

@@ -4,8 +4,25 @@
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width,initial-scale=1'>
 
+	<!-- Configuration -->
+	<meta name="op-config"
+		content='{
+			"auth_server": {
+				"type": "nakama",
+				"url": "nakama1.outplay.games",
+				"port": 7350,
+				"key": "defaultkey"
+			},
+			"tourney_server": {
+				"type": "nakama",
+				"url": "nakama1.outplay.games",
+				"port": 7350,
+				"key": "defaultkey"
+			}
+		}'>
+
 	<title>OP Arcade SDK Example</title>
-	<script defer src='/dist/op.js'></script> <!-- load sdk as op -->
+	<script defer src='./lib/op.js'></script> <!-- load sdk as op -->
 
 	<!-- tailwind css -->
 	<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
@@ -139,6 +156,19 @@
 			text: await op.attemptTourney(options)
 		}).showToast();
 	}
+
+	function getSessionToken() {
+
+		let session = op.getSessionToken();
+
+		let text = (session == null) ? "no session" : "token: " + session.token.substr(0,12) + "...";
+
+		Toastify({
+			text
+		}).showToast();
+	}
+
+
 </script>
 
 <style>
@@ -147,7 +177,7 @@
 
 <body>
 
-	<h2 class="mb-4 bg-green-600 col-span-3 h-10 text-right">Demo Test Page</h2>
+	<h2 class="mb-4 bg-green-600 col-span-3 h-10 text-right">OP Arcade Demo Game</h2>
 
 	<div class="flex flex-wrap -mx-2 mb-8">
 		<div class="w-full md:w-1/2 px-2">
@@ -203,9 +233,18 @@
 			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
 			  onclick="postScore()">ATTEMPT</button>	  
 		</div>
-
-		
 	 </div>
+
+	 <div class="w-full md:w-1/2 px-2">
+		<div class="h-12 text-sm text-grey-dark flex items-center">
+			  <button 
+			  class="m-2.5 px-10 py-1 text-sm text-purple-600 
+			  font-semibold rounded-full border border-purple-200 
+			  hover:text-white hover:bg-purple-600 hover:border-transparent 
+			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+			  onclick="getSessionToken()">SESSION</button>	  
+		</div>
+	</div>
 
 	   
 	   

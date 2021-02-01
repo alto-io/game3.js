@@ -12,28 +12,32 @@ export class Auth {
     authProvider = null;
 
     constructor(options) {
-        let serverType = options.type;
+      if (options != null)
+        this.useServer(options);
+    }
 
-        switch (serverType) {
-            case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
+    useServer = async (options) => {
+      let serverType = options.type;
 
-                getAuthProvider(options).then(
-                    authProvider => {
-                      if (authProvider != null)
-                      {
-                        this.authProvider = authProvider;
-                        this.sdkState = CONSTANTS.SDK_STATES.READY;
-                      }
-                    }
-                  );           
-          
-                break;
-          
-                default:
-                  console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.AUTH_SERVER_TYPES));
-                break;
-        }
+      switch (serverType) {
+          case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
 
+              let authProvider = await getAuthProvider(options);
+
+              if (authProvider != null)
+                  {
+                    this.authProvider = authProvider;
+                    this.sdkState = CONSTANTS.SDK_STATES.READY;
+                  }
+        
+              break;
+        
+              default:
+                console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.AUTH_SERVER_TYPES));
+              break;
+      }
+      
+      return this.authProvider;
     }
 
 
@@ -58,6 +62,20 @@ export class Auth {
         this.authProvider.logout();
         this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_OUT;
 
+        return this.loginState;
+      }
+
+      getSessionToken = () => {
+        return this.authProvider.getSessionToken();
+      }
+
+      saveSessionToken = (options) => {
+        if (options != null)
+        {
+          this.authProvider.saveSessionToken(options);
+          this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_IN;
+        }
+        
         return this.loginState;
       }
     

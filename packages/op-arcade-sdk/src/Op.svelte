@@ -3,22 +3,106 @@
 -->
 
 <script>
+
+export const OP_ARCADE_URL_DEV = "http://localhost:3000/"
+export const OP_ARCADE_URL_PROD = "http://op-arcade-dev.herokuapp.com/"
+
+export const DEFAULT_CONFIG = {
+    tourney_server: {
+        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+        url: "localhost",
+        port: "7350",
+        key: "defaultkey"
+    },
+    auth_server: {
+        type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
+        url: "localhost",
+        port: "7350",
+        key: "defaultkey"
+    }
+}
+
+export let config;
+export const configStore = writable(config);
+
 import CONSTANTS from './constants.js'
+import { writable, get } from 'svelte/store';
 
 import TailwindCss from './TailwindCss.svelte'
 import SdkDrawer from './components/SdkDrawer.svelte'
 import Content from './components/Content.svelte';
 import Modal from './components/Modal.svelte';
 
-
-import { config, tourneyStore, authStore, url } from './stores.js'
+import { tourneyStore, 
+        loginState, 
+        authStore, 
+        url, 
+        onOpArcade, 
+        isProd,
+        passedSessionToken, 
+        useServers } from './stores.js'
 
  function props() {
   return {
     url: $url,
-    config: $config
+    config
   }
 }
+
+async function initialize() {
+  let serverConfig = get(configStore);
+
+  if (serverConfig == null)
+  {
+    console.log('%c%s',
+        'color: blue; background: white;',
+        "-- Using default localhost config --"
+        )
+    serverConfig = DEFAULT_CONFIG;
+  }
+
+  // check if we're on OP Arcade
+  onOpArcade.set($url == OP_ARCADE_URL_DEV || $url == OP_ARCADE_URL_PROD);
+  isProd.set($url == OP_ARCADE_URL_PROD);
+
+  if (get(isProd))
+  {
+    console.log('%c%s',
+        'color: orange; background: white;',
+        "-- Welcome to OP Arcade --"
+        )
+  }
+  else {
+    console.log('%c%s',
+        'color: orange; background: white;',
+        "-- development mode --"
+        )
+  }
+
+  useServers(serverConfig).then(
+    (result) => {
+      if ($onOpArcade)
+      {
+        $loginState = saveSessionToken($passedSessionToken);
+      }
+    }
+  );
+}
+
+// save session token
+window.onmessage = function(e){
+  try {
+    let session = JSON.parse(e.data);
+    passedSessionToken.set(session);
+  } catch (e) {}
+};
+
+function getSessionFromOpArcade()
+{
+  window.top.postMessage('getSession', '*')
+}
+
+
 
 async function getTourney(options) {
 
@@ -48,6 +132,14 @@ async function joinTourney(options) {
   return result;
 }
 
+function getSessionToken() {
+  let session = $authStore.getSessionToken();
+  return session;
+}
+
+function saveSessionToken(options) {
+  return $authStore.saveSessionToken(options);
+}
 
 export {
   CONSTANTS,
@@ -56,7 +148,10 @@ export {
   loginPrompt,
   attemptTourney,
   postScore,
-  joinTourney
+  joinTourney,
+  getSessionToken,
+  useServers,
+  initialize
 }
 
 </script>
