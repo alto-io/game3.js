@@ -18,9 +18,12 @@ export const tourneyStore = getTourneyStore();
 export const authStore = getAuthStore();
 
 export async function useServers(options) {    
+    let auth_provider = await get(authStore).useServer(options.auth_server);
+    let tourney_provider = await get(tourneyStore).useServer(options.tourney_server, auth_provider);
+
     return {
-        auth_provider:  await get(authStore).useServer(options.auth_server),
-        tourney_provider: await get(tourneyStore).useServer(options.tourney_server)
+        auth_provider,
+        tourney_provider
     }
 }
 

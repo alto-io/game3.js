@@ -40,12 +40,15 @@ class NakamaAuthProvider {
 
     client = null;
     session = null;
+    loginObject = null;
     
     constructor(client) {
         this.client = client;
     }
 
     login = async (loginObject) => {
+
+        this.loginObject = loginObject;
 
         try {
             this.session = await this.client.apiClient.authenticateEmail(
@@ -67,34 +70,34 @@ class NakamaAuthProvider {
 
     logout = () => {
         this.session = null;
+        this.loginObject = null;
     }
 
     refreshSession = async () => {
-        if (this.session == null)
+        if (this.loginObject != null)
         {
-            this.session = await this.client.apiClient.authenticateCustom({
-                id: TEST_ID,
-                create: true
-            }); 
+            if (this.session == null)
+            {   
+                await this.login(this.loginObject);
+            }
+
+            // if session has expired
+            else if ( (this.session.expires_at * 1000) < Date.now())
+            {
+                // recreate client
+                this.client = new nakamajs.Client(
+                    this.client.serverkey,
+                    this.client.host,
+                    this.client.port
+                )
+
+                await this.login(this.loginObject);
+            }
         }
 
-        // if session has expired
-        else if ( (this.session.expires_at * 1000) < Date.now())
-        {
-            // recreate client
-            this.client = new nakamajs.Client(
-                this.client.serverkey,
-                this.client.host,
-                this.client.port
-            )
-
-            this.session = await this.client.apiClient.authenticateCustom({
-                id: TEST_ID,
-                create: true
-            }); 
-
+        else {
+            console.error("previous login not detected -- unable to refresh session")
         }
-
     }
 
     getSessionToken = () => {

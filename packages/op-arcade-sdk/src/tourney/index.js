@@ -15,20 +15,32 @@ export class Tourney {
         this.useServer(options)
     }
 
-    useServer = async (options) => {
+    useServer = async (options, auth_provider = null) => {
       let serverType = options.type;
 
       switch (serverType) {
           case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
 
-              let tourneyProvider = await getTourneyProvider(options);
-              
-              if (tourneyProvider != null)
-                {
-                  this.tourneyProvider = tourneyProvider;
-                  this.sdkState = CONSTANTS.SDK_STATES.READY;
+              // nakama requires the authProvider
+              if (auth_provider == null)
+              {
+                console.error("no auth provider given. Nakama requires an auth provider.");
+              }
+
+              else {
+
+                let tourneyProvider = await getTourneyProvider(options, auth_provider);
+                
+                if (tourneyProvider != null) {
+                    this.tourneyProvider = tourneyProvider;
+                    this.sdkState = CONSTANTS.SDK_STATES.READY;
+                  }
+                else {
+                    console.error("unable to initialize nakama tourney provider.");
                 }
-        
+
+              }
+              
               break;
         
               default:
