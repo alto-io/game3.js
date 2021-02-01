@@ -7,6 +7,9 @@
 export const OP_ARCADE_URL_DEV = "http://localhost:3000/"
 export const OP_ARCADE_URL_PROD = "http://op-arcade-dev.herokuapp.com/"
 
+export const OP_ARCADE_URL_DEV_ORIGIN = "http://localhost:3000"
+export const OP_ARCADE_URL_PROD_ORIGIN = "http://op-arcade-dev.herokuapp.com"
+
 export const DEFAULT_CONFIG = {
     tourney_server: {
         type: CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA,
@@ -90,12 +93,22 @@ async function initialize() {
 }
 
 // save session token
-window.onmessage = function(e){
-  try {
-    let session = JSON.parse(e.data);
-    passedSessionToken.set(session);
-  } catch (e) {}
-};
+window.addEventListener("message", (e) => {
+  if (e.origin == OP_ARCADE_URL_DEV_ORIGIN ||
+      e.origin == OP_ARCADE_URL_PROD_ORIGIN)
+    {
+      try {
+      let session = JSON.parse(e.data);
+      passedSessionToken.set(session);
+
+      // possible timing issue with useServers. need to find a way to sync
+      $loginState = saveSessionToken($passedSessionToken);
+    } catch (e) {
+      console.log(e)
+    }
+      
+    }
+}, false);
 
 function getSessionFromOpArcade()
 {
