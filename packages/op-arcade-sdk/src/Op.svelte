@@ -56,10 +56,10 @@ async function initialize() {
   // check if we're on OP Arcade
   onOpArcade.set($url === OP_ARCADE_URL);
 
-  // if (get(onOpArcade))
-  // {
-  //   getSessionFromOpArcade();
-  // }
+  if (get(onOpArcade))
+  {
+    getSessionFromOpArcade();
+  }
 
 
   useServers(serverConfig);
@@ -68,8 +68,10 @@ async function initialize() {
 // save session token
 window.onmessage = function(e){
   try {
-    let session = JSON.parse(e.data);
-    console.log(session)
+    if (e.origin.includes("http://localhost:3000")) {
+      let session = JSON.parse(e.data);
+      console.log("session is", session)
+    }
   } catch (e) {}
 };
 
@@ -77,8 +79,6 @@ function getSessionFromOpArcade()
 {
   window.top.postMessage('getSession', '*')
 }
-
-
 
 async function getTourney(options) {
 
