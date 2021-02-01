@@ -7,6 +7,7 @@ export const username = writable("");
 export const password = writable("");
 export const loginState = writable(CONSTANTS.LOGIN_STATES.LOGGED_OUT);
 export const passedSessionToken = writable(null);
+export const tournamentId = writable(null);
 
 export const apiKey = writable("");
 export const url = readable(document.referrer);

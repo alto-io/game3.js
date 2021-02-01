@@ -43,6 +43,7 @@ import { tourneyStore,
         onOpArcade, 
         isProd,
         passedSessionToken, 
+        tournamentId,
         useServers } from './stores.js'
 
  function props() {
@@ -87,6 +88,7 @@ async function initialize() {
       if ($onOpArcade)
       {
         $loginState = saveSessionToken($passedSessionToken);
+        $tournamentId = saveTournamentId($passedSessionToken);
       }
     }
   );
@@ -103,6 +105,7 @@ window.addEventListener("message", (e) => {
 
       // possible timing issue with useServers. need to find a way to sync
       $loginState = saveSessionToken($passedSessionToken);
+      $tournamentId = saveTournamentId($passedSessionToken);
     } catch (e) {
       console.log(e)
     }
@@ -154,6 +157,15 @@ function saveSessionToken(options) {
   return $authStore.saveSessionToken(options);
 }
 
+function saveTournamentId(options) {
+  return $tourneyStore.saveTournamentId(options);
+}
+
+function getTournamentId() {
+  let tournamentId = $tourneyStore.getTournamentId();
+  return tournamentId;
+}
+
 export {
   CONSTANTS,
   props,
@@ -163,6 +175,7 @@ export {
   postScore,
   joinTourney,
   getSessionToken,
+  getTournamentId,
   useServers,
   initialize
 }

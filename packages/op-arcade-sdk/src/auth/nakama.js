@@ -101,6 +101,7 @@ class NakamaAuthProvider {
     }
 
     getSessionToken = () => {
+        console.log(this.session);
         return this.session;
     }
 

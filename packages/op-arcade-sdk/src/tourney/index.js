@@ -73,7 +73,17 @@ export class Tourney {
       return result
     }
 
-    
+    saveTournamentId = (options) => {
+      if (options != null)
+      {
+        this.tourneyProvider.saveTournamentId(options);
+      }
+    }
+
+    getTournamentId = () => {
+      return this.tourneyProvider.getTournamentId();
+    }
+
 }
 
 export function getTourneyStore(options) {
