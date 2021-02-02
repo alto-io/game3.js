@@ -161,8 +161,8 @@
 
 	function getSessionToken() {
 
-		let session = op.getSessionToken();
-
+    let session = op.getSessionToken();
+    
 		let text = (session == null) ? "no session" : "token: " + session.token.substr(0,12) + "...";
 
 		Toastify({
@@ -170,13 +170,6 @@
 		}).showToast();
   }
   
-  function urlGameDetails() {
-    let game_url = document.getElementById("input-game-url").value;
-
-    let options = {
-      game_url
-    }
-
   function getTournamentId() {
     let tournamentId = op.getTournamentId();
 
@@ -186,6 +179,7 @@
       text
     }).showToast();
   }
+
 </script>
 
 <style>
