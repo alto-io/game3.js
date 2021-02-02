@@ -6,18 +6,26 @@ import { getAuthStore } from './auth';
 export const username = writable("");
 export const password = writable("");
 export const loginState = writable(CONSTANTS.LOGIN_STATES.LOGGED_OUT);
+export const passedSessionToken = writable(null);
+export const tournamentId = writable(null);
 
 export const apiKey = writable("");
 export const url = readable(document.referrer);
 
 export const onOpArcade = writable(false);
+export const isProd = writable(false);
 
 export const tourneyStore = getTourneyStore();
 export const authStore = getAuthStore();
 
-export function useServers(options) {    
-    get(authStore).useServer(options.auth_server);
-    get(tourneyStore).useServer(options.tourney_server);
+export async function useServers(options) {    
+    let auth_provider = await get(authStore).useServer(options.auth_server);
+    let tourney_provider = await get(tourneyStore).useServer(options.tourney_server, auth_provider);
+
+    return {
+        auth_provider,
+        tourney_provider
+    }
 }
 
 export const SDK_STATES = {

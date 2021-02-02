@@ -3571,21 +3571,19 @@
             this.useServer(options);
         }
 
-        useServer = (options) => {
+        useServer = async (options) => {
           let serverType = options.type;
 
           switch (serverType) {
               case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
 
-                  getTourneyProvider(options).then(
-                      tourneyProvider => {
-                        if (tourneyProvider != null)
-                        {
-                          this.tourneyProvider = tourneyProvider;
-                          this.sdkState = CONSTANTS.SDK_STATES.READY;
-                        }
-                      }
-                    );           
+                  let tourneyProvider = await getTourneyProvider(options);
+                  
+                  if (tourneyProvider != null)
+                    {
+                      this.tourneyProvider = tourneyProvider;
+                      this.sdkState = CONSTANTS.SDK_STATES.READY;
+                    }
             
                   break;
             
@@ -3593,6 +3591,8 @@
                     console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
                   break;
           }
+
+          return this.tourneyProvider;
         }
 
         getTourney = async (tournament_id) => {
@@ -3723,6 +3723,10 @@
         getSessionToken = () => {
             return this.session;
         }
+
+        saveSessionToken = (options) => {
+            this.session = options;
+        }
      
     }
 
@@ -3739,28 +3743,28 @@
             this.useServer(options);
         }
 
-        useServer = (options) => {
+        useServer = async (options) => {
           let serverType = options.type;
 
           switch (serverType) {
               case CONSTANTS.AUTH_SERVER_TYPES.NAKAMA:
 
-                  getAuthProvider(options).then(
-                      authProvider => {
-                        if (authProvider != null)
-                        {
-                          this.authProvider = authProvider;
-                          this.sdkState = CONSTANTS.SDK_STATES.READY;
-                        }
+                  let authProvider = await getAuthProvider(options);
+
+                  if (authProvider != null)
+                      {
+                        this.authProvider = authProvider;
+                        this.sdkState = CONSTANTS.SDK_STATES.READY;
                       }
-                    );           
             
                   break;
             
                   default:
                     console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.AUTH_SERVER_TYPES));
                   break;
-          }      
+          }
+          
+          return this.authProvider;
         }
 
 
@@ -3791,6 +3795,16 @@
           getSessionToken = () => {
             return this.authProvider.getSessionToken();
           }
+
+          saveSessionToken = (options) => {
+            if (options != null)
+            {
+              this.authProvider.saveSessionToken(options);
+              this.loginState = CONSTANTS.LOGIN_STATES.LOGGED_IN;
+            }
+            
+            return this.loginState;
+          }
         
     }
 
@@ -3801,16 +3815,22 @@
     const username = writable("");
     const password = writable("");
     const loginState = writable(CONSTANTS.LOGIN_STATES.LOGGED_OUT);
+    const passedSessionToken = writable(null);
 
     const apiKey = writable("");
-    const url = readable(window.location.href);
+    const url = readable(document.referrer);
+
+    const onOpArcade = writable(false);
+    const isProd = writable(false);
 
     const tourneyStore = getTourneyStore();
     const authStore = getAuthStore();
 
-    function useServers(options) {    
-        get_store_value(authStore).useServer(options.auth_server);
-        get_store_value(tourneyStore).useServer(options.tourney_server);
+    async function useServers(options) {    
+        return {
+            auth_provider:  await get_store_value(authStore).useServer(options.auth_server),
+            tourney_provider: await get_store_value(tourneyStore).useServer(options.tourney_server)
+        }
     }
 
     const SDK_STATES = {
@@ -4151,12 +4171,12 @@
 
     function add_css$1() {
     	var style = element("style");
-    	style.id = "svelte-155o5zv-style";
-    	style.textContent = ".logged-in.svelte-155o5zv{background-color:#00c3ff}";
+    	style.id = "svelte-x2vv6l-style";
+    	style.textContent = ".logged-in.svelte-x2vv6l{background-color:#00c3ff}.on-op-arcade.svelte-x2vv6l{visibility:visible;width:3.5rem;height:3.5rem}";
     	append(document.head, style);
     }
 
-    // (35:0) {#if visible}
+    // (43:0) {#if visible}
     function create_if_block$1(ctx) {
     	let div3;
     	let div0;
@@ -4192,7 +4212,7 @@
     	let mounted;
     	let dispose;
     	loginprompt = new LoginPrompt({});
-    	let if_block = /*$opSdk*/ ctx[3].state == SDK_STATES.NOT_CONNECTED && create_if_block_1$1(ctx);
+    	let if_block = /*$opSdk*/ ctx[4].state == SDK_STATES.NOT_CONNECTED && create_if_block_1$1(ctx);
 
     	return {
     		c() {
@@ -4241,7 +4261,7 @@
     			span16.innerHTML = `<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="w-6 h-6"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
     			t18 = space();
     			span17 = element("span");
-    			t19 = text(/*$url*/ ctx[2]);
+    			t19 = text(/*$url*/ ctx[3]);
     			t20 = space();
     			div1 = element("div");
     			if (if_block) if_block.c();
@@ -4294,14 +4314,14 @@
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(div0, "click", /*click_handler_1*/ ctx[7]);
+    				dispose = listen(div0, "click", /*click_handler_1*/ ctx[8]);
     				mounted = true;
     			}
     		},
     		p(ctx, dirty) {
-    			if (!current || dirty & /*$url*/ 4) set_data(t19, /*$url*/ ctx[2]);
+    			if (!current || dirty & /*$url*/ 8) set_data(t19, /*$url*/ ctx[3]);
 
-    			if (/*$opSdk*/ ctx[3].state == SDK_STATES.NOT_CONNECTED) {
+    			if (/*$opSdk*/ ctx[4].state == SDK_STATES.NOT_CONNECTED) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -4351,7 +4371,7 @@
     	};
     }
 
-    // (170:8) {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}
+    // (178:8) {#if $opSdk.state == SDK_STATES.NOT_CONNECTED}
     function create_if_block_1$1(ctx) {
     	let input;
     	let t;
@@ -4371,13 +4391,13 @@
     		},
     		m(target, anchor) {
     			insert(target, input, anchor);
-    			set_input_value(input, /*$apiKey*/ ctx[4]);
+    			set_input_value(input, /*$apiKey*/ ctx[5]);
     			insert(target, t, anchor);
     			insert(target, button, anchor);
 
     			if (!mounted) {
     				dispose = [
-    					listen(input, "input", /*input_input_handler*/ ctx[8]),
+    					listen(input, "input", /*input_input_handler*/ ctx[9]),
     					listen(button, "click", opSdk.connect)
     				];
 
@@ -4385,8 +4405,8 @@
     			}
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*$apiKey*/ 16 && input.value !== /*$apiKey*/ ctx[4]) {
-    				set_input_value(input, /*$apiKey*/ ctx[4]);
+    			if (dirty & /*$apiKey*/ 32 && input.value !== /*$apiKey*/ ctx[5]) {
+    				set_input_value(input, /*$apiKey*/ ctx[5]);
     			}
     		},
     		d(detaching) {
@@ -4400,10 +4420,12 @@
     }
 
     function create_fragment$1(ctx) {
+    	let div;
+    	let t0;
     	let button;
     	let img$1;
     	let img_src_value;
-    	let t;
+    	let t1;
     	let if_block_anchor;
     	let current;
     	let mounted;
@@ -4412,37 +4434,47 @@
 
     	return {
     		c() {
+    			div = element("div");
+    			t0 = space();
     			button = element("button");
     			img$1 = element("img");
-    			t = space();
+    			t1 = space();
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
+    			attr(div, "class", "invisible m-3 fixed -top-0.5 -left-1 inline-flex items-center justify-center bg-yellow-500 w-12 h-12 rounded-full transition-transform svelte-x2vv6l");
+    			toggle_class(div, "on-op-arcade", /*$onOpArcade*/ ctx[1]);
     			attr(img$1, "class", "w-10 h-10 fill-current");
     			attr(img$1, "alt", "g3js logo");
     			if (img$1.src !== (img_src_value = img)) attr(img$1, "src", img_src_value);
-    			attr(button, "class", "m-3 fixed top-0 left-0 inline-flex items-center justify-center w-12 h-12 mr-2 transition-colors duration-300 bg-indigo-700 rounded-full hover:bg-indigo-900 svelte-155o5zv");
-    			toggle_class(button, "logged-in", /*$loginState*/ ctx[1] == CONSTANTS.LOGIN_STATES.LOGGED_IN);
+    			attr(button, "class", "m-3 fixed top-0 left-0 inline-flex items-center justify-center w-12 h-12 mr-2 transition-colors duration-300 bg-indigo-700 rounded-full hover:bg-indigo-900 svelte-x2vv6l");
+    			toggle_class(button, "logged-in", /*$loginState*/ ctx[2] == CONSTANTS.LOGIN_STATES.LOGGED_IN);
     		},
     		m(target, anchor) {
+    			insert(target, div, anchor);
+    			insert(target, t0, anchor);
     			insert(target, button, anchor);
     			append(button, img$1);
-    			insert(target, t, anchor);
+    			insert(target, t1, anchor);
     			if (if_block) if_block.m(target, anchor);
     			insert(target, if_block_anchor, anchor);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen(window, "keydown", /*handleKeydown*/ ctx[5]),
-    					listen(button, "click", /*click_handler*/ ctx[6])
+    					listen(window, "keydown", /*handleKeydown*/ ctx[6]),
+    					listen(button, "click", /*click_handler*/ ctx[7])
     				];
 
     				mounted = true;
     			}
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*$loginState, CONSTANTS*/ 2) {
-    				toggle_class(button, "logged-in", /*$loginState*/ ctx[1] == CONSTANTS.LOGIN_STATES.LOGGED_IN);
+    			if (dirty & /*$onOpArcade*/ 2) {
+    				toggle_class(div, "on-op-arcade", /*$onOpArcade*/ ctx[1]);
+    			}
+
+    			if (dirty & /*$loginState, CONSTANTS*/ 4) {
+    				toggle_class(button, "logged-in", /*$loginState*/ ctx[2] == CONSTANTS.LOGIN_STATES.LOGGED_IN);
     			}
 
     			if (/*visible*/ ctx[0]) {
@@ -4478,8 +4510,10 @@
     			current = false;
     		},
     		d(detaching) {
+    			if (detaching) detach(div);
+    			if (detaching) detach(t0);
     			if (detaching) detach(button);
-    			if (detaching) detach(t);
+    			if (detaching) detach(t1);
     			if (if_block) if_block.d(detaching);
     			if (detaching) detach(if_block_anchor);
     			mounted = false;
@@ -4489,14 +4523,16 @@
     }
 
     function instance$1($$self, $$props, $$invalidate) {
+    	let $onOpArcade;
     	let $loginState;
     	let $url;
     	let $opSdk;
     	let $apiKey;
-    	component_subscribe($$self, loginState, $$value => $$invalidate(1, $loginState = $$value));
-    	component_subscribe($$self, url, $$value => $$invalidate(2, $url = $$value));
-    	component_subscribe($$self, opSdk, $$value => $$invalidate(3, $opSdk = $$value));
-    	component_subscribe($$self, apiKey, $$value => $$invalidate(4, $apiKey = $$value));
+    	component_subscribe($$self, onOpArcade, $$value => $$invalidate(1, $onOpArcade = $$value));
+    	component_subscribe($$self, loginState, $$value => $$invalidate(2, $loginState = $$value));
+    	component_subscribe($$self, url, $$value => $$invalidate(3, $url = $$value));
+    	component_subscribe($$self, opSdk, $$value => $$invalidate(4, $opSdk = $$value));
+    	component_subscribe($$self, apiKey, $$value => $$invalidate(5, $apiKey = $$value));
     	let visible = false;
 
     	function handleKeydown(event) {
@@ -4514,6 +4550,7 @@
 
     	return [
     		visible,
+    		$onOpArcade,
     		$loginState,
     		$url,
     		$opSdk,
@@ -4528,7 +4565,7 @@
     class SdkDrawer extends SvelteComponent {
     	constructor(options) {
     		super();
-    		if (!document.getElementById("svelte-155o5zv-style")) add_css$1();
+    		if (!document.getElementById("svelte-x2vv6l-style")) add_css$1();
     		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
     	}
     }
@@ -5265,7 +5302,7 @@
     	let current;
 
     	function content_showPopup_binding(value) {
-    		/*content_showPopup_binding*/ ctx[14].call(null, value);
+    		/*content_showPopup_binding*/ ctx[16].call(null, value);
     	}
 
     	let content_props = {};
@@ -5347,7 +5384,7 @@
     		p(ctx, [dirty]) {
     			const modal_changes = {};
 
-    			if (dirty & /*$$scope, showPopup*/ 262145) {
+    			if (dirty & /*$$scope, showPopup*/ 16777217) {
     				modal_changes.$$scope = { dirty, ctx };
     			}
 
@@ -5378,11 +5415,19 @@
 
     function instance$4($$self, $$props, $$invalidate) {
     	let $url;
+    	let $onOpArcade;
+    	let $loginState;
+    	let $passedSessionToken;
     	let $tourneyStore;
     	let $authStore;
-    	component_subscribe($$self, url, $$value => $$invalidate(15, $url = $$value));
-    	component_subscribe($$self, tourneyStore, $$value => $$invalidate(16, $tourneyStore = $$value));
-    	component_subscribe($$self, authStore, $$value => $$invalidate(17, $authStore = $$value));
+    	component_subscribe($$self, url, $$value => $$invalidate(17, $url = $$value));
+    	component_subscribe($$self, onOpArcade, $$value => $$invalidate(18, $onOpArcade = $$value));
+    	component_subscribe($$self, loginState, $$value => $$invalidate(19, $loginState = $$value));
+    	component_subscribe($$self, passedSessionToken, $$value => $$invalidate(20, $passedSessionToken = $$value));
+    	component_subscribe($$self, tourneyStore, $$value => $$invalidate(21, $tourneyStore = $$value));
+    	component_subscribe($$self, authStore, $$value => $$invalidate(22, $authStore = $$value));
+    	const OP_ARCADE_URL_DEV = "http://localhost:3000/";
+    	const OP_ARCADE_URL_PROD = "http://op-arcade-dev.herokuapp.com/";
 
     	const DEFAULT_CONFIG = {
     		tourney_server: {
@@ -5406,11 +5451,41 @@
     		return { url: $url, config };
     	}
 
-    	async function connect() {
+    	async function initialize() {
     		let serverConfig = get_store_value(configStore);
-    		if (serverConfig == null) serverConfig = DEFAULT_CONFIG;
-    		useServers(serverConfig);
+
+    		if (serverConfig == null) {
+    			console.log("%c%s", "color: blue; background: white;", "-- Using default localhost config --");
+    			serverConfig = DEFAULT_CONFIG;
+    		}
+
+    		// check if we're on OP Arcade
+    		onOpArcade.set($url == OP_ARCADE_URL_DEV || $url == OP_ARCADE_URL_PROD);
+
+    		isProd.set($url == OP_ARCADE_URL_PROD);
+
+    		if (get_store_value(isProd)) {
+    			console.log("%c%s", "color: orange; background: white;", "-- Welcome to OP Arcade --");
+    		} else {
+    			console.log("%c%s", "color: orange; background: white;", "-- development mode --");
+    		}
+
+    		useServers(serverConfig).then(result => {
+    			if ($onOpArcade) {
+    				set_store_value(loginState, $loginState = saveSessionToken($passedSessionToken), $loginState);
+    			}
+    		});
     	}
+
+    	// save session token
+    	window.onmessage = function (e) {
+    		try {
+    			let session = JSON.parse(e.data);
+    			passedSessionToken.set(session);
+    		} catch(e) {
+    			
+    		}
+    	};
 
     	async function getTourney(options) {
     		let result = await $tourneyStore.getTourney(options);
@@ -5443,24 +5518,30 @@
     		return session;
     	}
 
+    	function saveSessionToken(options) {
+    		return $authStore.saveSessionToken(options);
+    	}
+
     	function content_showPopup_binding(value) {
     		showPopup = value;
     		$$invalidate(0, showPopup);
     	}
 
     	$$self.$$set = $$props => {
-    		if ("config" in $$props) $$invalidate(2, config = $$props.config);
+    		if ("config" in $$props) $$invalidate(4, config = $$props.config);
     	};
 
     	return [
     		showPopup,
+    		OP_ARCADE_URL_DEV,
+    		OP_ARCADE_URL_PROD,
     		DEFAULT_CONFIG,
     		config,
     		configStore,
     		CONSTANTS,
     		useServers,
     		props,
-    		connect,
+    		initialize,
     		getTourney,
     		loginPrompt,
     		attemptTourney,
@@ -5476,28 +5557,38 @@
     		super();
 
     		init(this, options, instance$4, create_fragment$3, safe_not_equal, {
-    			DEFAULT_CONFIG: 1,
-    			config: 2,
-    			configStore: 3,
-    			CONSTANTS: 4,
-    			useServers: 5,
-    			props: 6,
-    			connect: 7,
-    			getTourney: 8,
-    			loginPrompt: 9,
-    			attemptTourney: 10,
-    			postScore: 11,
-    			joinTourney: 12,
-    			getSessionToken: 13
+    			OP_ARCADE_URL_DEV: 1,
+    			OP_ARCADE_URL_PROD: 2,
+    			DEFAULT_CONFIG: 3,
+    			config: 4,
+    			configStore: 5,
+    			CONSTANTS: 6,
+    			useServers: 7,
+    			props: 8,
+    			initialize: 9,
+    			getTourney: 10,
+    			loginPrompt: 11,
+    			attemptTourney: 12,
+    			postScore: 13,
+    			joinTourney: 14,
+    			getSessionToken: 15
     		});
     	}
 
-    	get DEFAULT_CONFIG() {
+    	get OP_ARCADE_URL_DEV() {
     		return this.$$.ctx[1];
     	}
 
-    	get configStore() {
+    	get OP_ARCADE_URL_PROD() {
+    		return this.$$.ctx[2];
+    	}
+
+    	get DEFAULT_CONFIG() {
     		return this.$$.ctx[3];
+    	}
+
+    	get configStore() {
+    		return this.$$.ctx[5];
     	}
 
     	get CONSTANTS() {
@@ -5509,35 +5600,35 @@
     	}
 
     	get props() {
-    		return this.$$.ctx[6];
-    	}
-
-    	get connect() {
-    		return this.$$.ctx[7];
-    	}
-
-    	get getTourney() {
     		return this.$$.ctx[8];
     	}
 
-    	get loginPrompt() {
+    	get initialize() {
     		return this.$$.ctx[9];
     	}
 
-    	get attemptTourney() {
+    	get getTourney() {
     		return this.$$.ctx[10];
     	}
 
-    	get postScore() {
+    	get loginPrompt() {
     		return this.$$.ctx[11];
     	}
 
-    	get joinTourney() {
+    	get attemptTourney() {
     		return this.$$.ctx[12];
     	}
 
-    	get getSessionToken() {
+    	get postScore() {
     		return this.$$.ctx[13];
+    	}
+
+    	get joinTourney() {
+    		return this.$$.ctx[14];
+    	}
+
+    	get getSessionToken() {
+    		return this.$$.ctx[15];
     	}
     }
 
@@ -5561,7 +5652,7 @@
     	}
     });
 
-    op.connect();
+    op.initialize();
 
     // attach to window
     window.op = op;

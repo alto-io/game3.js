@@ -4,7 +4,11 @@
 
 <script>
 
-export const OP_ARCADE_URL = "http://localhost:3000/"
+export const OP_ARCADE_URL_DEV = "http://localhost:3000/"
+export const OP_ARCADE_URL_PROD = "http://op-arcade-dev.herokuapp.com/"
+
+export const OP_ARCADE_URL_DEV_ORIGIN = "http://localhost:3000"
+export const OP_ARCADE_URL_PROD_ORIGIN = "http://op-arcade-dev.herokuapp.com"
 
 export const DEFAULT_CONFIG = {
     tourney_server: {
@@ -32,7 +36,15 @@ import SdkDrawer from './components/SdkDrawer.svelte'
 import Content from './components/Content.svelte';
 import Modal from './components/Modal.svelte';
 
-import { tourneyStore, authStore, url, onOpArcade, useServers, set } from './stores.js'
+import { tourneyStore, 
+        loginState, 
+        authStore, 
+        url, 
+        onOpArcade, 
+        isProd,
+        passedSessionToken, 
+        tournamentId,
+        useServers } from './stores.js'
 
  function props() {
   return {
@@ -54,26 +66,52 @@ async function initialize() {
   }
 
   // check if we're on OP Arcade
-  onOpArcade.set($url === OP_ARCADE_URL);
+  onOpArcade.set($url == OP_ARCADE_URL_DEV || $url == OP_ARCADE_URL_PROD);
+  isProd.set($url == OP_ARCADE_URL_PROD);
 
-  if (get(onOpArcade))
+  if (get(isProd))
   {
-    getSessionFromOpArcade();
+    console.log('%c%s',
+        'color: orange; background: white;',
+        "-- Welcome to OP Arcade --"
+        )
+  }
+  else {
+    console.log('%c%s',
+        'color: orange; background: white;',
+        "-- development mode --"
+        )
   }
 
-
-  useServers(serverConfig);
+  useServers(serverConfig).then(
+    (result) => {
+      if ($onOpArcade)
+      {
+        $loginState = saveSessionToken($passedSessionToken);
+        $tournamentId = saveTournamentId($passedSessionToken);
+      }
+    }
+  );
 }
 
 // save session token
-window.onmessage = function(e){
-  try {
-    if (e.origin.includes("http://localhost:3000")) {
+window.addEventListener("message", (e) => {
+  if (e.origin == OP_ARCADE_URL_DEV_ORIGIN ||
+      e.origin == OP_ARCADE_URL_PROD_ORIGIN)
+    {
+      try {
       let session = JSON.parse(e.data);
-      console.log("session is", session)
+      passedSessionToken.set(session);
+
+      // possible timing issue with useServers. need to find a way to sync
+      $loginState = saveSessionToken($passedSessionToken);
+      $tournamentId = saveTournamentId($passedSessionToken);
+    } catch (e) {
+      console.log(e)
     }
-  } catch (e) {}
-};
+      
+    }
+}, false);
 
 function getSessionFromOpArcade()
 {
@@ -113,9 +151,17 @@ function getSessionToken() {
   return session;
 }
 
-async function urlGameDetails(options) {
-  let result = await $tourneyStore.urlGameDetails(options);
-  return result;
+function saveSessionToken(options) {
+  return $authStore.saveSessionToken(options);
+}
+
+function saveTournamentId(options) {
+  return $tourneyStore.saveTournamentId(options);
+}
+
+function getTournamentId() {
+  let tournamentId = $tourneyStore.getTournamentId();
+  return tournamentId;
 }
 
 export {
@@ -127,7 +173,7 @@ export {
   postScore,
   joinTourney,
   getSessionToken,
-  urlGameDetails,
+  getTournamentId,
   useServers,
   initialize
 }

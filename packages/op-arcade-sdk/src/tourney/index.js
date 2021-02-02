@@ -15,28 +15,40 @@ export class Tourney {
         this.useServer(options)
     }
 
-    useServer = (options) => {
+    useServer = async (options, auth_provider = null) => {
       let serverType = options.type;
 
       switch (serverType) {
           case CONSTANTS.TOURNEY_SERVER_TYPES.NAKAMA:
 
-              getTourneyProvider(options).then(
-                  tourneyProvider => {
-                    if (tourneyProvider != null)
-                    {
-                      this.tourneyProvider = tourneyProvider;
-                      this.sdkState = CONSTANTS.SDK_STATES.READY;
-                    }
+              // nakama requires the authProvider
+              if (auth_provider == null)
+              {
+                console.error("no auth provider given. Nakama requires an auth provider.");
+              }
+
+              else {
+
+                let tourneyProvider = await getTourneyProvider(options, auth_provider);
+                
+                if (tourneyProvider != null) {
+                    this.tourneyProvider = tourneyProvider;
+                    this.sdkState = CONSTANTS.SDK_STATES.READY;
                   }
-                );           
-        
+                else {
+                    console.error("unable to initialize nakama tourney provider.");
+                }
+
+              }
+              
               break;
         
               default:
                 console.error("server type not found. Must be one of : " + Object.keys(CONSTANTS.TOURNEY_SERVER_TYPES));
               break;
       }
+
+      return this.tourneyProvider;
     }
 
     getTourney = async (tournament_id) => {
@@ -61,12 +73,17 @@ export class Tourney {
       return result
     }
 
-    urlGameDetails = async (options) => {
-      console.log("options in index.js", options)
-      let result = await this.tourneyProvider.urlGameDetails(options)
-      return result
+    saveTournamentId = (options) => {
+      if (options != null)
+      {
+        this.tourneyProvider.saveTournamentId(options);
+      }
     }
-    
+
+    getTournamentId = () => {
+      return this.tourneyProvider.getTournamentId();
+    }
+
 }
 
 export function getTourneyStore(options) {

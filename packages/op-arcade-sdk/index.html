@@ -5,7 +5,8 @@
 	<meta name='viewport' content='width=device-width,initial-scale=1'>
 
 	<!-- Configuration -->
-	<!-- <meta name="op-config"
+	<!--
+	<meta name="op-config"
 		content='{
 			"auth_server": {
 				"type": "nakama",
@@ -19,7 +20,8 @@
 				"port": 7350,
 				"key": "defaultkey"
 			}
-		}'> -->
+		}'>
+	-->
 
 	<title>OP Arcade SDK Example</title>
 	<script defer src='./lib/op.js'></script> <!-- load sdk as op -->
@@ -74,7 +76,7 @@
 		let tournament_id = document.getElementById("input-tourney-id").value;
 
 		let options = {
-			tournament_id
+			tournament_id: op.getTournamentId()
 		}
 
 		op.joinTourney(options).then
@@ -105,7 +107,7 @@
 		let score = Number(document.getElementById("input-score").value);
 
 		let options = {
-			tournament_id,
+			tournament_id: op.getTournamentId(),
 			score
 		}
 
@@ -175,29 +177,14 @@
       game_url
     }
 
-    console.log("options in index.html", options)
+  function getTournamentId() {
+    let tournamentId = op.getTournamentId();
 
-    op.urlGameDetails(options).then
-    (
-			(result) => {
-				// catch error
-				if (result instanceof Response) {
-					Toastify({
-						text: "Unable to Connect:  " + result.statusText,
-						backgroundColor: "#ff4444"
-					}).showToast();
-				}
+    let text = (tournamentId == null) ? "no tourney id" : "tournamentId: " + tournamentId;
 
-				else {
-
-					console.log(result)
-
-					Toastify({
-						text: "Result Found:  " + result
-					}).showToast();
-				}
-			}
-		)
+    Toastify({
+      text
+    }).showToast();
   }
 </script>
 
@@ -274,24 +261,19 @@
 			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
 			  onclick="getSessionToken()">SESSION</button>	  
 		</div>
+  </div>
+  
+  <div class="w-full md:w-1/2 px-2">
+		<div class="h-12 text-sm text-grey-dark flex items-center">
+			  <button 
+			  class="m-2.5 px-10 py-1 text-sm text-purple-600 
+			  font-semibold rounded-full border border-purple-200 
+			  hover:text-white hover:bg-purple-600 hover:border-transparent 
+			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+			  onclick="getTournamentId()">GET ID</button>	  
+		</div>
 	</div>
 
-  <div class="h-12 text-sm text-grey-dark flex items-center">
-    <input id="input-game-url" class="py-2 px-2 bg-white text-gray-700 
-      placeholder-gray-500 shadow-md rounded-lg text-base 
-      focus:outline-none focus:ring-2 
-      focus:ring-purple-600 focus:border-transparent"
-      placeholder="game-url">			
-
-      <button 
-      class="m-2.5 px-10 py-1 text-sm text-purple-600 
-      font-semibold rounded-full border border-purple-200 
-      hover:text-white hover:bg-purple-600 hover:border-transparent 
-      focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
-      onclick="urlGameDetails()">GAME</button>	  
-  </div>
-	   
-	   
 	</div>
 
 </body>
