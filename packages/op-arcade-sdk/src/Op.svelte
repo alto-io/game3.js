@@ -5,10 +5,10 @@
 <script>
 
 export const OP_ARCADE_URL_DEV = "http://localhost:3000/"
-export const OP_ARCADE_URL_PROD = "http://op-arcade-dev.herokuapp.com/"
+export const OP_ARCADE_URL_PROD = "http://test.outplay.games/"
 
 export const OP_ARCADE_URL_DEV_ORIGIN = "http://localhost:3000"
-export const OP_ARCADE_URL_PROD_ORIGIN = "http://op-arcade-dev.herokuapp.com"
+export const OP_ARCADE_URL_PROD_ORIGIN = "http://test.outplay.games"
 
 export const DEFAULT_CONFIG = {
     tourney_server: {
