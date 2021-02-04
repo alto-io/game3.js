@@ -7,6 +7,7 @@
 export const OP_ARCADE_URL_DEV = "http://localhost:3000/"
 export const OP_ARCADE_URL_PROD = "http://test.outplay.games/"
 
+// origin expects no trailing slash
 export const OP_ARCADE_URL_DEV_ORIGIN = "http://localhost:3000"
 export const OP_ARCADE_URL_PROD_ORIGIN = "http://test.outplay.games"
 
@@ -42,6 +43,7 @@ import { tourneyStore,
         url, 
         onOpArcade, 
         isProd,
+        isTournament,
         passedSessionToken, 
         useServers } from './stores.js'
 
@@ -102,7 +104,12 @@ window.addEventListener("message", (e) => {
       passedSessionToken.set(session);
 
       // possible timing issue with useServers. need to find a way to sync
-      $loginState = saveSessionToken($passedSessionToken);
+
+      if ($passedSessionToken === null) {
+        console.log("no session token from message")
+      }
+      else
+        $loginState = saveSessionToken($passedSessionToken);
     } catch (e) {
       console.log(e)
     }
