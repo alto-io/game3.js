@@ -37,7 +37,7 @@
 	// onClick functions
 	function playerLogin() {
 		op.loginPrompt();
-	}
+  }
 
 	function getTourney() {
 
@@ -74,7 +74,7 @@
 		let tournament_id = document.getElementById("input-tourney-id").value;
 
 		let options = {
-			tournament_id
+			tournament_id: op.getTournamentId()
 		}
 
 		op.joinTourney(options).then
@@ -105,7 +105,7 @@
 		let score = Number(document.getElementById("input-score").value);
 
 		let options = {
-			tournament_id,
+			tournament_id: op.getTournamentId(),
 			score
 		}
 
@@ -159,15 +159,24 @@
 
 	function getSessionToken() {
 
-		let session = op.getSessionToken();
-
+    let session = op.getSessionToken();
+    
 		let text = (session == null) ? "no session" : "token: " + session.token.substr(0,12) + "...";
 
 		Toastify({
 			text
 		}).showToast();
-	}
+  }
+  
+  function getTournamentId() {
+    let tournamentId = op.getTournamentId();
 
+    let text = (tournamentId == null) ? "no tourney id" : "tournamentId: " + tournamentId;
+
+    Toastify({
+      text
+    }).showToast();
+  }
 
 </script>
 
@@ -244,10 +253,19 @@
 			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
 			  onclick="getSessionToken()">SESSION</button>	  
 		</div>
+  </div>
+  
+  <div class="w-full md:w-1/2 px-2">
+		<div class="h-12 text-sm text-grey-dark flex items-center">
+			  <button 
+			  class="m-2.5 px-10 py-1 text-sm text-purple-600 
+			  font-semibold rounded-full border border-purple-200 
+			  hover:text-white hover:bg-purple-600 hover:border-transparent 
+			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+			  onclick="getTournamentId()">GET ID</button>	  
+		</div>
 	</div>
 
-	   
-	   
 	</div>
 
 </body>
