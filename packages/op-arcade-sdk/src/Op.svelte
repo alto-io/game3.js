@@ -5,10 +5,11 @@
 <script>
 
 export const OP_ARCADE_URL_DEV = "http://localhost:3000/"
-export const OP_ARCADE_URL_PROD = "http://op-arcade-dev.herokuapp.com/"
+export const OP_ARCADE_URL_PROD = "http://test.outplay.games/"
 
+// origin expects no trailing slash
 export const OP_ARCADE_URL_DEV_ORIGIN = "http://localhost:3000"
-export const OP_ARCADE_URL_PROD_ORIGIN = "http://op-arcade-dev.herokuapp.com"
+export const OP_ARCADE_URL_PROD_ORIGIN = "http://test.outplay.games"
 
 export const DEFAULT_CONFIG = {
     tourney_server: {
@@ -42,6 +43,7 @@ import { tourneyStore,
         url, 
         onOpArcade, 
         isProd,
+        isTournament,
         passedSessionToken, 
         tournamentId,
         useServers } from './stores.js'
@@ -87,11 +89,25 @@ async function initialize() {
     (result) => {
       if ($onOpArcade)
       {
-        $loginState = saveSessionToken($passedSessionToken);
-        $tournamentId = saveTournamentId($passedSessionToken);
+        updateOpArcadeStores();
       }
     }
   );
+}
+
+function updateOpArcadeStores() {
+
+    // possible timing issue with useServers. need to find a way to sync
+    if ($passedSessionToken === null) {
+      console.log("no session token passed")
+    }
+    else {
+      $loginState = saveSessionToken($passedSessionToken);
+      $tournamentId = saveTournamentId($passedSessionToken);
+
+      if ($tournamentId !== null) 
+        $isTournament = true;
+    }
 }
 
 // save session token
@@ -102,10 +118,7 @@ window.addEventListener("message", (e) => {
       try {
       let session = JSON.parse(e.data);
       passedSessionToken.set(session);
-
-      // possible timing issue with useServers. need to find a way to sync
-      $loginState = saveSessionToken($passedSessionToken);
-      $tournamentId = saveTournamentId($passedSessionToken);
+      updateOpArcadeStores();
     } catch (e) {
       console.log(e)
     }
