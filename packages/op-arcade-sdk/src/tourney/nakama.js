@@ -28,6 +28,7 @@ class NakamaTourneyProvider {
     authProvider = null;
     client = null;
     session = null;
+    tournamentId = null;
     
     constructor(auth_provider) {
         this.authProvider = auth_provider;
@@ -111,8 +112,15 @@ class NakamaTourneyProvider {
             console.error("joinTourney failed [" + e.status + ":" + e.statusText + "]"); 
             return(e);
          }
-    }        
+    }
 
+    saveTournamentId = (options) => {
+      this.tournamentId = options.tournamentId;
+    }
+
+    getTournamentId = () => {
+      return this.tournamentId;
+    }
 }
 
 export {
