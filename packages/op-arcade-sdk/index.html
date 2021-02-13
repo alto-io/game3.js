@@ -9,13 +9,13 @@
 		content='{
 			"auth_server": {
 				"type": "nakama",
-				"url": "nakama1.outplay.games",
+				"url": "localhost",
 				"port": 7350,
 				"key": "defaultkey"
 			},
 			"tourney_server": {
 				"type": "nakama",
-				"url": "nakama1.outplay.games",
+				"url": "localhost",
 				"port": 7350,
 				"key": "defaultkey"
 			}
@@ -106,7 +106,7 @@
 
 		let options = {
 			tournament_id: op.getTournamentId(),
-			score
+			metadata: '{"score": ' + score + '}'
 		}
 
 		op.postScore(options).then
