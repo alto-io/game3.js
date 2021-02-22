@@ -32,10 +32,10 @@ export const configStore = writable(config);
 import CONSTANTS from './constants.js'
 import { writable, get } from 'svelte/store';
 
-import TailwindCss from './TailwindCss.svelte'
-import SdkDrawer from './components/SdkDrawer.svelte'
-import Content from './components/Content.svelte';
-import Modal from './components/Modal.svelte';
+// import TailwindCss from './TailwindCss.svelte'
+// import SdkDrawer from './components/SdkDrawer.svelte'
+// import Content from './components/Content.svelte';
+// import Modal from './components/Modal.svelte';
 
 import { tourneyStore, 
         loginState, 
@@ -191,11 +191,15 @@ export {
   initialize
 }
 
+// disable frontend 
+
+// <TailwindCss></TailwindCss>
+// <SdkDrawer/>
+
+// <Modal>
+// 	<Content bind:showPopup={showPopup}/>
+// </Modal>
+
 </script>
 
-<TailwindCss></TailwindCss>
-<SdkDrawer/>
 
-<Modal>
-	<Content bind:showPopup={showPopup}/>
-</Modal>

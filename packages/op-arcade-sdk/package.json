@@ -1,6 +1,6 @@
 {
   "name": "op-arcade-sdk",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Monetize your game with tournaments on OP Arcade (play.outplay.games)",
   "author": "Paul Gadi <paul@outplay.games>",
   "repository": {
@@ -8,10 +8,10 @@
     "url": "git+https://github.com/alto-io/game3.js.git",
     "directory": "packages/op-arcade-sdk"
   },
-  "main": "dist/op.js",
-  "unpkg": "dist/op.js",
+  "main": "lib/op.js",
+  "unpkg": "lib/op.js",
   "files": [
-    "dist/op.js"
+    "lib/op.js"
   ],
   "license": "MIT",
   "scripts": {
