@@ -151,6 +151,7 @@ async function attemptTourney(options) {
 
 async function postScore(options) {
   let result = await $tourneyStore.postScore(options);
+  window.top.postMessage('postScore', '*')
   return result;
 }
 
