@@ -1,7 +1,8 @@
 import CONSTANTS from '../constants.js'
 import * as nakamajs from '@heroiclabs/nakama-js';
 
-// const axios = require('axios')
+import {get} from 'svelte/store'
+import {isProd, NODE_API_URL} from '../stores'
 import axios from 'axios'
 
 const TEST_ID = "test_id"
@@ -95,11 +96,9 @@ class NakamaTourneyProvider {
                 }
             }
     
-            const dev = 'http://127.0.0.1:3001/oparcade/api/tournaments/post-score'
-            const prod = 'http://op-arcade-dev.herokuapp.com/oparcade/api/tournaments/post-score'
-            const isDevelopment = false
-            const requestURL = isDevelopment ? dev : prod
-            const res = await axios.post(requestURL, args, config)
+            const {prod, dev} = get(NODE_API_URL)
+            const requestURL = get(isProd) ? prod : dev
+            const res = await axios.post(`${requestURL}/tournaments/post-score`, args, config)
             return res
         } catch (e) {
             console.error("postScore failed [" + e.status + ":" + e.statusText + "]");

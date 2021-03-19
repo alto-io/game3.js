@@ -19,6 +19,11 @@ export const isTournament = writable(false);
 export const tourneyStore = getTourneyStore();
 export const authStore = getAuthStore();
 
+export const NODE_API_URL = writable({
+    dev: "http://127.0.0.1:3001/oparcade/api",
+    prod: "http://op-arcade-dev.herokuapp.com/oparcade/api"
+})
+
 export async function useServers(options) {    
     let auth_provider = await get(authStore).useServer(options.auth_server);
     let tourney_provider = await get(tourneyStore).useServer(options.tourney_server, auth_provider);
