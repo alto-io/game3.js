@@ -1,6 +1,6 @@
 # Game3.js (The Web 3.0 Game Framework)
 
-👋 Thank you for checking out Game3.js! 
+👋 Thank you for checking out Game3.js!
 
 ### **Heads up! ⚠** 
 
@@ -13,7 +13,7 @@ Don't hesitate to file a Github issue or reach out to us on Gitter 👇 if you h
 
 [![Join the community on Gitter](https://img.shields.io/gitter/room/alto-io/game3-js?style=for-the-badge)](https://gitter.im/game3-js/community)
 
-## 🚀 Getting Started
+## 🚀 Quickstart
 
 ### 1. Install required software
 
@@ -93,14 +93,9 @@ Game3.js currently does not have a web dashboard for integrating games yet, and 
 Do [reach out to us](https://gitter.im/game3-js/community) if you want to integrate your games with OP Arcade, the upcoming live version of Game3.js!
 
 
-## Packages
+## Game3.js Overview
 
-Game3.js is dependent on these other standalone packages:
-
-![Package Diagram](https://docs.google.com/drawings/d/e/2PACX-1vTQXwQMVheGfXrSmmr6PYsByHdHcF5_vZ4itwFB70-PhkL0BCXzRNv8-vuvQSyn8FuCHToKU-kWnjEZ/pub?w=553&amp;h=450)
-
-* [**booter**](https://github.com/polats/booter) - Zero-config project template to create open-source web games, with Web Monetization and PWA support
-* [**nft-minter**](https://github.com/polats/nft-minter) - A Heroku web server to easily mint Ethereum non-fungible tokens via an API
+![Game3.js Overview](http://www.plantuml.com/plantuml/png/bLJBRjim4BppAnQvv9HUZ5wD14sT5Ct3Y89U34DWf8NDcW-1eb04Hl-zr8gLkQnHj1TRdDd7x731wpv87mQZHNzGjfDU6cYSwPn56whmhX4yDa7QdKOXEjaSv0xXOYSDBZvyxo_WA00szw-F3n_XBeBRyLWrNdMXty8Lf8mOwkn8hQSpSS_h-iOtiiMwklqgUE9chzeMxVPgcUM8dq9OroAh6XK8E6c6jq7f5ZOH0ziPy8ETe0XiWKKQPGCB9EHCdFG7B289erWIJXqAsMCnieC-2exIQQ16kw65B-jL1SUyBK7roZiRqAQ1o69864sKPn2xg9zMh_Mj339BMK04OGIJuhBD8-afkqqexoU02sDpSG6dwUvKs0zlVBu4_j-4tz3tojdw1JNA7bDEGY6XIIThm9GkopedfK-VRrwupcoevnysvkrLHtsPjpFrfy79syf87-fFKOkNJUXJYSG2iJ2pL6LMDSfjK4TThEm_NXdLcJTqoQyl9xXVZ2hzefqcvemxZ6KBaVQUg48_uqZYtmBEUoekVpyLz4pm1mQEPCJbWtntGu1xr5sKErTbUymInQWcfvDHOlhB6LeVCVxaQBe-SHsd68p-1G00)
 
 ## 🎭 Live Demo
 
@@ -118,9 +113,3 @@ The `master` branch is deployed every commit on [http://game3js-staging.herokuap
 ## Licenses
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](https://github.com/alto-io/game3.js/blob/master/LICENSE)
-
-The major libraries and assets used in this project and their licenses:
-
-* React: [MIT](https://github.com/facebook/react/blob/master/LICENSE)
-* Colyseus: [MIT](https://github.com/colyseus/colyseus/blob/master/LICENSE)
-* PIXI.js: [MIT](https://github.com/pixijs/pixi.js/blob/dev/LICENSE)

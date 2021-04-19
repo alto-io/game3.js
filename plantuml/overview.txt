@@ -1,0 +1,90 @@
+@startuml
+skinparam componentStyle rectangle
+
+package "game3.js" {
+  [HTML5 Game]
+  [Scripts] - package.json
+  [Packages] - OP_Arcade_SDK
+
+  [Scripts] -[hidden]-> [Packages]
+}
+
+node package.json {
+
+  component build [
+   npm run build
+  ] 
+  component mint [
+   npm run mint
+  ] 
+  component market [
+   npm run market
+  ]
+
+  [build] -[hidden]-> [mint]
+  [mint] -[hidden]-> [market]
+}
+
+cloud IPFS {
+  component IPFS_Frontend [
+    Game Frontend
+  ]
+  component Game3_NFT_Data [
+    Game3 NFT Data
+  ]
+
+  component IPFS_Market_Frontend [
+    Market Frontend
+  ]
+
+  IPFS_Frontend -[hidden]-> Game3_NFT_Data
+}
+
+cloud Github {
+  component Github_Frontend [
+    Game Frontend
+  ]
+  component Version_Release [
+    Version Release
+  ]
+
+  Github_Frontend -[hidden]> Version_Release
+}
+
+cloud NEAR {
+  component Game3_NFT_Ownership [
+     Game3 NFT Ownership
+  ]
+
+  component Market_Smart_Contracts [
+     Market Smart Contracts
+  ]
+
+}
+
+cloud Vercel {
+ component Market_Frontend [
+    Market Frontend
+  ]
+
+}
+
+[build] -> IPFS_Frontend
+[build] -> Github_Frontend
+[build] -> Version_Release
+[mint] -> Game3_NFT_Ownership
+[mint] -> Game3_NFT_Data
+[market] -> Market_Frontend
+[market] -> IPFS_Market_Frontend
+[market] -> Market_Smart_Contracts
+'Packages
+node OP_Arcade_SDK {
+
+}
+
+'Layout Helpers
+[market] -[hidden]-> OP_Arcade_SDK
+IPFS -[hidden]-> Github
+Github -[hidden]-> NEAR
+NEAR -[hidden]-> Vercel
+@enduml
