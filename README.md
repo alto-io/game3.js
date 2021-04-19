@@ -6,32 +6,24 @@
 
 Please take note that this project is still under heavy development, and we're currently refactoring it to be an NPM package.
 
-
-Don't hesitate to file a Github issue or reach out to us on Gitter 👇 if you have any questions. 
-
- 
-
-[![Join the community on Gitter](https://img.shields.io/gitter/room/alto-io/game3-js?style=for-the-badge)](https://gitter.im/game3-js/community)
+Don't hesitate to file a Github issue or reach out to us on <a href="../../discussions">Github Discussions</a> if you have any questions. 
 
 ## 🚀 Quickstart
 
 ### 1. Install required software
 
  * [Node.js](https://nodejs.org/en/download/)
- * [Yarn](https://yarnpkg.com/getting-started/install)
 
 ### 2. Fork the repository
 
 * [![Fork Game3.js](https://img.shields.io/github/forks/alto-io/game3.js.svg?style=social&label=Fork%20Game3.js&maxAge=2592000)](https://GitHub.com/alto-io/game3.js/fork)
 
-### 3. Run the app
+### 3. Run the example game
 
 From inside project directory:
 
-* Switch to the **develop** branch, which is the last branch where this Readme is applicable
-* Install dependencies with `yarn`.
-* Start game with `yarn start`.
-* The game is available at http://localhost:3000.
+* `npm install`
+* `npm start`
 
 ## 🕹 Playing A Game
 

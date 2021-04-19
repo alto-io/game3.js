@@ -8,39 +8,27 @@
     "url": "git+https://github.com/alto-io/game3.js.git"
   },
   "license": "MIT",
-  "main": "dist/game3.js",
-  "unpkg": "dist/game3.js",
-  "files": [
-    "dist/game3.js"
-  ],
   "scripts": {
-    "serve": "serve docs",
-    "dev": "concurrently --kill-others-on-fail \"webpack --watch\" \"npm run serve\"",
-    "build": "npm-run-all --parallel build:*",
-    "build:dev": "webpack",
-    "build:booter": "cd packages/booter && npm run build",
-    "build:op-arcade-sdk": "cd packages/op-arcade-sdk && npm run build",
-    "np": "np"
+    "serve": "sirv",
+    "start": "parcel index.html --open",
+    "build": "npm run clean && parcel build index.html --dist-dir ./dist",
+    "clean": "rimraf ./dist ./parcel-cache"
   },
   "devDependencies": {
-    "concurrently": "^5.3.0",
-    "dotenv": "^8.2.0",
-    "html-replace-webpack-plugin": "^2.6.0",
-    "html-webpack-plugin": "^4.5.0",
-    "np": "^7.0.0",
-    "npm-run-all": "^4.1.5",
-    "serve": "^11.3.2",
-    "ts-loader": "^8.0.11",
-    "typescript": "^4.1.2",
-    "webpack": "^5.9.0",
-    "webpack-cli": "^4.2.0"
+    "@parcel/config-default": "2.0.0-beta.1",
+    "parcel": "2.0.0-beta.1",
+    "parcel-reporter-static-files-copy": "^1.2.2",
+    "sirv-cli": "^1.0.11"
+  },
+  "dependencies": {},
+  "staticFiles": {
+    "staticPath": "assets",
+    "staticOutPath": "assets",
+    "watcherGlob": "**"
   },
   "bugs": {
     "url": "https://github.com/alto-io/game3.js/issues"
   },
   "homepage": "https://github.com/alto-io/game3.js#readme",
-  "directories": {
-    "doc": "docs"
-  },
   "keywords": []
 }

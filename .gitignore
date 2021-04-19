@@ -1,8 +1,21 @@
-*.log
+# System and IDE files
+Thumbs.db
 .DS_Store
-node_modules
-packages/op-arcade-sdk/lib
-.tmp
-.env
+.idea
+*.suo
+*.sublime-project
+*.sublime-workspace
+*.log
+
+# Build Files
 dist
 temp
+.tmp
+.parcel-cache
+
+# Vendors
+node_modules/
+
+# Project Files
+packages/op-arcade-sdk/lib
+.env
