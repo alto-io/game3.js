@@ -9,11 +9,16 @@ package "game3.js" {
   [Scripts] -[hidden]-> [Packages]
 }
 
-node package.json {
+node Github_Actions {
 
   component build [
-   npm run build
+   Release
   ] 
+
+}
+
+node package.json {
+
   component mint [
    npm run mint
   ] 

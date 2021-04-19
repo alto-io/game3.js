@@ -42,6 +42,10 @@ To deploy on IPFS we need to do the following steps:
 
 * The game is now deployed and can be accessed using the IPFS gateways listed on the <a href="../../releases">Release Notes</a>
 
+## Game3.js Overview
+
+![Game3.js Overview](http://www.plantuml.com/plantuml/proxy?src=https://raw.github.com/alto-io/game3.js/main/plantuml/overview.txt)
+
 ## Licenses
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](https://github.com/alto-io/game3.js/blob/master/LICENSE)
