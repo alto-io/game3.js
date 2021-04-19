@@ -95,7 +95,7 @@ Do [reach out to us](https://gitter.im/game3-js/community) if you want to integr
 
 ## Game3.js Overview
 
-![Game3.js Overview](http://www.plantuml.com/plantuml/png/bLJBRjim4BppAnQvv9HUZ5wD14sT5Ct3Y89U34DWf8NDcW-1eb04Hl-zr8gLkQnHj1TRdDd7x731wpv87mQZHNzGjfDU6cYSwPn56whmhX4yDa7QdKOXEjaSv0xXOYSDBZvyxo_WA00szw-F3n_XBeBRyLWrNdMXty8Lf8mOwkn8hQSpSS_h-iOtiiMwklqgUE9chzeMxVPgcUM8dq9OroAh6XK8E6c6jq7f5ZOH0ziPy8ETe0XiWKKQPGCB9EHCdFG7B289erWIJXqAsMCnieC-2exIQQ16kw65B-jL1SUyBK7roZiRqAQ1o69864sKPn2xg9zMh_Mj339BMK04OGIJuhBD8-afkqqexoU02sDpSG6dwUvKs0zlVBu4_j-4tz3tojdw1JNA7bDEGY6XIIThm9GkopedfK-VRrwupcoevnysvkrLHtsPjpFrfy79syf87-fFKOkNJUXJYSG2iJ2pL6LMDSfjK4TThEm_NXdLcJTqoQyl9xXVZ2hzefqcvemxZ6KBaVQUg48_uqZYtmBEUoekVpyLz4pm1mQEPCJbWtntGu1xr5sKErTbUymInQWcfvDHOlhB6LeVCVxaQBe-SHsd68p-1G00)
+![Game3.js Overview](http://www.plantuml.com/plantuml/proxy?src=https://raw.github.com/alto-io/game3.js/main/plantuml/overview.txt)
 
 ## 🎭 Live Demo
 
