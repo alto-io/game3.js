@@ -9,14 +9,14 @@
   },
   "license": "MIT",
   "scripts": {
-    "serve": "sirv",
-    "start": "parcel index.html --open",
+    "start": "sirv",
+    "start:dist": "npm run build && sirv dist",
     "build": "npm run clean && parcel build index.html --dist-dir ./dist",
-    "clean": "rimraf ./dist ./parcel-cache"
+    "clean": "rimraf dist .parcel-cache"
   },
   "devDependencies": {
-    "@parcel/config-default": "2.0.0-beta.1",
-    "parcel": "2.0.0-beta.1",
+    "@parcel/config-default": "2.0.0-beta.2",
+    "parcel": "2.0.0-beta.2",
     "parcel-reporter-static-files-copy": "^1.2.2",
     "sirv-cli": "^1.0.11"
   },
