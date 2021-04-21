@@ -1,0 +1,59 @@
+@startuml
+skinparam actorStyle awesome
+left to right direction
+rectangle "Game Files" as gf 
+
+rectangle "IPFS" as IPFS1 {
+    rectangle CID as CID1
+}
+
+rectangle "OP! NFT" as NFT {
+    rectangle "Game CID" as GAME_CID
+    rectangle "Dev Wallet" as NFT_DEV_WALLET
+    rectangle "Card Art" as NFT_CARD_ART
+    rectangle "Artist Wallet" as NFT_ARTIST_WALLET
+
+    rectangle "IPFS" as IPFS2 {
+        rectangle "NFT CID" as NFT_CID
+    }
+
+    rectangle "Revenue Sources" as REV_SOURCE #aliceblue;line:blue;line.dashed;text:blue
+
+    NFT_DEV_WALLET --[hidden]> NFT_CARD_ART
+    NFT_DEV_WALLET -[hidden]> NFT_ARTIST_WALLET
+    NFT_CARD_ART -[hidden]> REV_SOURCE
+    GAME_CID --[hidden]> NFT_CID
+}
+
+rectangle "NFT Marketplaces" as MARKET #aliceblue;line:blue;line.bold;text:blue
+rectangle "OP Arcade Tourneys" as TOURNEY #aliceblue;line:blue;line.bold;text:blue
+rectangle "DeFi Protocols" as DEFI #aliceblue;line:blue;line.bold;text:blue
+
+REV_SOURCE <-- MARKET #aliceblue;line:blue
+REV_SOURCE <-- TOURNEY #aliceblue;line:blue
+REV_SOURCE <-- DEFI #aliceblue;line:blue
+
+NFT --[hidden]> IPFS2
+CID1 --> GAME_CID
+
+note "unique CID\nfor provenance" as N1
+N1 .. CID1
+N1 .. NFT_CID
+
+actor "Developer" as DEV
+actor "Artist" as ARTIST
+
+rectangle "Web3 Wallet" as DEV_WALLET
+rectangle "Web3 Wallet" as ARTIST_WALLET
+
+DEV --> DEV_WALLET
+ARTIST --> ARTIST_WALLET
+ARTIST --> NFT_CARD_ART
+DEV_WALLET --> NFT_DEV_WALLET
+ARTIST_WALLET --> NFT_ARTIST_WALLET
+
+'Layout Helpers
+gf --> IPFS1
+
+
+@enduml
