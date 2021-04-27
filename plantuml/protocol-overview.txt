@@ -6,6 +6,7 @@ skinparam actorStyle awesome
 :Player as Distributor: as PL2 << Peer Node via IPFS Desktop >>
 :Player as Supporter: as PL3 << Patronage via NFTs >>
 :Player as Curator: as PL4 << DAO Proposals >>
+:Player as Developer: as PL5 << Game Modding >>
 
 usecase UC [
 <b>OP Protocol
@@ -23,6 +24,7 @@ Open-Source\nGame Code
 GD -> UC
 UC <- PL
 PL3 --> UC
+PL5 --> UC
 UC <-- PL2
 UC <-- PL4
 @enduml
