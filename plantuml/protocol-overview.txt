@@ -1,0 +1,28 @@
+@startuml
+
+skinparam actorStyle awesome
+:Game Developer: as GD
+:Player: as PL
+:Player as Distributor: as PL2 << Peer Node via IPFS Desktop >>
+:Player as Supporter: as PL3 << Patronage via NFTs >>
+:Player as Curator: as PL4 << DAO Proposals >>
+
+usecase UC [
+<b>OP Protocol
+====
+OP NFTs
+....
+Game DAOs
+....
+Peer-to-Peer Distribution
+....
+Open-Source\nGame Code
+
+]
+
+GD -> UC
+UC <- PL
+PL3 --> UC
+UC <-- PL2
+UC <-- PL4
+@enduml

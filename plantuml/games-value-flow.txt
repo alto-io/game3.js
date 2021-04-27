@@ -1,0 +1,23 @@
+@startuml
+
+skinparam actorStyle awesome
+:Game Developer: as GD
+:Player: as PL
+
+queue Creation
+queue Distribution
+queue Discoverability
+queue Monetization
+
+GD -[hidden]> Creation 
+Creation -> Distribution
+Distribution -> Discoverability
+Discoverability -> Monetization
+Monetization -[hidden]> PL
+
+note "Centralized Web 2.0 Platforms" as W2
+Creation .. W2
+Distribution .. W2
+Discoverability .. W2
+Monetization .. W2
+@enduml
