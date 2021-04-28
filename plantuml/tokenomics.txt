@@ -1,0 +1,140 @@
+@startuml
+
+skinparam actorStyle awesome
+
+'Actors
+:Protocol Developer\n(OP Games): as OPG
+:Game Developer: as GD
+:Player as Supporter: as PLS << Patronage via NFTs >>
+:Trader: as TR
+:Player as Distributor: as PLDIST << Peer Node via IPFS Desktop >>
+:Player as Developer: as PLDEV << Game Modding >>
+
+
+':Player: as PL
+':Player as Curator: as PL4 << DAO Proposals >>
+
+' Notes
+note "5% of Total Sales" as NMF
+note "2% Reselling Fee" as NRF
+note "20% of Total Sales" as NDS
+note "75% of Total Sales" as NGT
+note "X% for Protocol Support\n(via DAO Proposal)" as NPS
+
+'Processes
+circle mints as MINTS
+circle "resells NFT" as RESELLS
+
+'Artifacts
+collections "OP NFTs" as OPNFT
+entity "yield\ntokens" as AOPT1
+
+skinparam rectangle {
+    roundCorner<<Game DAOs>> 25
+}
+
+artifact "Open-Source\nGame Code" as OSGC
+rectangle "Game DAO" as GDAO
+node GT [
+    <b>Game Treasury
+    ====
+    <i><color:blue>Assets:</color></i>
+    NFT Revenues
+    OP Arcade Revenues
+    Game-specific ERC-20
+    ====
+    <i><color:blue>Used for:</color></i>
+    Live Ops
+    Community Management
+    Additional Development
+    Marketing
+    Token Management
+    Protocol Support
+]
+
+node "Market Makers" as AMM
+cloud "Peer-to-Peer Distribution\nvia IPFS Nodes" as IPFS
+
+node PDAO [
+    <b>Protocol DAO
+    ====
+    <i><color:blue>Assets:</color></i>
+    OP Tokens
+    ====
+    <i><color:blue>Token Generation:</color></i>
+    X Amount / Game Listing
+    X Amount / NFT Minted
+    Private / Public Sale
+    ====
+    <i><color:blue>Token Sinks:</color></i>
+    Development Bounties
+    OP Arcade Promotions
+    Storage Costs
+    Scheduled Burns
+]
+
+'Protocol DAO
+PDAO <- OPG : Maintains
+
+'Distribution
+IPFS <- OSGC : Deployed on
+IPFS <-- PLDIST : Hosts game
+
+
+'Player Developer
+OSGC <-- PLDEV : Additional Development
+
+'Market Makers
+AMM <-- GT : "ERC-20\n in Liquidity Pools"
+
+'DAOs as Governance
+OPNFT -> GDAO: Used as Governance Tokens
+GT <-- GDAO : manages
+
+'Minting Fee
+OPG <. NMF
+NMF .. MINTS
+
+'Reselling Fee
+GD <. NRF
+NRF .. RESELLS
+
+'Developer Share
+GD <. NDS
+NDS .. OPNFT
+
+'Treasury Share
+NGT .> GT
+NGT .. OPNFT
+
+'Sustainability Fund
+OPG <. NPS
+NPS .. GT
+
+'Minting NFTs
+GD - MINTS
+MINTS -> OPNFT
+OPNFT <-- PLS : buys
+
+'Yield Tokens
+OPNFT -> AOPT1 : generates
+AOPT1 -> PLS
+
+'Secondary Market Fees
+RESELLS - PLS
+TR <- RESELLS
+
+'NFTs as Governance
+
+'Layout Helpers
+GD --> OSGC : develops
+NMF -[hidden]> NRF
+MINTS -[hidden]-> NRF
+MINTS -[hidden]-> OPNFT
+OPG -[hidden]-> GD
+OPNFT -[hidden]-> TR
+TR -[hidden]> PLS
+GT -[hidden]-> GDAO
+NDS -[hidden]> NGT
+
+@enduml
