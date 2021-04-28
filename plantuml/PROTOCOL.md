@@ -12,4 +12,4 @@ By using Web 3.0, we can start building a model that replaces these platforms wi
 
 Current Tokenomics Draft:
 
-![Tokenomics Draft](http://www.plantuml.com/plantuml/proxy?src=https://github.com/alto-io/game3.js/raw/main/plantuml/tokenomics.txt)
+![Tokenomics Draft](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/alto-io/game3.js/main/plantuml/tokenomics.txt)
