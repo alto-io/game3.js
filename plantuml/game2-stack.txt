@@ -1,0 +1,60 @@
+@startuml
+
+skinparam actorStyle awesome
+
+'Actors
+rectangle "Web 2.0 Game Stack" as G2 {
+
+    card Discoverability {
+        node "Streaming Platforms" as SP
+        node "Ad Networks" as ADN
+    }
+
+    card Distribution {
+        cloud "Cloud Providers" as AS {
+            node "App Stores" as APPSTORE
+            node "Cloud Hosting" as CH
+        }
+    }
+
+    card Creation {
+        node "Game Engines" as GE
+        cloud "Code Repositories" as GIT
+
+        cloud "Cloud Providers" as CP {
+            database "User\nDatabases" as USERDB
+            node "Multiplayer\nServers" as MPS
+        }
+
+    }
+    
+    
+
+
+    rectangle "Monetization" as FS #aliceblue;line:blue;line.dashed;text:blue
+
+    GIT --[hidden]> FS    
+}
+
+rectangle "Monetization Options" as FS_RECT #aliceblue;line:blue;line.bold;text:blue {
+    rectangle "Publishing Deals" as PD #aliceblue;line:blue;line.bold;text:blue
+    rectangle "In-app Purchases" as IAP #aliceblue;line:blue;line.bold;text:blue
+    rectangle "In-game Ads" as ADS #aliceblue;line:blue;line.bold;text:blue
+    rectangle "Downloadable Content" as DLC #aliceblue;line:blue;line.bold;text:blue
+    rectangle "Unit Sales" as US #aliceblue;line:blue;line.bold;text:blue
+    rectangle "Initial Funding" as IF #aliceblue;line:blue;line.bold;text:blue 
+}
+
+FS <-- IF #aliceblue;line:blue
+FS <-- US #aliceblue;line:blue
+FS <-- DLC #aliceblue;line:blue
+FS <-- IAP #aliceblue;line:blue
+FS <-- ADS #aliceblue;line:blue
+FS <-- PD #aliceblue;line:blue
+
+'Layout Helpers
+FS_RECT -[hidden]-> G2
+
+
+
+@enduml
