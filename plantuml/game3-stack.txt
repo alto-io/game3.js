@@ -1,0 +1,73 @@
+@startuml
+
+skinparam actorStyle awesome
+
+'Actors
+rectangle "Web 3.0 Game Stack" as G2 {
+
+    card Discoverability {
+        node "Token Exchanges"
+        node "NFT Storefronts"
+        node "Game 3 Curators\n (OP Arcade)"
+        node "Web 3 Wallets"
+        node "Client Node software\n(IPFS Desktop)"
+    }
+
+    card Distribution {
+        cloud "Cloud Providers" as AS {
+            node "App Stores" as APPSTORE {
+                rectangle "OP Arcade"
+                rectangle "Browsers\n(Brave)"
+            }
+            node "Cloud Hosting" as CH {
+                rectangle "Filecoin\nNetwork"
+                rectangle IPFS
+            }
+        }
+
+        cloud "Peer to Peer" {
+            rectangle "IPFS Desktop"
+        }
+    }
+
+    card Creation {
+        cloud "Cloud Providers" as CP {
+            database "User\nDatabases" as USERDB {
+                rectangle "Web 3 Accounts"
+                rectangle "OrbitDB"
+            }
+            node "Multiplayer\nServers" as MPS {
+                rectangle "IPFS Pubsub"
+            }
+        }
+        
+        cloud "Code Repositories" as GIT {
+            rectangle "Radicle.xyz"
+        }
+        node "Game Engines\n(Open-source)" as GE {
+            rectangle "Phaser"
+            rectangle "Babylon.js"
+
+        }
+
+
+    }
+    
+
+    rectangle "Sustainability" as FS_RECT #aliceblue;line:blue;line.bold;text:blue {
+        rectangle "Game DAOs" as ADS #aliceblue;line:blue;line.bold;text:blue
+        rectangle "Crypto Tournaments" as US #aliceblue;line:blue;line.bold;text:blue
+        rectangle "NFT Sales" as IF #aliceblue;line:blue;line.bold;text:blue 
+        rectangle "DeFi Primitives" as IAP #aliceblue;line:blue;line.bold;text:blue
+        rectangle "Token Generation Events" as DLC #aliceblue;line:blue;line.bold;text:blue
+        rectangle "Future Money Legos" as PD #aliceblue;line:blue;line.bold;text:blue
+    }
+  
+}
+
+'Layout Helpers
+FS_RECT -[hidden]-> G2
+Distribution -[hidden]-> Discoverability
+Creation -[hidden]-> FS_RECT
+
+@enduml

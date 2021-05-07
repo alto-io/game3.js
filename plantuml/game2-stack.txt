@@ -18,8 +18,8 @@ rectangle "Web 2.0 Game Stack" as G2 {
     }
 
     card Creation {
-        node "Game Engines" as GE
         cloud "Code Repositories" as GIT
+        node "Game Engines" as GE
 
         cloud "Cloud Providers" as CP {
             database "User\nDatabases" as USERDB
