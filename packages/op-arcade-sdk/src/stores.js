@@ -8,12 +8,12 @@ export const password = writable("");
 export const loginState = writable(CONSTANTS.LOGIN_STATES.LOGGED_OUT);
 export const passedSessionToken = writable(null);
 export const tournamentId = writable(null);
+export const apiUrl = writable(null);
 
 export const apiKey = writable("");
 export const url = readable(document.referrer);
 
 export const onOpArcade = writable(false);
-export const isProd = writable(false);
 export const isTournament = writable(false);
 
 export const tourneyStore = getTourneyStore();
@@ -24,7 +24,7 @@ export const NODE_API_URL = writable({
     prod: "http://op-arcade-dev.herokuapp.com/oparcade/api"
 })
 
-export async function useServers(options) {    
+export async function useServers(options) {
     let auth_provider = await get(authStore).useServer(options.auth_server);
     let tourney_provider = await get(tourneyStore).useServer(options.tourney_server, auth_provider);
 

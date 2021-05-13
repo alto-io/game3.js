@@ -4,12 +4,14 @@
 
 <script>
 
-export const OP_ARCADE_URL_DEV = "http://localhost:3000/"
-export const OP_ARCADE_URL_PROD = "http://test.outplay.games/"
-
 // origin expects no trailing slash
-export const OP_ARCADE_URL_DEV_ORIGIN = "http://localhost:3000"
-export const OP_ARCADE_URL_PROD_ORIGIN = "http://test.outplay.games"
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'http://test.outplay.games',
+  'http://op-arcade-dev.herokuapp.com',
+  'http://op-arcade-alpha.herokuapp.com',
+  'http://op-arcade-prod.herokuapp.com',
+]
 
 export const DEFAULT_CONFIG = {
     tourney_server: {
@@ -23,7 +25,7 @@ export const DEFAULT_CONFIG = {
         url: "localhost",
         port: "7350",
         key: "defaultkey"
-    }
+    },
 }
 
 export let config;
@@ -41,8 +43,8 @@ import { tourneyStore,
         loginState, 
         authStore, 
         url, 
-        onOpArcade, 
-        isProd,
+        onOpArcade,
+        apiUrl,
         isTournament,
         passedSessionToken, 
         tournamentId,
@@ -68,22 +70,12 @@ async function initialize() {
   }
 
   // check if we're on OP Arcade
-  onOpArcade.set($url == OP_ARCADE_URL_DEV || $url == OP_ARCADE_URL_PROD);
-  isProd.set($url == OP_ARCADE_URL_PROD);
+  onOpArcade.set(ALLOWED_ORIGINS.includes($url.slice(0, -1)));
 
-  if (get(isProd))
-  {
-    console.log('%c%s',
-        'color: orange; background: white;',
-        "-- Welcome to OP Arcade --"
-        )
-  }
-  else {
-    console.log('%c%s',
-        'color: orange; background: white;',
-        "-- development mode --"
-        )
-  }
+  console.log('%c%s',
+      'color: orange; background: white;',
+      "-- Welcome to OP Arcade --"
+      )
 
   useServers(serverConfig).then(
     (result) => {
@@ -96,7 +88,6 @@ async function initialize() {
 }
 
 function updateOpArcadeStores() {
-
     // possible timing issue with useServers. need to find a way to sync
     if ($passedSessionToken === null) {
       console.log("no session token passed")
@@ -112,18 +103,16 @@ function updateOpArcadeStores() {
 
 // save session token
 window.addEventListener("message", (e) => {
-  if (e.origin == OP_ARCADE_URL_DEV_ORIGIN ||
-      e.origin == OP_ARCADE_URL_PROD_ORIGIN)
-    {
-      try {
-      let session = JSON.parse(e.data);
-      passedSessionToken.set(session);
+  if (ALLOWED_ORIGINS.includes(e.origin)) {
+    try {
+      let messageData = JSON.parse(e.data);
+      apiUrl.set(messageData.apiUrl);
+      passedSessionToken.set(messageData);
       updateOpArcadeStores();
     } catch (e) {
       console.log(e)
     }
-      
-    }
+  }
 }, false);
 
 function getSessionFromOpArcade()
