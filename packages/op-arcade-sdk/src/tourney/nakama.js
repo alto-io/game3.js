@@ -2,7 +2,7 @@ import CONSTANTS from '../constants.js'
 import * as nakamajs from '@heroiclabs/nakama-js';
 
 import {get} from 'svelte/store'
-import {isProd, NODE_API_URL} from '../stores'
+import {apiUrl} from '../stores'
 import axios from 'axios'
 
 const TEST_ID = "test_id"
@@ -95,9 +95,7 @@ class NakamaTourneyProvider {
                     'Content-Type': 'application/json'
                 }
             }
-    
-            const {prod, dev} = get(NODE_API_URL)
-            const requestURL = get(isProd) ? prod : dev
+            const requestURL = get(apiUrl)
             const res = await axios.post(`${requestURL}/tournaments/post-score`, args, config)
             return res
         } catch (e) {
