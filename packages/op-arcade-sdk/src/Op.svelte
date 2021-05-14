@@ -8,6 +8,7 @@
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://test.outplay.games',
+  'http://alpha.outplay.games',
   'http://op-arcade-dev.herokuapp.com',
   'http://op-arcade-alpha.herokuapp.com',
   'http://op-arcade-prod.herokuapp.com',
