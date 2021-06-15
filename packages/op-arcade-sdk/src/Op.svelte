@@ -33,7 +33,8 @@ export let config;
 export const configStore = writable(config);
 
 import CONSTANTS from './constants.js'
-import { writable, get } from 'svelte/store';
+import { writable, get } from 'svelte/store'
+import * as remotePlay from './remotePlay'
 
 // import TailwindCss from './TailwindCss.svelte'
 // import SdkDrawer from './components/SdkDrawer.svelte'
@@ -49,7 +50,8 @@ import { tourneyStore,
         isTournament,
         passedSessionToken, 
         tournamentId,
-        useServers } from './stores.js'
+        useServers,
+      } from './stores.js'
 
  function props() {
   return {
@@ -179,7 +181,8 @@ export {
   getSessionToken,
   getTournamentId,
   useServers,
-  initialize
+  initialize,
+  remotePlay,
 }
 
 // disable frontend 
