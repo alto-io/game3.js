@@ -38,43 +38,21 @@ class RemotePlayState {
         this.log.push(evt)
     }
 
-    sendAnimationFrame = (timestamp) => {
-        this.sendEvent(AnimationFrameEvt, {
-            t: timestamp
-        })
-    }
-
-    sendMouseDown = (e) => {
-        this.sendEvent(MouseDownEvt, {
-            clientX: e.clientX,
-            clientY: e.clientY,
-        })
-    }
-
-    sendMouseUp = (e) => {
-        this.sendEvent(MouseUpEvt, {
-            clientX: e.clientX,
-            clientY: e.clientY,
-        })
-    }
-
-    sendMouseMove = (e) => {
-        this.sendEvent(MouseMoveEvt, {
-            clientX: e.clientX,
-            clientY: e.clientY,
-        })
-    }
-
     requestAnimationFrame = (handler) => {
         return window.requestAnimationFrame((timestamp) => {
-            this.sendAnimationFrame(timestamp)
+            this.sendEvent(AnimationFrameEvt, {
+                t: timestamp
+            })
             handler(timestamp)
         })
     }
 
     addOnMouseDown = (element, handler) => {
         const wrappedHandler = (e) => {
-            this.sendMouseDown(e)
+            this.sendEvent(MouseDownEvt, {
+                clientX: e.clientX,
+                clientY: e.clientY,
+            })
             handler(e)
         }
         element.onmousedown = wrappedHandler
@@ -83,7 +61,10 @@ class RemotePlayState {
 
     addOnMouseUp = (element, handler) => {
         const wrappedHandler = (e) => {
-            this.sendMouseUp(e)
+            this.sendEvent(MouseUpEvt, {
+                clientX: e.clientX,
+                clientY: e.clientY,
+            })
             handler(e)
         }
         element.onmouseup = wrappedHandler
@@ -92,7 +73,10 @@ class RemotePlayState {
 
     addOnMouseMove = (element, handler) => {
         const wrappedHandler = (e) => {
-            this.sendMouseMove(e)
+            this.sendEvent(MouseMoveEvt, {
+                clientX: e.clientX,
+                clientY: e.clientY,
+            })
             handler(e)
         }
         element.onmousemove = wrappedHandler
