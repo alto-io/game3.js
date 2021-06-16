@@ -1,3 +1,5 @@
+import seedrandom from 'seedrandom'
+
 //TODO:
 // - record and replicate mouse event per-element
 // - handle situation when handlers were added/removed while game is in progress
@@ -7,6 +9,7 @@ const AnimationFrameEvt = 1
 const MouseDownEvt = 2
 const MouseUpEvt = 3
 const MouseMoveEvt = 4
+const RandomSeedEvt = 5
 
 // modes
 const idleMode = 1
@@ -15,6 +18,9 @@ const replicatingMode = 3
 
 class RemotePlayState {
     constructor() {
+        this.log = []
+
+        this.seedrandom = null
         this.mode = idleMode
 
         this.replicationHandlers = new Map()
@@ -23,8 +29,6 @@ class RemotePlayState {
         this.mouseUpHandlers = new Map()
         this.mouseMoveHandlers = new Map()
 
-        this.log = []
-
         this.startReplicating()
     }
 
@@ -32,32 +36,26 @@ class RemotePlayState {
         this.mode = replicatingMode
     }
 
-    replicate = (events) => {
+    replicate = async (events) => {
         if (!Array.isArray(events)) {
             return
         }
-        events.forEach((evt) => {
+        let prevT = 0
+        for (let i = 0; i < events.length; i++) {
+            const evt = events[i]
             const type = evt.e
             const handler = this.replicationHandlers.get(type)
             switch(type) {
+                case RandomSeedEvt: {
+                    this.initSeedrandom(evt.s)
+                    break
+                }
                 case AnimationFrameEvt: {
                     handler(evt.t)
                     break
                 }
-                case MouseDownEvt: {
-                    handler({
-                        clientX: evt.clientX,
-                        clientY: evt.clientY,
-                    })
-                    break
-                }
-                case MouseUpEvt: {
-                    handler({
-                        clientX: evt.clientX,
-                        clientY: evt.clientY,
-                    })
-                    break
-                }
+                case MouseDownEvt: 
+                case MouseUpEvt: 
                 case MouseMoveEvt: {
                     handler({
                         clientX: evt.clientX,
@@ -66,12 +64,19 @@ class RemotePlayState {
                     break
                 }
             }
-        })
+/*
+            console.log(`evt type: ${type}`)
+            const delay = evt.t - prevT
+            prevT = evt.t
+            await new Promise(resolve => setTimeout(resolve, delay))
+*/
+        }
     }
 
     startPlay = () => {
         if (this.mode === idleMode) {
             this.mode = playingMode
+            this.initSeedrandom()
         }
     }
 
@@ -95,6 +100,19 @@ class RemotePlayState {
             evt.t = window.performance.now()
         }
         this.log.push(evt)
+    }
+
+    initSeedrandom = (seed) => {
+        const useSeed = seed || Math.random().toString()
+        this.seedrandom = new seedrandom(useSeed)
+        this.sendEvent(RandomSeedEvt, {
+            s: useSeed
+        })
+    }
+
+    random = () => {
+        // assuming random is always initialized first
+        return this.seedrandom()
     }
 
     requestAnimationFrame = (handler) => {
@@ -176,8 +194,7 @@ export const stopPlay = () => remotePlay.stopPlay()
 
 export const replicate = (events) => remotePlay.replicate(events)
 
-export const random = () => {
-}
+export const random = () => remotePlay.random()
 
 export const requestAnimationFrame = (handler) => remotePlay.requestAnimationFrame(handler)
 
