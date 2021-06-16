@@ -1,31 +1,90 @@
+//TODO:
+// - record and replicate mouse event per-element
+// - handle situation when handlers were added/removed while game is in progress
+
+// events
 const AnimationFrameEvt = 1
 const MouseDownEvt = 2
 const MouseUpEvt = 3
 const MouseMoveEvt = 4
 
+// modes
+const idleMode = 1
+const playingMode = 2
+const replicatingMode = 3
+
 class RemotePlayState {
     constructor() {
-        this.playing = false
+        this.mode = idleMode
+
+        this.replicationHandlers = new Map()
 
         this.mouseDownHandlers = new Map()
         this.mouseUpHandlers = new Map()
         this.mouseMoveHandlers = new Map()
 
         this.log = []
+
+        this.startReplicating()
+    }
+
+    startReplicating = () => {
+        this.mode = replicatingMode
+    }
+
+    replicate = (events) => {
+        if (!Array.isArray(events)) {
+            return
+        }
+        events.forEach((evt) => {
+            const type = evt.e
+            const handler = this.replicationHandlers.get(type)
+            switch(type) {
+                case AnimationFrameEvt: {
+                    handler(evt.t)
+                    break
+                }
+                case MouseDownEvt: {
+                    handler({
+                        clientX: evt.clientX,
+                        clientY: evt.clientY,
+                    })
+                    break
+                }
+                case MouseUpEvt: {
+                    handler({
+                        clientX: evt.clientX,
+                        clientY: evt.clientY,
+                    })
+                    break
+                }
+                case MouseMoveEvt: {
+                    handler({
+                        clientX: evt.clientX,
+                        clientY: evt.clientY,
+                    })
+                    break
+                }
+            }
+        })
     }
 
     startPlay = () => {
-        this.playing = true
+        if (this.mode === idleMode) {
+            this.mode = playingMode
+        }
     }
 
     stopPlay = () => {
-        this.playing = false
-        console.log(JSON.stringify(this.log))
-        this.log = []
+        if (this.mode === playingMode) {
+            this.mode = idleMode
+            console.log(JSON.stringify(this.log))
+            this.log = []
+        }
     }
 
     sendEvent = (type, data) => {
-        if (!this.playing) {
+        if (this.mode !== playingMode) {
             return
         }
         const evt = {
@@ -39,6 +98,10 @@ class RemotePlayState {
     }
 
     requestAnimationFrame = (handler) => {
+        if (this.mode === replicatingMode) {
+            this.replicationHandlers.set(AnimationFrameEvt, handler)
+            return
+        }
         return window.requestAnimationFrame((timestamp) => {
             this.sendEvent(AnimationFrameEvt, {
                 t: timestamp
@@ -48,6 +111,10 @@ class RemotePlayState {
     }
 
     addOnMouseDown = (element, handler) => {
+        if (this.mode === replicatingMode) {
+            this.replicationHandlers.set(MouseDownEvt, handler)
+            return
+        }
         const wrappedHandler = (e) => {
             this.sendEvent(MouseDownEvt, {
                 clientX: e.clientX,
@@ -60,6 +127,10 @@ class RemotePlayState {
     }
 
     addOnMouseUp = (element, handler) => {
+        if (this.mode === replicatingMode) {
+            this.replicationHandlers.set(MouseUpEvt, handler)
+            return
+        }
         const wrappedHandler = (e) => {
             this.sendEvent(MouseUpEvt, {
                 clientX: e.clientX,
@@ -72,6 +143,10 @@ class RemotePlayState {
     }
 
     addOnMouseMove = (element, handler) => {
+        if (this.mode === replicatingMode) {
+            this.replicationHandlers.set(MouseMoveEvt, handler)
+            return
+        }
         const wrappedHandler = (e) => {
             this.sendEvent(MouseMoveEvt, {
                 clientX: e.clientX,
@@ -98,6 +173,8 @@ const remotePlay = new RemotePlayState()
 export const startPlay = () => remotePlay.startPlay()
 
 export const stopPlay = () => remotePlay.stopPlay()
+
+export const replicate = (events) => remotePlay.replicate(events)
 
 export const random = () => {
 }
