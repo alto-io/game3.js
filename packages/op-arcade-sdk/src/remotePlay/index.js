@@ -1,24 +1,68 @@
+const AnimationFrameEvt = 1
+const MouseDownEvt = 2
+const MouseUpEvt = 3
+const MouseMoveEvt = 4
+
 class RemotePlayState {
     constructor() {
+        this.playing = false
+
         this.mouseDownHandlers = new Map()
         this.mouseUpHandlers = new Map()
         this.mouseMoveHandlers = new Map()
+
+        this.log = []
+    }
+
+    startPlay = () => {
+        this.playing = true
+    }
+
+    stopPlay = () => {
+        this.playing = false
+        console.log(JSON.stringify(this.log))
+        this.log = []
+    }
+
+    sendEvent = (type, data) => {
+        if (!this.playing) {
+            return
+        }
+        const evt = {
+            e: type,
+            ...data,
+        }
+        if (!evt.t) {
+            evt.t = window.performance.now()
+        }
+        this.log.push(evt)
     }
 
     sendAnimationFrame = (timestamp) => {
-        // console.log(`frame: ${timestamp}`)
+        this.sendEvent(AnimationFrameEvt, {
+            t: timestamp
+        })
     }
 
     sendMouseDown = (e) => {
-        console.log(`sendMouseDown: ${e}`)
+        this.sendEvent(MouseDownEvt, {
+            clientX: e.clientX,
+            clientY: e.clientY,
+        })
     }
 
     sendMouseUp = (e) => {
-        console.log(`sendMouseUp: ${e}`)
+        this.sendEvent(MouseUpEvt, {
+            clientX: e.clientX,
+            clientY: e.clientY,
+        })
     }
 
     sendMouseMove = (e) => {
-        console.log(`sendMouseMove: ${e}`)
+        this.sendEvent(MouseMoveEvt, {
+            clientX: e.clientX,
+            clientY: e.clientY,
+        })
     }
 
     requestAnimationFrame = (handler) => {
@@ -66,6 +110,10 @@ class RemotePlayState {
 }
 
 const remotePlay = new RemotePlayState()
+
+export const startPlay = () => remotePlay.startPlay()
+
+export const stopPlay = () => remotePlay.stopPlay()
 
 export const random = () => {
 }
