@@ -10,15 +10,22 @@ const MouseDownEvt = 2
 const MouseUpEvt = 3
 const MouseMoveEvt = 4
 const RandomSeedEvt = 5
+const SetViewportEvt = 6
 
 // modes
 const idleMode = 1
 const playingMode = 2
 const replicatingMode = 3
 
+// TODO: unhardcode
+const wsServerUrl = 'ws://localhost:3005'
+
 class RemotePlayState {
     constructor() {
         this.log = []
+
+        this.ws = null
+        this.wsReady = false
 
         this.seedrandom = null
         this.mode = idleMode
@@ -29,53 +36,66 @@ class RemotePlayState {
         this.mouseUpHandlers = new Map()
         this.mouseMoveHandlers = new Map()
 
-        this.startReplicating()
+        // this.startReplicating()
+    }
+
+    initialize = () => {
+        this.ws = new WebSocket(wsServerUrl)
+        this.ws.onopen = (event) => {
+            this.wsReady = true
+        }
+        this.serverSendQueue()
+    }
+
+    serverSendQueue = () => {
+        requestAnimationFrame(this.serverSendQueue)
+        if (!this.ws || !this.wsReady) {
+            return
+        }
+        if (this.ws && this.log.length > 0) {
+            this.ws.send(JSON.stringify(this.log))
+            this.log.length = 0
+        }
     }
 
     startReplicating = () => {
+        console.log('startReplicating')
         this.mode = replicatingMode
     }
 
-    replicate = async (events) => {
-        if (!Array.isArray(events)) {
+    replicate = async (evt) => {
+        const type = evt.e
+        const handler = this.replicationHandlers.get(type)
+        if (type !== RandomSeedEvt && !handler) {
+            console.error(`Handler for event ${type} not found!`)
             return
         }
-        let prevT = 0
-        for (let i = 0; i < events.length; i++) {
-            const evt = events[i]
-            const type = evt.e
-            const handler = this.replicationHandlers.get(type)
-            switch(type) {
-                case RandomSeedEvt: {
-                    this.initSeedrandom(evt.s)
-                    break
-                }
-                case AnimationFrameEvt: {
-                    handler(evt.t)
-                    break
-                }
-                case MouseDownEvt: 
-                case MouseUpEvt: 
-                case MouseMoveEvt: {
-                    handler({
-                        clientX: evt.clientX,
-                        clientY: evt.clientY,
-                    })
-                    break
-                }
-            }
-/*
-            console.log(`evt type: ${type}`)
-            const delay = evt.t - prevT
-            prevT = evt.t
-            await new Promise(resolve => setTimeout(resolve, delay))
-*/
+        switch(type) {
+            case RandomSeedEvt:
+                this.initSeedrandom(evt.s)
+                break
+            case AnimationFrameEvt:
+                handler(evt.t)
+                break
+            case MouseDownEvt: 
+            case MouseUpEvt: 
+            case MouseMoveEvt:
+                handler({
+                    clientX: evt.clientX,
+                    clientY: evt.clientY,
+                })
+                break
+            default:
+                break
         }
     }
 
-    startPlay = () => {
+    startPlay = (width, height) => {
+        console.log('startPlay')
         if (this.mode === idleMode) {
             this.mode = playingMode
+            this.initialize()
+            this.setViewport(width, height)
             this.initSeedrandom()
         }
     }
@@ -86,6 +106,8 @@ class RemotePlayState {
             console.log(JSON.stringify(this.log))
             this.log = []
         }
+        this.ws.close()
+        this.wsReady = false
     }
 
     sendEvent = (type, data) => {
@@ -100,6 +122,13 @@ class RemotePlayState {
             evt.t = window.performance.now()
         }
         this.log.push(evt)
+    }
+
+    setViewport = (width, height) => {
+        this.sendEvent(SetViewportEvt, {
+            w: width,
+            h: height,
+        })
     }
 
     initSeedrandom = (seed) => {
@@ -161,6 +190,7 @@ class RemotePlayState {
     }
 
     addOnMouseMove = (element, handler) => {
+        console.log('addOnMouseMove')
         if (this.mode === replicatingMode) {
             this.replicationHandlers.set(MouseMoveEvt, handler)
             return
@@ -188,9 +218,11 @@ class RemotePlayState {
 
 const remotePlay = new RemotePlayState()
 
-export const startPlay = () => remotePlay.startPlay()
+export const startPlay = (width, height) => remotePlay.startPlay(width, height)
 
 export const stopPlay = () => remotePlay.stopPlay()
+
+export const startReplicating = () => remotePlay.startReplicating()
 
 export const replicate = (events) => remotePlay.replicate(events)
 
