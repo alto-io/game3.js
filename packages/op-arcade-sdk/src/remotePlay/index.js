@@ -18,7 +18,7 @@ const playingMode = 2
 const replicatingMode = 3
 
 // TODO: unhardcode
-const wsServerUrl = 'ws://localhost:3005'
+const wsServerUrl = 'ws://localhost:3005?sessionId=optesting'
 
 class RemotePlayState {
     constructor() {
