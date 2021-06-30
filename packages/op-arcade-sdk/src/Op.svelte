@@ -109,6 +109,9 @@ window.addEventListener("message", (e) => {
   if (ALLOWED_ORIGINS.includes(e.origin)) {
     try {
       let messageData = JSON.parse(e.data);
+
+      remotePlay.initSession(messageData.playServerUrl, messageData.playSessionId)
+
       apiUrl.set(messageData.apiUrl);
       passedSessionToken.set(messageData);
       updateOpArcadeStores();

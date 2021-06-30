@@ -13,19 +13,21 @@ const RandomSeedEvt = 5
 const SetViewportEvt = 6
 
 // modes
-const idleMode = 1
-const playingMode = 2
-const replicatingMode = 3
+export const idleMode = 1
+export const playingMode = 2
+export const replicatingMode = 3
+
+const wsOpenState = 1
 
 // TODO: unhardcode
-const wsServerUrl = 'ws://localhost:3005?sessionId=optesting'
+//const wsServerUrl = 'ws://localhost:3005?sessionId=optesting'
 
 class RemotePlayState {
     constructor() {
         this.log = []
 
+        this.sessionId = null
         this.ws = null
-        this.wsReady = false
 
         this.seedrandom = null
         this.mode = idleMode
@@ -36,31 +38,50 @@ class RemotePlayState {
         this.mouseUpHandlers = new Map()
         this.mouseMoveHandlers = new Map()
 
-        // this.startReplicating()
+        this.gameInitFunction = null
+        this.gameReady = false
     }
 
-    initialize = () => {
+    initSession = (serverUrl, sessionId) => {
+        this.sessionId = sessionId
+        //ws://localhost:3005
+        const wsServerUrl = `ws://${serverUrl}?sessionId=${this.sessionId}`
         this.ws = new WebSocket(wsServerUrl)
         this.ws.onopen = (event) => {
-            this.wsReady = true
+            console.log('WebSocket open:')
+            console.log(event)
+        }
+        this.ws.onerror = (event) => {
+            console.error('WebSocket error')
+            console.error(event)
         }
         this.serverSendQueue()
+        if (this.gameInitFunction) {
+            this.gameInitFunction()
+        }
+    }
+
+    closeSession = () => {
+        this.mode = idleMode
+        this.ws.close()
+    }
+
+    initGame = (initFunction) => {
+        this.gameInitFunction = initFunction
+        if (this.sessionId) {
+            this.gameInitFunction()
+        }
     }
 
     serverSendQueue = () => {
         requestAnimationFrame(this.serverSendQueue)
-        if (!this.ws || !this.wsReady) {
+        if (!this.ws || this.ws.readyState !== wsOpenState) {
             return
         }
         if (this.ws && this.log.length > 0) {
             this.ws.send(JSON.stringify(this.log))
             this.log.length = 0
         }
-    }
-
-    startReplicating = () => {
-        console.log('startReplicating')
-        this.mode = replicatingMode
     }
 
     replicate = async (evt) => {
@@ -90,24 +111,28 @@ class RemotePlayState {
         }
     }
 
+    startReplicating = () => {
+        this.mode = replicatingMode
+    }
+
     startPlay = (width, height) => {
-        console.log('startPlay')
-        if (this.mode === idleMode) {
-            this.mode = playingMode
-            this.initialize()
-            this.setViewport(width, height)
-            this.initSeedrandom()
+        if (this.mode !== idleMode) {
+            return
         }
+        this.mode = playingMode
+        this.setViewport(width, height)
+        this.initSeedrandom()
     }
 
     stopPlay = () => {
-        if (this.mode === playingMode) {
-            this.mode = idleMode
-            console.log(JSON.stringify(this.log))
-            this.log = []
+        if (this.mode !== playingMode) {
+            return
         }
-        this.ws.close()
-        this.wsReady = false
+        this.mode = idleMode
+        this.log = []
+
+        // TODO:
+        this.closeSession()
     }
 
     sendEvent = (type, data) => {
@@ -218,6 +243,10 @@ class RemotePlayState {
 
 const remotePlay = new RemotePlayState()
 
+export const initSession = (serverUrl, sessionId) => remotePlay.initSession(serverUrl, sessionId)
+
+export const initGame = (initFunction) => remotePlay.initGame(initFunction)
+
 export const startPlay = (width, height) => remotePlay.startPlay(width, height)
 
 export const stopPlay = () => remotePlay.stopPlay()
@@ -242,14 +271,10 @@ export const addOnMouseMove = (element, handler) => remotePlay.addOnMouseMove(el
 
 export const removeOnMouseMove = (element, handler) => {}
 
-export const addOnClick = (element, handler) => {
-}
+export const addOnClick = (element, handler) => {}
 
-export const removeOnClick = (element, handler) => {
-}
+export const removeOnClick = (element, handler) => {}
 
-export const addOnKeydown = (element, handler) => {
-}
+export const addOnKeydown = (element, handler) => {}
 
-export const removeOnKeyup = (element, handler) => {
-}
+export const removeOnKeyup = (element, handler) => {}
