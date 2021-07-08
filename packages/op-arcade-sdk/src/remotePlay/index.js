@@ -11,6 +11,7 @@ const MouseUpEvt = 3
 const MouseMoveEvt = 4
 const RandomSeedEvt = 5
 const SetViewportEvt = 6
+const StartPlayEvt = 7
 
 // modes
 export const idleMode = 1
@@ -124,7 +125,10 @@ class RemotePlayState {
             return
         }
         this.mode = playingMode
-        this.setViewport(width, height)
+        this.sendEvent(StartPlayEvt, {
+            w: width,
+            h: height,
+        })
         this.initSeedrandom()
     }
 
@@ -254,6 +258,8 @@ export const initGame = (initFunction) => remotePlay.initGame(initFunction)
 export const startPlay = (width, height) => remotePlay.startPlay(width, height)
 
 export const stopPlay = () => remotePlay.stopPlay()
+
+export const setViewport = (width, height) => remotePlay.setViewport(width, height)
 
 export const startReplicating = () => remotePlay.startReplicating()
 
