@@ -78,6 +78,13 @@ class RemotePlayState {
         }
     }
 
+    postScore = async (options) => {
+        if (window.postScoreHandler) {
+            return await window.postScoreHandler(options)
+        }
+        return null
+    }
+
     serverSendQueue = () => {
         requestAnimationFrame(this.serverSendQueue)
         if (!this.ws || this.ws.readyState !== wsOpenState) {
@@ -258,6 +265,10 @@ export const initGame = (initFunction) => remotePlay.initGame(initFunction)
 export const startPlay = (width, height) => remotePlay.startPlay(width, height)
 
 export const stopPlay = () => remotePlay.stopPlay()
+
+export const setPostScoreHandler = (handler) => remotePlay.setPostScoreHandler(handler)
+
+export const postScore = (options) => remotePlay.postScore(options)
 
 export const setViewport = (width, height) => remotePlay.setViewport(width, height)
 

@@ -82,6 +82,7 @@ class NakamaTourneyProvider {
     }
 
     postScore = async (options) => {
+/*
         await this.refreshSession();
         try {
             const args = {
@@ -102,6 +103,7 @@ class NakamaTourneyProvider {
             console.error("postScore failed [" + e.status + ":" + e.statusText + "]");
             return (e);
         }
+*/
     }
 
     joinTourney = async (options) => {
