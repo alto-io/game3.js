@@ -109,6 +109,7 @@ window.addEventListener("message", (e) => {
   if (ALLOWED_ORIGINS.includes(e.origin)) {
     try {
       let messageData = JSON.parse(e.data);
+      console.log(messageData)
 
       remotePlay.initSession(messageData.playServerUrl, messageData.playSessionId)
 

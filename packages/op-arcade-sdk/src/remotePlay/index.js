@@ -43,6 +43,7 @@ class RemotePlayState {
     }
 
     initSession = (serverUrl, sessionId) => {
+        console.log(`OP Arcade init session: ${sessionId}`)
         this.sessionId = sessionId
         //ws://localhost:3005
         const wsServerUrl = `ws://${serverUrl}?sessionId=${this.sessionId}`
@@ -57,6 +58,7 @@ class RemotePlayState {
         }
         this.serverSendQueue()
         if (this.gameInitFunction) {
+            console.log(`OP Arcade calling init game function.`)
             this.gameInitFunction()
         }
     }
@@ -67,8 +69,10 @@ class RemotePlayState {
     }
 
     initGame = (initFunction) => {
+        console.log(`OP Arcade init game.`)
         this.gameInitFunction = initFunction
         if (this.sessionId) {
+            console.log(`OP Arcade calling init game function.`)
             this.gameInitFunction()
         }
     }
