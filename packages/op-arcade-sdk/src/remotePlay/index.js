@@ -12,6 +12,7 @@ const MouseMoveEvt = 4
 const RandomSeedEvt = 5
 const SetViewportEvt = 6
 const StartPlayEvt = 7
+const ListenerEvt = 8
 
 // modes
 export const idleMode = 1
@@ -34,7 +35,10 @@ class RemotePlayState {
         this.mode = idleMode
 
         this.replicationHandlers = new Map()
+        // object => (string => func)
+        this.replicationEventListeners = new Map()
 
+        // TODO: these intended to use for handler removal (not implemented yet)
         this.mouseDownHandlers = new Map()
         this.mouseUpHandlers = new Map()
         this.mouseMoveHandlers = new Map()
@@ -69,7 +73,7 @@ class RemotePlayState {
         this.ws.close()
     }
 
-    initGame = (initFunction) => {
+    initGame = (initFunction = null) => {
         console.log(`OP Arcade init game.`)
         this.gameInitFunction = initFunction
         if (this.sessionId) {
@@ -98,24 +102,46 @@ class RemotePlayState {
 
     replicate = async (evt) => {
         const type = evt.e
-        const handler = this.replicationHandlers.get(type)
-        if (type !== RandomSeedEvt && !handler) {
-            console.error(`Handler for event ${type} not found!`)
-            return
+
+        let simpleHandler = null
+        const needsSimpleHandler = [AnimationFrameEvt, MouseDownEvt, MouseUpEvt, MouseMoveEvt]
+            .includes(type)
+        if (needsSimpleHandler) {
+            simpleHandler = this.replicationHandlers.get(type)
+            if (!simpleHandler) {
+                //console.error(`Handler for event ${type} not found!`)
+                return
+            }
         }
+
+        let listenerHandler = null
+        if (type === ListenerEvt) {
+            listenerHandler = this.findReplicationListenerHandler(evt)
+            if (!listenerHandler) {
+                console.error(`Handler for event ${type} not found!`)
+                return
+            }
+        }
+
         switch(type) {
             case RandomSeedEvt:
                 this.initSeedrandom(evt.s)
                 break
             case AnimationFrameEvt:
-                handler(evt.t)
+                simpleHandler(evt.t)
                 break
-            case MouseDownEvt: 
-            case MouseUpEvt: 
+            case MouseDownEvt:
+            case MouseUpEvt:
             case MouseMoveEvt:
-                handler({
+                simpleHandler({
                     clientX: evt.clientX,
                     clientY: evt.clientY,
+                })
+                break
+            case ListenerEvt:
+                listenerHandler({
+                    target: document.getElementById(evt.tid),
+                    keyCode: evt.kc
                 })
                 break
             default:
@@ -147,7 +173,7 @@ class RemotePlayState {
         this.log = []
 
         // TODO:
-        this.closeSession()
+        // this.closeSession()
     }
 
     sendEvent = (type, data) => {
@@ -254,6 +280,42 @@ class RemotePlayState {
         existing.push(handler)
         map.set(element, existing)
     }
+
+    addEventListener = (object, eventName, handler) => {
+        if (this.mode === replicatingMode) {
+            this.saveReplicationListenerHandler(object, eventName, handler)
+            return
+        }
+        const wrappedHandler = (e) => {
+            this.sendEvent(ListenerEvt, {
+                oid: object.id || null,
+                w: object === window,
+                en: eventName,
+                tid: (e.target && e.target.id) || null,
+                kc: e.keyCode,
+                // TODO: add more properties as necessary
+            })
+            handler(e)
+        }
+        object.addEventListener(eventName, wrappedHandler)
+    }
+
+    saveReplicationListenerHandler = (object, eventName, handler) => {
+        if (!this.replicationEventListeners.has(object)) {
+            this.replicationEventListeners.set(object, new Map())
+        }
+        const objListeners = this.replicationEventListeners.get(object)
+        objListeners.set(eventName, handler)
+    }
+
+    findReplicationListenerHandler = (event) => {
+        const object = event.w ? window : document.getElementById(event.oid)
+        const objListeners = this.replicationEventListeners.get(object)
+        if (!objListeners) {
+            return null
+        }
+        return objListeners.get(event.en)
+    }
 }
 
 const remotePlay = new RemotePlayState()
@@ -282,20 +344,14 @@ export const requestAnimationFrame = (handler) => remotePlay.requestAnimationFra
 
 export const addOnMouseDown = (element, handler) => remotePlay.addOnMouseDown(element, handler)
 
+// TODO
 export const removeOnMouseDown = (element, handler) => {}
 
 export const addOnMouseUp = (element, handler) => remotePlay.addOnMouseUp(element, handler)
 
+// TODO
 export const removeOnMouseUp = (element, handler) => {}
 
 export const addOnMouseMove = (element, handler) => remotePlay.addOnMouseMove(element, handler)
 
-export const removeOnMouseMove = (element, handler) => {}
-
-export const addOnClick = (element, handler) => {}
-
-export const removeOnClick = (element, handler) => {}
-
-export const addOnKeydown = (element, handler) => {}
-
-export const removeOnKeyup = (element, handler) => {}
+export const addEventListener = (object, eventName, handler) => remotePlay.addEventListener(object, eventName, handler)
