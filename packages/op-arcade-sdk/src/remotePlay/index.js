@@ -56,6 +56,13 @@ class RemotePlayState {
         this.ws.onopen = (event) => {
             console.log('WebSocket open:')
             console.log(event)
+            this.ws.onmessage = (event) => {
+                console.log('WebSocket message:')
+                console.log(event.data)
+                if (event.data === 'scoreSubmitted') {
+                    this.refreshPage()
+                }
+            }
         }
         this.ws.onerror = (event) => {
             console.error('WebSocket error')
@@ -315,6 +322,10 @@ class RemotePlayState {
             return null
         }
         return objListeners.get(event.en)
+    }
+
+    refreshPage = () => {
+        setTimeout(() => window.top.postMessage("refreshPage", '*'), 500)
     }
 }
 
