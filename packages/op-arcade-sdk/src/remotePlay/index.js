@@ -146,10 +146,20 @@ class RemotePlayState {
                 })
                 break
             case ListenerEvt:
-                listenerHandler({
+                const e = {
                     target: document.getElementById(evt.tid),
-                    keyCode: evt.kc
-                })
+                    type: evt.type,
+                    keyCode: evt.kc,
+                    preventDefault: () => {},
+                    pageX: evt.px,
+                    pageY: evt.py,
+                    timeStamp: evt.ts,
+                    ctrlKey: evt.ck,
+                    button: evt.b,
+                    movementX: evt.mx,
+                    movementY: evt.my,
+                }
+                listenerHandler(e)
                 break
             default:
                 break
@@ -295,11 +305,19 @@ class RemotePlayState {
         }
         const wrappedHandler = (e) => {
             this.sendEvent(ListenerEvt, {
+                t: e.type,
                 oid: object.id || null,
                 w: object === window,
                 en: eventName,
                 tid: (e.target && e.target.id) || null,
                 kc: e.keyCode,
+                px: e.pageX,
+                py: e.pageY,
+                ts: e.timeStamp,
+                ck: e.ctrlKey,
+                b: e.button,
+                mx: e.movementX,
+                my: e.movementY,
                 // TODO: add more properties as necessary
             })
             handler(e)
