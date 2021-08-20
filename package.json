@@ -16,9 +16,9 @@
   },
   "devDependencies": {
     "@parcel/config-default": "2.0.0-beta.2",
-    "parcel": "2.0.0-beta.2",
+    "parcel": "^2.0.0-rc.0",
     "parcel-reporter-static-files-copy": "^1.2.2",
-    "sirv-cli": "^1.0.11"
+    "sirv-cli": "^1.0.12"
   },
   "dependencies": {},
   "staticFiles": {
