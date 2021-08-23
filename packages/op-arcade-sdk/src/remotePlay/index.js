@@ -45,6 +45,9 @@ class RemotePlayState {
 
         this.gameInitFunction = null
         this.gameReady = false
+
+        this.lastClientNow = 0.0
+        this.lastClientNowUpdateTime = 0.0
     }
 
     initSession = (serverUrl, sessionId) => {
@@ -109,6 +112,11 @@ class RemotePlayState {
 
     replicate = async (evt) => {
         const type = evt.e
+
+        if (evt.t) {
+            this.lastClientNow = evt.t
+            this.lastClientNowUpdateTime = window.performance.now()
+        }
 
         let simpleHandler = null
         const needsSimpleHandler = [AnimationFrameEvt, MouseDownEvt, MouseUpEvt, MouseMoveEvt]
@@ -234,7 +242,7 @@ class RemotePlayState {
         }
         return window.requestAnimationFrame((timestamp) => {
             this.sendEvent(AnimationFrameEvt, {
-                t: timestamp
+                t: timestamp,
             })
             handler(timestamp)
         })
@@ -345,6 +353,13 @@ class RemotePlayState {
     refreshPage = () => {
         setTimeout(() => window.top.postMessage("refreshPage", '*'), 500)
     }
+
+    now = () => {
+        if (this.mode === replicatingMode) {
+            return this.lastClientNow + (window.performance.now() - this.lastClientNowUpdateTime)
+        }
+        return window.performance.now()
+    }
 }
 
 const remotePlay = new RemotePlayState()
@@ -384,3 +399,5 @@ export const removeOnMouseUp = (element, handler) => {}
 export const addOnMouseMove = (element, handler) => remotePlay.addOnMouseMove(element, handler)
 
 export const addEventListener = (object, eventName, handler) => remotePlay.addEventListener(object, eventName, handler)
+
+export const now = () => remotePlay.now()
