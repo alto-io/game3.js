@@ -13,6 +13,8 @@ const RandomSeedEvt = 5
 const SetViewportEvt = 6
 const StartPlayEvt = 7
 const ListenerEvt = 8
+const PassiveEvt = 9
+const ClickEvt = 10
 
 // modes
 export const idleMode = 1
@@ -34,11 +36,13 @@ class RemotePlayState {
         this.seedrandom = null
         this.mode = idleMode
 
+        // TODO: currently only one handler is supported
         this.replicationHandlers = new Map()
         // object => (string => func)
         this.replicationEventListeners = new Map()
 
         // TODO: these intended to use for handler removal (not implemented yet)
+        this.clickHandlers = new Map()
         this.mouseDownHandlers = new Map()
         this.mouseUpHandlers = new Map()
         this.mouseMoveHandlers = new Map()
@@ -48,6 +52,10 @@ class RemotePlayState {
 
         this.lastClientNow = 0.0
         this.lastClientNowUpdateTime = 0.0
+
+        // Map for fired passive events: string => { bool, bool } (evtId => { client fired, server fired }
+        this.passiveEventRegistry = new Map()
+        this.replicationPaused = false
     }
 
     initSession = (serverUrl, sessionId) => {
@@ -113,19 +121,28 @@ class RemotePlayState {
     replicate = async (evt) => {
         const type = evt.e
 
+        if (type === PassiveEvt) {
+            remotePlay.catchPassiveEvent(evt.id, true)
+            return true
+        }
+
+        if (this.replicationPaused) {
+            return false
+        }
+
         if (evt.t) {
             this.lastClientNow = evt.t
             this.lastClientNowUpdateTime = window.performance.now()
         }
 
         let simpleHandler = null
-        const needsSimpleHandler = [AnimationFrameEvt, MouseDownEvt, MouseUpEvt, MouseMoveEvt]
+        const needsSimpleHandler = [AnimationFrameEvt, MouseDownEvt, MouseUpEvt, MouseMoveEvt, ClickEvt]
             .includes(type)
         if (needsSimpleHandler) {
             simpleHandler = this.replicationHandlers.get(type)
             if (!simpleHandler) {
                 //console.error(`Handler for event ${type} not found!`)
-                return
+                return true
             }
         }
 
@@ -134,7 +151,7 @@ class RemotePlayState {
             listenerHandler = this.findReplicationListenerHandler(evt)
             if (!listenerHandler) {
                 console.error(`Handler for event ${type} not found!`)
-                return
+                return true
             }
         }
 
@@ -145,12 +162,15 @@ class RemotePlayState {
             case AnimationFrameEvt:
                 simpleHandler(evt.t)
                 break
+            case ClickEvt:
             case MouseDownEvt:
             case MouseUpEvt:
             case MouseMoveEvt:
                 simpleHandler({
                     clientX: evt.clientX,
                     clientY: evt.clientY,
+                    pageX: evt.pageX,
+                    pageY: evt.pageY,
                 })
                 break
             case ListenerEvt:
@@ -172,6 +192,7 @@ class RemotePlayState {
             default:
                 break
         }
+        return true
     }
 
     startReplicating = () => {
@@ -248,6 +269,24 @@ class RemotePlayState {
         })
     }
 
+    addOnClick = (element, handler) => {
+        if (this.mode === replicatingMode) {
+            this.replicationHandlers.set(ClickEvt, handler)
+            return
+        }
+        const wrappedHandler = (e) => {
+            this.sendEvent(ClickEvt, {
+                clientX: e.clientX,
+                clientY: e.clientY,
+                pageX: e.pageX,
+                pageY: e.pageY,
+            })
+            handler(e)
+        }
+        element.onclick = wrappedHandler
+        this.addPerElementHandler(this.clickHandlers, element, wrappedHandler)
+    }
+
     addOnMouseDown = (element, handler) => {
         if (this.mode === replicatingMode) {
             this.replicationHandlers.set(MouseDownEvt, handler)
@@ -257,6 +296,8 @@ class RemotePlayState {
             this.sendEvent(MouseDownEvt, {
                 clientX: e.clientX,
                 clientY: e.clientY,
+                pageX: e.pageX,
+                pageY: e.pageY,
             })
             handler(e)
         }
@@ -273,6 +314,8 @@ class RemotePlayState {
             this.sendEvent(MouseUpEvt, {
                 clientX: e.clientX,
                 clientY: e.clientY,
+                pageX: e.pageX,
+                pageY: e.pageY,
             })
             handler(e)
         }
@@ -290,6 +333,8 @@ class RemotePlayState {
             this.sendEvent(MouseMoveEvt, {
                 clientX: e.clientX,
                 clientY: e.clientY,
+                pageX: e.pageX,
+                pageY: e.pageY,
             })
             handler(e)
         }
@@ -360,6 +405,37 @@ class RemotePlayState {
         }
         return window.performance.now()
     }
+
+    firePassiveEvent = (evtId) => {
+        if (this.mode === replicatingMode) {
+            this.catchPassiveEvent(evtId, false)
+            return
+        }
+        this.sendEvent(PassiveEvt, {
+            id: evtId,
+        })
+    }
+
+    catchPassiveEvent = (evtId, fromClient) => {
+        console.log(`catchPassiveEvent: ${evtId}, fromClient: ${fromClient.toString()}`)
+        if (this.passiveEventRegistry.has(evtId)) {
+            const existing = this.passiveEventRegistry.get(evtId)
+            if (fromClient) {
+                existing.client = true
+            } else {
+                existing.server = true
+            }
+        } else {
+            this.passiveEventRegistry.set(evtId, {
+                client: fromClient,
+                server: !fromClient,
+            })
+        }
+        // pause replication if there are unsynced passive events
+        this.replicationPaused = [...this.passiveEventRegistry.entries()]
+            .some(([k, v]) => v.client && !v.server)
+        console.log(`replicationPaused: ${this.replicationPaused.toString()}`)
+    }
 }
 
 const remotePlay = new RemotePlayState()
@@ -380,11 +456,13 @@ export const setViewport = (width, height) => remotePlay.setViewport(width, heig
 
 export const startReplicating = () => remotePlay.startReplicating()
 
-export const replicate = (events) => remotePlay.replicate(events)
+export const replicate = (event) => remotePlay.replicate(event)
 
 export const random = () => remotePlay.random()
 
 export const requestAnimationFrame = (handler) => remotePlay.requestAnimationFrame(handler)
+
+export const addOnClick = (element, handler) => remotePlay.addOnClick(element, handler)
 
 export const addOnMouseDown = (element, handler) => remotePlay.addOnMouseDown(element, handler)
 
@@ -401,3 +479,5 @@ export const addOnMouseMove = (element, handler) => remotePlay.addOnMouseMove(el
 export const addEventListener = (object, eventName, handler) => remotePlay.addEventListener(object, eventName, handler)
 
 export const now = () => remotePlay.now()
+
+export const firePassiveEvent = (evtId) => remotePlay.firePassiveEvent(evtId)
