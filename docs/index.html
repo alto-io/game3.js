@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width,initial-scale=1'>
+
+	<!-- Configuration -->
+	<meta name="op-config"
+		content='{
+			"auth_server": {
+				"type": "nakama",
+				"url": "localhost",
+				"port": 7350,
+				"key": "defaultkey"
+			},
+			"tourney_server": {
+				"type": "nakama",
+				"url": "localhost",
+				"port": 7350,
+				"key": "defaultkey"
+			}
+		}'>
+
+	<title>OP Arcade SDK Example</title>
+
+	<!-- for dev -->
+	<script defer src='./lib/op.js'></script> 
+
+	<!-- for latest npm version -->
+	<!--
+	<script defer src='https://unpkg.com/op-arcade-sdk'></script>
+	-->
+
+
+	<!-- tailwind css -->
+	<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+
+	<!-- toastify -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+</head>
+
+<script>
+
+	// onClick functions
+	function playerLogin() {
+		op.loginPrompt();
+  }
+
+	function getTourney() {
+
+		let tourney_id = document.getElementById("input-tourney-id").value;
+
+		let options = {
+			tourney_id
+		}
+
+		op.getTourney(options).then
+		(
+			(result) => {
+				// catch error
+				if (result instanceof Response) {
+					Toastify({
+						text: "Unable to Connect:  " + result.statusText,
+						backgroundColor: "#ff4444"
+					}).showToast();
+				}
+
+				else {
+
+					console.log(result)
+
+					Toastify({
+						text: "Results Found:  " + result.records.length
+					}).showToast();
+				}
+			}
+		)
+	}
+
+	function joinTourney() {
+		let tournament_id = document.getElementById("input-tourney-id").value;
+
+		let options = {
+			tournament_id: op.getTournamentId()
+		}
+
+		op.joinTourney(options).then
+		(
+			(result) => {
+
+				// catch error
+				if (result instanceof Response) {
+					Toastify({
+						text: "Unable to Join:  " + result.statusText,
+						backgroundColor: "#ff4444"
+					}).showToast();
+				}
+
+				else {
+
+					Toastify({
+						text: "Tourney Joined!"
+					}).showToast();
+				}
+			}
+		)
+	}
+
+	function postScore() {
+
+		let tournament_id = document.getElementById("input-tourney-id").value;
+		let score = Number(document.getElementById("input-score").value);
+
+		let options = {
+			tournament_id: op.getTournamentId(),
+			metadata: '{"score": ' + score + '}'
+		}
+
+		op.postScore(options).then
+		(
+			(result) => {
+				console.log(result)
+				// catch error
+				if (!result.success) {
+					Toastify({
+						text: "Error: " + result.msg,
+						backgroundColor: "#ff4444"
+					}).showToast();
+				}
+
+				else {
+
+					Toastify({
+						text: "Score Posted!"
+					}).showToast();
+				}
+			}
+		)
+	}
+
+	async function attemptTourney() {
+		// 		Toastify({
+		// text: "This is a toast",
+		// duration: 3000,
+		// destination: "https://github.com/apvarun/toastify-js",
+		// newWindow: true,
+		// close: true,
+		// gravity: "top", // `top` or `bottom`
+		// position: "right", // `left`, `center` or `right`
+		// backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+		// stopOnFocus: true, // Prevents dismissing of toast on hover
+		// onClick: function(){} // Callback after click
+		// }).showToast();
+
+		let tourney_id = document.getElementById("input-tourney-id").value;
+
+		let options = {
+			tourney_id
+		}
+		
+
+		Toastify({
+			text: await op.attemptTourney(options)
+		}).showToast();
+	}
+
+	function getSessionToken() {
+
+    let session = op.getSessionToken();
+    
+		let text = (session == null) ? "no session" : "token: " + session.token.substr(0,12) + "...";
+
+		Toastify({
+			text
+		}).showToast();
+  }
+  
+  function getTournamentId() {
+    let tournamentId = op.getTournamentId();
+
+    let text = (tournamentId == null) ? "no tourney id" : "tournamentId: " + tournamentId;
+
+    Toastify({
+      text
+    }).showToast();
+  }
+
+</script>
+
+<style>
+	
+</style>
+
+<body>
+
+	<h2 class="mb-4 bg-green-600 col-span-3 h-10 text-right">OP Arcade Demo Game</h2>
+
+	<div class="flex flex-wrap -mx-2 mb-8">
+		<div class="w-full md:w-1/2 px-2">
+			<div class="h-12 text-sm text-grey-dark flex items-center">
+				<button 
+				class="m-2.5 px-4 py-1 text-sm text-purple-600 
+				font-semibold rounded-full border border-purple-200 
+				hover:text-white hover:bg-purple-600 hover:border-transparent 
+				focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+				onclick="playerLogin()">LOGIN</button>	  
+			</div>
+		 </div>
+		 <div class="w-full md:w-1/2 px-2">
+		  <div class="h-12 text-sm text-grey-dark flex items-center">
+				<button 
+				class="m-2.5 px-10 py-1 text-sm text-purple-600 
+				font-semibold rounded-full border border-purple-200 
+				hover:text-white hover:bg-purple-600 hover:border-transparent 
+				focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+				onclick="attemptTourney()">CREATE MATCH</button>	  
+		  </div>
+	   </div>
+
+	   <div class="w-full md:w-1/2 px-2">
+		<div class="h-12 text-sm text-grey-dark flex items-center">
+		  <input id="input-tourney-id" class="py-2 px-2 bg-white text-gray-700 
+			  placeholder-gray-500 shadow-md rounded-lg text-base 
+			  focus:outline-none focus:ring-2 
+			  focus:ring-purple-600 focus:border-transparent"
+			  placeholder="tourney-id (xxxx-xx...)">			
+
+			  <button 
+			  class="m-2.5 px-10 py-1 text-sm text-purple-600 
+			  font-semibold rounded-full border border-purple-200 
+			  hover:text-white hover:bg-purple-600 hover:border-transparent 
+			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+			  onclick="joinTourney()">JOIN</button>	  
+		</div>
+
+
+	   <div class="w-full md:w-1/2 px-2">
+		<div class="h-12 text-sm text-grey-dark flex items-center">
+			  <input id="input-score" class="py-2 px-2 bg-white text-gray-700 
+			  placeholder-gray-500 shadow-md rounded-lg text-base 
+			  focus:outline-none focus:ring-2 
+			  focus:ring-purple-600 focus:border-transparent"			  
+			  placeholder="score (integer)">			
+
+			  <button 
+			  class="m-2.5 px-10 py-1 text-sm text-purple-600 
+			  font-semibold rounded-full border border-purple-200 
+			  hover:text-white hover:bg-purple-600 hover:border-transparent 
+			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+			  onclick="postScore()">ATTEMPT</button>	  
+		</div>
+	 </div>
+
+	 <div class="w-full md:w-1/2 px-2">
+		<div class="h-12 text-sm text-grey-dark flex items-center">
+			  <button 
+			  class="m-2.5 px-10 py-1 text-sm text-purple-600 
+			  font-semibold rounded-full border border-purple-200 
+			  hover:text-white hover:bg-purple-600 hover:border-transparent 
+			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+			  onclick="getSessionToken()">SESSION</button>	  
+		</div>
+  </div>
+  
+  <div class="w-full md:w-1/2 px-2">
+		<div class="h-12 text-sm text-grey-dark flex items-center">
+			  <button 
+			  class="m-2.5 px-10 py-1 text-sm text-purple-600 
+			  font-semibold rounded-full border border-purple-200 
+			  hover:text-white hover:bg-purple-600 hover:border-transparent 
+			  focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+			  onclick="getTournamentId()">GET ID</button>	  
+		</div>
+	</div>
+
+	</div>
+
+</body>
+</html>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
