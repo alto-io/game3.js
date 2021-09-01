@@ -108,7 +108,7 @@ class RemotePlayState {
     }
 
     serverSendQueue = () => {
-        requestAnimationFrame(this.serverSendQueue)
+        window.requestAnimationFrame(this.serverSendQueue)
         if (!this.ws || this.ws.readyState !== wsOpenState) {
             return
         }
@@ -261,12 +261,14 @@ class RemotePlayState {
             this.replicationHandlers.set(AnimationFrameEvt, handler)
             return
         }
-        return window.requestAnimationFrame((timestamp) => {
-            this.sendEvent(AnimationFrameEvt, {
-                t: timestamp,
+        if (this.mode === playingMode) {
+            return window.requestAnimationFrame((timestamp) => {
+                this.sendEvent(AnimationFrameEvt, {
+                    t: timestamp,
+                })
+                handler(timestamp)
             })
-            handler(timestamp)
-        })
+        }
     }
 
     addOnClick = (element, handler) => {
