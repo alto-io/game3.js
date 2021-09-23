@@ -41,7 +41,6 @@
   "homepage": "https://github.com/alto-io/game3.js/tree/main/packages/op-arcade-sdk",
   "keywords": [],
   "dependencies": {
-    "@heroiclabs/nakama-js": "^2.1.3",
     "@parcel/config-default": "^2.0.0-alpha.3",
     "axios": "^0.21.1",
     "parcel-reporter-static-files-copy": "^1.3.0",

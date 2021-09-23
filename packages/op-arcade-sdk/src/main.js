@@ -20,8 +20,6 @@ const op = new Op({
 	}
 });
 
-op.initialize();
-
 // attach to window
 window.op = op;
 
