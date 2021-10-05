@@ -34,6 +34,9 @@ class RemotePlayState {
         this.ws = null
 
         this.seedrandom = null
+        this.randomseed = null
+        this.randomSeedCallback = null
+
         this.mode = idleMode
 
         // TODO: currently only one handler is supported
@@ -201,6 +204,7 @@ class RemotePlayState {
 
     startPlay = (width, height) => {
         if (this.mode !== idleMode) {
+            console.log(`[Op SDK]: start play ignored, current mode: ${this.mode}`)
             return
         }
         this.mode = playingMode
@@ -244,15 +248,22 @@ class RemotePlayState {
     }
 
     initSeedrandom = (seed) => {
-        const useSeed = seed || Math.random().toString()
-        this.seedrandom = new seedrandom(useSeed)
+        console.log('[Op SDK] initSeedrandom.')
+        this.randomseed = seed || Math.random().toString()
+        this.seedrandom = new seedrandom(this.randomseed)
+        if (this.randomSeedCallback) {
+            this.randomSeedCallback(this.randomseed)
+        }
         this.sendEvent(RandomSeedEvt, {
-            s: useSeed
+            s: this.randomseed
         })
     }
 
     random = () => {
-        // assuming random is always initialized first
+        if (!this.seedrandom) {
+            console.error('[Op SDK] seedrandom is called before initialization.')
+            return 0.5
+        }
         return this.seedrandom()
     }
 
@@ -326,7 +337,6 @@ class RemotePlayState {
     }
 
     addOnMouseMove = (element, handler) => {
-        console.log('addOnMouseMove')
         if (this.mode === replicatingMode) {
             this.replicationHandlers.set(MouseMoveEvt, handler)
             return
@@ -482,4 +492,4 @@ export const addEventListener = (object, eventName, handler) => remotePlay.addEv
 
 export const now = () => remotePlay.now()
 
-export const firePassiveEvent = (evtId) => remotePlay.firePassiveEvent(evtId)
+export const firePassiveEvent = (evtId) => remotePlay.firePassiveEvent(evtId)export const getRandomSeed = () => remotePlay.randomseed
