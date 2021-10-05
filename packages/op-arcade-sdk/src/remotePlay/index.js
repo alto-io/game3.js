@@ -16,6 +16,11 @@ const ListenerEvt = 8
 const PassiveEvt = 9
 const ClickEvt = 10
 
+// events replicated "globally" through puppeteer
+const GlobalMouseDownEvt = 11
+const GlobalMouseUpEvt = 12
+const GlobalMouseMoveEvt = 13
+
 // modes
 export const idleMode = 1
 export const playingMode = 2
@@ -448,6 +453,32 @@ class RemotePlayState {
             .some(([k, v]) => v.client && !v.server)
         console.log(`replicationPaused: ${this.replicationPaused.toString()}`)
     }
+
+    registerGlobalInput = () => {
+        if (!window) {
+            return
+        }
+        window.addEventListener('mousedown', evt => 
+            this.sendEvent(GlobalMouseDownEvt, {
+                x: evt.clientX,
+                y: evt.clientY,
+                b: evt.button,
+            })
+        )
+        window.addEventListener('mouseup', evt => 
+            this.sendEvent(GlobalMouseUpEvt, {
+                x: evt.clientX,
+                y: evt.clientY,
+                b: evt.button,
+            })
+        )
+        window.addEventListener('mousemove', evt =>
+            this.sendEvent(GlobalMouseMoveEvt, {
+                x: evt.clientX,
+                y: evt.clientY,
+            })
+        )
+    }
 }
 
 const remotePlay = new RemotePlayState()
@@ -492,4 +523,15 @@ export const addEventListener = (object, eventName, handler) => remotePlay.addEv
 
 export const now = () => remotePlay.now()
 
-export const firePassiveEvent = (evtId) => remotePlay.firePassiveEvent(evtId)export const getRandomSeed = () => remotePlay.randomseed
+export const firePassiveEvent = (evtId) => remotePlay.firePassiveEvent(evtId)
+
+export const registerGlobalInput = () => remotePlay.registerGlobalInput()
+
+export const setRandomSeedCallback = (cb) => {
+    remotePlay.randomSeedCallback = cb
+    if (remotePlay.randomseed) {
+        remotePlay.randomSeedCallback(remotePlay.randomseed)
+    }
+}
+
+export const getRandomSeed = () => remotePlay.randomseed
