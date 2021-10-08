@@ -12,7 +12,6 @@ const ALLOWED_ORIGINS = [
   'http://op-arcade-dev.herokuapp.com',
   'http://op-arcade-alpha.herokuapp.com',
   'http://op-arcade-prod.herokuapp.com',
-  //AWS Infra
   'http://dev.mightybiggames.com'
 
 ]
